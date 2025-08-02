@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kratos System - Tecnologia com Força e Precisão</title>
+  <style>
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  background: #111;
+  color: #eee;
+}
+header {
+  background: #1a1a1a;
+  padding: 15px 0;
+}
+.container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.logo {
+  width: 120px;
+}
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
+}
+nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+.hero {
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../static/background.jpg') center/cover;
+  padding: 80px 0;
+  text-align: center;
+}
+.hero h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 48px;
+  color: #f2f2f2;
+}
+.hero .btn {
+  background: #cc0000;
+  padding: 12px 30px;
+  color: #fff;
+  text-decoration: none;
+  margin-top: 20px;
+  display: inline-block;
+  border-radius: 6px;
+}
+.section {
+  padding: 60px 0;
+}
+.section.dark {
+  background: #222;
+}
+.features li {
+  margin: 10px 0;
+}
+.plans {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+.plan {
+  background: #333;
+  padding: 20px;
+  margin: 10px;
+  border-radius: 8px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+  text-align: center;
+}
+.plan.destaque {
+  border: 2px solid #cc0000;
+}
+form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+form input, form textarea {
+  margin: 5px 0;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+}
+form button {
+  background: #cc0000;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+}
+footer {
+  background: #111;
+  text-align: center;
+  padding: 20px;
+}
+.whatsapp-float {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  bottom: 20px;
+  right: 20px;
+  background-color: #25D366;
+  color: white;
+  border-radius: 50px;
+  text-align: center;
+  font-size: 30px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+}
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+</style>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Montserrat&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="header">
+    <div class="container">
+      <img src="static/logo_kratos.png" alt="Kratos System" class="logo" />
+      <nav>
+        <ul>
+          <li><a href="#sobre">Sobre</a></li>
+          <li><a href="#diferencial">Diferencial</a></li>
+          <li><a href="#planos">Planos</a></li>
+          <li><a href="#contato">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Kratos System</h1>
+      <p><em>Força, estratégia e tecnologia adaptada à sua empresa.</em></p>
+      <a href="#contato" class="btn">Solicitar uma Proposta</a>
+    </div>
+  </section>
+
+  <section id="sobre" class="section dark">
+    <div class="container">
+      <h2>Um Sistema feito sob medida</h2>
+      <p>Esqueça soluções prontas e engessadas. No Kratos System, você recebe exatamente o que sua empresa precisa — com a robustez de um guerreiro espartano e a precisão de um alfaiate digital.</p>
+    </div>
+  </section>
+
+  <section id="diferencial" class="section">
+    <div class="container">
+      <h2>Por que escolher o Kratos System?</h2>
+      <ul class="features">
+        <li>⚔️ 100% Personalizado</li>
+        <li>🏛️ Design Profissional inspirado em Kratos</li>
+        <li>🔐 Seguro e Escalável</li>
+        <li>🧠 Construído com você</li>
+        <li>💰 Preço Justo</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="planos" class="section dark">
+    <div class="container">
+      <h2>Planos</h2>
+      <div class="plans">
+        <div class="plan">
+          <h3>Mensal</h3>
+          <p><strong>R$ 399,00</strong></p>
+          <p>Comece agora</p>
+        </div>
+        <div class="plan destaque">
+          <h3>Trimestral</h3>
+          <p><strong>R$ 999,00</strong></p>
+          <p>Mais economia</p>
+        </div>
+        <div class="plan">
+          <h3>Anual</h3>
+          <p><strong>R$ 3.499,00</strong></p>
+          <p>Foco no longo prazo</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  
+  <section id="necessidade" class="section">
+    <div class="container">
+      <h2>Conhecimento da Necessidade</h2>
+      <p>Antes de qualquer entrega ou proposta definitiva, nossa equipe realiza uma análise completa da sua empresa.</p>
+      <p>Visitamos o local (quando necessário), entendemos os processos, necessidades, desafios e o que pode ser otimizado.</p>
+      <p>Nosso compromisso é entregar uma solução que realmente resolva seu problema — e não apenas vender mais um sistema.</p>
+    </div>
+  </section>
+
+  <section id="infraestrutura" class="section dark">
+    <div class="container">
+      <h2>Infraestrutura Técnica</h2>
+      <p>Todos os planos incluem <strong>256MB de RAM</strong> como padrão, ideais para operações leves e médias.</p>
+      <p>Se sua empresa precisar de mais desempenho ou armazenamento, oferecemos <strong>planos de upgrade sob demanda</strong>, com até 1GB+ de memória RAM e espaço adicional para dados.</p>
+      <p>Com o Kratos System, sua tecnologia cresce junto com o seu negócio.</p>
+    </div>
+  </section>
+
+  <section id="contato" class="section">
+    <div class="container">
+      <h2>Contato</h2>
+      <p>📞 <a href="tel:+5584998003714">(84) 99800-3714</a><br>
+         📧 <a href="mailto:alllcabtatra@icloud.com">alllcabtatra@icloud.com</a>
+      </p>
+      <form action="https://formspree.io/f/xjvnqrgk" method="POST">
+        <input type="text" name="nome" placeholder="Seu nome" required />
+        <input type="email" name="email" placeholder="Seu e-mail" required />
+        <textarea name="mensagem" placeholder="Mensagem" required></textarea>
+        <button type="submit" class="btn">Enviar</button>
+      </form>
+    </div>
+  </section>
+
+  <a href="https://wa.me/5584998003714" class="whatsapp-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Kratos System. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+
+<script>
+  // Rolagem suave
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener("click", function(e) {
+      e.preventDefault();
+      document.querySelector(this.getAttribute("href")).scrollIntoView({
+        behavior: "smooth"
+      });
+    });
+  });
+
+  // Animação simples ao rolar
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('.section').forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 100) {
+        section.classList.add('visible');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
