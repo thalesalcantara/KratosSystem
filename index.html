@@ -83,16 +83,34 @@
       border-radius: 22px;
       box-shadow: 0 8px 28px #0005;
       border: 2px solid #2d9dd8;
-      padding: 2rem;
+      padding: 2.8rem 2rem 2rem 2rem; /* espaço no topo para o selo */
       width: 300px;
       text-align: center;
       position: relative;
       transition: 0.2s;
       cursor: pointer;
+      margin-bottom: 16px;
     }
     .plano:hover {
       transform: scale(1.03);
       box-shadow: 0 12px 38px #59d0ffaa;
+    }
+    .selo-melhor {
+      display: inline-block;
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #39c4ff 60%, #002b57 100%);
+      color: #fff;
+      padding: 0.48rem 1.9rem;
+      border-radius: 24px;
+      font-weight: bold;
+      font-size: 1.14rem;
+      box-shadow: 0 2px 18px #39c4ff77;
+      letter-spacing: 0.5px;
+      border: 2px solid #27b7ff;
+      z-index: 5;
     }
     .preco {
       font-size: 2rem;
@@ -111,26 +129,17 @@
       border-radius: 14px;
       padding: 4px 12px;
       margin-left: 8px;
+      font-size: 2rem;
+      font-weight: bold;
+      min-width: 90px;
+      display: inline-block;
     }
     .economia {
       color: #39e769;
       font-weight: bold;
       margin-top: 8px;
-      display:block;
-      font-size:1.08rem;
-    }
-    .melhor {
-      background: linear-gradient(90deg, #59d0ff, #001233);
-      color: #fff;
-      padding: 0.4rem 1.2rem;
-      border-radius: 20px;
-      position: absolute;
-      bottom: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 4px 12px #59d0ff88;
-      font-size:1.13rem;
-      font-weight:bold;
+      display: block;
+      font-size: 1.08rem;
     }
     .topo {
       position: fixed;
@@ -173,13 +182,13 @@
       background: #1f2737;
       color: #fff;
       margin-bottom: 1.2rem;
-      font-size:1.09rem;
+      font-size: 1.09rem;
       resize: vertical;
     }
     #contato textarea {
       min-height: 110px;
-      font-size:1.13rem;
-      margin-bottom:1.5rem;
+      font-size: 1.13rem;
+      margin-bottom: 1.5rem;
     }
     #contato input[type="submit"] {
       background: #59d0ff;
@@ -187,13 +196,23 @@
       font-weight: bold;
       font-size: 1.13rem;
       transition: 0.2s;
-      border-radius:13px;
-      padding:13px 32px;
-      box-shadow:0 2px 12px #1115;
-      border:none;
+      border-radius: 13px;
+      padding: 13px 32px;
+      box-shadow: 0 2px 12px #1115;
+      border: none;
     }
     #contato input[type="submit"]:hover {
       background: #2a8dbd;
+    }
+    @media (max-width: 900px) {
+      .planos { flex-direction: column; align-items: center; }
+      .plano { width: 99%; min-width: 220px; }
+    }
+    @media (max-width: 600px) {
+      .planos { gap: 1.1rem; padding: 0.5rem; }
+      .hero { padding: 1.4rem 0; }
+      #contato { padding: 1.5rem 0.2rem; }
+      header { padding-top: 2.4rem; }
     }
   </style>
 </head>
@@ -206,7 +225,7 @@
   </nav>
 
   <header id="inicio">
-    <img class="logo-kratos" src="{{ url_for('static', filename='logo.png') }}" alt="Kratos System" />
+    <img class="logo-kratos" src="logo.png" alt="Kratos System" />
     <h1>Kratos System</h1>
   </header>
 
@@ -230,7 +249,7 @@
       <span class="economia">Desconto de 11,3%. Você pagará R$ 399</span>
     </div>
     <div class="plano" onclick="abrirWhats('Plano Trimestral - R$ 999')">
-      <div class="melhor">MELHOR OFERTA</div>
+      <span class="selo-melhor">MELHOR OFERTA</span>
       <h3>Plano Trimestral</h3>
       <div class="preco">
         <span class="preco-riscado">R$1100</span>
