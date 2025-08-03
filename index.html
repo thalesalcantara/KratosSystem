@@ -29,6 +29,7 @@
     nav a:hover {
       color: #fff;
       text-shadow: 0 0 8px #59d0ff88;
+      cursor: pointer;
     }
     header {
       padding: 2.5rem 1.2rem 1rem 1.2rem;
@@ -44,7 +45,7 @@
     }
     h1 {
       color: #59d0ff;
-      font-size: 2.4rem;
+      font-size: 2.7rem;
       margin-top: 0.3rem;
       letter-spacing: 2px;
       font-weight: 700;
@@ -56,29 +57,6 @@
       font-size: 1.22rem;
       font-weight: 500;
     }
-    .historia {
-      max-width: 750px;
-      margin: 60px auto 40px;
-      background: linear-gradient(to right, #1e2332, #222943 80%);
-      border: 2px solid #59d0ff;
-      border-radius: 28px;
-      box-shadow: 0 10px 40px #0008;
-      padding: 2.7rem 2.1rem 2.3rem 2.1rem;
-      color: #ffe6b2;
-      font-size: 1.19rem;
-      line-height: 2;
-      text-align: center;
-      position: relative;
-    }
-    .historia h2 {
-      color: #59d0ff;
-      margin-bottom: 1.1rem;
-      font-size: 2.1rem;
-      font-weight: bold;
-    }
-    .historia strong {
-      color: #ff5151;
-    }
     .oferta-limitada {
       background: linear-gradient(to right, #232943, #0c1e35);
       color: #fff;
@@ -88,6 +66,7 @@
       border-radius: 18px;
       max-width: 510px;
       margin: 30px auto 32px auto;
+      box-shadow: 0 8px 28px #0006;
     }
     .oferta-limitada h2 {
       font-size: 2rem;
@@ -227,23 +206,64 @@
     #contato input[type="submit"]:hover {
       background: #2a8dbd;
     }
+    /* Modal História */
+    #historia-modal-bg {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(20, 24, 34, 0.94);
+      justify-content: center;
+      align-items: center;
+    }
+    #historia-modal {
+      background: #1e2332;
+      color: #ffe6b2;
+      padding: 2.7rem 2.1rem 2.3rem 2.1rem;
+      border-radius: 32px;
+      max-width: 96vw;
+      width: 420px;
+      box-shadow: 0 8px 54px #000c;
+      position: relative;
+      font-size: 1.18rem;
+      line-height: 2;
+      text-align: center;
+    }
+    #historia-modal h2 {
+      color: #59d0ff;
+      margin-bottom: 0.7rem;
+      font-size: 2.15rem;
+    }
+    #fechar-historia {
+      position: absolute;
+      top: 10px;
+      right: 16px;
+      background: none;
+      color: #fff;
+      border: none;
+      font-size: 2.0rem;
+      cursor: pointer;
+    }
     @media (max-width: 900px) {
       .planos { flex-direction: column; align-items: center; }
       .plano { width: 99%; min-width: 220px; }
-      .historia { padding: 2rem 0.7rem; }
     }
     @media (max-width: 600px) {
       .planos { gap: 1.1rem; padding: 0.5rem; }
       .hero { padding: 1.4rem 0; }
       #contato { padding: 1.5rem 0.2rem; }
       header { padding-top: 2.4rem; }
+      #historia-modal { padding: 1.7rem 1rem; }
     }
   </style>
 </head>
 <body>
   <nav>
     <a href="#inicio">Início</a>
-    <a href="#historia">Nossa História</a>
+    <a href="#historia" onclick="abrirHistoriaModal();return false;">Nossa História</a>
     <a href="#planos">Planos</a>
     <a href="#contato">Contato</a>
   </nav>
@@ -255,18 +275,6 @@
 
   <section class="hero">
     Força, estratégia e tecnologia sem correntes.
-  </section>
-
-  <!-- SEÇÃO HISTÓRIA -->
-  <section class="historia" id="historia">
-    <h2>Minha história</h2>
-    <p>
-      Eu... o Kratos System... <strong>nasceu da minha raiva</strong>. Da dor de não encontrar um sistema que me servisse.<br>
-      Cansado de me curvar a adaptações que não eram minhas, eu mesmo tomei as rédeas.<br>
-      Aprendi, programei, criei. Fiz soluções sob medida para mim... e para aqueles que, como eu, precisavam de algo <span style="color:#59d0ff;font-weight:bold;">verdadeiramente forjado sob demanda</span>.<br>
-      O Kratos System é o resultado desse renascimento.<br>
-      <b>Forjado no fogo da necessidade. Entregue com o aço da tecnologia. E oferecido a preço justo.</b>
-    </p>
   </section>
 
   <div class="oferta-limitada">
@@ -285,7 +293,6 @@
       <span class="economia">Desconto de 11,3%. Você pagará R$ 399</span>
     </div>
     <div class="plano" onclick="abrirWhats('Plano Trimestral - R$ 999')">
-      <span class="selo-melhor">MELHOR OFERTA</span>
       <h3>Plano Trimestral</h3>
       <div class="preco">
         <span class="preco-riscado">R$1100</span>
@@ -294,6 +301,7 @@
       <span class="economia">Desconto de 9,18%. Você pagará R$ 999</span>
     </div>
     <div class="plano" onclick="abrirWhats('Plano Anual - R$ 3.499')">
+      <span class="selo-melhor">MELHOR OFERTA</span>
       <h3>Plano Anual</h3>
       <div class="preco">
         <span class="preco-riscado">R$4400</span>
@@ -313,7 +321,27 @@
     </form>
   </section>
 
+  <!-- Modal da História -->
+  <div id="historia-modal-bg">
+    <div id="historia-modal">
+      <button id="fechar-historia" onclick="fecharHistoriaModal()" title="Fechar">&times;</button>
+      <h2>Minha história</h2>
+      <p>
+        Eu... o Kratos System... <span style="color:#ff5151;font-weight:bold;">nasceu da minha raiva</span>. Da dor de não encontrar um sistema que me servisse.<br />
+        Cansado de me curvar a adaptações que não eram minhas, eu mesmo tomei as rédeas.<br />
+        Aprendi, programei, criei. Fiz soluções sob medida para mim... e para aqueles que, como eu, precisavam de algo <span style="color:#59d0ff;font-weight:bold;">verdadeiramente forjado sob demanda</span>.<br />
+        O Kratos System é o resultado desse renascimento.<br />
+        <b>Forjado no fogo da necessidade. Entregue com o aço da tecnologia. E oferecido a preço justo.</b>
+      </p>
+    </div>
+  </div>
+
   <div class="topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8679;</div>
+
+  <footer style="text-align:center;padding:2rem;background:#0c1524;color:#ccc;font-size:.98rem;box-shadow:0 -6px 38px #0005;">
+    &copy; 2025 Kratos System. Forjado sob demanda. Todas as soluções são personalizadas.<br />
+    Este site não é afiliado à Sony ou God of War. Imagens meramente ilustrativas.
+  </footer>
 
   <script>
     function abrirWhats(msg) {
@@ -324,6 +352,20 @@
       document.querySelector('.topo').style.display = window.scrollY > 220 ? 'flex' : 'none';
     });
     document.querySelector('.topo').style.display = 'none';
+
+    // Modal da História
+    function abrirHistoriaModal() {
+      document.getElementById('historia-modal-bg').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function fecharHistoriaModal() {
+      document.getElementById('historia-modal-bg').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+    document.getElementById('historia-modal-bg').onclick = function (e) {
+      if (e.target === this) fecharHistoriaModal();
+    };
+    document.getElementById('fechar-historia').onclick = fecharHistoriaModal;
   </script>
 </body>
 </html>
