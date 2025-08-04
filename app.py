@@ -11,7 +11,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'coopex-secreto')
 # BANCO DE DADOS
 db_url = os.getenv('DATABASE_URL')
 if db_url and db_url.startswith('postgres://'):
-    db_url = db_url.replace('postgres://', 'postgresql://', 1)   # <-- Corrigido AQUI
+    db_url = db_url.replace('postgres://', 'postgresql+psycopg://', 1)  # <-- Ajuste para o driver psycopg moderno
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///coopex.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
