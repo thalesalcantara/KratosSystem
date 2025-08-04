@@ -7,18 +7,15 @@ import os
 
 app = Flask(__name__)
 
-# Configurações de ambiente
 app.secret_key = os.getenv('SECRET_KEY', 'coopex-secreto')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///coopex.db')
+
+db_url = os.getenv('DATABASE_URL')
+if db_url and db_url.startswith('postgres://'):
+    db_url = db_url.replace('postgres://', 'postgresql+psycopg://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///coopex.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Ajuste para o PostgreSQL no Render:
-# Render pode fornecer a URL no formato "postgres://", que o SQLAlchemy não aceita diretamente,
-# então vamos fazer essa correção automática:
-if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
-
-# Uploads
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
@@ -26,13 +23,12 @@ os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
-# Models
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     credito = db.Column(db.Float, default=0)
-    foto = db.Column(db.String(120), nullable=True)  # Novo campo para foto
+    foto = db.Column(db.String(120), nullable=True)
 
 class Estabelecimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -66,14 +62,12 @@ class Lancamento(db.Model):
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
 
-# Helpers
 def is_admin():
     return session.get('user_tipo') == 'admin'
 
 def is_estabelecimento():
     return session.get('user_tipo') == 'estabelecimento'
 
-# --- LOGIN ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -100,13 +94,10 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# --- PAINEL ADMIN ALIAS ---
 @app.route('/painel_admin')
 def painel_admin():
-    # Alias para dashboard, resolve erro do HTML
     return redirect(url_for('dashboard'))
 
-# --- DASHBOARD ---
 @app.route('/')
 @app.route('/dashboard')
 def dashboard():
@@ -115,7 +106,6 @@ def dashboard():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
-    # Filtros
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
@@ -143,7 +133,6 @@ def dashboard():
     total_cooperados = len(cooperados)
     total_estabelecimentos = len(estabelecimentos)
 
-    # Dados para gráfico (sempre garantidos)
     cooperado_nomes = [c.nome for c in cooperados]
     cooperado_valores = []
     for c in cooperados:
@@ -166,7 +155,6 @@ def dashboard():
         filtros=filtros
     )
 
-# --- COOPERADOS ---
 @app.route('/listar_cooperados')
 def listar_cooperados():
     if not is_admin():
@@ -183,7 +171,7 @@ def novo_cooperado():
         nome = request.form['nome']
         username = request.form['username']
         credito = float(request.form['credito'])
-        foto_file = request.files.get('foto')  # Upload da foto
+        foto_file = request.files.get('foto')
         foto_filename = None
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{username}_{foto_file.filename}")
@@ -226,7 +214,6 @@ def excluir_cooperado(id):
     flash('Cooperado excluído!', 'success')
     return redirect(url_for('listar_cooperados'))
 
-# --- AJUSTAR CRÉDITO ---
 @app.route('/ajustar_credito', methods=['GET', 'POST'])
 def ajustar_credito():
     if not is_admin():
@@ -248,7 +235,6 @@ def ajustar_credito():
             flash('Selecione um cooperado e valor.', 'danger')
     return render_template('ajustar_credito.html', cooperados=cooperados)
 
-# --- ESTABELECIMENTOS ---
 @app.route('/listar_estabelecimentos')
 def listar_estabelecimentos():
     if not is_admin():
@@ -310,7 +296,6 @@ def excluir_estabelecimento(id):
     flash('Estabelecimento excluído!', 'success')
     return redirect(url_for('listar_estabelecimentos'))
 
-# --- LANÇAMENTOS ADMIN ---
 @app.route('/lancamentos')
 def listar_lancamentos():
     if not is_admin():
@@ -342,7 +327,6 @@ def listar_lancamentos():
     lancamentos = query.order_by(Lancamento.data.desc()).all()
     return render_template('lancamentos.html', admin=admin, cooperados=cooperados, estabelecimentos=estabelecimentos, lancamentos=lancamentos, filtros=filtros)
 
-# --- PAINEL ESTABELECIMENTO ---
 @app.route('/painel_estabelecimento', methods=['GET', 'POST'])
 def painel_estabelecimento():
     if not is_estabelecimento():
@@ -384,7 +368,6 @@ def painel_estabelecimento():
         l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
-# --- BANCO E ADMIN MASTER ---
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
@@ -397,5 +380,4 @@ def criar_banco_e_admin():
 
 if __name__ == '__main__':
     criar_banco_e_admin()
-    # Em produção Render usa gunicorn, então aqui só para dev local
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
