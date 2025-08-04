@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <title>Estabelecimentos - Coopex</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google Fonts, Bootstrap e Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <style>
+        body {
+            background: #191c20;
+            font-family: 'Roboto', Arial, sans-serif;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            background: linear-gradient(160deg, #101218 60%, #003399 100%);
+            color: #fff;
+            box-shadow: 3px 0 12px #00339944;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .sidebar .logo {
+            width: 160px;
+            margin: 38px auto 16px auto;
+            display: block;
+            filter: drop-shadow(0 0 18px #ffd700cc);
+        }
+        .sidebar h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #ffd700;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 22px;
+            font-size: 1.18rem;
+            font-weight: 600;
+        }
+        .sidebar .nav-link {
+            color: #fff;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            margin: 4px 0;
+            transition: background 0.22s, color 0.22s;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
+            background: #ffd70033;
+            color: #ffd700 !important;
+        }
+        .sidebar .nav-link i {
+            font-size: 1.4rem;
+            margin-right: 13px;
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 35px 32px 20px 32px;
+        }
+        .topbar {
+            background: #101218;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            border-bottom: 1.5px solid #23262b;
+            box-shadow: 0 2px 16px #0004;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        .topbar span {
+            color: #ffd700;
+            font-weight: 700;
+            font-size: 1.08rem;
+            margin-right: 25px;
+        }
+        .topbar .btn {
+            font-weight: 700;
+            border-radius: 20px;
+        }
+        .dashboard-card {
+            background: linear-gradient(120deg, #23262b 90%, #003399 100%);
+            border-radius: 17px;
+            box-shadow: 0 8px 32px #0008, 0 2px 8px #00339944;
+            padding: 28px 24px 20px 24px;
+            margin-bottom: 38px;
+            color: #ffd700;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 4px #222, 0 1px 2px #00339988;
+        }
+        .dashboard-card h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
+            color: #191c20;
+            font-weight: bold;
+            border: none;
+            transition: background .17s;
+            border-radius: 17px;
+            padding: 8px 18px;
+        }
+        .btn-primary:hover {
+            background: #ffe670;
+            color: #003399;
+        }
+        .table {
+            color: #fff;
+            background: #23262b;
+            border-radius: 10px;
+            overflow: hidden;
+            text-align: center;
+        }
+        .table thead th {
+            background: #22263d;
+            color: #ffd700;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1.1px;
+            text-align: center;
+        }
+        /* Sobrescreve qualquer fundo branco do Bootstrap table-striped */
+        .table-striped > tbody > tr > td,
+        .table-striped > tbody > tr > th {
+            background-color: #23262b !important;
+        }
+        .table-striped > tbody > tr:nth-of-type(odd) > td,
+        .table-striped > tbody > tr:nth-of-type(odd) > th {
+            background-color: #1d2024 !important;
+        }
+        .td-yellow {
+            color: #ffd700 !important;
+            font-weight: 700 !important;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.11rem !important;
+        }
+        .estab-foto {
+            width: 108px;
+            height: 108px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #ffd700;
+            box-shadow: 0 0 14px #00339944;
+            display: block;
+            margin: 0 auto;
+            background: #23262b;
+        }
+        .alert {
+            background: #ffd700;
+            color: #222;
+            font-weight: 600;
+            border-radius: 9px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        a {
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
+        <h3>Coopex Parcerias</h3>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="{{ url_for('painel_admin') }}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+            <a class="nav-link active" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i>Estabelecimentos</a>
+            <a class="nav-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people-fill"></i>Cooperados</a>
+            <a class="nav-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-currency-dollar"></i>Lançamentos</a>
+            <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <div class="topbar mb-4">
+            <span>Bem-vindo, {{ admin.nome }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="dashboard-card">
+            <h4><i class="bi bi-building"></i> Estabelecimentos Cadastrados</h4>
+            <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-primary mb-3">+ Novo Estabelecimento</a>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Logo</th>
+                            <th>Nome</th>
+                            <th>Usuário</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for est in estabelecimentos %}
+                        <tr>
+                            <td>
+                              {% if est.logo %}
+                                <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}" alt="Logo do Estabelecimento" class="estab-foto">
+                              {% else %}
+                                <span style="color:#666;font-size:0.93rem">Sem logo</span>
+                              {% endif %}
+                            </td>
+                            <td class="td-yellow">{{ est.nome }}</td>
+                            <td class="td-yellow">{{ est.username }}</td>
+                            <td>
+                                <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                                <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir este estabelecimento?')">Excluir</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4">Nenhum estabelecimento cadastrado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

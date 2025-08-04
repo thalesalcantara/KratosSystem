@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Coopex Parcerias</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts, Bootstrap e Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: #191c20;
+            font-family: 'Roboto', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: linear-gradient(130deg, #101218 80%, #003399 100%);
+            color: #ffd700;
+            padding: 40px 36px 32px 36px;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px #000a, 0 2px 8px #00339955;
+            width: 100%;
+            max-width: 420px;
+            margin: 32px 0;
+        }
+        .login-logo {
+            display: block;
+            margin: 0 auto 24px auto;
+            width: 78px;
+            filter: drop-shadow(0 0 8px #ffd700aa);
+        }
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            letter-spacing: 2px;
+            color: #ffd700;
+            margin-bottom: 16px;
+        }
+        .form-label {
+            color: #fff;
+            font-weight: 600;
+        }
+        .form-control, .form-select {
+            background: #23262b;
+            border: 1px solid #22263d;
+            color: #ffd700;
+            font-weight: 500;
+            border-radius: 9px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 0 1.5px #ffd70044;
+            background: #191c20;
+            color: #ffd700;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
+            color: #191c20;
+            font-weight: bold;
+            border: none;
+            border-radius: 17px;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            width: 100%;
+            transition: background .17s;
+        }
+        .btn-primary:hover {
+            background: #ffe670;
+            color: #003399;
+        }
+        .alert {
+            background: #ffd700;
+            color: #222;
+            font-weight: 600;
+            border-radius: 9px;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+        .form-select, .form-control {
+            margin-bottom: 18px;
+        }
+        @media (max-width: 500px) {
+            .login-box {
+                padding: 22px 8px;
+            }
+            .login-logo { width: 58px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" class="login-logo" alt="Logo Coopex">
+        <h2>Coopex Parcerias</h2>
+        <form method="post">
+            <label class="form-label" for="tipo"><i class="bi bi-person-badge"></i> Tipo de Acesso</label>
+            <select class="form-select" id="tipo" name="tipo" required>
+                <option value="admin">Administrador Master</option>
+                <option value="estabelecimento">Estabelecimento</option>
+            </select>
+            <label class="form-label" for="username"><i class="bi bi-person"></i> Usuário</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Digite seu usuário" required>
+            <label class="form-label" for="senha"><i class="bi bi-lock"></i> Senha</label>
+            <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha" required>
+            <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} text-center mt-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
