@@ -11,7 +11,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'coopex-secreto')
 # BANCO DE DADOS
 db_url = os.getenv('DATABASE_URL')
 if db_url and db_url.startswith('postgres://'):
-    db_url = db_url.replace('postgres://', 'postgresql+psycopg://', 1)  # <-- Ajuste para o driver psycopg moderno
+    db_url = db_url.replace('postgres://', 'postgresql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///coopex.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -63,13 +63,13 @@ class Lancamento(db.Model):
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
 
-# HELPERS
+# Helpers
 def is_admin():
     return session.get('user_tipo') == 'admin'
 def is_estabelecimento():
     return session.get('user_tipo') == 'estabelecimento'
 
-# ROTAS
+# --- LOGIN ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -96,10 +96,13 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+# --- PAINEL ADMIN ALIAS ---
 @app.route('/painel_admin')
 def painel_admin():
+    # Alias para dashboard, resolve erro do HTML
     return redirect(url_for('dashboard'))
 
+# --- DASHBOARD ---
 @app.route('/')
 @app.route('/dashboard')
 def dashboard():
@@ -108,6 +111,7 @@ def dashboard():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
+    # Filtros
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
@@ -134,6 +138,8 @@ def dashboard():
     total_valor = sum(l.valor for l in lancamentos)
     total_cooperados = len(cooperados)
     total_estabelecimentos = len(estabelecimentos)
+
+    # Dados para gráfico
     cooperado_nomes = [c.nome for c in cooperados]
     cooperado_valores = []
     for c in cooperados:
@@ -156,6 +162,7 @@ def dashboard():
         filtros=filtros
     )
 
+# --- COOPERADOS ---
 @app.route('/listar_cooperados')
 def listar_cooperados():
     if not is_admin():
@@ -215,6 +222,7 @@ def excluir_cooperado(id):
     flash('Cooperado excluído!', 'success')
     return redirect(url_for('listar_cooperados'))
 
+# --- AJUSTAR CRÉDITO ---
 @app.route('/ajustar_credito', methods=['GET', 'POST'])
 def ajustar_credito():
     if not is_admin():
@@ -236,6 +244,7 @@ def ajustar_credito():
             flash('Selecione um cooperado e valor.', 'danger')
     return render_template('ajustar_credito.html', cooperados=cooperados)
 
+# --- ESTABELECIMENTOS ---
 @app.route('/listar_estabelecimentos')
 def listar_estabelecimentos():
     if not is_admin():
@@ -297,6 +306,7 @@ def excluir_estabelecimento(id):
     flash('Estabelecimento excluído!', 'success')
     return redirect(url_for('listar_estabelecimentos'))
 
+# --- LANÇAMENTOS ADMIN ---
 @app.route('/lancamentos')
 def listar_lancamentos():
     if not is_admin():
@@ -328,6 +338,7 @@ def listar_lancamentos():
     lancamentos = query.order_by(Lancamento.data.desc()).all()
     return render_template('lancamentos.html', admin=admin, cooperados=cooperados, estabelecimentos=estabelecimentos, lancamentos=lancamentos, filtros=filtros)
 
+# --- PAINEL ESTABELECIMENTO ---
 @app.route('/painel_estabelecimento', methods=['GET', 'POST'])
 def painel_estabelecimento():
     if not is_estabelecimento():
@@ -369,7 +380,7 @@ def painel_estabelecimento():
         l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
-# CRIAR BANCO E ADMIN MASTER
+# --- BANCO E ADMIN MASTER ---
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
