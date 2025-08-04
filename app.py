@@ -6,15 +6,8 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-
-# Configurações para produção com PostgreSQL no Render
-app.secret_key = os.getenv('SECRET_KEY', 'coopex-secreto')
-
-uri = os.getenv('DATABASE_URL', 'sqlite:///coopex.db')
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql+psycopg://", 1)
-app.config['SQLALCHEMY_DATABASE_URI'] = uri
-
+app.secret_key = 'coopex-secreto'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coopex.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Ajuste: pasta de upload de fotos de cooperados E logos de estabelecimentos
