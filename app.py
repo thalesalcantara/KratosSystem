@@ -6,11 +6,18 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-app.secret_key = 'coopex-secreto'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coopex.db'
+
+# Configurações de ambiente
+app.secret_key = os.getenv('SECRET_KEY', 'coopex-secreto')
+
+uri = os.getenv('DATABASE_URL', 'sqlite:///coopex.db')
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql+psycopg://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Ajuste: pasta de upload de fotos de cooperados E logos de estabelecimentos
+# Uploads
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
@@ -24,7 +31,7 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     credito = db.Column(db.Float, default=0)
-    foto = db.Column(db.String(120), nullable=True)  # Novo campo para foto
+    foto = db.Column(db.String(120), nullable=True)
 
 class Estabelecimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,6 +68,7 @@ class Lancamento(db.Model):
 # Helpers
 def is_admin():
     return session.get('user_tipo') == 'admin'
+
 def is_estabelecimento():
     return session.get('user_tipo') == 'estabelecimento'
 
@@ -106,7 +114,6 @@ def dashboard():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
-    # Filtros
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
@@ -122,19 +129,20 @@ def dashboard():
         try:
             data_inicio = datetime.strptime(filtros['data_inicio'], '%Y-%m-%d')
             query = query.filter(Lancamento.data >= data_inicio)
-        except: pass
+        except:
+            pass
     if filtros['data_fim']:
         try:
             data_fim = datetime.strptime(filtros['data_fim'], '%Y-%m-%d')
             query = query.filter(Lancamento.data <= data_fim)
-        except: pass
+        except:
+            pass
     lancamentos = query.all()
     total_pedidos = len(lancamentos)
     total_valor = sum(l.valor for l in lancamentos)
     total_cooperados = len(cooperados)
     total_estabelecimentos = len(estabelecimentos)
 
-    # Dados para gráfico (sempre garantidos)
     cooperado_nomes = [c.nome for c in cooperados]
     cooperado_valores = []
     for c in cooperados:
@@ -144,18 +152,17 @@ def dashboard():
         cooperado_valores = [0]
         cooperado_nomes = ["Nenhum cooperado"]
     return render_template('dashboard.html',
-        admin=admin,
-        cooperados=cooperados,
-        estabelecimentos=estabelecimentos,
-        total_pedidos=total_pedidos,
-        total_valor=total_valor,
-        total_cooperados=total_cooperados,
-        total_estabelecimentos=total_estabelecimentos,
-        cooperado_nomes=cooperado_nomes,
-        cooperado_valores=cooperado_valores,
-        lancamentos_contagem=cooperado_valores,
-        filtros=filtros
-    )
+                           admin=admin,
+                           cooperados=cooperados,
+                           estabelecimentos=estabelecimentos,
+                           total_pedidos=total_pedidos,
+                           total_valor=total_valor,
+                           total_cooperados=total_cooperados,
+                           total_estabelecimentos=total_estabelecimentos,
+                           cooperado_nomes=cooperado_nomes,
+                           cooperado_valores=cooperado_valores,
+                           lancamentos_contagem=cooperado_valores,
+                           filtros=filtros)
 
 # --- COOPERADOS ---
 @app.route('/listar_cooperados')
@@ -174,7 +181,7 @@ def novo_cooperado():
         nome = request.form['nome']
         username = request.form['username']
         credito = float(request.form['credito'])
-        foto_file = request.files.get('foto')  # Upload da foto
+        foto_file = request.files.get('foto')
         foto_filename = None
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{username}_{foto_file.filename}")
@@ -324,12 +331,14 @@ def listar_lancamentos():
         try:
             data_inicio = datetime.strptime(filtros['data_inicio'], '%Y-%m-%d')
             query = query.filter(Lancamento.data >= data_inicio)
-        except: pass
+        except:
+            pass
     if filtros['data_fim']:
         try:
             data_fim = datetime.strptime(filtros['data_fim'], '%Y-%m-%d')
             query = query.filter(Lancamento.data <= data_fim)
-        except: pass
+        except:
+            pass
     lancamentos = query.order_by(Lancamento.data.desc()).all()
     return render_template('lancamentos.html', admin=admin, cooperados=cooperados, estabelecimentos=estabelecimentos, lancamentos=lancamentos, filtros=filtros)
 
@@ -375,7 +384,7 @@ def painel_estabelecimento():
         l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
-# --- BANCO E ADMIN MASTER ---
+# --- CRIAR BANCO E ADMIN MASTER ---
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
@@ -388,4 +397,5 @@ def criar_banco_e_admin():
 
 if __name__ == '__main__':
     criar_banco_e_admin()
-    app.run(debug=True)
+    # Em produção, o Render usa gunicorn, então aqui é só para dev local
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
