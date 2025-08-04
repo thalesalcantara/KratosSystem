@@ -4,4 +4,3 @@ gunicorn==21.2.0
 Werkzeug==2.3.8
 psycopg2-binary==2.9.7
 
-
