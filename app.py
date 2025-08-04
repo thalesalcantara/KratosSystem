@@ -6,16 +6,11 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'coopex-secreto')
-
-# BANCO DE DADOS
-db_url = os.getenv('DATABASE_URL')
-if db_url and db_url.startswith('postgres://'):
-    db_url = db_url.replace('postgres://', 'postgresql://', 1)
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///coopex.db'
+app.secret_key = 'coopex-secreto'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coopex.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# UPLOADS
+# Ajuste: pasta de upload de fotos de cooperados E logos de estabelecimentos
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
@@ -23,13 +18,13 @@ os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
-# MODELS
+# Models
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     credito = db.Column(db.Float, default=0)
-    foto = db.Column(db.String(120), nullable=True)
+    foto = db.Column(db.String(120), nullable=True)  # Novo campo para foto
 
 class Estabelecimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -139,7 +134,7 @@ def dashboard():
     total_cooperados = len(cooperados)
     total_estabelecimentos = len(estabelecimentos)
 
-    # Dados para gráfico
+    # Dados para gráfico (sempre garantidos)
     cooperado_nomes = [c.nome for c in cooperados]
     cooperado_valores = []
     for c in cooperados:
@@ -179,7 +174,7 @@ def novo_cooperado():
         nome = request.form['nome']
         username = request.form['username']
         credito = float(request.form['credito'])
-        foto_file = request.files.get('foto')
+        foto_file = request.files.get('foto')  # Upload da foto
         foto_filename = None
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{username}_{foto_file.filename}")
@@ -393,4 +388,4 @@ def criar_banco_e_admin():
 
 if __name__ == '__main__':
     criar_banco_e_admin()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
+    app.run(debug=True)
