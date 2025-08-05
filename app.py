@@ -8,8 +8,8 @@ import os
 app = Flask(__name__)
 app.secret_key = 'coopex-secreto'
 
-# BANCO DE DADOS RENDER (PostgreSQL) - USE O DRIVER psycopg (novo)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
+# Config do PostgreSQL no Render
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Pastas de upload
@@ -20,7 +20,7 @@ os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
-# MODELS
+# Models
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
@@ -151,9 +151,12 @@ def dashboard():
         filtros=filtros
     )
 
+# Outras rotas suas aqui...
+
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
+        # Cria admin master só se não existir
         if not Admin.query.filter_by(username='coopex').first():
             admin = Admin(nome='Administrador Master', username='coopex')
             admin.set_senha('coopex05289')
@@ -161,6 +164,16 @@ def criar_banco_e_admin():
             db.session.commit()
             print('Admin criado: coopex / coopex05289')
 
+# ---- CRIA AS TABELAS ANTES DE QUALQUER ROTA SER USADA ----
+with app.app_context():
+    db.create_all()
+    # Cria admin master se não existir
+    if not Admin.query.filter_by(username='coopex').first():
+        admin = Admin(nome='Administrador Master', username='coopex')
+        admin.set_senha('coopex05289')
+        db.session.add(admin)
+        db.session.commit()
+        print('Admin criado: coopex / coopex05289')
+
 if __name__ == '__main__':
-    criar_banco_e_admin()
     app.run(debug=False, host="0.0.0.0")
