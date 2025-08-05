@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Painel Estabelecimento - Coopex</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <title>Estabelecimentos - Coopex</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Fonts, Bootstrap e Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <style>
         body {
             background: #191c20;
@@ -15,11 +15,11 @@
             min-height: 100vh;
         }
         .sidebar {
-            width: 210px;
+            width: 220px;
             height: 100vh;
             position: fixed;
             top: 0; left: 0;
-            background: linear-gradient(160deg, #101218 70%, #003399 100%);
+            background: linear-gradient(160deg, #101218 60%, #003399 100%);
             color: #fff;
             box-shadow: 3px 0 12px #00339944;
             z-index: 10;
@@ -28,10 +28,11 @@
             align-items: center;
         }
         .sidebar .logo {
-            width: 100px; /* Aumenta o tamanho da logo */
-            margin: 28px auto 14px auto;
+            width: 200px;  /* LOGO MAIOR */
+            max-width: 90%;
+            margin: 30px auto 8px auto;
             display: block;
-            filter: drop-shadow(0 0 8px #ffd700aa);
+            filter: drop-shadow(0 0 18px #ffd700cc);
             transition: width 0.2s;
         }
         .sidebar h3 {
@@ -39,40 +40,38 @@
             color: #ffd700;
             text-align: center;
             letter-spacing: 2px;
-            margin-bottom: 28px;
-            font-size: 1rem;
-            line-height: 1.1;
-            white-space: normal;
-            word-break: break-word;
-            width: 100%;
-            padding: 0 5px;
+            margin-bottom: 22px;
+            font-size: 1.18rem;
+            font-weight: 600;
         }
         .sidebar .nav-link {
             color: #fff;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             border-radius: 8px;
-            margin: 3px 0;
-            padding: 11px 20px;
+            margin: 4px 0;
+            transition: background 0.22s, color 0.22s;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             text-decoration: none;
-            transition: background 0.22s, color 0.22s;
+            width: 100%;
+            box-sizing: border-box;
         }
         .sidebar .nav-link.active, .sidebar .nav-link:hover {
             background: #ffd70033;
             color: #ffd700 !important;
         }
         .sidebar .nav-link i {
-            font-size: 1.3rem;
-            margin-right: 10px;
+            font-size: 1.4rem;
+            margin-right: 13px;
         }
         .main-content {
-            margin-left: 230px;
-            padding: 38px 32px 20px 32px;
+            margin-left: 240px;
+            padding: 35px 32px 20px 32px;
         }
         .topbar {
             background: #101218;
-            height: 62px;
+            height: 64px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -82,19 +81,11 @@
             top: 0;
             z-index: 20;
         }
-        .est-nome {
-            display: inline-block;
-            max-width: 260px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: middle;
-        }
         .topbar span {
             color: #ffd700;
             font-weight: 700;
-            font-size: 1.07rem;
-            margin-right: 24px;
+            font-size: 1.08rem;
+            margin-right: 25px;
         }
         .topbar .btn {
             font-weight: 700;
@@ -115,6 +106,7 @@
             font-weight: 700;
             color: #fff;
             letter-spacing: 1.5px;
+            margin-bottom: 20px;
         }
         .btn-primary {
             background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
@@ -123,6 +115,7 @@
             border: none;
             transition: background .17s;
             border-radius: 17px;
+            padding: 8px 18px;
         }
         .btn-primary:hover {
             background: #ffe670;
@@ -130,9 +123,10 @@
         }
         .table {
             color: #fff;
-            background: #222;
+            background: #23262b;
             border-radius: 10px;
             overflow: hidden;
+            text-align: center;
         }
         .table thead th {
             background: #22263d;
@@ -141,11 +135,35 @@
             letter-spacing: 1.1px;
             text-align: center;
         }
-        .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #28345c;
+        /* Sobrescreve qualquer fundo branco do Bootstrap table-striped */
+        .table-striped > tbody > tr > td,
+        .table-striped > tbody > tr > th {
+            background-color: #23262b !important;
         }
-        .table-striped > tbody > tr:nth-of-type(even) > * {
-            background-color: #1a2341;
+        .table-striped > tbody > tr:nth-of-type(odd) > td,
+        .table-striped > tbody > tr:nth-of-type(odd) > th {
+            background-color: #1d2024 !important;
+        }
+        .td-yellow {
+            color: #ffd700 !important;
+            font-weight: 700 !important;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.97rem !important;  /* NOME MENOR */
+            max-width: 130px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .estab-foto {
+            width: 108px;
+            height: 108px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #ffd700;
+            box-shadow: 0 0 14px #00339944;
+            display: block;
+            margin: 0 auto;
+            background: #23262b;
         }
         .alert {
             background: #ffd700;
@@ -155,159 +173,80 @@
             margin-bottom: 10px;
             text-align: center;
         }
+        a {
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
         @media (max-width: 900px) {
             .sidebar { display: none; }
-            .main-content { margin-left: 0; padding: 12px; }
-            .topbar span.est-nome { max-width: 120px; }
+            .main-content { margin-left: 0; padding: 10px; }
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
-        <h3>Estabelecimento</h3>
-        <a class="nav-link active" href="#"><i class="bi bi-currency-dollar"></i>Lançar Crédito</a>
-        <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
+        <h3>Coopex Parcerias</h3>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="{{ url_for('painel_admin') }}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+            <a class="nav-link active" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i>Estabelecimentos</a>
+            <a class="nav-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people-fill"></i>Cooperados</a>
+            <a class="nav-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-currency-dollar"></i>Lançamentos</a>
+            <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
+        </nav>
     </div>
     <div class="main-content">
         <div class="topbar mb-4">
-            {% if est %}
-                <span class="est-nome" title="{{ est.nome }}">Bem-vindo, {{ est.nome }}</span>
-            {% else %}
-                <span class="est-nome">Bem-vindo!</span>
-            {% endif %}
+            <span>Bem-vindo, {{ admin.nome }}</span>
             <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
         </div>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} text-center">
-                        {{ message }}
-                    </div>
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
-
-        <div class="dashboard-card mb-4">
-            <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
-            <form method="post" action="{{ url_for('painel_estabelecimento') }}">
-                <div class="row g-3 align-items-center mb-2">
-                    <div class="col-md-4">
-                        <label class="form-label" for="cooperado_id"><i class="bi bi-person-lines-fill"></i> Cooperado</label>
-                        <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
-                            <option value="">Selecione...</option>
-                            {% for c in cooperados %}
-                                <option 
-                                    value="{{ c.id }}" 
-                                    data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
-                                    data-saldo-raw="{{ c.credito }}"
-                                    data-foto="{{ url_for('static', filename='uploads/' ~ c.foto) if c.foto else '' }}"
-                                >{{ c.nome }}</option>
-                            {% endfor %}
-                        </select>
-                        <div id="foto-cooperado-preview" style="text-align:center; margin:10px 0 0 0;"></div>
-                        <div id="saldo-cooperado" style="color:#ffd700; font-weight:700; margin:8px 0 6px 0; font-size:1.13em;"></div>
-                        <div id="erro-lancar" style="color:#ffd700; font-size:0.97em; font-weight:500; margin-top:5px;"></div>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label" for="valor"><i class="bi bi-cash-stack"></i> Valor (R$)</label>
-                        <input type="number" step="0.01" min="0.01" class="form-control" id="valor" name="valor" required oninput="checarCreditoSuficiente()">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="os_numero"><i class="bi bi-file-earmark-text"></i> Nº OS</label>
-                        <input type="text" class="form-control" id="os_numero" name="os_numero" required placeholder="Ex: 12345">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="descricao"><i class="bi bi-justify-left"></i> Descrição</label>
-                        <input type="text" class="form-control" id="descricao" name="descricao" placeholder="(opcional)">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary mt-2" id="btn-lancar"><i class="bi bi-plus-circle"></i> Lançar Valor</button>
-            </form>
-        </div>
-
         <div class="dashboard-card">
-            <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
+            <h4><i class="bi bi-building"></i> Estabelecimentos Cadastrados</h4>
+            <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-primary mb-3">+ Novo Estabelecimento</a>
             <div class="table-responsive">
-                <table class="table table-striped text-center align-middle">
+                <table class="table table-striped align-middle">
                     <thead>
                         <tr>
-                            <th>Data (Brasília)</th>
-                            <th>Nº OS</th>
-                            <th>Cooperado</th>
-                            <th>Valor (R$)</th>
-                            <th>Descrição</th>
+                            <th>Logo</th>
+                            <th>Nome</th>
+                            <th>Usuário</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for l in lancamentos %}
+                        {% for est in estabelecimentos %}
                         <tr>
-                            <td>{{ l.data_brasilia }}</td>
-                            <td>{{ l.os_numero }}</td>
-                            <td>{{ l.cooperado.nome }}</td>
-                            <td>{{ "{:,.2f}".format(l.valor) }}</td>
-                            <td>{{ l.descricao or '' }}</td>
+                            <td>
+                              {% if est.logo %}
+                                <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}" alt="Logo do Estabelecimento" class="estab-foto">
+                              {% else %}
+                                <span style="color:#666;font-size:0.93rem">Sem logo</span>
+                              {% endif %}
+                            </td>
+                            <td class="td-yellow" title="{{ est.nome }}">{{ est.nome }}</td>
+                            <td class="td-yellow">{{ est.username }}</td>
+                            <td>
+                                <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                                <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir este estabelecimento?')">Excluir</a>
+                            </td>
                         </tr>
-                    {% else %}
-                        <tr><td colspan="5">Nenhum lançamento realizado.</td></tr>
-                    {% endfor %}
+                        {% else %}
+                        <tr><td colspan="4">Nenhum estabelecimento cadastrado.</td></tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
-    <script>
-    function mostrarInfoCooperado() {
-        var select = document.getElementById("cooperado_id");
-        var saldoDiv = document.getElementById("saldo-cooperado");
-        var fotoDiv = document.getElementById("foto-cooperado-preview");
-        var option = select.options[select.selectedIndex];
-        var saldo = option ? option.getAttribute("data-saldo") : null;
-        var foto = option ? option.getAttribute("data-foto") : null;
-        if (saldo && select.value) {
-            saldoDiv.innerHTML = '<i class="bi bi-cash-coin"></i> Saldo atual: <b>R$ ' + saldo + '</b>';
-        } else {
-            saldoDiv.innerHTML = '';
-        }
-        if (foto && select.value) {
-            fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #ffd700;box-shadow:0 0 8px #00339955;">';
-        } else {
-            fotoDiv.innerHTML = '';
-        }
-        checarCreditoSuficiente();
-    }
-
-    function checarCreditoSuficiente() {
-        var select = document.getElementById("cooperado_id");
-        var valorInput = document.getElementById("valor");
-        var erroDiv = document.getElementById("erro-lancar");
-        var btn = document.getElementById("btn-lancar");
-        var option = select.options[select.selectedIndex];
-        var saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
-        var valor = valorInput.value ? parseFloat(valorInput.value) : null;
-        if (!saldo || saldo <= 0) {
-            erroDiv.innerHTML = "Este cooperado está sem crédito disponível!";
-            btn.disabled = true;
-            return;
-        }
-        if (valor && valor > saldo) {
-            erroDiv.innerHTML = "O valor excede o saldo disponível!";
-            btn.disabled = true;
-        } else {
-            erroDiv.innerHTML = "";
-            btn.disabled = false;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        mostrarInfoCooperado();
-        document.getElementById("cooperado_id").addEventListener("change", mostrarInfoCooperado);
-        document.getElementById("valor").addEventListener("input", checarCreditoSuficiente);
-    });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
