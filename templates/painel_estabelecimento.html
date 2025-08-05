@@ -28,17 +28,26 @@
             align-items: center;
         }
         .sidebar .logo {
-            width: 60px;
-            margin: 32px auto 20px auto;
+            width: 170px; /* LOGO BEM MAIOR */
+            max-width: 95%;
+            margin: 28px auto 10px auto;
             display: block;
-            filter: drop-shadow(0 0 8px #ffd700aa);
+            filter: drop-shadow(0 0 18px #ffd700cc);
+            transition: width 0.2s;
         }
         .sidebar h3 {
             font-family: 'Orbitron', sans-serif;
             color: #ffd700;
             text-align: center;
-            letter-spacing: 2px;
-            margin-bottom: 32px;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            font-size: 1.02rem;
+            font-weight: 700;
+            text-shadow: 0 0 5px #00339977;
+            background: rgba(0,0,0,0.11);
+            border-radius: 6px;
+            padding: 2px 0;
+            width: 100%;
         }
         .sidebar .nav-link {
             color: #fff;
@@ -126,7 +135,6 @@
             letter-spacing: 1.1px;
             text-align: center;
         }
-        /* Linhas da tabela com cores mais claras para facilitar leitura */
         .table-striped > tbody > tr:nth-of-type(odd) > * {
             background-color: #28345c;
         }
@@ -150,7 +158,7 @@
 <body>
     <div class="sidebar">
         <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
-        <h3>Estabelecimento</h3>
+        <h3>Parceiro<br>Coopex</h3>
         <a class="nav-link active" href="#"><i class="bi bi-currency-dollar"></i>Lançar Crédito</a>
         <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
     </div>
