@@ -113,7 +113,7 @@
         </h2>
         <form method="post" enctype="multipart/form-data" autocomplete="off">
             {% if cooperado and cooperado.foto %}
-                <img src="{{ url_for('cooperado_foto', id=cooperado.id) }}"
+                <img src="{{ url_for('static', filename='uploads/' ~ cooperado.foto) }}"
                      alt="Foto do Cooperado" class="profile-pic" id="foto-preview-existente">
             {% endif %}
             <div class="mb-3">
