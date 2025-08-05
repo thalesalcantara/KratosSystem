@@ -151,6 +151,13 @@ def dashboard():
         filtros=filtros
     )
 
+# ---------- ROTA TEMPORÁRIA PARA CRIAR O BANCO ----------
+@app.route('/initdb')
+def initdb():
+    db.create_all()
+    return 'Banco criado com sucesso!'
+# ---------- FIM DA ROTA TEMPORÁRIA ----------
+
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
