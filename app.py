@@ -151,23 +151,20 @@ def dashboard():
         filtros=filtros
     )
 
-# ---------- ROTA TEMPORÁRIA PARA CRIAR O BANCO ----------
+# ---------- ROTA TEMPORÁRIA PARA CRIAR O BANCO E O ADMIN MASTER ----------
 @app.route('/initdb')
 def initdb():
     db.create_all()
-    return 'Banco criado com sucesso!'
-# ---------- FIM DA ROTA TEMPORÁRIA ----------
+    if not Admin.query.filter_by(username='coopex').first():
+        admin = Admin(nome='Administrador Master', username='coopex')
+        admin.set_senha('coopex05289')
+        db.session.add(admin)
+        db.session.commit()
+        return 'Banco criado e admin master (coopex/coopex05289) criado com sucesso!'
+    else:
+        return 'Banco já existe e admin master já criado.'
 
-def criar_banco_e_admin():
-    with app.app_context():
-        db.create_all()
-        if not Admin.query.filter_by(username='coopex').first():
-            admin = Admin(nome='Administrador Master', username='coopex')
-            admin.set_senha('coopex05289')
-            db.session.add(admin)
-            db.session.commit()
-            print('Admin criado: coopex / coopex05289')
+# -------------------------------------------------------
 
 if __name__ == '__main__':
-    criar_banco_e_admin()
     app.run(debug=False, host="0.0.0.0")
