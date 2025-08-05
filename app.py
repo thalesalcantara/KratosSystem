@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = 'coopex-secreto'
 
 # BANCO DE DADOS RENDER (PostgreSQL)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://banco_de_dados_pa8y_user:H6pPw7AsRQwMAmewMjqUAzSW0YacShb0@dpg-d28gqemr433s73e0r5f0-a.oregon-postgres.render.com/banco_de_dados_pa8y'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Pastas de upload
