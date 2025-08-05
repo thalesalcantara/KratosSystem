@@ -99,16 +99,101 @@
             background: #101218; box-shadow: 0 0 7px #00339944;
         }
         .txt-amarelo { color: #ffd700 !important; font-weight: 600; letter-spacing: .4px; text-shadow: 0 0 3px #ffd700; }
+
+        /* ----------- CALCULADORA ----------- */
+        .calculadora-box {
+            background: #23262b;
+            border-radius: 13px;
+            box-shadow: 0 3px 12px #00339933;
+            padding: 18px 22px 14px 22px;
+            color: #ffd700;
+            max-width: 270px;
+            margin: 0 auto 28px auto;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .calculadora-titulo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.17em;
+            font-weight: 700;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .calculadora-display {
+            width: 100%;
+            background: #101218;
+            color: #ffd700;
+            font-size: 1.4em;
+            font-family: 'Orbitron', monospace;
+            border: 1.5px solid #00339966;
+            border-radius: 8px;
+            margin-bottom: 11px;
+            padding: 6px 10px;
+            text-align: right;
+        }
+        .calculadora-botoes {
+            display: grid;
+            grid-template-columns: repeat(4, 50px);
+            gap: 7px;
+            justify-content: center;
+        }
+        .calc-btn {
+            font-size: 1.15em;
+            font-family: 'Orbitron', monospace;
+            border-radius: 7px;
+            border: none;
+            background: #003399;
+            color: #ffd700;
+            font-weight: bold;
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background 0.13s;
+        }
+        .calc-btn:active, .calc-btn:hover {
+            background: #ffd700;
+            color: #003399;
+        }
+        .calc-btn.operador { background: #23262b; color: #ffd700; border: 1.5px solid #00339955;}
+        .calc-btn.igual { background: #ffd700; color: #003399;}
+        .calc-btn.limpar { background: #d9534f; color: #fff;}
         @media (max-width: 700px) {
             .main-content { padding: 7px 2px; }
             .dashboard-card { padding: 10px 3px 5px 3px; }
             .foto-cooperado { width: 38px; height: 38px; }
             .filtros-row { flex-direction: column; align-items: stretch; gap: 8px; }
+            .calculadora-box { max-width: 100%; }
+            .calculadora-botoes { grid-template-columns: repeat(4, 1fr);}
         }
     </style>
 </head>
 <body>
     <div class="main-content">
+        <!-- CALCULADORA -->
+        <div class="calculadora-box mb-4">
+            <div class="calculadora-titulo"><i class="bi bi-calculator"></i> Calculadora</div>
+            <input type="text" class="calculadora-display" id="calc-display" readonly value="0">
+            <div class="calculadora-botoes">
+                <button class="calc-btn" onclick="calcInsere('7')">7</button>
+                <button class="calc-btn" onclick="calcInsere('8')">8</button>
+                <button class="calc-btn" onclick="calcInsere('9')">9</button>
+                <button class="calc-btn operador" onclick="calcInsere('/')">÷</button>
+                <button class="calc-btn" onclick="calcInsere('4')">4</button>
+                <button class="calc-btn" onclick="calcInsere('5')">5</button>
+                <button class="calc-btn" onclick="calcInsere('6')">6</button>
+                <button class="calc-btn operador" onclick="calcInsere('*')">×</button>
+                <button class="calc-btn" onclick="calcInsere('1')">1</button>
+                <button class="calc-btn" onclick="calcInsere('2')">2</button>
+                <button class="calc-btn" onclick="calcInsere('3')">3</button>
+                <button class="calc-btn operador" onclick="calcInsere('-')">−</button>
+                <button class="calc-btn" onclick="calcInsere('0')">0</button>
+                <button class="calc-btn" onclick="calcInsere('.')">.</button>
+                <button class="calc-btn limpar" onclick="calcLimpar()">C</button>
+                <button class="calc-btn operador" onclick="calcInsere('+')">+</button>
+                <button class="calc-btn igual" onclick="calcResultado()" style="grid-column: span 4;">=</button>
+            </div>
+        </div>
+        <!-- FIM CALCULADORA -->
+
         <div class="dashboard-card">
             <h4><i class="bi bi-people-fill"></i> Cooperados</h4>
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -175,14 +260,39 @@
         </div>
     </div>
     <script>
-    // Função para normalizar string removendo acento e colocando minúsculo
+    // ---- CALCULADORA JS ----
+    let calcValor = '';
+    function calcInsere(val) {
+        if (calcValor === '' && (val === '*' || val === '/' || val === '+' || val === '-')) return;
+        if (calcValor.length > 20) return;
+        calcValor += val;
+        document.getElementById('calc-display').value = calcValor;
+    }
+    function calcResultado() {
+        try {
+            if (calcValor === '') return;
+            let res = eval(calcValor.replace(/[^-()\d/*+.]/g, ''));
+            if (res === undefined) return;
+            document.getElementById('calc-display').value = res;
+            calcValor = res.toString();
+        } catch (e) {
+            document.getElementById('calc-display').value = 'Erro';
+            calcValor = '';
+        }
+    }
+    function calcLimpar() {
+        calcValor = '';
+        document.getElementById('calc-display').value = '0';
+    }
+    // ---- FIM CALCULADORA JS ----
+
+    // Filtros cooperados
     function normalize(str) {
         return (str || "")
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase();
     }
-
     function filtrarCooperados() {
         const busca = normalize(document.getElementById('busca-cooperado').value);
         const creditoFiltro = parseFloat(document.getElementById('filtro-credito').value.replace(",", "."));
@@ -191,15 +301,10 @@
         let algumMostrado = false;
 
         linhas.forEach(linha => {
-            // Busca por nome ou usuário (2ª e 3ª td)
             const nome = normalize(linha.cells[1]?.innerText);
             const usuario = normalize(linha.cells[2]?.innerText);
             const credito = parseFloat(linha.cells[3]?.getAttribute("data-credito"));
-
-            // Filtro busca
             let exibe = (!busca || nome.includes(busca) || usuario.includes(busca));
-
-            // Filtro crédito
             if (!isNaN(creditoFiltro)) {
                 if (filtrarDiferente) {
                     exibe = exibe && (credito !== creditoFiltro);
@@ -209,12 +314,10 @@
             } else if (filtrarDiferente) {
                 exibe = exibe && true;
             }
-
             linha.style.display = exibe ? "" : "none";
             if (exibe) algumMostrado = true;
         });
 
-        // Mensagem "Nenhum encontrado"
         const tabela = document.getElementById("tabela-cooperados");
         let noResult = tabela.querySelector(".no-result");
         if (!algumMostrado) {
