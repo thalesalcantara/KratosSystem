@@ -214,7 +214,7 @@ def excluir_cooperado(id):
     flash('Cooperado excluído!', 'success')
     return redirect(url_for('listar_cooperados'))
 
-# ---- AJUSTAR CRÉDITO ----
+# ---- AJUSTAR CRÉDITO GLOBAL (Lista Todos) ----
 @app.route('/ajustar_credito', methods=['GET', 'POST'])
 def ajustar_credito():
     if not is_admin():
@@ -235,6 +235,21 @@ def ajustar_credito():
         else:
             flash('Selecione um cooperado e valor.', 'danger')
     return render_template('ajustar_credito.html', cooperados=cooperados)
+
+# ---- AJUSTE INDIVIDUAL DE CRÉDITO (Com Foto) ----
+@app.route('/ajustar_credito/<int:id>', methods=['GET', 'POST'])
+def ajustar_credito_individual(id):
+    if not is_admin():
+        return redirect(url_for('login'))
+    cooperado = Cooperado.query.get_or_404(id)
+    if request.method == 'POST':
+        novo_credito = request.form.get('credito')
+        if novo_credito is not None:
+            cooperado.credito = float(novo_credito)
+            db.session.commit()
+            flash('Crédito ajustado!', 'success')
+            return redirect(url_for('listar_cooperados'))
+    return render_template('ajustar_credito_individual.html', cooperado=cooperado)
 
 # ---- ESTABELECIMENTOS CRUD ----
 @app.route('/listar_estabelecimentos')
