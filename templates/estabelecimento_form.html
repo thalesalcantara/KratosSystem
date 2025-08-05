@@ -26,6 +26,34 @@
             width: 100%;
             max-width: 420px;
         }
+        .form-card .logo-preview {
+            margin: 18px auto 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .form-card .logo-preview img {
+            max-width: 200px; /* LOGO BEM MAIOR */
+            max-height: 120px;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px #003399aa;
+            margin-bottom: 5px;
+        }
+        .form-card .estab-nome {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;           /* NOME BEM MENOR */
+            color: #e0e0e0;
+            letter-spacing: 1.5px;
+            text-align: center;
+            margin-top: 6px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 85%;
+        }
         h2 {
             font-family: 'Orbitron', sans-serif;
             text-align: center;
@@ -73,26 +101,29 @@
             margin-top: 10px;
             margin-bottom: 0;
         }
-        .logo-preview {
-            margin: 10px auto 0 auto;
-            display: flex;
-            justify-content: center;
-        }
-        .logo-preview img {
-            max-width: 150px;
-            max-height: 80px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px #00339988;
-        }
         @media (max-width: 500px) {
             .form-card {
                 padding: 18px 4px;
+            }
+            .form-card .logo-preview img {
+                max-width: 120px;
+                max-height: 70px;
+            }
+            .form-card .estab-nome {
+                font-size: 0.85rem;
+                max-width: 95%;
             }
         }
     </style>
 </head>
 <body>
     <div class="form-card">
+        {% if editar and estabelecimento.logo %}
+        <div class="logo-preview">
+            <img src="{{ url_for('static', filename='logos/' + estabelecimento.logo) }}" alt="Logo atual">
+            <div class="estab-nome" title="{{ estabelecimento.nome }}">{{ estabelecimento.nome }}</div>
+        </div>
+        {% endif %}
         <h2>
             <i class="bi bi-shop"></i>
             {{ 'Editar' if editar else 'Novo' }} Estabelecimento
@@ -109,11 +140,6 @@
             
             <label class="form-label" for="logo"><i class="bi bi-image"></i> Logo do Estabelecimento</label>
             <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-            {% if editar and estabelecimento.logo %}
-                <div class="logo-preview mt-2">
-                    <img src="{{ url_for('static', filename='logos/' + estabelecimento.logo) }}" alt="Logo atual">
-                </div>
-            {% endif %}
             
             <button type="submit" class="btn btn-primary mt-3">
                 {{ 'Salvar Alterações' if editar else 'Cadastrar Estabelecimento' }}
