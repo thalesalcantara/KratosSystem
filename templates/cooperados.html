@@ -99,31 +99,39 @@
             background: #101218; box-shadow: 0 0 7px #00339944;
         }
         .txt-amarelo { color: #ffd700 !important; font-weight: 600; letter-spacing: .4px; text-shadow: 0 0 3px #ffd700; }
-
-        /* ----------- CALCULADORA ----------- */
-        .calculadora-box {
+        /* ----------- CALCULADORA FLUTUANTE ----------- */
+        .calculadora-flutuante {
+            position: fixed;
+            top: 90px;
+            right: 28px;
+            z-index: 2000;
             background: #23262b;
-            border-radius: 13px;
-            box-shadow: 0 3px 12px #00339933;
-            padding: 18px 22px 14px 22px;
+            border-radius: 16px;
+            box-shadow: 0 6px 32px #00339999, 0 2px 8px #00339933;
             color: #ffd700;
-            max-width: 270px;
-            margin: 0 auto 28px auto;
+            width: 255px;
+            padding: 16px 16px 14px 16px;
             font-family: 'Roboto', Arial, sans-serif;
+            opacity: 0.96;
+            user-select: none;
+            transition: box-shadow .18s, right .4s, left .4s;
+            cursor: default;
         }
+        .calculadora-flutuante.esquerda { left: 28px; right:auto; }
+        .calculadora-flutuante.direita { right: 28px; left:auto; }
+        .calculadora-flutuante:focus { outline: 2px solid #ffd70088; }
         .calculadora-titulo {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.17em;
+            font-size: 1.12em;
             font-weight: 700;
             color: #ffd700;
-            text-align: center;
-            margin-bottom: 8px;
+            letter-spacing: 1.1px;
         }
         .calculadora-display {
             width: 100%;
             background: #101218;
             color: #ffd700;
-            font-size: 1.4em;
+            font-size: 1.32em;
             font-family: 'Orbitron', monospace;
             border: 1.5px solid #00339966;
             border-radius: 8px;
@@ -133,7 +141,7 @@
         }
         .calculadora-botoes {
             display: grid;
-            grid-template-columns: repeat(4, 50px);
+            grid-template-columns: repeat(4, 48px);
             gap: 7px;
             justify-content: center;
         }
@@ -156,44 +164,57 @@
         .calc-btn.operador { background: #23262b; color: #ffd700; border: 1.5px solid #00339955;}
         .calc-btn.igual { background: #ffd700; color: #003399;}
         .calc-btn.limpar { background: #d9534f; color: #fff;}
+        @media (max-width: 950px) {
+            .calculadora-flutuante {
+                position: static !important;
+                width: 100%;
+                max-width: 320px;
+                margin: 12px auto;
+                top: auto; right: auto; left:auto;
+            }
+        }
         @media (max-width: 700px) {
             .main-content { padding: 7px 2px; }
             .dashboard-card { padding: 10px 3px 5px 3px; }
             .foto-cooperado { width: 38px; height: 38px; }
             .filtros-row { flex-direction: column; align-items: stretch; gap: 8px; }
-            .calculadora-box { max-width: 100%; }
-            .calculadora-botoes { grid-template-columns: repeat(4, 1fr);}
         }
     </style>
 </head>
 <body>
-    <div class="main-content">
-        <!-- CALCULADORA -->
-        <div class="calculadora-box mb-4">
+    <!-- CALCULADORA FLUTUANTE -->
+    <div class="calculadora-flutuante" id="calc-flutuante" tabindex="0">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
             <div class="calculadora-titulo"><i class="bi bi-calculator"></i> Calculadora</div>
-            <input type="text" class="calculadora-display" id="calc-display" readonly value="0">
-            <div class="calculadora-botoes">
-                <button class="calc-btn" onclick="calcInsere('7')">7</button>
-                <button class="calc-btn" onclick="calcInsere('8')">8</button>
-                <button class="calc-btn" onclick="calcInsere('9')">9</button>
-                <button class="calc-btn operador" onclick="calcInsere('/')">÷</button>
-                <button class="calc-btn" onclick="calcInsere('4')">4</button>
-                <button class="calc-btn" onclick="calcInsere('5')">5</button>
-                <button class="calc-btn" onclick="calcInsere('6')">6</button>
-                <button class="calc-btn operador" onclick="calcInsere('*')">×</button>
-                <button class="calc-btn" onclick="calcInsere('1')">1</button>
-                <button class="calc-btn" onclick="calcInsere('2')">2</button>
-                <button class="calc-btn" onclick="calcInsere('3')">3</button>
-                <button class="calc-btn operador" onclick="calcInsere('-')">−</button>
-                <button class="calc-btn" onclick="calcInsere('0')">0</button>
-                <button class="calc-btn" onclick="calcInsere('.')">.</button>
-                <button class="calc-btn limpar" onclick="calcLimpar()">C</button>
-                <button class="calc-btn operador" onclick="calcInsere('+')">+</button>
-                <button class="calc-btn igual" onclick="calcResultado()" style="grid-column: span 4;">=</button>
+            <div>
+                <button title="Mover" type="button" onclick="toggleCalcSide()" class="calc-btn operador" style="font-size:1em; padding:2px 8px;min-width:unset;"><i class="bi bi-arrow-left-right"></i></button>
+                <button title="Arrastar" type="button" class="calc-btn operador" style="font-size:1.08em;cursor:grab;" onmousedown="startDragCalc(event)">☰</button>
             </div>
         </div>
-        <!-- FIM CALCULADORA -->
+        <input type="text" class="calculadora-display" id="calc-display" readonly value="0">
+        <div class="calculadora-botoes">
+            <button class="calc-btn" onclick="calcInsere('7')">7</button>
+            <button class="calc-btn" onclick="calcInsere('8')">8</button>
+            <button class="calc-btn" onclick="calcInsere('9')">9</button>
+            <button class="calc-btn operador" onclick="calcInsere('/')">÷</button>
+            <button class="calc-btn" onclick="calcInsere('4')">4</button>
+            <button class="calc-btn" onclick="calcInsere('5')">5</button>
+            <button class="calc-btn" onclick="calcInsere('6')">6</button>
+            <button class="calc-btn operador" onclick="calcInsere('*')">×</button>
+            <button class="calc-btn" onclick="calcInsere('1')">1</button>
+            <button class="calc-btn" onclick="calcInsere('2')">2</button>
+            <button class="calc-btn" onclick="calcInsere('3')">3</button>
+            <button class="calc-btn operador" onclick="calcInsere('-')">-</button>
+            <button class="calc-btn" onclick="calcInsere('0')">0</button>
+            <button class="calc-btn" onclick="calcInsere('.')">.</button>
+            <button class="calc-btn igual" onclick="calcIgual()">=</button>
+            <button class="calc-btn operador" onclick="calcInsere('+')">+</button>
+            <button class="calc-btn limpar" style="grid-column: span 4;" onclick="calcLimpar()">Limpar</button>
+        </div>
+    </div>
+    <!-- FIM CALCULADORA -->
 
+    <div class="main-content">
         <div class="dashboard-card">
             <h4><i class="bi bi-people-fill"></i> Cooperados</h4>
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -259,34 +280,92 @@
             </div>
         </div>
     </div>
+    <!-- JS CALCULADORA FLUTUANTE -->
     <script>
-    // ---- CALCULADORA JS ----
-    let calcValor = '';
+    let calcInput = '';
+    let calcSide = localStorage.getItem('calcSide') || 'direita';
+    let dragOffsetX = 0, dragOffsetY = 0, draggingCalc = false;
+    const calcFlutuante = document.getElementById('calc-flutuante');
+
     function calcInsere(val) {
-        if (calcValor === '' && (val === '*' || val === '/' || val === '+' || val === '-')) return;
-        if (calcValor.length > 20) return;
-        calcValor += val;
-        document.getElementById('calc-display').value = calcValor;
-    }
-    function calcResultado() {
-        try {
-            if (calcValor === '') return;
-            let res = eval(calcValor.replace(/[^-()\d/*+.]/g, ''));
-            if (res === undefined) return;
-            document.getElementById('calc-display').value = res;
-            calcValor = res.toString();
-        } catch (e) {
-            document.getElementById('calc-display').value = 'Erro';
-            calcValor = '';
-        }
+        if (calcInput.length > 24) return;
+        if (val === '.' && calcInput.endsWith('.')) return;
+        if (calcInput === "0" && val !== ".") calcInput = "";
+        calcInput += val;
+        calcAtualiza();
     }
     function calcLimpar() {
-        calcValor = '';
-        document.getElementById('calc-display').value = '0';
+        calcInput = '';
+        calcAtualiza();
     }
-    // ---- FIM CALCULADORA JS ----
-
-    // Filtros cooperados
+    function calcIgual() {
+        try {
+            let expressao = calcInput.replace(/×/g, '*').replace(/÷/g, '/');
+            let resultado = Function('"use strict";return (' + expressao + ')')();
+            if (resultado === undefined || isNaN(resultado)) throw "inválido";
+            calcInput = String(resultado).replace('.', ',');
+        } catch {
+            calcInput = '';
+            alert("Expressão inválida!");
+        }
+        calcAtualiza();
+    }
+    function calcAtualiza() {
+        document.getElementById('calc-display').value = calcInput.length ? calcInput : "0";
+    }
+    function toggleCalcSide() {
+        calcFlutuante.classList.toggle('esquerda');
+        calcFlutuante.classList.toggle('direita');
+        calcSide = calcFlutuante.classList.contains('esquerda') ? 'esquerda' : 'direita';
+        localStorage.setItem('calcSide', calcSide);
+    }
+    // Arrastar/drag
+    function startDragCalc(e) {
+        if (window.innerWidth < 950) return; // Mobile ignora
+        draggingCalc = true;
+        const rect = calcFlutuante.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+        document.onmousemove = dragCalc;
+        document.onmouseup = stopDragCalc;
+    }
+    function dragCalc(e) {
+        if (!draggingCalc) return;
+        calcFlutuante.style.left = (e.clientX - dragOffsetX) + "px";
+        calcFlutuante.style.top = (e.clientY - dragOffsetY) + "px";
+        calcFlutuante.style.right = "auto";
+        calcFlutuante.style.position = "fixed";
+    }
+    function stopDragCalc() {
+        draggingCalc = false;
+        document.onmousemove = null;
+        document.onmouseup = null;
+    }
+    // Teclado do PC
+    calcFlutuante.addEventListener('keydown', function(e){
+        if (e.ctrlKey || e.metaKey) return;
+        if (e.key >= '0' && e.key <= '9') calcInsere(e.key);
+        else if (e.key === ',' || e.key === '.') calcInsere('.');
+        else if (['+', '-', '*', '/'].includes(e.key)) calcInsere(e.key);
+        else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calcIgual(); }
+        else if (e.key === 'Backspace' || e.key === 'Delete') {
+            calcInput = calcInput.slice(0, -1); calcAtualiza();
+        }
+        else if (e.key === 'Escape') calcLimpar();
+    });
+    calcFlutuante.addEventListener('click', ()=>calcFlutuante.focus());
+    // Lado inicial
+    window.addEventListener('DOMContentLoaded', ()=>{
+        if (window.innerWidth < 950) return;
+        if (calcSide === 'esquerda') {
+            calcFlutuante.classList.add('esquerda');
+            calcFlutuante.classList.remove('direita');
+        } else {
+            calcFlutuante.classList.add('direita');
+            calcFlutuante.classList.remove('esquerda');
+        }
+    });
+    // Filtros cooperados (restante do seu código original)
     function normalize(str) {
         return (str || "")
             .normalize("NFD")
@@ -331,7 +410,6 @@
             noResult.remove();
         }
     }
-
     document.getElementById('busca-cooperado').addEventListener('input', filtrarCooperados);
     document.getElementById('filtro-credito').addEventListener('input', filtrarCooperados);
     document.getElementById('filtrar-diferente').addEventListener('change', filtrarCooperados);
