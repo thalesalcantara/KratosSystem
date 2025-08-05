@@ -8,8 +8,8 @@ import os
 app = Flask(__name__)
 app.secret_key = 'coopex-secreto'
 
-# BANCO DE DADOS RENDER (PostgreSQL)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
+# BANCO DE DADOS RENDER (PostgreSQL) - USE O DRIVER psycopg (novo)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Pastas de upload
@@ -150,8 +150,6 @@ def dashboard():
         lancamentos_contagem=cooperado_valores,
         filtros=filtros
     )
-
-# Repita suas outras rotas aqui, como já estavam: listar_cooperados, novo_cooperado, listar_estabelecimentos, etc.
 
 def criar_banco_e_admin():
     with app.app_context():
