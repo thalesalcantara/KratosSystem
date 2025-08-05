@@ -14,8 +14,17 @@
             font-family: 'Roboto', Arial, sans-serif;
             min-height: 100vh;
         }
+        .main-container-flex {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: flex-start;
+            min-height: 100vh;
+            max-width: 100vw;
+        }
         .main-content {
-            margin: 0 auto;
+            margin: 0;
+            width: 100%;
             max-width: 880px;
             padding: 36px 12px 32px 12px;
         }
@@ -99,39 +108,38 @@
             background: #101218; box-shadow: 0 0 7px #00339944;
         }
         .txt-amarelo { color: #ffd700 !important; font-weight: 600; letter-spacing: .4px; text-shadow: 0 0 3px #ffd700; }
-        /* ----------- CALCULADORA FLUTUANTE ----------- */
-        .calculadora-flutuante {
-            position: fixed;
-            top: 90px;
-            right: 28px;
-            z-index: 2000;
-            background: #23262b;
-            border-radius: 16px;
-            box-shadow: 0 6px 32px #00339999, 0 2px 8px #00339933;
-            color: #ffd700;
-            width: 255px;
-            padding: 16px 16px 14px 16px;
-            font-family: 'Roboto', Arial, sans-serif;
-            opacity: 0.96;
-            user-select: none;
-            transition: box-shadow .18s, right .4s, left .4s;
-            cursor: default;
+        /* ----------- CALCULADORA ENCAIXADA ----------- */
+        .calculadora-fixed {
+            position: sticky;
+            top: 36px;
+            right: 0;
+            min-width: 310px;
+            max-width: 310px;
+            margin-left: 24px;
+            z-index: 99;
+            height: fit-content;
         }
-        .calculadora-flutuante.esquerda { left: 28px; right:auto; }
-        .calculadora-flutuante.direita { right: 28px; left:auto; }
-        .calculadora-flutuante:focus { outline: 2px solid #ffd70088; }
+        .calculadora-box {
+            background: #23262b;
+            border-radius: 13px;
+            box-shadow: 0 3px 12px #00339933;
+            padding: 18px 22px 14px 22px;
+            color: #ffd700;
+            font-family: 'Orbitron', Arial, sans-serif;
+        }
         .calculadora-titulo {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.12em;
+            font-size: 1.17em;
             font-weight: 700;
             color: #ffd700;
-            letter-spacing: 1.1px;
+            text-align: center;
+            margin-bottom: 8px;
         }
         .calculadora-display {
             width: 100%;
             background: #101218;
             color: #ffd700;
-            font-size: 1.32em;
+            font-size: 1.4em;
             font-family: 'Orbitron', monospace;
             border: 1.5px solid #00339966;
             border-radius: 8px;
@@ -141,7 +149,7 @@
         }
         .calculadora-botoes {
             display: grid;
-            grid-template-columns: repeat(4, 48px);
+            grid-template-columns: repeat(4, 50px);
             gap: 7px;
             justify-content: center;
         }
@@ -164,208 +172,157 @@
         .calc-btn.operador { background: #23262b; color: #ffd700; border: 1.5px solid #00339955;}
         .calc-btn.igual { background: #ffd700; color: #003399;}
         .calc-btn.limpar { background: #d9534f; color: #fff;}
-        @media (max-width: 950px) {
-            .calculadora-flutuante {
-                position: static !important;
-                width: 100%;
-                max-width: 320px;
-                margin: 12px auto;
-                top: auto; right: auto; left:auto;
-            }
+        @media (max-width: 1200px) {
+            .main-container-flex { flex-direction: column; }
+            .calculadora-fixed { position: static; margin-left: 0; margin-bottom: 30px; max-width: 100vw;}
         }
         @media (max-width: 700px) {
             .main-content { padding: 7px 2px; }
             .dashboard-card { padding: 10px 3px 5px 3px; }
             .foto-cooperado { width: 38px; height: 38px; }
             .filtros-row { flex-direction: column; align-items: stretch; gap: 8px; }
+            .calculadora-fixed { max-width: 100vw; }
+            .calculadora-box { max-width: 100%; }
+            .calculadora-botoes { grid-template-columns: repeat(4, 1fr);}
         }
     </style>
 </head>
 <body>
-    <!-- CALCULADORA FLUTUANTE -->
-    <div class="calculadora-flutuante" id="calc-flutuante" tabindex="0">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-            <div class="calculadora-titulo"><i class="bi bi-calculator"></i> Calculadora</div>
-            <div>
-                <button title="Mover" type="button" onclick="toggleCalcSide()" class="calc-btn operador" style="font-size:1em; padding:2px 8px;min-width:unset;"><i class="bi bi-arrow-left-right"></i></button>
-                <button title="Arrastar" type="button" class="calc-btn operador" style="font-size:1.08em;cursor:grab;" onmousedown="startDragCalc(event)">☰</button>
-            </div>
-        </div>
-        <input type="text" class="calculadora-display" id="calc-display" readonly value="0">
-        <div class="calculadora-botoes">
-            <button class="calc-btn" onclick="calcInsere('7')">7</button>
-            <button class="calc-btn" onclick="calcInsere('8')">8</button>
-            <button class="calc-btn" onclick="calcInsere('9')">9</button>
-            <button class="calc-btn operador" onclick="calcInsere('/')">÷</button>
-            <button class="calc-btn" onclick="calcInsere('4')">4</button>
-            <button class="calc-btn" onclick="calcInsere('5')">5</button>
-            <button class="calc-btn" onclick="calcInsere('6')">6</button>
-            <button class="calc-btn operador" onclick="calcInsere('*')">×</button>
-            <button class="calc-btn" onclick="calcInsere('1')">1</button>
-            <button class="calc-btn" onclick="calcInsere('2')">2</button>
-            <button class="calc-btn" onclick="calcInsere('3')">3</button>
-            <button class="calc-btn operador" onclick="calcInsere('-')">-</button>
-            <button class="calc-btn" onclick="calcInsere('0')">0</button>
-            <button class="calc-btn" onclick="calcInsere('.')">.</button>
-            <button class="calc-btn igual" onclick="calcIgual()">=</button>
-            <button class="calc-btn operador" onclick="calcInsere('+')">+</button>
-            <button class="calc-btn limpar" style="grid-column: span 4;" onclick="calcLimpar()">Limpar</button>
-        </div>
-    </div>
-    <!-- FIM CALCULADORA -->
-
-    <div class="main-content">
-        <div class="dashboard-card">
-            <h4><i class="bi bi-people-fill"></i> Cooperados</h4>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} text-center">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <div class="filtros-row">
-                <input type="text" id="busca-cooperado" placeholder="Buscar por nome ou usuário...">
-                <input type="number" step="0.01" min="0" id="filtro-credito" placeholder="Valor máximo de crédito" style="max-width: 140px;">
-                <div class="form-check form-switch" style="display:inline-flex;align-items:center;">
-                    <input class="form-check-input" type="checkbox" id="filtrar-diferente">
-                    <label class="form-check-label" for="filtrar-diferente" style="font-size:0.96em;">Mostrar apenas crédito diferente</label>
-                </div>
-                <a href="{{ url_for('novo_cooperado') }}" class="btn btn-primary btn-sm ms-auto">
-                    <i class="bi bi-person-plus"></i> Novo Cooperado
-                </a>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-striped align-middle text-center" id="tabela-cooperados">
-                    <thead>
-                        <tr>
-                            <th>Foto</th>
-                            <th>Nome</th>
-                            <th>Usuário</th>
-                            <th>Crédito (R$)</th>
-                            <th style="width:160px">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for c in cooperados %}
-                        <tr>
-                            <td>
-                                {% if c.foto %}
-                                    <img src="{{ url_for('static', filename='uploads/' ~ c.foto) }}" alt="Foto de {{ c.nome }}" class="foto-cooperado">
-                                {% else %}
-                                    <span style="font-size:1.4em; color:#ffd700;">
-                                        <i class="bi bi-person-circle"></i>
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="txt-amarelo">{{ c.nome }}</td>
-                            <td class="txt-amarelo">{{ c.username }}</td>
-                            <td class="txt-amarelo" data-credito="{{ "%.2f"|format(c.credito) }}">{{ "{:,.2f}".format(c.credito) }}</td>
-                            <td>
-                                <a href="{{ url_for('editar_cooperado', id=c.id) }}" class="btn btn-outline-primary btn-sm">Editar</a>
-                                <a href="{{ url_for('ajustar_credito_individual', id=c.id) }}" class="btn btn-outline-warning btn-sm">Ajustar Crédito</a>
-                                <a href="{{ url_for('excluir_cooperado', id=c.id) }}" class="btn btn-outline-danger btn-sm"
-                                    onclick="return confirm('Excluir este cooperado?')">Excluir</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    {% if not cooperados %}
-                        <tr><td colspan="5" class="text-center">Nenhum cooperado cadastrado.</td></tr>
+    <div class="main-container-flex">
+        <div class="main-content">
+            <!-- RESTANTE DO PAINEL -->
+            <div class="dashboard-card">
+                <h4><i class="bi bi-people-fill"></i> Cooperados</h4>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} text-center">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
                     {% endif %}
-                    </tbody>
-                </table>
+                {% endwith %}
+
+                <div class="filtros-row">
+                    <input type="text" id="busca-cooperado" placeholder="Buscar por nome ou usuário...">
+                    <input type="number" step="0.01" min="0" id="filtro-credito" placeholder="Valor máximo de crédito" style="max-width: 140px;">
+                    <div class="form-check form-switch" style="display:inline-flex;align-items:center;">
+                        <input class="form-check-input" type="checkbox" id="filtrar-diferente">
+                        <label class="form-check-label" for="filtrar-diferente" style="font-size:0.96em;">Mostrar apenas crédito diferente</label>
+                    </div>
+                    <a href="{{ url_for('novo_cooperado') }}" class="btn btn-primary btn-sm ms-auto">
+                        <i class="bi bi-person-plus"></i> Novo Cooperado
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle text-center" id="tabela-cooperados">
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>Nome</th>
+                                <th>Usuário</th>
+                                <th>Crédito (R$)</th>
+                                <th style="width:160px">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for c in cooperados %}
+                            <tr>
+                                <td>
+                                    {% if c.foto %}
+                                        <img src="{{ url_for('static', filename='uploads/' ~ c.foto) }}" alt="Foto de {{ c.nome }}" class="foto-cooperado">
+                                    {% else %}
+                                        <span style="font-size:1.4em; color:#ffd700;">
+                                            <i class="bi bi-person-circle"></i>
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="txt-amarelo">{{ c.nome }}</td>
+                                <td class="txt-amarelo">{{ c.username }}</td>
+                                <td class="txt-amarelo" data-credito="{{ "%.2f"|format(c.credito) }}">{{ "{:,.2f}".format(c.credito) }}</td>
+                                <td>
+                                    <a href="{{ url_for('editar_cooperado', id=c.id) }}" class="btn btn-outline-primary btn-sm">Editar</a>
+                                    <a href="{{ url_for('ajustar_credito_individual', id=c.id) }}" class="btn btn-outline-warning btn-sm">Ajustar Crédito</a>
+                                    <a href="{{ url_for('excluir_cooperado', id=c.id) }}" class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Excluir este cooperado?')">Excluir</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% if not cooperados %}
+                            <tr><td colspan="5" class="text-center">Nenhum cooperado cadastrado.</td></tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- CALCULADORA FIXA AO LADO DIREITO -->
+        <div class="calculadora-fixed">
+            <div class="calculadora-box mb-2">
+                <div class="calculadora-titulo"><i class="bi bi-calculator"></i> Calculadora</div>
+                <input type="text" class="calculadora-display" id="calc-display" readonly value="0">
+                <div class="calculadora-botoes">
+                    <button class="calc-btn" onclick="calcInsere('7')">7</button>
+                    <button class="calc-btn" onclick="calcInsere('8')">8</button>
+                    <button class="calc-btn" onclick="calcInsere('9')">9</button>
+                    <button class="calc-btn operador" onclick="calcInsere('/')">÷</button>
+                    <button class="calc-btn" onclick="calcInsere('4')">4</button>
+                    <button class="calc-btn" onclick="calcInsere('5')">5</button>
+                    <button class="calc-btn" onclick="calcInsere('6')">6</button>
+                    <button class="calc-btn operador" onclick="calcInsere('*')">×</button>
+                    <button class="calc-btn" onclick="calcInsere('1')">1</button>
+                    <button class="calc-btn" onclick="calcInsere('2')">2</button>
+                    <button class="calc-btn" onclick="calcInsere('3')">3</button>
+                    <button class="calc-btn operador" onclick="calcInsere('-')">−</button>
+                    <button class="calc-btn" onclick="calcInsere('0')">0</button>
+                    <button class="calc-btn" onclick="calcInsere('.')">.</button>
+                    <button class="calc-btn limpar" onclick="calcLimpar()">C</button>
+                    <button class="calc-btn operador" onclick="calcInsere('+')">+</button>
+                    <button class="calc-btn igual" onclick="calcResultado()" style="grid-column: span 4;">=</button>
+                </div>
             </div>
         </div>
     </div>
-    <!-- JS CALCULADORA FLUTUANTE -->
     <script>
-    let calcInput = '';
-    let calcSide = localStorage.getItem('calcSide') || 'direita';
-    let dragOffsetX = 0, dragOffsetY = 0, draggingCalc = false;
-    const calcFlutuante = document.getElementById('calc-flutuante');
-
+    // ---- CALCULADORA JS ----
+    let calcValor = '';
     function calcInsere(val) {
-        if (calcInput.length > 24) return;
-        if (val === '.' && calcInput.endsWith('.')) return;
-        if (calcInput === "0" && val !== ".") calcInput = "";
-        calcInput += val;
-        calcAtualiza();
+        if (calcValor === '' && (val === '*' || val === '/' || val === '+' || val === '-')) return;
+        if (calcValor.length > 20) return;
+        calcValor += val;
+        document.getElementById('calc-display').value = calcValor;
+    }
+    function calcResultado() {
+        try {
+            if (calcValor === '') return;
+            let res = eval(calcValor.replace(/[^-()\d/*+.]/g, ''));
+            if (res === undefined) return;
+            document.getElementById('calc-display').value = res;
+            calcValor = res.toString();
+        } catch (e) {
+            document.getElementById('calc-display').value = 'Erro';
+            calcValor = '';
+        }
     }
     function calcLimpar() {
-        calcInput = '';
-        calcAtualiza();
+        calcValor = '';
+        document.getElementById('calc-display').value = '0';
     }
-    function calcIgual() {
-        try {
-            let expressao = calcInput.replace(/×/g, '*').replace(/÷/g, '/');
-            let resultado = Function('"use strict";return (' + expressao + ')')();
-            if (resultado === undefined || isNaN(resultado)) throw "inválido";
-            calcInput = String(resultado).replace('.', ',');
-        } catch {
-            calcInput = '';
-            alert("Expressão inválida!");
-        }
-        calcAtualiza();
-    }
-    function calcAtualiza() {
-        document.getElementById('calc-display').value = calcInput.length ? calcInput : "0";
-    }
-    function toggleCalcSide() {
-        calcFlutuante.classList.toggle('esquerda');
-        calcFlutuante.classList.toggle('direita');
-        calcSide = calcFlutuante.classList.contains('esquerda') ? 'esquerda' : 'direita';
-        localStorage.setItem('calcSide', calcSide);
-    }
-    // Arrastar/drag
-    function startDragCalc(e) {
-        if (window.innerWidth < 950) return; // Mobile ignora
-        draggingCalc = true;
-        const rect = calcFlutuante.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
-        document.onmousemove = dragCalc;
-        document.onmouseup = stopDragCalc;
-    }
-    function dragCalc(e) {
-        if (!draggingCalc) return;
-        calcFlutuante.style.left = (e.clientX - dragOffsetX) + "px";
-        calcFlutuante.style.top = (e.clientY - dragOffsetY) + "px";
-        calcFlutuante.style.right = "auto";
-        calcFlutuante.style.position = "fixed";
-    }
-    function stopDragCalc() {
-        draggingCalc = false;
-        document.onmousemove = null;
-        document.onmouseup = null;
-    }
-    // Teclado do PC
-    calcFlutuante.addEventListener('keydown', function(e){
-        if (e.ctrlKey || e.metaKey) return;
-        if (e.key >= '0' && e.key <= '9') calcInsere(e.key);
-        else if (e.key === ',' || e.key === '.') calcInsere('.');
-        else if (['+', '-', '*', '/'].includes(e.key)) calcInsere(e.key);
-        else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calcIgual(); }
-        else if (e.key === 'Backspace' || e.key === 'Delete') {
-            calcInput = calcInput.slice(0, -1); calcAtualiza();
-        }
-        else if (e.key === 'Escape') calcLimpar();
-    });
-    calcFlutuante.addEventListener('click', ()=>calcFlutuante.focus());
-    // Lado inicial
-    window.addEventListener('DOMContentLoaded', ()=>{
-        if (window.innerWidth < 950) return;
-        if (calcSide === 'esquerda') {
-            calcFlutuante.classList.add('esquerda');
-            calcFlutuante.classList.remove('direita');
-        } else {
-            calcFlutuante.classList.add('direita');
-            calcFlutuante.classList.remove('esquerda');
+    // Atalhos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName.toLowerCase() === "input" && e.target !== document.getElementById('calc-display')) return;
+        if ("0123456789/*-+.".includes(e.key)) {
+            calcInsere(e.key);
+            e.preventDefault();
+        } else if (e.key === "Enter" || e.key === "=") {
+            calcResultado();
+            e.preventDefault();
+        } else if (e.key === "Backspace" || e.key === "Delete") {
+            calcLimpar();
+            e.preventDefault();
         }
     });
-    // Filtros cooperados (restante do seu código original)
+    // Filtros cooperados
     function normalize(str) {
         return (str || "")
             .normalize("NFD")
@@ -378,7 +335,6 @@
         const filtrarDiferente = document.getElementById('filtrar-diferente').checked;
         const linhas = document.querySelectorAll("#tabela-cooperados tbody tr");
         let algumMostrado = false;
-
         linhas.forEach(linha => {
             const nome = normalize(linha.cells[1]?.innerText);
             const usuario = normalize(linha.cells[2]?.innerText);
@@ -396,7 +352,6 @@
             linha.style.display = exibe ? "" : "none";
             if (exibe) algumMostrado = true;
         });
-
         const tabela = document.getElementById("tabela-cooperados");
         let noResult = tabela.querySelector(".no-result");
         if (!algumMostrado) {
@@ -416,4 +371,4 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html
