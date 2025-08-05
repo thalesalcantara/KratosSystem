@@ -151,8 +151,7 @@ def dashboard():
         filtros=filtros
     )
 
-# ... RESTANTE DO SEU CÓDIGO (rotas e models) ...
-# (cole aqui o restante normalmente, igual você já tinha)
+# Repita suas outras rotas aqui, como já estavam: listar_cooperados, novo_cooperado, listar_estabelecimentos, etc.
 
 def criar_banco_e_admin():
     with app.app_context():
@@ -166,4 +165,4 @@ def criar_banco_e_admin():
 
 if __name__ == '__main__':
     criar_banco_e_admin()
-    app.run(debug=True)
+    app.run(debug=False, host="0.0.0.0")
