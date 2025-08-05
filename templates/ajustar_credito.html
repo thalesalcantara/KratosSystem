@@ -1,43 +1,37 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Ajustar Crédito - {{ cooperado.nome }}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <style>
-        body { background: #191c20; font-family: 'Roboto', Arial, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .ajustar-card { background: #23262b; color: #ffd700; padding: 36px 28px 24px 28px; border-radius: 16px; box-shadow: 0 8px 32px #000a; width: 100%; max-width: 410px; }
-        .foto-cooperado { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; border: 3px solid #ffd700; margin-bottom: 12px; background: #fff; }
-        label { color: #fff; font-weight: 600; }
-        .form-control { background: #23262b; border: 1px solid #22263d; color: #ffd700; font-weight: 500; border-radius: 9px; }
-        .btn-primary { background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%); color: #191c20; font-weight: bold; border: none; border-radius: 13px; width: 100%; margin-top: 10px;}
-        .btn-primary:hover { background: #ffe670; color: #003399;}
-        .alert { background: #ffd700; color: #222; font-weight: 600; border-radius: 9px; margin-bottom: 15px; }
-    </style>
-</head>
-<body>
-    <div class="ajustar-card">
-        <h4 class="text-center"><i class="bi bi-person-circle"></i> Ajustar Crédito</h4>
-        {% if cooperado.foto %}
-            <img src="{{ url_for('static', filename='uploads/' ~ cooperado.foto) }}" alt="Foto de {{ cooperado.nome }}" class="foto-cooperado">
-        {% else %}
-            <div class="text-center mb-2"><i class="bi bi-person-circle" style="font-size:3em;color:#ffd700;background:#fff;border-radius:50%;"></i></div>
-        {% endif %}
-        <div class="text-center mb-3" style="font-size:1.1em; color:#fff;">{{ cooperado.nome }}</div>
-        <form method="post">
-            <label for="credito">Crédito (R$):</label>
-            <input type="number" name="credito" id="credito" class="form-control" value="{{ cooperado.credito }}" min="0" step="0.01" required>
-            <button type="submit" class="btn btn-primary">Salvar</button>
-            <a href="{{ url_for('listar_cooperados') }}" class="btn btn-secondary w-100 mt-2">Voltar</a>
-        </form>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-</body>
-</html>
+{% if cooperados %}
+<!-- Ajuste Global -->
+<h4>Ajustar Crédito de Cooperado</h4>
+<form method="post">
+    <select name="cooperado_id" required class="form-select mb-2">
+        <option value="">Selecione o cooperado...</option>
+        {% for c in cooperados %}
+            <option value="{{ c.id }}">{{ c.nome }} ({{ c.username }})</option>
+        {% endfor %}
+    </select>
+    <input type="number" name="credito" step="0.01" min="0" class="form-control mb-2" placeholder="Novo crédito" required>
+    <button type="submit" class="btn btn-primary">Ajustar</button>
+</form>
+{% elif cooperado %}
+<!-- Ajuste Individual -->
+<h4>Ajustar Crédito - {{ cooperado.nome }}</h4>
+<form method="post">
+    {% if cooperado.foto %}
+        <img src="{{ url_for('static', filename='uploads/' ~ cooperado.foto) }}" style="width:90px; height:90px; border-radius:50%; border:2px solid #ffd700; margin-bottom:10px;">
+    {% endif %}
+    <div><b>Usuário:</b> {{ cooperado.username }}</div>
+    <div><b>Crédito Atual:</b> R$ {{ "%.2f"|format(cooperado.credito) }}</div>
+    <input type="number" name="credito" step="0.01" min="0" value="{{ cooperado.credito }}" class="form-control mb-2" placeholder="Novo crédito" required>
+    <button type="submit" class="btn btn-warning">Ajustar</button>
+    <a href="{{ url_for('listar_cooperados') }}" class="btn btn-secondary ms-2">Voltar</a>
+</form>
+{% else %}
+<p>Nenhum cooperado encontrado.</p>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} mt-2">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
