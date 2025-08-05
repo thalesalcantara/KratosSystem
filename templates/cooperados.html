@@ -160,7 +160,7 @@
                             <td class="txt-amarelo" data-credito="{{ "%.2f"|format(c.credito) }}">{{ "{:,.2f}".format(c.credito) }}</td>
                             <td>
                                 <a href="{{ url_for('editar_cooperado', id=c.id) }}" class="btn btn-outline-primary btn-sm">Editar</a>
-                                <a href="{{ url_for('ajustar_credito', id=c.id) }}" class="btn btn-outline-warning btn-sm">Ajustar Crédito</a>
+                                <a href="{{ url_for('ajustar_credito_individual', id=c.id) }}" class="btn btn-outline-warning btn-sm">Ajustar Crédito</a>
                                 <a href="{{ url_for('excluir_cooperado', id=c.id) }}" class="btn btn-outline-danger btn-sm"
                                     onclick="return confirm('Excluir este cooperado?')">Excluir</a>
                             </td>
@@ -200,8 +200,15 @@
             let exibe = (!busca || nome.includes(busca) || usuario.includes(busca));
 
             // Filtro crédito
-            if (filtrarDiferente && !isNaN(creditoFiltro)) {
-                exibe = exibe && (credito !== creditoFiltro);
+            if (!isNaN(creditoFiltro)) {
+                if (filtrarDiferente) {
+                    exibe = exibe && (credito !== creditoFiltro);
+                } else {
+                    exibe = exibe && (credito <= creditoFiltro);
+                }
+            } else if (filtrarDiferente) {
+                // Se o campo crédito está vazio mas switch está on, mostra todos diferentes de vazio
+                exibe = exibe && true;
             }
 
             linha.style.display = exibe ? "" : "none";
