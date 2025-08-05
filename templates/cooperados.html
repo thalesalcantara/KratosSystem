@@ -207,7 +207,6 @@
                     exibe = exibe && (credito <= creditoFiltro);
                 }
             } else if (filtrarDiferente) {
-                // Se o campo crédito está vazio mas switch está on, mostra todos diferentes de vazio
                 exibe = exibe && true;
             }
 
@@ -215,7 +214,7 @@
             if (exibe) algumMostrado = true;
         });
 
-        // Opcional: mensagem "Nenhum encontrado"
+        // Mensagem "Nenhum encontrado"
         const tabela = document.getElementById("tabela-cooperados");
         let noResult = tabela.querySelector(".no-result");
         if (!algumMostrado) {
