@@ -28,17 +28,24 @@
             align-items: center;
         }
         .sidebar .logo {
-            width: 60px;
-            margin: 32px auto 20px auto;
+            width: 100px; /* Aumenta o tamanho da logo */
+            margin: 28px auto 14px auto;
             display: block;
             filter: drop-shadow(0 0 8px #ffd700aa);
+            transition: width 0.2s;
         }
         .sidebar h3 {
             font-family: 'Orbitron', sans-serif;
             color: #ffd700;
             text-align: center;
             letter-spacing: 2px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
+            font-size: 1rem;        /* Fonte menor */
+            line-height: 1.1;
+            white-space: normal;     /* Permite quebra */
+            word-break: break-word;  /* Força quebra se necessário */
+            width: 100%;
+            padding: 0 5px;
         }
         .sidebar .nav-link {
             color: #fff;
@@ -166,7 +173,6 @@
     </div>
     <div class="main-content">
         <div class="topbar mb-4">
-            <!-- ADICIONE class="est-nome" E title -->
             <span class="est-nome" title="{{ est.nome }}">Bem-vindo, {{ est.nome }}</span>
             <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
         </div>
