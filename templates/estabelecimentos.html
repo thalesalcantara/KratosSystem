@@ -40,10 +40,10 @@
             text-align: center;
             letter-spacing: 2px;
             margin-bottom: 28px;
-            font-size: 1rem;        /* Fonte menor */
+            font-size: 1rem;
             line-height: 1.1;
-            white-space: normal;     /* Permite quebra */
-            word-break: break-word;  /* Força quebra se necessário */
+            white-space: normal;
+            word-break: break-word;
             width: 100%;
             padding: 0 5px;
         }
@@ -82,10 +82,9 @@
             top: 0;
             z-index: 20;
         }
-        /* AJUSTE AQUI PARA NOME GRANDE */
         .est-nome {
             display: inline-block;
-            max-width: 260px; /* ajuste se quiser mais ou menos */
+            max-width: 260px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -142,7 +141,6 @@
             letter-spacing: 1.1px;
             text-align: center;
         }
-        /* Linhas da tabela com cores mais claras para facilitar leitura */
         .table-striped > tbody > tr:nth-of-type(odd) > * {
             background-color: #28345c;
         }
@@ -173,7 +171,11 @@
     </div>
     <div class="main-content">
         <div class="topbar mb-4">
-            <span class="est-nome" title="{{ est.nome }}">Bem-vindo, {{ est.nome }}</span>
+            {% if est %}
+                <span class="est-nome" title="{{ est.nome }}">Bem-vindo, {{ est.nome }}</span>
+            {% else %}
+                <span class="est-nome">Bem-vindo!</span>
+            {% endif %}
             <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
         </div>
 
@@ -308,3 +310,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
