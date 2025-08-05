@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -12,12 +12,6 @@ app.secret_key = 'coopex-secreto'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Pastas de upload
-app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
-app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
-os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
-os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
-
 db = SQLAlchemy(app)
 
 # MODELS
@@ -26,7 +20,8 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     credito = db.Column(db.Float, default=0)
-    foto = db.Column(db.String(120), nullable=True)
+    foto = db.Column(db.LargeBinary, nullable=True)
+    foto_mimetype = db.Column(db.String(50), nullable=True)
 
 class Estabelecimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,6 +60,15 @@ def is_admin():
     return session.get('user_tipo') == 'admin'
 def is_estabelecimento():
     return session.get('user_tipo') == 'estabelecimento'
+
+# ---- ROTA DE IMAGEM BINÁRIA COOPERADO ----
+@app.route('/cooperado_foto/<int:id>')
+def cooperado_foto(id):
+    cooperado = Cooperado.query.get_or_404(id)
+    if cooperado.foto:
+        return Response(cooperado.foto, mimetype=cooperado.foto_mimetype)
+    else:
+        return send_file('static/default_user.png', mimetype='image/png')
 
 # ---- LOGIN/LOGOUT ----
 @app.route('/login', methods=['GET', 'POST'])
@@ -172,14 +176,15 @@ def novo_cooperado():
         username = request.form['username']
         credito = float(request.form.get('credito', 0))
         foto_file = request.files.get('foto')
-        foto_filename = None
+        foto_bytes = None
+        foto_mimetype = None
         if foto_file and foto_file.filename:
-            foto_filename = secure_filename(f"foto_{username}_{foto_file.filename}")
-            foto_file.save(os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], foto_filename))
+            foto_bytes = foto_file.read()
+            foto_mimetype = foto_file.mimetype
         if Cooperado.query.filter_by(username=username).first():
             flash('Usuário já existe!', 'danger')
             return redirect(url_for('novo_cooperado'))
-        cooperado = Cooperado(nome=nome, username=username, credito=credito, foto=foto_filename)
+        cooperado = Cooperado(nome=nome, username=username, credito=credito, foto=foto_bytes, foto_mimetype=foto_mimetype)
         db.session.add(cooperado)
         db.session.commit()
         flash('Cooperado cadastrado!', 'success')
@@ -196,9 +201,8 @@ def editar_cooperado(id):
         cooperado.credito = float(request.form['credito'])
         foto_file = request.files.get('foto')
         if foto_file and foto_file.filename:
-            foto_filename = secure_filename(f"foto_{cooperado.username}_{foto_file.filename}")
-            foto_file.save(os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], foto_filename))
-            cooperado.foto = foto_filename
+            cooperado.foto = foto_file.read()
+            cooperado.foto_mimetype = foto_file.mimetype
         db.session.commit()
         flash('Cooperado alterado!', 'success')
         return redirect(url_for('listar_cooperados'))
@@ -219,7 +223,6 @@ def excluir_cooperado(id):
 def ajustar_credito():
     if not is_admin():
         return redirect(url_for('login'))
-    # Suporte para ajuste individual por ?id=XX (opcional, mas bom para fallback)
     cooperado_id = request.args.get('id')
     if cooperado_id:
         return ajustar_credito_individual(cooperado_id)
@@ -275,7 +278,7 @@ def novo_estabelecimento():
         filename = None
         if logo_file and logo_file.filename:
             filename = secure_filename(logo_file.filename)
-            logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
+            logo_file.save(os.path.join('static/logos', filename))
         if Estabelecimento.query.filter_by(username=username).first():
             flash('Usuário já existe!', 'danger')
             return redirect(url_for('novo_estabelecimento'))
@@ -299,7 +302,7 @@ def editar_estabelecimento(id):
         logo_file = request.files.get('logo')
         if logo_file and logo_file.filename:
             filename = secure_filename(logo_file.filename)
-            logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
+            logo_file.save(os.path.join('static/logos', filename))
             est.logo = filename
         db.session.commit()
         flash('Estabelecimento alterado!', 'success')
