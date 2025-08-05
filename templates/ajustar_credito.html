@@ -21,6 +21,8 @@
         <h4 class="text-center"><i class="bi bi-person-circle"></i> Ajustar Crédito</h4>
         {% if cooperado.foto %}
             <img src="{{ url_for('static', filename='uploads/' ~ cooperado.foto) }}" alt="Foto de {{ cooperado.nome }}" class="foto-cooperado">
+        {% else %}
+            <div class="text-center mb-2"><i class="bi bi-person-circle" style="font-size:3em;color:#ffd700;background:#fff;border-radius:50%;"></i></div>
         {% endif %}
         <div class="text-center mb-3" style="font-size:1.1em; color:#fff;">{{ cooperado.nome }}</div>
         <form method="post">
