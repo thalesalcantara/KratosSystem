@@ -151,6 +151,35 @@ def dashboard():
         filtros=filtros
     )
 
+# ---------- ROTAS MÍNIMAS PARA O DASHBOARD NÃO QUEBRAR ----------
+@app.route('/listar_cooperados')
+def listar_cooperados():
+    return "Página de Cooperados (em breve)"
+
+@app.route('/novo_cooperado')
+def novo_cooperado():
+    return "Cadastrar novo cooperado (em breve)"
+
+@app.route('/listar_estabelecimentos')
+def listar_estabelecimentos():
+    return "Página de Estabelecimentos (em breve)"
+
+@app.route('/novo_estabelecimento')
+def novo_estabelecimento():
+    return "Cadastrar novo estabelecimento (em breve)"
+
+@app.route('/listar_lancamentos')
+def listar_lancamentos():
+    return "Página de Lançamentos (em breve)"
+
+@app.route('/novo_lancamento')
+def novo_lancamento():
+    return "Cadastrar novo lançamento (em breve)"
+
+@app.route('/painel_estabelecimento')
+def painel_estabelecimento():
+    return "Painel do Estabelecimento (em breve)"
+
 # ---------- ROTA TEMPORÁRIA PARA CRIAR O BANCO E O ADMIN MASTER ----------
 @app.route('/initdb')
 def initdb():
@@ -163,7 +192,6 @@ def initdb():
         return 'Banco criado e admin master (coopex/coopex05289) criado com sucesso!'
     else:
         return 'Banco já existe e admin master já criado.'
-
 # -------------------------------------------------------
 
 if __name__ == '__main__':
