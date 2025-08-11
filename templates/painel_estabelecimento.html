@@ -191,7 +191,7 @@
                                     value="{{ c.id }}" 
                                     data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
                                     data-saldo-raw="{{ c.credito }}"
-                                    data-foto="{{ url_for('static', filename='uploads/' ~ c.foto) if c.foto else '' }}"
+                                    data-foto="{{ url_for('foto_cooperado', id=c.id) }}"
                                 >{{ c.nome }}</option>
                             {% endfor %}
                         </select>
@@ -261,7 +261,8 @@
             saldoDiv.innerHTML = '';
         }
         if (foto && select.value) {
-            fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #ffd700;box-shadow:0 0 8px #00339955;">';
+            // imagem servida pela rota /cooperados/foto/<id>
+            fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #ffd700;box-shadow:0 0 8px #00339955;" loading="lazy" onerror="this.style.display=\'none\'">';
         } else {
             fotoDiv.innerHTML = '';
         }
