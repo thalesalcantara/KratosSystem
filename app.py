@@ -5,10 +5,16 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from io import BytesIO
 from sqlalchemy import text
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment
-from openpyxl.utils import get_column_letter
 import os
+
+# tenta importar openpyxl sem derrubar o app no deploy
+try:
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment
+    from openpyxl.utils import get_column_letter
+    HAS_OPENPYXL = True
+except Exception:
+    HAS_OPENPYXL = False
 
 app = Flask(__name__)
 app.secret_key = 'coopex-secreto'
@@ -17,7 +23,7 @@ app.secret_key = 'coopex-secreto'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Pastas de upload (ainda usadas para logos dos estabelecimentos)
+# Pastas de upload
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
@@ -31,10 +37,10 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     credito = db.Column(db.Float, default=0)
-    # legado: caminho do arquivo (mantido para compatibilidade)
+    # legado: caminho do arquivo (mantido)
     foto = db.Column(db.String(120), nullable=True)
-    # novos campos (armazenamento no banco)
-    foto_data = db.Column(db.LargeBinary, nullable=True)      # BYTEA no PostgreSQL
+    # novos campos: foto no banco (BYTEA)
+    foto_data = db.Column(db.LargeBinary, nullable=True)
     foto_mimetype = db.Column(db.String(50), nullable=True)
     foto_filename = db.Column(db.String(120), nullable=True)
 
@@ -70,21 +76,18 @@ class Lancamento(db.Model):
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
 
-# ---- AJUSTE DE SCHEMA (sem Alembic): cria colunas de foto no banco se faltarem ----
+# ---- AJUSTE DE SCHEMA (sem Alembic): cria colunas de foto se faltarem ----
 def ensure_schema():
     with app.app_context():
         cols = {r[0] for r in db.session.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
         )).fetchall()}
-        alter_stmts = []
-        if 'foto_data' not in cols:
-            alter_stmts.append("ADD COLUMN foto_data BYTEA")
-        if 'foto_mimetype' not in cols:
-            alter_stmts.append("ADD COLUMN foto_mimetype VARCHAR(50)")
-        if 'foto_filename' not in cols:
-            alter_stmts.append("ADD COLUMN foto_filename VARCHAR(120)")
-        if alter_stmts:
-            db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
+        alter = []
+        if 'foto_data' not in cols: alter.append("ADD COLUMN foto_data BYTEA")
+        if 'foto_mimetype' not in cols: alter.append("ADD COLUMN foto_mimetype VARCHAR(50)")
+        if 'foto_filename' not in cols: alter.append("ADD COLUMN foto_filename VARCHAR(120)")
+        if alter:
+            db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter)))
             db.session.commit()
 
 # ---- FUNÇÕES AUXILIARES ----
@@ -94,8 +97,7 @@ def is_estabelecimento():
     return session.get('user_tipo') == 'estabelecimento'
 
 def parse_date(s):
-    if not s:
-        return None
+    if not s: return None
     try:
         return datetime.strptime(s, '%Y-%m-%d')
     except:
@@ -137,15 +139,13 @@ def dashboard():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
-
-    # strings para o template
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
         'data_inicio': request.args.get('data_inicio'),
         'data_fim': request.args.get('data_fim')
     }
-    # ints para a query (elimina ::VARCHAR)
+    # usa ints na query (evita ::VARCHAR)
     coop_id_i = int(filtros['cooperado_id']) if filtros['cooperado_id'] else None
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
     di = parse_date(filtros['data_inicio'])
@@ -167,13 +167,9 @@ def dashboard():
     total_cooperados = len(cooperados)
     total_estabelecimentos = len(estabelecimentos)
     cooperado_nomes = [c.nome for c in cooperados]
-    cooperado_valores = []
-    for c in cooperados:
-        valor = sum(l.valor for l in lancamentos if l.cooperado_id == c.id)
-        cooperado_valores.append(valor)
+    cooperado_valores = [sum(l.valor for l in lancamentos if l.cooperado_id == c.id) for c in cooperados]
     if not cooperado_valores:
-        cooperado_valores = [0]
-        cooperado_nomes = ["Nenhum cooperado"]
+        cooperado_valores = [0]; cooperado_nomes = ["Nenhum cooperado"]
     return render_template('dashboard.html',
         admin=admin,
         cooperados=cooperados,
@@ -210,32 +206,25 @@ def novo_cooperado():
         username = request.form['username']
         credito = float(request.form.get('credito', 0) or 0)
         foto_file = request.files.get('foto')
-        foto_filename = None
-        foto_data = None
-        foto_mimetype = None
+        foto_filename = None; foto_data = None; foto_mimetype = None
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{username}_{foto_file.filename}")
-            # legado (opcional): ainda salva no disco, mas o que vale é o banco
-            foto_file.stream.seek(0)
-            raw = foto_file.read()
-            foto_data = raw
-            foto_mimetype = foto_file.mimetype
-            # Se quiser, ainda salva no static (não obrigatório)
+            foto_file.stream.seek(0); raw = foto_file.read()
+            foto_data = raw; foto_mimetype = foto_file.mimetype
+            # opcional: ainda salva no disco (legado)
             try:
                 with open(os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], foto_filename), 'wb') as f:
                     f.write(raw)
             except:
                 pass
         if Cooperado.query.filter_by(username=username).first():
-            flash('Usuário já existe!', 'danger')
-            return redirect(url_for('novo_cooperado'))
+            flash('Usuário já existe!', 'danger'); return redirect(url_for('novo_cooperado'))
         cooperado = Cooperado(
             nome=nome, username=username, credito=credito,
             foto=foto_filename, foto_data=foto_data,
             foto_mimetype=foto_mimetype, foto_filename=foto_filename
         )
-        db.session.add(cooperado)
-        db.session.commit()
+        db.session.add(cooperado); db.session.commit()
         flash('Cooperado cadastrado!', 'success')
         return redirect(url_for('listar_cooperados'))
     return render_template('cooperado_form.html', editar=False, cooperado=None)
@@ -251,8 +240,7 @@ def editar_cooperado(id):
         foto_file = request.files.get('foto')
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{cooperado.username}_{foto_file.filename}")
-            foto_file.stream.seek(0)
-            raw = foto_file.read()
+            foto_file.stream.seek(0); raw = foto_file.read()
             cooperado.foto = foto_filename
             cooperado.foto_filename = foto_filename
             cooperado.foto_data = raw
@@ -272,8 +260,7 @@ def excluir_cooperado(id):
     if not is_admin():
         return redirect(url_for('login'))
     cooperado = Cooperado.query.get_or_404(id)
-    db.session.delete(cooperado)
-    db.session.commit()
+    db.session.delete(cooperado); db.session.commit()
     flash('Cooperado excluído!', 'success')
     return redirect(url_for('listar_cooperados'))
 
@@ -281,16 +268,13 @@ def excluir_cooperado(id):
 @app.route('/cooperados/foto/<int:id>')
 def foto_cooperado(id):
     c = Cooperado.query.get_or_404(id)
-    # prioridade: banco
     if c.foto_data:
         return send_file(BytesIO(c.foto_data), mimetype=c.foto_mimetype or 'image/jpeg',
                          download_name=c.foto_filename or f'cooperado_{id}.jpg')
-    # fallback: arquivo legado
     if c.foto:
         path = os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], c.foto)
         if os.path.exists(path):
             return send_file(path, mimetype='image/jpeg')
-    # placeholder vazio
     return send_file(BytesIO(b''), mimetype='image/jpeg')
 
 # ---- ESTABELECIMENTOS CRUD ----
@@ -320,8 +304,7 @@ def novo_estabelecimento():
             return redirect(url_for('novo_estabelecimento'))
         est = Estabelecimento(nome=nome, username=username, logo=filename)
         est.set_senha(senha)
-        db.session.add(est)
-        db.session.commit()
+        db.session.add(est); db.session.commit()
         flash('Estabelecimento cadastrado!', 'success')
         return redirect(url_for('listar_estabelecimentos'))
     return render_template('estabelecimento_form.html', editar=False, estabelecimento=None)
@@ -350,8 +333,7 @@ def excluir_estabelecimento(id):
     if not is_admin():
         return redirect(url_for('login'))
     est = Estabelecimento.query.get_or_404(id)
-    db.session.delete(est)
-    db.session.commit()
+    db.session.delete(est); db.session.commit()
     flash('Estabelecimento excluído!', 'success')
     return redirect(url_for('listar_estabelecimentos'))
 
@@ -363,15 +345,12 @@ def listar_lancamentos():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
-
-    # strings para o template
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
         'data_inicio': request.args.get('data_inicio'),
         'data_fim': request.args.get('data_fim')
     }
-    # ints para a query (evita ::VARCHAR)
     coop_id_i = int(filtros['cooperado_id']) if filtros['cooperado_id'] else None
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
     di = parse_date(filtros['data_inicio'])
@@ -395,7 +374,18 @@ def exportar_lancamentos():
     if not is_admin():
         return redirect(url_for('login'))
 
-    # mesmos filtros da listagem
+    # garante openpyxl (sem derrubar o app se faltou no deploy)
+    global HAS_OPENPYXL
+    if not HAS_OPENPYXL:
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Font, Alignment
+            from openpyxl.utils import get_column_letter
+            HAS_OPENPYXL = True
+        except Exception:
+            flash('Exportação indisponível: adicione "openpyxl>=3.1.2" ao requirements.txt e redeploy.', 'danger')
+            return redirect(url_for('listar_lancamentos'))
+
     coop_id = request.args.get('cooperado_id')
     est_id = request.args.get('estabelecimento_id')
     di_s = request.args.get('data_inicio')
@@ -403,8 +393,7 @@ def exportar_lancamentos():
 
     coop_id_i = int(coop_id) if coop_id else None
     est_id_i  = int(est_id) if est_id else None
-    di = parse_date(di_s)
-    df = parse_date(df_s)
+    di = parse_date(di_s); df = parse_date(df_s)
 
     q = Lancamento.query
     if coop_id_i is not None:
@@ -420,43 +409,27 @@ def exportar_lancamentos():
     rows = q.all()
 
     # Monta planilha
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Lançamentos"
-
+    wb = Workbook(); ws = wb.active; ws.title = "Lançamentos"
     header = ["Data", "Nº OS", "Cooperado", "Estabelecimento", "Valor (R$)", "Descrição"]
     ws.append(header)
-    # estilo do cabeçalho
     for col_idx, h in enumerate(header, start=1):
         cell = ws.cell(row=1, column=col_idx, value=h)
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center")
-
-    # linhas
     for l in rows:
         coop_nome = l.cooperado.nome if l.cooperado else ""
         est_nome = l.estabelecimento.nome if l.estabelecimento else ""
         data_fmt = l.data.strftime('%d/%m/%Y %H:%M')
         ws.append([data_fmt, l.os_numero, coop_nome, est_nome, float(l.valor), l.descricao or ""])
-
-    # largura de colunas
     widths = [20, 16, 32, 32, 16, 60]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
-
-    # formato de moeda na coluna E
     for r in range(2, ws.max_row + 1):
         ws.cell(row=r, column=5).number_format = u'"R$" #,##0.00'
 
-    # retorna o arquivo
-    bio = BytesIO()
-    wb.save(bio)
-    bio.seek(0)
-    filename = "lancamentos.xlsx"
+    bio = BytesIO(); wb.save(bio); bio.seek(0)
     return send_file(
-        bio,
-        as_attachment=True,
-        download_name=filename,
+        bio, as_attachment=True, download_name="lancamentos.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
@@ -506,7 +479,7 @@ def painel_estabelecimento():
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
-        ensure_schema()  # garante colunas de foto no banco
+        ensure_schema()
         if not Admin.query.filter_by(username='coopex').first():
             admin = Admin(nome='Administrador Master', username='coopex')
             admin.set_senha('coopex05289')
