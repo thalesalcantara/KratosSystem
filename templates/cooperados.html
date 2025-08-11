@@ -229,12 +229,13 @@
                         {% for c in cooperados %}
                             <tr>
                                 <td>
-                                    {% if c.foto %}
-                                        <img src="{{ url_for('static', filename='uploads/' ~ c.foto) }}" alt="Foto de {{ c.nome }}" class="foto-cooperado">
+                                    {% if c.foto_data or c.foto %}
+                                      <img src="{{ url_for('foto_cooperado', id=c.id) }}"
+                                           alt="Foto de {{ c.nome }}" class="foto-cooperado" loading="lazy">
                                     {% else %}
-                                        <span style="font-size:1.4em; color:#ffd700;">
-                                            <i class="bi bi-person-circle"></i>
-                                        </span>
+                                      <span style="font-size:1.4em; color:#ffd700;">
+                                        <i class="bi bi-person-circle"></i>
+                                      </span>
                                     {% endif %}
                                 </td>
                                 <td class="txt-amarelo">{{ c.nome }}</td>
@@ -371,4 +372,4 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html
+</html>
