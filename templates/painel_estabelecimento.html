@@ -365,7 +365,6 @@
         // Checa restrição (se já expirou, não abre)
         const tr = btn.closest('tr');
         if (estaExpirado(tr.getAttribute('data-created'))) {
-            alert('Edição permitida somente até 1 hora após a criação.');
             return;
         }
         const id = btn.getAttribute('data-id');
@@ -387,7 +386,6 @@
     function confirmarExcluir(formEl) {
         const tr = formEl.closest('tr');
         if (estaExpirado(tr.getAttribute('data-created'))) {
-            alert('Exclusão permitida somente até 1 hora após a criação.');
             return false;
         }
         return confirm('Confirma excluir este lançamento? O crédito será devolvido ao cooperado.');
@@ -421,7 +419,7 @@
         const criado = new Date(createdIso); // trata como UTC
         const agora = new Date();
         const diffMs = agora - criado;
-        return diffMs > (5 * 60 * 60 * 1000); // 5 horas
+        return diffMs > (60 * 60 * 1000); // 1 hora
     }
     </script>
 
