@@ -666,9 +666,9 @@ def estab_excluir_lancamento(id):
         flash('Você não tem permissão para excluir este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # janela de 1 hora
-    if datetime.utcnow() - l.data > timedelta(hours=1):
-        flash('Exclusão permitida somente até 1 hora após a criação.', 'warning')
+    # janela de 5 hora
+    if datetime.utcnow() - l.data > timedelta(hours=5):
+        flash('Exclusão permitida somente até 5 hora após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
 
     cooperado = Cooperado.query.get(l.cooperado_id)
