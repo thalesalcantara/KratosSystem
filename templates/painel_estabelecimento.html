@@ -419,7 +419,7 @@
         const criado = new Date(createdIso); // trata como UTC
         const agora = new Date();
         const diffMs = agora - criado;
-        return diffMs > (5 * 60 * 60 * 1000); // 1 hora
+        return diffMs > (60 * 60 * 1000); // 1 hora
     }
     </script>
 
