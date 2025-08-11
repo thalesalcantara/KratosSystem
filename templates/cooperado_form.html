@@ -107,6 +107,11 @@
 </head>
 <body>
     <div class="form-card">
+        <!-- Botão de voltar ao Dashboard -->
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light w-100 mb-3">
+            <i class="bi bi-arrow-left-circle"></i> Voltar ao Dashboard
+        </a>
+
         <h2>
             <i class="bi bi-person"></i>
             {% if editar %}Editar Cooperado{% else %}Novo Cooperado{% endif %}
