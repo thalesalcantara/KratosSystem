@@ -102,36 +102,27 @@ def dashboard():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
-
-    # Mantém strings para o template marcar seleções
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
         'data_inicio': request.args.get('data_inicio'),
         'data_fim': request.args.get('data_fim')
     }
-    # Converte para int para a query (evita ::VARCHAR no Postgres)
-    coop_id = request.args.get('cooperado_id', type=int)
-    est_id = request.args.get('estabelecimento_id', type=int)
-
     query = Lancamento.query
-    if coop_id is not None:
-        query = query.filter(Lancamento.cooperado_id == coop_id)
-    if est_id is not None:
-        query = query.filter(Lancamento.estabelecimento_id == est_id)
+    if filtros['cooperado_id']:
+        query = query.filter_by(cooperado_id=filtros['cooperado_id'])
+    if filtros['estabelecimento_id']:
+        query = query.filter_by(estabelecimento_id=filtros['estabelecimento_id'])
     if filtros['data_inicio']:
         try:
             data_inicio = datetime.strptime(filtros['data_inicio'], '%Y-%m-%d')
             query = query.filter(Lancamento.data >= data_inicio)
-        except:
-            pass
+        except: pass
     if filtros['data_fim']:
         try:
             data_fim = datetime.strptime(filtros['data_fim'], '%Y-%m-%d')
             query = query.filter(Lancamento.data <= data_fim)
-        except:
-            pass
-
+        except: pass
     lancamentos = query.all()
     total_pedidos = len(lancamentos)
     total_valor = sum(l.valor for l in lancamentos)
@@ -333,35 +324,27 @@ def listar_lancamentos():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
-
-    # strings para o template
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
         'data_inicio': request.args.get('data_inicio'),
         'data_fim': request.args.get('data_fim')
     }
-    # ints para a query
-    coop_id = request.args.get('cooperado_id', type=int)
-    est_id  = request.args.get('estabelecimento_id', type=int)
-
     query = Lancamento.query
-    if coop_id is not None:
-        query = query.filter(Lancamento.cooperado_id == coop_id)
-    if est_id is not None:
-        query = query.filter(Lancamento.estabelecimento_id == est_id)
+    if filtros['cooperado_id']:
+        query = query.filter_by(cooperado_id=filtros['cooperado_id'])
+    if filtros['estabelecimento_id']:
+        query = query.filter_by(estabelecimento_id=filtros['estabelecimento_id'])
     if filtros['data_inicio']:
         try:
             data_inicio = datetime.strptime(filtros['data_inicio'], '%Y-%m-%d')
             query = query.filter(Lancamento.data >= data_inicio)
-        except:
-            pass
+        except: pass
     if filtros['data_fim']:
         try:
             data_fim = datetime.strptime(filtros['data_fim'], '%Y-%m-%d')
             query = query.filter(Lancamento.data <= data_fim)
-        except:
-            pass
+        except: pass
     lancamentos = query.order_by(Lancamento.data.desc()).all()
     return render_template('lancamentos.html', admin=admin, cooperados=cooperados, estabelecimentos=estabelecimentos, lancamentos=lancamentos, filtros=filtros)
 
