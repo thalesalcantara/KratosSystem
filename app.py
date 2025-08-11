@@ -424,7 +424,7 @@ def excluir_estabelecimento(id):
     return redirect(url_for('listar_estabelecimentos'))
 
 # =========================
-# LANÇAMENTOS
+# LANÇAMENTOS (ADMIN)
 # =========================
 @app.route('/lancamentos')
 def listar_lancamentos():
@@ -517,6 +517,7 @@ def exportar_lancamentos():
 
     widths = [20, 16, 32, 32, 16, 60]
     for i, w in enumerate(widths, start=1):
+        from openpyxl.utils import get_column_letter
         ws.column_dimensions[get_column_letter(i)].width = w
 
     for r in range(2, ws.max_row + 1):
@@ -585,6 +586,104 @@ def painel_estabelecimento():
             pass
         l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
+
+# =========================
+# ESTAB: EDITAR / EXCLUIR LANÇAMENTO (1h de janela)
+# =========================
+@app.route('/estab/lancamento/editar/<int:id>', methods=['POST'])
+def estab_editar_lancamento(id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+
+    from datetime import datetime, timedelta
+
+    l = Lancamento.query.get_or_404(id)
+
+    # segurança: só o estabelecimento que criou pode editar
+    if l.estabelecimento_id != session.get('user_id'):
+        flash('Você não tem permissão para editar este lançamento.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # janela de 1 hora
+    if datetime.utcnow() - l.data > timedelta(hours=1):
+        flash('Edição permitida somente até 1 hora após a criação.', 'warning')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # dados do form
+    os_numero = request.form.get('os_numero', '').strip()
+    valor_str = request.form.get('valor', '').strip().replace(',', '.')
+    descricao = request.form.get('descricao', '').strip()
+
+    # validações
+    try:
+        novo_valor = float(valor_str)
+        if novo_valor <= 0:
+            raise ValueError()
+    except Exception:
+        flash('Valor inválido.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    if not os_numero:
+        flash('O número da OS é obrigatório.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    cooperado = Cooperado.query.get(l.cooperado_id)
+    if not cooperado:
+        flash('Cooperado não encontrado.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    valor_antigo = l.valor
+    delta = novo_valor - valor_antigo  # positivo => precisa debitar mais crédito
+
+    if delta > 0 and cooperado.credito < delta:
+        flash('Crédito insuficiente para aumentar o valor deste lançamento.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # aplica alterações
+    l.os_numero = os_numero
+    l.valor = novo_valor
+    l.descricao = descricao if descricao else None
+
+    # ajusta crédito do cooperado (subtrai o delta)
+    cooperado.credito -= delta
+
+    db.session.commit()
+    flash('Lançamento editado com sucesso!', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
+
+@app.route('/estab/lancamento/excluir/<int:id>', methods=['POST'])
+def estab_excluir_lancamento(id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+
+    from datetime import datetime, timedelta
+
+    l = Lancamento.query.get_or_404(id)
+
+    # segurança: só o estabelecimento que criou pode excluir
+    if l.estabelecimento_id != session.get('user_id'):
+        flash('Você não tem permissão para excluir este lançamento.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # janela de 1 hora
+    if datetime.utcnow() - l.data > timedelta(hours=1):
+        flash('Exclusão permitida somente até 1 hora após a criação.', 'warning')
+        return redirect(url_for('painel_estabelecimento'))
+
+    cooperado = Cooperado.query.get(l.cooperado_id)
+    if not cooperado:
+        flash('Cooperado não encontrado.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # devolve o valor ao crédito do cooperado
+    cooperado.credito += l.valor
+
+    db.session.delete(l)
+    db.session.commit()
+    flash('Lançamento excluído e crédito devolvido ao cooperado.', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
 
 # =========================
 # CRIA BANCO + ADMIN MASTER
