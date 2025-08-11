@@ -28,12 +28,11 @@
             align-items: center;
         }
         .sidebar .logo {
-            width: 170px; /* LOGO BEM MAIOR */
+            width: 170px;
             max-width: 95%;
             margin: 28px auto 10px auto;
             display: block;
             filter: drop-shadow(0 0 18px #ffd700cc);
-            transition: width 0.2s;
         }
         .sidebar h3 {
             font-family: 'Orbitron', sans-serif;
@@ -162,6 +161,7 @@
         <a class="nav-link active" href="#"><i class="bi bi-currency-dollar"></i>Lançar Crédito</a>
         <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
     </div>
+
     <div class="main-content">
         <div class="topbar mb-4">
             <span>Bem-vindo, {{ est.nome }}</span>
@@ -191,7 +191,7 @@
                                     value="{{ c.id }}" 
                                     data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
                                     data-saldo-raw="{{ c.credito }}"
-                                    data-foto="{{ url_for('foto_cooperado', id=c.id) }}"
+                                    data-foto="{{ url_for('foto_cooperado', id=c.id) if (c.foto_data or c.foto) else '' }}"
                                 >{{ c.nome }}</option>
                             {% endfor %}
                         </select>
@@ -227,19 +227,40 @@
                             <th>Cooperado</th>
                             <th>Valor (R$)</th>
                             <th>Descrição</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for l in lancamentos %}
-                        <tr>
+                        <tr data-created="{{ l.data.isoformat() }}Z" data-id="{{ l.id }}">
                             <td>{{ l.data_brasilia }}</td>
-                            <td>{{ l.os_numero }}</td>
-                            <td>{{ l.cooperado.nome }}</td>
-                            <td>{{ "{:,.2f}".format(l.valor) }}</td>
-                            <td>{{ l.descricao or '' }}</td>
+                            <td class="os">{{ l.os_numero }}</td>
+                            <td class="coop">{{ l.cooperado.nome }}</td>
+                            <td class="valor" data-valor="{{ '%.2f'|format(l.valor) }}">{{ "{:,.2f}".format(l.valor) }}</td>
+                            <td class="desc">{{ l.descricao or '' }}</td>
+                            <td class="acoes">
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm btn-editar"
+                                        data-id="{{ l.id }}"
+                                        data-os="{{ l.os_numero }}"
+                                        data-valor="{{ '%.2f'|format(l.valor) }}"
+                                        data-desc="{{ l.descricao or '' }}"
+                                        onclick="abrirModalEditar(this)">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </button>
+                                <form method="post"
+                                      action="{{ url_for('estab_excluir_lancamento', id=l.id) }}"
+                                      style="display:inline-block;"
+                                      onsubmit="return confirmarExcluir(this);">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm btn-excluir">
+                                        <i class="bi bi-trash"></i> Excluir
+                                    </button>
+                                </form>
+                                <div class="text-warning small mt-1 aviso-expirado" style="display:none;">(período de 1h expirado)</div>
+                            </td>
                         </tr>
                     {% else %}
-                        <tr><td colspan="5">Nenhum lançamento realizado.</td></tr>
+                        <tr><td colspan="6">Nenhum lançamento realizado.</td></tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -247,7 +268,41 @@
         </div>
     </div>
 
+    <!-- MODAL EDITAR LANÇAMENTO -->
+    <div class="modal fade" id="modalEditarLanc" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="post" id="form-editar-modal">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Lançamento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label">Nº OS</label>
+                  <input type="text" class="form-control" id="edit-os" name="os_numero" required>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Valor (R$)</label>
+                  <input type="number" step="0.01" min="0.01" class="form-control" id="edit-valor" name="valor" required>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Descrição</label>
+                  <input type="text" class="form-control" id="edit-desc" name="descricao">
+              </div>
+              <div class="form-text text-warning">
+                * Edição permitida até 1 hora após a criação.
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" type="submit">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
+    // ---- Foto + Saldo do Cooperado ao selecionar
     function mostrarInfoCooperado() {
         var select = document.getElementById("cooperado_id");
         var saldoDiv = document.getElementById("saldo-cooperado");
@@ -261,8 +316,7 @@
             saldoDiv.innerHTML = '';
         }
         if (foto && select.value) {
-            // imagem servida pela rota /cooperados/foto/<id>
-            fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #ffd700;box-shadow:0 0 8px #00339955;" loading="lazy" onerror="this.style.display=\'none\'">';
+            fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #ffd700;box-shadow:0 0 8px #00339955;">';
         } else {
             fotoDiv.innerHTML = '';
         }
@@ -277,10 +331,11 @@
         var option = select.options[select.selectedIndex];
         var saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
         var valor = valorInput.value ? parseFloat(valorInput.value) : null;
-        if (!saldo || saldo <= 0) {
+
+        if (!select.value) { erroDiv.innerHTML = ""; btn.disabled = true; return; }
+        if (saldo == null || isNaN(saldo) || saldo <= 0) {
             erroDiv.innerHTML = "Este cooperado está sem crédito disponível!";
-            btn.disabled = true;
-            return;
+            btn.disabled = true; return;
         }
         if (valor && valor > saldo) {
             erroDiv.innerHTML = "O valor excede o saldo disponível!";
@@ -291,12 +346,85 @@
         }
     }
 
+    // ---- Modal Editar
+    let editarModal;
     document.addEventListener('DOMContentLoaded', function() {
         mostrarInfoCooperado();
         document.getElementById("cooperado_id").addEventListener("change", mostrarInfoCooperado);
         document.getElementById("valor").addEventListener("input", checarCreditoSuficiente);
+
+        editarModal = new bootstrap.Modal(document.getElementById('modalEditarLanc'));
+
+        // Desabilita botões Editar/Excluir após 1h (cheque visual; o backend também valida)
+        aplicarRestricaoUmaHora();
+        // Atualiza a cada minuto (opcional)
+        setInterval(aplicarRestricaoUmaHora, 60 * 1000);
     });
+
+    function abrirModalEditar(btn) {
+        // Checa restrição (se já expirou, não abre)
+        const tr = btn.closest('tr');
+        if (estaExpirado(tr.getAttribute('data-created'))) {
+            alert('Edição permitida somente até 1 hora após a criação.');
+            return;
+        }
+        const id = btn.getAttribute('data-id');
+        const os = btn.getAttribute('data-os') || '';
+        const valor = btn.getAttribute('data-valor') || '';
+        const desc = btn.getAttribute('data-desc') || '';
+
+        document.getElementById('edit-os').value = os;
+        document.getElementById('edit-valor').value = valor.replace(',', '.');
+        document.getElementById('edit-desc').value = desc;
+
+        // Define a action do form para a rota de edição
+        const form = document.getElementById('form-editar-modal');
+        form.action = "{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0', '/' + id);
+
+        editarModal.show();
+    }
+
+    function confirmarExcluir(formEl) {
+        const tr = formEl.closest('tr');
+        if (estaExpirado(tr.getAttribute('data-created'))) {
+            alert('Exclusão permitida somente até 1 hora após a criação.');
+            return false;
+        }
+        return confirm('Confirma excluir este lançamento? O crédito será devolvido ao cooperado.');
+    }
+
+    function aplicarRestricaoUmaHora() {
+        const linhas = document.querySelectorAll('table tbody tr[data-created]');
+        linhas.forEach(tr => {
+            const createdIso = tr.getAttribute('data-created');
+            const expirado = estaExpirado(createdIso);
+
+            const btnEditar = tr.querySelector('.btn-editar');
+            const btnExcluir = tr.querySelector('.btn-excluir');
+            const aviso = tr.querySelector('.aviso-expirado');
+
+            if (expirado) {
+                if (btnEditar) { btnEditar.disabled = true; btnEditar.classList.add('disabled'); }
+                if (btnExcluir) { btnExcluir.disabled = true; btnExcluir.classList.add('disabled'); }
+                if (aviso) aviso.style.display = 'block';
+            } else {
+                if (btnEditar) { btnEditar.disabled = false; btnEditar.classList.remove('disabled'); }
+                if (btnExcluir) { btnExcluir.disabled = false; btnExcluir.classList.remove('disabled'); }
+                if (aviso) aviso.style.display = 'none';
+            }
+        });
+    }
+
+    function estaExpirado(createdIso) {
+        if (!createdIso) return false;
+        // createdIso vem do servidor como UTC (l.data é datetime.utcnow())
+        const criado = new Date(createdIso); // trata como UTC
+        const agora = new Date();
+        const diffMs = agora - criado;
+        return diffMs > (60 * 60 * 1000); // 1 hora
+    }
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
