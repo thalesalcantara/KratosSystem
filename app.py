@@ -14,7 +14,7 @@ app.secret_key = 'coopex-secreto'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Pastas de upload (ainda usadas para logos e fallback de fotos)
+# Pastas de upload (logos e fallback opcional de fotos)
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
@@ -22,7 +22,9 @@ os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
+# =========================
 # MODELS
+# =========================
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
@@ -67,8 +69,11 @@ class Lancamento(db.Model):
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
 
-# ---- AJUSTE DE SCHEMA: cria colunas de foto no banco se faltarem ----
+# =========================
+# AJUSTE DE SCHEMA (sem Alembic)
+# =========================
 def ensure_schema():
+    """Cria colunas de foto no banco se ainda não existirem."""
     with app.app_context():
         cols = {r[0] for r in db.session.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
@@ -84,7 +89,7 @@ def ensure_schema():
             db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
             db.session.commit()
 
-# Garante o schema também sob gunicorn (primeira request)
+# Garante o schema sob gunicorn (no 1º request do worker)
 _SCHEMA_BOOTED = False
 @app.before_request
 def _run_schema_once():
@@ -96,7 +101,9 @@ def _run_schema_once():
             pass
         _SCHEMA_BOOTED = True
 
-# ---- FUNÇÕES AUXILIARES ----
+# =========================
+# HELPERS
+# =========================
 def is_admin():
     return session.get('user_tipo') == 'admin'
 def is_estabelecimento():
@@ -110,7 +117,9 @@ def parse_date(s):
     except:
         return None
 
-# ---- LOGIN/LOGOUT ----
+# =========================
+# LOGIN/LOGOUT
+# =========================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -137,7 +146,9 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# ---- DASHBOARD (ADMIN) ----
+# =========================
+# DASHBOARD (ADMIN)
+# =========================
 @app.route('/')
 @app.route('/dashboard')
 def dashboard():
@@ -146,13 +157,13 @@ def dashboard():
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
+
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
         'estabelecimento_id': request.args.get('estabelecimento_id'),
         'data_inicio': request.args.get('data_inicio'),
         'data_fim': request.args.get('data_fim')
     }
-    # ints para a query (evita ::VARCHAR no PostgreSQL)
     coop_id_i = int(filtros['cooperado_id']) if filtros['cooperado_id'] else None
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
     di = parse_date(filtros['data_inicio'])
@@ -173,6 +184,7 @@ def dashboard():
     total_valor = sum(l.valor for l in lancamentos)
     total_cooperados = len(cooperados)
     total_estabelecimentos = len(estabelecimentos)
+
     cooperado_nomes = [c.nome for c in cooperados]
     cooperado_valores = []
     for c in cooperados:
@@ -181,6 +193,7 @@ def dashboard():
     if not cooperado_valores:
         cooperado_valores = [0]
         cooperado_nomes = ["Nenhum cooperado"]
+
     return render_template('dashboard.html',
         admin=admin,
         cooperados=cooperados,
@@ -199,7 +212,9 @@ def dashboard():
 def painel_admin():
     return redirect(url_for('dashboard'))
 
-# ---- COOPERADOS CRUD ----
+# =========================
+# COOPERADOS CRUD
+# =========================
 @app.route('/listar_cooperados')
 def listar_cooperados():
     if not is_admin():
@@ -217,25 +232,27 @@ def novo_cooperado():
         username = request.form['username']
         credito = float(request.form.get('credito', 0) or 0)
         foto_file = request.files.get('foto')
+
         foto_filename = None
         foto_data = None
         foto_mimetype = None
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{username}_{foto_file.filename}")
-            # lê bytes e guarda no banco
             foto_file.stream.seek(0)
             raw = foto_file.read()
             foto_data = raw
             foto_mimetype = foto_file.mimetype
-            # opcional: salva também no disco (fallback p/ templates legados)
+            # opcional: salva também no disco (fallback)
             try:
                 with open(os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], foto_filename), 'wb') as f:
                     f.write(raw)
             except:
                 pass
+
         if Cooperado.query.filter_by(username=username).first():
             flash('Usuário já existe!', 'danger')
             return redirect(url_for('novo_cooperado'))
+
         cooperado = Cooperado(
             nome=nome, username=username, credito=credito,
             foto=foto_filename, foto_data=foto_data,
@@ -255,6 +272,7 @@ def editar_cooperado(id):
     if request.method == 'POST':
         cooperado.nome = request.form['nome']
         cooperado.credito = float(request.form.get('credito', cooperado.credito) or cooperado.credito)
+
         foto_file = request.files.get('foto')
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{cooperado.username}_{foto_file.filename}")
@@ -269,6 +287,7 @@ def editar_cooperado(id):
                     f.write(raw)
             except:
                 pass
+
         db.session.commit()
         flash('Cooperado alterado!', 'success')
         return redirect(url_for('listar_cooperados'))
@@ -284,23 +303,65 @@ def excluir_cooperado(id):
     flash('Cooperado excluído!', 'success')
     return redirect(url_for('listar_cooperados'))
 
-# ---- SERVE FOTO DO COOPERADO (do banco; fallback no disco) ----
+# Serve foto do cooperado (prioriza banco; fallback no disco)
 @app.route('/cooperados/foto/<int:id>')
 def foto_cooperado(id):
     c = Cooperado.query.get_or_404(id)
-    # prioridade: banco
     if c.foto_data:
-        return send_file(BytesIO(c.foto_data), mimetype=c.foto_mimetype or 'image/jpeg',
+        return send_file(BytesIO(c.foto_data),
+                         mimetype=c.foto_mimetype or 'image/jpeg',
                          download_name=c.foto_filename or f'cooperado_{id}.jpg')
-    # fallback: arquivo legado
     if c.foto:
         path = os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], c.foto)
         if os.path.exists(path):
             return send_file(path, mimetype='image/jpeg')
-    # placeholder vazio
     return send_file(BytesIO(b''), mimetype='image/jpeg')
 
-# ---- ESTABELECIMENTOS CRUD ----
+# =========================
+# AJUSTAR CRÉDITO (ADMIN ONLY)
+# =========================
+@app.route('/ajustar_credito', methods=['GET', 'POST'])
+def ajustar_credito():
+    if not is_admin():
+        return redirect(url_for('login'))
+    cooperado_id = request.args.get('id')
+    if cooperado_id:
+        return ajustar_credito_individual(int(cooperado_id))
+
+    cooperados = Cooperado.query.order_by(Cooperado.nome).all()
+    if request.method == 'POST':
+        cooperado_id = request.form.get('cooperado_id')
+        novo_credito = request.form.get('credito')
+        if cooperado_id and novo_credito is not None:
+            c = Cooperado.query.get(int(cooperado_id))
+            if c:
+                c.credito = float(novo_credito)
+                db.session.commit()
+                flash('Crédito ajustado!', 'success')
+                return redirect(url_for('ajustar_credito'))
+            else:
+                flash('Cooperado não encontrado!', 'danger')
+        else:
+            flash('Selecione um cooperado e valor.', 'danger')
+    return render_template('ajustar_credito.html', cooperados=cooperados)
+
+@app.route('/ajustar_credito/<int:id>', methods=['GET', 'POST'])
+def ajustar_credito_individual(id):
+    if not is_admin():
+        return redirect(url_for('login'))
+    cooperado = Cooperado.query.get_or_404(id)
+    if request.method == 'POST':
+        novo_credito = request.form.get('credito')
+        if novo_credito is not None:
+            cooperado.credito = float(novo_credito)
+            db.session.commit()
+            flash('Crédito ajustado!', 'success')
+            return redirect(url_for('listar_cooperados'))
+    return render_template('ajustar_credito.html', cooperado=cooperado)
+
+# =========================
+# ESTABELECIMENTOS CRUD
+# =========================
 @app.route('/listar_estabelecimentos')
 def listar_estabelecimentos():
     if not is_admin():
@@ -362,7 +423,9 @@ def excluir_estabelecimento(id):
     flash('Estabelecimento excluído!', 'success')
     return redirect(url_for('listar_estabelecimentos'))
 
-# ---- LANÇAMENTOS (listar) ----
+# =========================
+# LANÇAMENTOS
+# =========================
 @app.route('/lancamentos')
 def listar_lancamentos():
     if not is_admin():
@@ -392,22 +455,25 @@ def listar_lancamentos():
         query = query.filter(Lancamento.data <= df)
 
     lancamentos = query.order_by(Lancamento.data.desc()).all()
-    return render_template('lancamentos.html', admin=admin, cooperados=cooperados, estabelecimentos=estabelecimentos, lancamentos=lancamentos, filtros=filtros)
+    return render_template('lancamentos.html',
+                           admin=admin,
+                           cooperados=cooperados,
+                           estabelecimentos=estabelecimentos,
+                           lancamentos=lancamentos,
+                           filtros=filtros)
 
-# ---- LANÇAMENTOS (exportar XLSX) ----
 @app.route('/lancamentos/exportar')
 def exportar_lancamentos():
     if not is_admin():
         return redirect(url_for('login'))
 
-    # lazy import: não quebra o deploy se faltar o pacote
+    # Importa aqui pra não quebrar o deploy se faltar lib
     try:
         from openpyxl import Workbook
         from openpyxl.styles import Font, Alignment
         from openpyxl.utils import get_column_letter
     except ImportError:
-        return ("Para exportar, instale o pacote: add 'openpyxl>=3.1.2' ao requirements.txt "
-                "e faça redeploy."), 500
+        return ("Para exportar, inclua 'openpyxl>=3.1.2' no requirements.txt e redeploy."), 500
 
     coop_id = request.args.get('cooperado_id')
     est_id = request.args.get('estabelecimento_id')
@@ -453,52 +519,62 @@ def exportar_lancamentos():
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
 
-    # formato moeda na coluna 5
     for r in range(2, ws.max_row + 1):
         ws.cell(row=r, column=5).number_format = u'"R$" #,##0.00'
 
     bio = BytesIO()
     wb.save(bio)
     bio.seek(0)
-    filename = "lancamentos.xlsx"
     return send_file(
         bio,
         as_attachment=True,
-        download_name=filename,
+        download_name="lancamentos.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-# ---- PAINEL ESTABELECIMENTO ----
+# =========================
+# PAINEL ESTABELECIMENTO
+# =========================
 @app.route('/painel_estabelecimento', methods=['GET', 'POST'])
 def painel_estabelecimento():
     if not is_estabelecimento():
         return redirect(url_for('login'))
     est = Estabelecimento.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
+
     if request.method == 'POST':
         cooperado_id = request.form.get('cooperado_id')
         valor = request.form.get('valor')
         os_numero = request.form.get('os_numero')
         descricao = request.form.get('descricao')
+
         if cooperado_id and valor and os_numero:
             c = Cooperado.query.get(int(cooperado_id))
             if c:
-                l = Lancamento(
-                    data=datetime.utcnow(),
-                    os_numero=os_numero,
-                    cooperado_id=c.id,
-                    estabelecimento_id=est.id,
-                    valor=float(valor),
-                    descricao=descricao
-                )
-                db.session.add(l)
-                c.credito += float(valor)
-                db.session.commit()
-                flash('Lançamento realizado com sucesso!', 'success')
+                valor_f = float(valor)
+
+                # D E B I T O : lançamento diminui o crédito do cooperado
+                novo_credito = c.credito - valor_f
+                if novo_credito < 0:
+                    flash('Crédito insuficiente para este lançamento.', 'danger')
+                else:
+                    l = Lancamento(
+                        data=datetime.utcnow(),
+                        os_numero=os_numero,
+                        cooperado_id=c.id,
+                        estabelecimento_id=est.id,
+                        valor=valor_f,
+                        descricao=descricao
+                    )
+                    db.session.add(l)
+                    c.credito = novo_credito
+                    db.session.commit()
+                    flash('Lançamento realizado com sucesso!', 'success')
             else:
                 flash('Cooperado não encontrado!', 'danger')
         else:
             flash('Preencha todos os campos obrigatórios!', 'danger')
+
     lancamentos = Lancamento.query.filter_by(estabelecimento_id=est.id).order_by(Lancamento.data.desc()).all()
     for l in lancamentos:
         hora_brasilia = l.data
@@ -510,11 +586,13 @@ def painel_estabelecimento():
         l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
-# ---- CRIA BANCO E ADMIN MASTER AUTOMÁTICO ----
+# =========================
+# CRIA BANCO + ADMIN MASTER
+# =========================
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
-        ensure_schema()  # garante colunas de foto no banco
+        ensure_schema()
         if not Admin.query.filter_by(username='coopex').first():
             admin = Admin(nome='Administrador Master', username='coopex')
             admin.set_senha('coopex05289')
