@@ -112,8 +112,9 @@
             {% if editar %}Editar Cooperado{% else %}Novo Cooperado{% endif %}
         </h2>
         <form method="post" enctype="multipart/form-data" autocomplete="off">
-            {% if cooperado and cooperado.foto %}
-                <img src="{{ url_for('static', filename='uploads/' ~ cooperado.foto) }}"
+            {# exibe a foto vinda do BANCO via rota foto_cooperado (com fallback no servidor) #}
+            {% if cooperado %}
+                <img src="{{ url_for('foto_cooperado', id=cooperado.id) }}"
                      alt="Foto do Cooperado" class="profile-pic" id="foto-preview-existente">
             {% endif %}
             <div class="mb-3">
