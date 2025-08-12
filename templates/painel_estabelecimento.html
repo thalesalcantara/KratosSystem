@@ -301,6 +301,12 @@
       </div>
     </div>
 
+    <!-- ÁUDIO: tocar no lançamento -->
+    <audio id="som-venda" preload="auto" style="display:none">
+      <source src="/statics/venda.mp3" type="audio/mpeg">
+      <source src="/statics/vendas.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
     // ---- Foto + Saldo do Cooperado ao selecionar
     function mostrarInfoCooperado() {
@@ -359,6 +365,19 @@
         aplicarRestricaoUmaHora();
         // Atualiza a cada minuto (opcional)
         setInterval(aplicarRestricaoUmaHora, 60 * 1000);
+
+        // ---- TOCAR SOM AO LANÇAR (clique no botão submit)
+        const btnLancar = document.getElementById('btn-lancar');
+        const audioVenda = document.getElementById('som-venda');
+        if (btnLancar && audioVenda) {
+            btnLancar.addEventListener('click', function () {
+                try {
+                    audioVenda.currentTime = 0;
+                    const p = audioVenda.play();
+                    if (p && typeof p.then === 'function') p.catch(()=>{});
+                } catch(e) {}
+            });
+        }
     });
 
     function abrirModalEditar(btn) {
