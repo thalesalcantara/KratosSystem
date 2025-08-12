@@ -301,11 +301,9 @@
       </div>
     </div>
 
-    <!-- ÁUDIO: tocar no lançamento -->
-    <audio id="som-venda" preload="auto" style="display:none">
-      <source src="/statics/venda.mp3" type="audio/mpeg">
-      <source src="/statics/vendas.mp3" type="audio/mpeg">
-    </audio>
+    <!-- ÁUDIO: VENDA -->
+    <audio id="snd-venda" preload="auto" playsinline
+           src="{{ url_for('statics_files', filename='venda.mp3') }}"></audio>
 
     <script>
     // ---- Foto + Saldo do Cooperado ao selecionar
@@ -366,18 +364,21 @@
         // Atualiza a cada minuto (opcional)
         setInterval(aplicarRestricaoUmaHora, 60 * 1000);
 
-        // ---- TOCAR SOM AO LANÇAR (clique no botão submit)
-        const btnLancar = document.getElementById('btn-lancar');
-        const audioVenda = document.getElementById('som-venda');
-        if (btnLancar && audioVenda) {
-            btnLancar.addEventListener('click', function () {
-                try {
-                    audioVenda.currentTime = 0;
-                    const p = audioVenda.play();
-                    if (p && typeof p.then === 'function') p.catch(()=>{});
-                } catch(e) {}
-            });
+        // Tenta tocar se houve sucesso (pós-resposta)
+        if (document.querySelector('.alert.alert-success')) {
+            const a = document.getElementById('snd-venda');
+            a && a.play().catch(()=>{});
         }
+    });
+
+    // Toca o áudio no clique do botão (gesto do usuário) ANTES do submit
+    document.addEventListener('click', function(ev){
+        const tgt = ev.target.closest('#btn-lancar');
+        if (!tgt) return;
+        if (tgt.disabled) return;
+        const a = document.getElementById('snd-venda');
+        a && a.play().catch(()=>{});
+        // não cancela o submit
     });
 
     function abrirModalEditar(btn) {
