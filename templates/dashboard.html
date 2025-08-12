@@ -32,7 +32,7 @@
         align-items: center;
       }
       .sidebar .logo {
-        width: 160px;
+        width: 160px;         /* 3x maior que antes */
         margin: 38px auto 8px auto;
         display: block;
         filter: drop-shadow(0 0 18px #ffd700cc);
@@ -111,9 +111,7 @@
         margin-bottom: 30px;
         text-align: center;
       }
-      .card-link {
-        text-decoration: none !important;
-      }
+      .card-link { text-decoration: none !important; }
       .card-link .card {
         background: linear-gradient(120deg, #23262b 90%, #003399 100%);
         border-radius: 17px;
@@ -142,62 +140,31 @@
         color: #ffe670;
         transition: color 0.2s;
       }
-      .card-link .card:hover i {
-        color: #fffbe7;
+      .card-link .card:hover i { color: #fffbe7; }
+      form .form-control, form .form-select {
+        background: #222; border: 1px solid #555; color: #ffd700;
       }
-      form .form-control,
-      form .form-select {
-        background: #222;
-        border: 1px solid #555;
-        color: #ffd700;
-      }
-      form label {
-        font-weight: 600;
-        color: #ffd700cc;
-      }
+      form label { font-weight: 600; color: #ffd700cc; }
       form .btn-primary {
         background: linear-gradient(90deg, #ffd700 60%, #ffe670 100%);
-        color: #191c20;
-        font-weight: bold;
-        border: none;
-        border-radius: 17px;
-        padding: 8px 20px;
-        margin-top: 10px;
+        color: #191c20; font-weight: bold; border: none; border-radius: 17px;
+        padding: 8px 20px; margin-top: 10px;
       }
-      form .btn-primary:hover {
-        background: #ffe670;
-        color: #003399;
-      }
-      #graficoCooperados {
-        max-height: 360px;
-      }
-      /* Notificação (balão) */
+      form .btn-primary:hover { background: #ffe670; color: #003399; }
+      #graficoCooperados { max-height: 360px; }
+      /* Balão de notificação */
       #notif-container {
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 9999;
+        position: fixed; top: 16px; right: 16px; z-index: 9999;
       }
       .notif {
-        background: #ffd700;
-        color: #003399;
-        font-weight: 800;
-        border-radius: 12px;
-        padding: 10px 14px;
-        margin-top: 8px;
+        background: #ffd700; color: #003399; font-weight: 800;
+        border-radius: 12px; padding: 10px 14px; margin-top: 8px;
         box-shadow: 0 10px 24px #0008, 0 2px 6px #00339955;
-        opacity: 0;
-        transform: translateY(-10px);
+        opacity: 0; transform: translateY(-10px);
         transition: opacity .18s ease, transform .18s ease;
       }
-      .notif.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      @media (max-width: 900px) {
-        .sidebar { display: none; }
-        .main-content { margin-left: 0; padding: 12px; }
-      }
+      .notif.show { opacity: 1; transform: translateY(0); }
+      @media (max-width: 900px) { .sidebar{display:none;} .main-content{margin-left:0;padding:12px;} }
     </style>
 </head>
 <body>
@@ -290,48 +257,44 @@
       </div>
     </div>
 
-    <!-- Gráfico tipo pizza (doughnut) com visual de disco de freio -->
+    <!-- Gráfico tipo pizza (doughnut) -->
     <canvas id="graficoCooperados" height="360"></canvas>
   </div>
 
-  <!-- ÁUDIO: toca quando detectar novo lançamento (arquivo em /statics/servico.mp3) -->
+  <!-- ÁUDIO: tocar quando novo lançamento aparecer (servico.mp3 em /statics) -->
   <audio id="snd-servico" preload="auto" playsinline
          src="{{ url_for('statics_files', filename='servico.mp3') }}"></audio>
 
-  <!-- Container para balões de notificação -->
+  <!-- Balões -->
   <div id="notif-container" aria-live="polite"></div>
 
   <script>
-    // ====== CHART: Pizza (Doughnut) com efeito "disco de freio" ======
+    // ====== Gráfico Doughnut com “disco de freio” ======
     (function () {
       const ctx = document.getElementById("graficoCooperados").getContext("2d");
 
       const labels = {{ cooperado_nomes|tojson }};
       const valores = {{ lancamentos_contagem|tojson }};
 
-      // Paleta dourada/azulada suave
       const colors = [];
       for (let i = 0; i < labels.length; i++) {
-        const hue = 48 + (i * 7) % 20;   // em torno do dourado
+        const hue = 48 + (i * 7) % 20;   // dourado
         const sat = 90;
         const light = 55 - (i % 3) * 6;
         colors.push(`hsl(${hue} ${sat}% ${light}%)`);
       }
 
-      // Plugin para desenhar centro/hub e furos (efeito disco)
-      const brakeDiscPlugin = {
+      const brakeDisc = {
         id: 'brakeDisc',
-        afterDraw(chart, args, opts) {
+        afterDraw(chart) {
           const meta = chart.getDatasetMeta(0);
           if (!meta || !meta.data || !meta.data.length) return;
-
           const arc0 = meta.data[0];
           const {x: cx, y: cy, innerRadius: rIn, outerRadius: rOut} = arc0;
-
           const ctx = chart.ctx;
           ctx.save();
 
-          // Linhas radiais (ranhuras)
+          // ranhuras
           ctx.strokeStyle = '#ffffff22';
           ctx.lineWidth = Math.max(1, (rOut - rIn) * 0.02);
           const grooves = 12;
@@ -345,30 +308,22 @@
             ctx.stroke();
           }
 
-          // Cubo central (hub)
+          // hub
           ctx.fillStyle = '#b9b9b9';
-          ctx.beginPath();
-          ctx.arc(cx, cy, rIn * 0.9, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(cx, cy, rIn * 0.9, 0, Math.PI * 2); ctx.fill();
 
-          // Hub interno mais escuro
+          // hub interno
           ctx.fillStyle = '#8a8a8a';
-          ctx.beginPath();
-          ctx.arc(cx, cy, rIn * 0.55, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(cx, cy, rIn * 0.55, 0, Math.PI * 2); ctx.fill();
 
-          // Furos dos parafusos (em contraste com o fundo da página)
+          // furos de parafuso
           ctx.fillStyle = '#191c20';
-          const holes = 5;
-          const holeRad = rIn * 0.08;
-          const holeDist = rIn * 0.68;
+          const holes = 5, holeRad = rIn * 0.08, holeDist = rIn * 0.68;
           for (let i = 0; i < holes; i++) {
             const ang = (i / holes) * Math.PI * 2 - Math.PI / 2;
             const hx = cx + Math.cos(ang) * holeDist;
             const hy = cy + Math.sin(ang) * holeDist;
-            ctx.beginPath();
-            ctx.arc(hx, hy, holeRad, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(hx, hy, holeRad, 0, Math.PI * 2); ctx.fill();
           }
 
           ctx.restore();
@@ -378,7 +333,7 @@
       new Chart(ctx, {
         type: "doughnut",
         data: {
-          labels: labels,
+          labels,
           datasets: [{
             label: "Valor (R$)",
             data: valores,
@@ -391,24 +346,19 @@
         options: {
           cutout: "55%",
           plugins: {
-            legend: {
-              labels: { color: "#ffd700" }
-            },
+            legend: { labels: { color: "#ffd700" } },
             tooltip: {
               callbacks: {
-                label: function (context) {
-                  const v = context.parsed;
-                  return "R$ " + (v || 0).toLocaleString("pt-BR", {minimumFractionDigits: 2});
-                }
+                label: (ctx) => "R$ " + (ctx.parsed || 0).toLocaleString("pt-BR", {minimumFractionDigits:2})
               }
             }
           }
         },
-        plugins: [brakeDiscPlugin]
+        plugins: [brakeDisc]
       });
     })();
 
-    // ====== SOM + BALÃO: detectar novo lançamento ======
+    // ====== Som + Balão: detectar novos lançamentos ======
     (function () {
       let lastId = {{ ultimo_lancamento_id or 0 }};
       const audio = document.getElementById('snd-servico');
@@ -419,8 +369,7 @@
         div.className = 'notif';
         div.textContent = nome ? `Novo lançamento: ${nome}` : 'Novo lançamento';
         notifBox.appendChild(div);
-        // força reflow para o CSS transition
-        void div.offsetWidth;
+        void div.offsetWidth; // reflow
         div.classList.add('show');
         setTimeout(() => {
           div.classList.remove('show');
@@ -435,25 +384,19 @@
           const novo = parseInt(j.last_id || 0);
           if (novo > lastId) {
             lastId = novo;
-            // toca som
+            // tocar som (se o navegador bloquear autoplay, falha silenciosa)
             audio && audio.play().catch(()=>{});
-            // tenta buscar o nome do cooperado (requer endpoint /api_lancamento_info?id=)
             try {
               const r2 = await fetch('{{ url_for("api_lancamento_info") }}?id=' + novo, { cache: 'no-store' });
               const j2 = await r2.json();
               const nome = (j2 && (j2.cooperado || j2.nome || j2.cooperado_nome)) || '';
               showBalloon(nome);
-            } catch (e) {
-              showBalloon('');
-            }
+            } catch (_) { showBalloon(''); }
           }
-        } catch (e) {
-          // silencioso
-        }
+        } catch (_) { /* silencioso */ }
       }
 
-      // Checa a cada 5s
-      setInterval(ping, 5000);
+      setInterval(ping, 5000); // checa a cada 5s
     })();
   </script>
 
