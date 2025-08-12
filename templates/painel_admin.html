@@ -230,7 +230,13 @@
         <i class="bi bi-arrow-left"></i> Voltar
       </button>
       <span>Bem-vindo, {{ admin.nome }}</span>
-      <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm btn-logout ms-2">Sair <i class="bi bi-power"></i></a>
+      <div class="d-flex align-items-center">
+        <!-- Botão opcional para “desbloquear” áudio por gesto do usuário -->
+        <button type="button" id="btn-ativar-som-servico" class="btn btn-outline-warning btn-sm me-2" title="Ativar/ testar som de novo lançamento">
+          <i class="bi bi-volume-up"></i> Som
+        </button>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm btn-logout ms-2">Sair <i class="bi bi-power"></i></a>
+      </div>
     </div>
 
     <h2><i class="bi bi-speedometer2"></i> Painel de Controle</h2>
@@ -312,6 +318,12 @@
 
     <!-- Gráfico Cooperados horizontal mostrando VALOR REAL gasto por cooperado -->
     <canvas id="graficoCooperados" height="320"></canvas>
+
+    <!-- Dados atuais (para o script comparar e decidir tocar o áudio) -->
+    <div id="metrics-data"
+         data-total-pedidos="{{ total_pedidos|default(0) }}"
+         data-ultimo-id="{{ ultimo_lancamento_id|default(0) }}"
+         style="display:none;"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -404,6 +416,65 @@
       options: options,
     });
   </script>
+
+  <!-- ÁUDIO: tocar quando aparecer novo lançamento (serviço) -->
+  <audio id="som-servico" preload="auto" style="display:none">
+    <!-- os mp3 estão em /statics (não é /static) -->
+    <source src="{{ url_for('statics_files', filename='servico.mp3') }}" type="audio/mpeg">
+  </audio>
+
+  <!-- Script: toca servico.mp3 quando detectar aumento de lançamentos -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const audio = document.getElementById('som-servico');
+      const metrics = document.getElementById('metrics-data');
+
+      // valores atuais vindos do servidor
+      const totalAtual = parseInt(metrics?.getAttribute('data-total-pedidos') || '0', 10);
+      const ultimoIdAtual = parseInt(metrics?.getAttribute('data-ultimo-id') || '0', 10);
+
+      // chaves no localStorage (por navegador)
+      const LS_TOTAL = 'coopex_total_pedidos';
+      const LS_ULTID = 'coopex_ultimo_lanc_id';
+
+      const totalPrev = parseInt(localStorage.getItem(LS_TOTAL) || '0', 10);
+      const ultPrev   = parseInt(localStorage.getItem(LS_ULTID) || '0', 10);
+
+      // decisão: tocar se aumentou o total ou se o último ID é maior
+      let deveTocar = false;
+      if (!isNaN(totalPrev) && totalAtual > totalPrev) {
+        deveTocar = true;
+      } else if (!isNaN(ultPrev) && ultimoIdAtual > ultPrev) {
+        deveTocar = true;
+      }
+
+      // salva os valores atuais para a próxima visita/reload
+      localStorage.setItem(LS_TOTAL, String(totalAtual));
+      localStorage.setItem(LS_ULTID, String(ultimoIdAtual));
+
+      function tocar(aud) {
+        if (!aud) return;
+        try {
+          aud.currentTime = 0;
+          const p = aud.play();
+          if (p && typeof p.then === 'function') p.catch(() => { /* pode ser bloqueado pelo navegador sem gesto */ });
+        } catch (e) { /* ignora */ }
+      }
+
+      if (deveTocar) {
+        tocar(audio);
+      }
+
+      // Botão opcional para “ativar/testar” som (ajuda a liberar autoplay)
+      const btn = document.getElementById('btn-ativar-som-servico');
+      if (btn) {
+        btn.addEventListener('click', function () {
+          tocar(audio);
+        });
+      }
+    });
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
