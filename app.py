@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -19,6 +19,10 @@ app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
 os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
+
+# Pasta para ÁUDIOS e outros estáticos personalizados (pasta "statics")
+app.config['STATICS_FOLDER'] = 'statics'
+os.makedirs(app.config['STATICS_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
@@ -118,6 +122,13 @@ def parse_date(s):
         return None
 
 # =========================
+# ROTA PARA SERVIR ÁUDIOS/ARQS DA PASTA "statics"
+# =========================
+@app.route('/statics/<path:filename>')
+def statics_files(filename):
+    return send_from_directory(app.config['STATICS_FOLDER'], filename)
+
+# =========================
 # LOGIN/LOGOUT
 # =========================
 @app.route('/login', methods=['GET', 'POST'])
@@ -194,6 +205,13 @@ def dashboard():
         cooperado_valores = [0]
         cooperado_nomes = ["Nenhum cooperado"]
 
+    # ID global do último lançamento (usado para tocar servico.mp3 no dashboard)
+    try:
+        from sqlalchemy import func
+        ultimo_lancamento_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
+    except Exception:
+        ultimo_lancamento_id = 0
+
     return render_template('dashboard.html',
         admin=admin,
         cooperados=cooperados,
@@ -205,7 +223,9 @@ def dashboard():
         cooperado_nomes=cooperado_nomes,
         cooperado_valores=cooperado_valores,
         lancamentos_contagem=cooperado_valores,
-        filtros=filtros
+        filtros=filtros,
+        # NOVO: fornece para o HTML comparar e tocar o áudio de serviço
+        ultimo_lancamento_id=ultimo_lancamento_id
     )
 
 @app.route('/painel_admin')
@@ -584,6 +604,7 @@ def painel_estabelecimento():
             hora_brasilia = l.data.replace(tzinfo=utc).astimezone(timezone('America/Sao_Paulo'))
         except:
             pass
+    # adiciona atributo formatado para exibir na tabela
         l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
