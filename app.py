@@ -648,9 +648,9 @@ def estab_editar_lancamento(id):
         flash('Você não tem permissão para editar este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # janela de 1 hora
-    if datetime.utcnow() - l.data > timedelta(hours=1):
-        flash('Edição permitida somente até 1 horas após a criação.', 'warning')
+    # janela de 10 hora
+    if datetime.utcnow() - l.data > timedelta(hours=10):
+        flash('Edição permitida somente até 10 horas após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
 
     # dados do form
@@ -710,9 +710,9 @@ def estab_excluir_lancamento(id):
         flash('Você não tem permissão para excluir este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # janela de 5 hora
-    if datetime.utcnow() - l.data > timedelta(hours=5):
-        flash('Exclusão permitida somente até 5 hora após a criação.', 'warning')
+    # janela de 10 hora
+    if datetime.utcnow() - l.data > timedelta(hours=10):
+        flash('Exclusão permitida somente até 10 hora após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
 
     cooperado = Cooperado.query.get(l.cooperado_id)
