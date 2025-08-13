@@ -2,17 +2,43 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from sqlalchemy import text, func
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os
+import time
 
 app = Flask(__name__)
 app.secret_key = 'coopex-secreto'
 
-# Configuração do PostgreSQL (Render)
+# ----- Proxy/HTTPS (Render) -----
+# Corrige scheme/host atrás do proxy para cookies seguros e redirects corretos
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+
+# ----- Sessão/Cookies: mais estável -----
+app.permanent_session_lifetime = timedelta(hours=10)
+app.config.update(
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,  # requer HTTPS (Render usa HTTPS)
+)
+
+# ----- SQLAlchemy (PostgreSQL no Render) -----
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Pool mais resiliente para Render Postgres
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_size': 5,
+    'max_overflow': 10,
+    'pool_timeout': 30,
+    'pool_recycle': 1800,  # 30 min
+}
+
+# ----- Estáticos mais rápidos -----
+# Cache de arquivos estáticos (logo, mp3, uploads) por 1 dia
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 24 * 60 * 60
 
 # Pastas de upload (logos e fallback opcional de fotos)
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
@@ -23,6 +49,16 @@ os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
 # Pasta para ÁUDIOS e outros estáticos personalizados (pasta "statics")
 app.config['STATICS_FOLDER'] = 'statics'
 os.makedirs(app.config['STATICS_FOLDER'], exist_ok=True)
+
+# ----- Compressão Gzip (opcional, não quebra se não tiver lib) -----
+try:
+    from flask_compress import Compress
+    Compress(app)
+except Exception:
+    pass
+
+# ----- JSON mais enxuto -----
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
 db = SQLAlchemy(app)
 
@@ -122,11 +158,35 @@ def parse_date(s):
         return None
 
 # =========================
+# CACHE LEVE para /api/ultimo_lancamento
+# =========================
+_LAST_LANC_CACHE = {"value": 0, "ts": 0.0}
+_LAST_LANC_TTL = 2.0  # segundos
+
+def _get_cached_last_lanc_id():
+    now = time.time()
+    if now - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
+        return _LAST_LANC_CACHE["value"], True
+    # consulta rápida no banco (MAX(id) usa índice)
+    last_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
+    _LAST_LANC_CACHE["value"] = int(last_id)
+    _LAST_LANC_CACHE["ts"] = now
+    return _LAST_LANC_CACHE["value"], False
+
+def _invalidate_last_lanc_cache():
+    _LAST_LANC_CACHE["ts"] = 0.0
+
+def _update_last_lanc_cache_with_value(v: int):
+    _LAST_LANC_CACHE["value"] = max(_LAST_LANC_CACHE["value"], int(v))
+    _LAST_LANC_CACHE["ts"] = time.time()
+
+# =========================
 # ROTA PARA SERVIR ÁUDIOS/ARQS DA PASTA "statics"
 # =========================
 @app.route('/statics/<path:filename>')
 def statics_files(filename):
-    return send_from_directory(app.config['STATICS_FOLDER'], filename)
+    # cache_timeout usa SEND_FILE_MAX_AGE_DEFAULT
+    return send_from_directory(app.config['STATICS_FOLDER'], filename, cache_timeout=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
 
 # =========================
 # LOGIN/LOGOUT
@@ -134,9 +194,13 @@ def statics_files(filename):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        tipo = request.form['tipo']
-        username = request.form['username']
-        senha = request.form['senha']
+        tipo = request.form.get('tipo', '').strip()
+        username = request.form.get('username', '').strip()
+        senha = request.form.get('senha', '')
+
+        # Sessão permanente (evita "cair" pro login logo depois)
+        session.permanent = True
+
         if tipo == 'admin':
             user = Admin.query.filter_by(username=username).first()
             if user and user.checar_senha(senha):
@@ -149,7 +213,15 @@ def login():
                 session['user_id'] = est.id
                 session['user_tipo'] = 'estabelecimento'
                 return redirect(url_for('painel_estabelecimento'))
+        else:
+            # tipo inválido (evita permanecer na tela "sem motivo")
+            flash('Selecione o tipo de usuário.', 'danger')
+            return render_template('login.html'), 400
+
         flash('Usuário ou senha inválidos', 'danger')
+        # 200 mantém a tela, mas podemos sinalizar claramente falha
+        return render_template('login.html'), 401
+
     return render_template('login.html')
 
 @app.route('/logout')
@@ -180,34 +252,61 @@ def dashboard():
     di = parse_date(filtros['data_inicio'])
     df = parse_date(filtros['data_fim'])
 
-    query = Lancamento.query
+    # Base query com filtros
+    base_q = db.session.query(Lancamento)
     if coop_id_i is not None:
-        query = query.filter(Lancamento.cooperado_id == coop_id_i)
+        base_q = base_q.filter(Lancamento.cooperado_id == coop_id_i)
     if est_id_i is not None:
-        query = query.filter(Lancamento.estabelecimento_id == est_id_i)
+        base_q = base_q.filter(Lancamento.estabelecimento_id == est_id_i)
     if di:
-        query = query.filter(Lancamento.data >= di)
+        base_q = base_q.filter(Lancamento.data >= di)
     if df:
-        query = query.filter(Lancamento.data <= df)
+        base_q = base_q.filter(Lancamento.data <= df)
 
-    lancamentos = query.all()
-    total_pedidos = len(lancamentos)
-    total_valor = sum(l.valor for l in lancamentos)
-    total_cooperados = len(cooperados)
-    total_estabelecimentos = len(estabelecimentos)
+    # Totais com agregação SQL (rápido)
+    total_pedidos = base_q.count()
+    total_valor = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
+    if coop_id_i is not None or est_id_i is not None or di or df:
+        # aplica os mesmos filtros
+        sum_q = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
+        if coop_id_i is not None:
+            sum_q = sum_q.filter(Lancamento.cooperado_id == coop_id_i)
+        if est_id_i is not None:
+            sum_q = sum_q.filter(Lancamento.estabelecimento_id == est_id_i)
+        if di:
+            sum_q = sum_q.filter(Lancamento.data >= di)
+        if df:
+            sum_q = sum_q.filter(Lancamento.data <= df)
+        total_valor = sum_q
+    total_valor = total_valor.scalar() or 0.0
 
-    cooperado_nomes = [c.nome for c in cooperados]
-    cooperado_valores = []
-    for c in cooperados:
-        valor = sum(l.valor for l in lancamentos if l.cooperado_id == c.id)
-        cooperado_valores.append(valor)
-    if not cooperado_valores:
-        cooperado_valores = [0]
-        cooperado_nomes = ["Nenhum cooperado"]
+    # Gráfico por cooperado com OUTER JOIN + GROUP BY
+    sum_per_coop = db.session.query(
+        Cooperado.id,
+        Cooperado.nome,
+        func.coalesce(func.sum(Lancamento.valor), 0.0).label('total')
+    ).outerjoin(
+        Lancamento, Cooperado.id == Lancamento.cooperado_id
+    )
+
+    # Filtros se houver (reaplicados sobre Lancamento)
+    if coop_id_i is not None:
+        sum_per_coop = sum_per_coop.filter(Cooperado.id == coop_id_i)
+    if est_id_i is not None:
+        sum_per_coop = sum_per_coop.filter((Lancamento.estabelecimento_id == est_id_i) | (Lancamento.id.is_(None)))
+    if di:
+        sum_per_coop = sum_per_coop.filter((Lancamento.data >= di) | (Lancamento.id.is_(None)))
+    if df:
+        sum_per_coop = sum_per_coop.filter((Lancamento.data <= df) | (Lancamento.id.is_(None)))
+
+    sum_per_coop = sum_per_coop.group_by(Cooperado.id, Cooperado.nome).order_by(Cooperado.nome).all()
+
+    cooperado_nomes = [row.nome for row in sum_per_coop] or ["Nenhum cooperado"]
+    cooperado_valores = [float(row.total) for row in sum_per_coop] or [0.0]
 
     # ID global do último lançamento (usado para tocar servico.mp3 no dashboard)
     try:
-        ultimo_lancamento_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
+        ultimo_lancamento_id, _ = _get_cached_last_lanc_id()
     except Exception:
         ultimo_lancamento_id = 0
 
@@ -217,13 +316,12 @@ def dashboard():
         estabelecimentos=estabelecimentos,
         total_pedidos=total_pedidos,
         total_valor=total_valor,
-        total_cooperados=total_cooperados,
-        total_estabelecimentos=total_estabelecimentos,
+        total_cooperados=len(cooperados),
+        total_estabelecimentos=len(estabelecimentos),
         cooperado_nomes=cooperado_nomes,
         cooperado_valores=cooperado_valores,
         lancamentos_contagem=cooperado_valores,
         filtros=filtros,
-        # NOVO: fornece para o HTML comparar e tocar o áudio de serviço
         ultimo_lancamento_id=ultimo_lancamento_id
     )
 
@@ -236,9 +334,14 @@ def painel_admin():
 # =========================
 @app.get('/api/ultimo_lancamento')
 def api_ultimo_lancamento():
-    """Retorna o maior ID de lançamento na base."""
-    last_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
-    return jsonify({"last_id": int(last_id)})
+    """Retorna o maior ID de lançamento na base (com cache leve para reduzir carga)."""
+    last_id, cached = _get_cached_last_lanc_id()
+    # Ajuda o browser/proxy a reusar por 2s (sem quebrar o frontend atual)
+    resp = jsonify({"last_id": int(last_id)})
+    resp.headers['Cache-Control'] = 'public, max-age=2'
+    if cached:
+        resp.headers['X-Cache-Hit'] = '1'
+    return resp
 
 @app.get('/api/lancamento_info')
 def api_lancamento_info():
@@ -353,12 +456,13 @@ def foto_cooperado(id):
     if c.foto_data:
         return send_file(BytesIO(c.foto_data),
                          mimetype=c.foto_mimetype or 'image/jpeg',
-                         download_name=c.foto_filename or f'cooperado_{id}.jpg')
+                         download_name=c.foto_filename or f'cooperado_{id}.jpg',
+                         max_age=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
     if c.foto:
         path = os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], c.foto)
         if os.path.exists(path):
-            return send_file(path, mimetype='image/jpeg')
-    return send_file(BytesIO(b''), mimetype='image/jpeg')
+            return send_file(path, mimetype='image/jpeg', max_age=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
+    return send_file(BytesIO(b''), mimetype='image/jpeg', max_age=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
 
 # =========================
 # AJUSTAR CRÉDITO (ADMIN ONLY)
@@ -613,6 +717,8 @@ def painel_estabelecimento():
                     db.session.add(l)
                     c.credito = novo_credito
                     db.session.commit()
+                    # Atualiza cache de "último lançamento"
+                    _update_last_lanc_cache_with_value(l.id)
                     flash('Lançamento realizado com sucesso!', 'success')
             else:
                 flash('Cooperado não encontrado!', 'danger')
@@ -692,6 +798,8 @@ def estab_editar_lancamento(id):
     cooperado.credito -= delta
 
     db.session.commit()
+    # invalida cache (pode alterar "último" se o edit afetar IDs futuros por alguma razão)
+    _invalidate_last_lanc_cache()
     flash('Lançamento editado com sucesso!', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
@@ -717,7 +825,7 @@ def estab_excluir_lancamento(id):
 
     cooperado = Cooperado.query.get(l.cooperado_id)
     if not cooperado:
-        flash('Cooperado não encontrado.', 'danger')
+        flash('Cooperado não encontrado!', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
     # devolve o valor ao crédito do cooperado
@@ -725,6 +833,8 @@ def estab_excluir_lancamento(id):
 
     db.session.delete(l)
     db.session.commit()
+    # invalida cache (talvez o último id existente mude)
+    _invalidate_last_lanc_cache()
     flash('Lançamento excluído e crédito devolvido ao cooperado.', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
