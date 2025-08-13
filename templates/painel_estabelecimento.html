@@ -290,7 +290,7 @@
                   <input type="text" class="form-control" id="edit-desc" name="descricao">
               </div>
               <div class="form-text text-warning">
-                * Edição permitida até 10 hora após a criação.
+                * Edição permitida até 1 hora após a criação.
               </div>
           </div>
           <div class="modal-footer">
@@ -439,7 +439,7 @@
         const criado = new Date(createdIso); // trata como UTC
         const agora = new Date();
         const diffMs = agora - criado;
-        return diffMs > (10 * 60 * 60 * 1000); // 10 hora
+        return diffMs > (60 * 60 * 1000); // 1 hora
     }
     </script>
 
