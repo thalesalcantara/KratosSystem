@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from io import BytesIO
-from sqlalchemy import text
+from sqlalchemy import text, func
 import os
 
 app = Flask(__name__)
@@ -207,7 +207,6 @@ def dashboard():
 
     # ID global do último lançamento (usado para tocar servico.mp3 no dashboard)
     try:
-        from sqlalchemy import func
         ultimo_lancamento_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
     except Exception:
         ultimo_lancamento_id = 0
@@ -231,6 +230,30 @@ def dashboard():
 @app.route('/painel_admin')
 def painel_admin():
     return redirect(url_for('dashboard'))
+
+# =========================
+# APIs para o Dashboard detectar novos lançamentos
+# =========================
+@app.get('/api/ultimo_lancamento')
+def api_ultimo_lancamento():
+    """Retorna o maior ID de lançamento na base."""
+    last_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
+    return jsonify({"last_id": int(last_id)})
+
+@app.get('/api/lancamento_info')
+def api_lancamento_info():
+    """Retorna dados básicos do lançamento para balão/tooltip no dashboard."""
+    lanc_id = request.args.get('id', type=int)
+    if not lanc_id:
+        return jsonify({"error": "id requerido"}), 400
+    l = Lancamento.query.get_or_404(lanc_id)
+    nome = l.cooperado.nome if l.cooperado else ""
+    return jsonify({
+        "id": l.id,
+        "cooperado": nome,
+        "valor": float(l.valor),
+        "os_numero": l.os_numero
+    })
 
 # =========================
 # COOPERADOS CRUD
@@ -604,7 +627,7 @@ def painel_estabelecimento():
             hora_brasilia = l.data.replace(tzinfo=utc).astimezone(timezone('America/Sao_Paulo'))
         except:
             pass
-    # adiciona atributo formatado para exibir na tabela
+        # adiciona atributo formatado para exibir na tabela
         l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
