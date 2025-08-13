@@ -276,13 +276,24 @@
       const labels = {{ cooperado_nomes|tojson }};
       const valores = {{ lancamentos_contagem|tojson }};
 
-      const colors = [];
-      for (let i = 0; i < labels.length; i++) {
-        const hue = 48 + (i * 7) % 20;   // dourado
-        const sat = 90;
-        const light = 55 - (i % 3) * 6;
-        colors.push(`hsl(${hue} ${sat}% ${light}%)`);
+      // --- GERAR ATÉ 300 CORES DISTINTAS (e usar exatamente a quantidade de cooperados) ---
+      function buildColors(total) {
+        const MAX = 300;
+        const n = Math.min(total, MAX);
+        const arr = [];
+        // espaça pelo círculo de matiz e alterna saturação/luminosidade para maior contraste
+        for (let i = 0; i < n; i++) {
+          const hue = Math.round((i * 360) / n);     // 0..360 distribuído
+          const ring = i % 3;                        // 3 níveis para contraste
+          const sat = ring === 0 ? 85 : ring === 1 ? 72 : 60;
+          const light = ring === 0 ? 55 : ring === 1 ? 50 : 45;
+          arr.push(`hsl(${hue} ${sat}% ${light}%)`);
+        }
+        // se houver mais labels que MAX, recicla as cores
+        while (arr.length < total) arr.push(arr[arr.length % n]);
+        return arr;
       }
+      const colors = buildColors(labels.length);
 
       const brakeDisc = {
         id: 'brakeDisc',
@@ -371,10 +382,11 @@
         notifBox.appendChild(div);
         void div.offsetWidth; // reflow
         div.classList.add('show');
+        // DURAÇÃO DO BALÃO: 3000ms (3 segundos)
         setTimeout(() => {
           div.classList.remove('show');
           setTimeout(() => div.remove(), 300);
-        }, 1500);
+        }, 3000);
       }
 
       async function ping() {
