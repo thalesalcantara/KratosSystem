@@ -185,8 +185,12 @@ def _update_last_lanc_cache_with_value(v: int):
 # =========================
 @app.route('/statics/<path:filename>')
 def statics_files(filename):
-    # cache_timeout usa SEND_FILE_MAX_AGE_DEFAULT
-    return send_from_directory(app.config['STATICS_FOLDER'], filename, cache_timeout=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
+    # Flask/Werkzeug 3: usar max_age (cache_timeout não é mais aceito)
+    return send_from_directory(
+        app.config['STATICS_FOLDER'],
+        filename,
+        max_age=app.config['SEND_FILE_MAX_AGE_DEFAULT']
+    )
 
 # =========================
 # LOGIN/LOGOUT
