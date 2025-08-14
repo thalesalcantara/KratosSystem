@@ -1,70 +1,73 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory, jsonify
+from flask import (
+    Flask, render_template, request, redirect, url_for, flash, session,
+    send_file, send_from_directory, jsonify, Response
+)
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from io import BytesIO
-from sqlalchemy import text, func
+from sqlalchemy import text, func, Index
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import time
+import hashlib
 
+# ========= APP / CONFIG =========
 app = Flask(__name__)
 app.secret_key = 'coopex-secreto'
 
-# ----- Proxy/HTTPS (Render) -----
 # Corrige scheme/host atrás do proxy para cookies seguros e redirects corretos
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
-# ----- Sessão/Cookies: mais estável -----
+# Sessão/Cookies
 app.permanent_session_lifetime = timedelta(hours=10)
 app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=True,  # requer HTTPS (Render usa HTTPS)
+    SESSION_COOKIE_SECURE=True,   # Render usa HTTPS
+    TEMPLATES_AUTO_RELOAD=False,  # evita rebuild de template em prod
+    JSONIFY_PRETTYPRINT_REGULAR=False,
+    JSON_SORT_KEYS=False,
 )
 
-# ----- SQLAlchemy (PostgreSQL no Render) -----
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
+# SQLAlchemy (PostgreSQL no Render)
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    'postgresql+psycopg://'
+    'banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH'
+    '@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Pool mais resiliente para Render Postgres
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
     'pool_size': 5,
     'max_overflow': 10,
     'pool_timeout': 30,
     'pool_recycle': 1800,  # 30 min
+    # REMOVIDO: connect_args com "statement_cache_size" (incompatível com psycopg3)
 }
 
-# ----- Estáticos mais rápidos -----
-# Cache de arquivos estáticos (logo, mp3, uploads) por 1 dia
+# Estáticos mais rápidos (cache padrão de 1 dia)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 24 * 60 * 60
 
-# Pastas de upload (logos e fallback opcional de fotos)
+# Pastas
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
+app.config['STATICS_FOLDER'] = 'statics'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
 os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
-
-# Pasta para ÁUDIOS e outros estáticos personalizados (pasta "statics")
-app.config['STATICS_FOLDER'] = 'statics'
 os.makedirs(app.config['STATICS_FOLDER'], exist_ok=True)
 
-# ----- Compressão Gzip (opcional, não quebra se não tiver lib) -----
+# Compressão Gzip (opcional)
 try:
     from flask_compress import Compress
     Compress(app)
 except Exception:
     pass
 
-# ----- JSON mais enxuto -----
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
-
 db = SQLAlchemy(app)
 
-# =========================
-# MODELS
-# =========================
+# ========= MODELS =========
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
@@ -73,7 +76,7 @@ class Cooperado(db.Model):
     # legado (arquivo no disco)
     foto = db.Column(db.String(120), nullable=True)
     # novos campos (foto no banco)
-    foto_data = db.Column(db.LargeBinary, nullable=True)      # BYTEA no PostgreSQL
+    foto_data = db.Column(db.LargeBinary, nullable=True)      # BYTEA
     foto_mimetype = db.Column(db.String(50), nullable=True)
     foto_filename = db.Column(db.String(120), nullable=True)
 
@@ -99,21 +102,23 @@ class Admin(db.Model):
         return check_password_hash(self.senha_hash, senha)
 
 class Lancamento(db.Model):
+    __tablename__ = 'lancamento'
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
     os_numero = db.Column(db.String(50), nullable=False)
-    cooperado_id = db.Column(db.Integer, db.ForeignKey('cooperado.id'), nullable=False)
-    estabelecimento_id = db.Column(db.Integer, db.ForeignKey('estabelecimento.id'), nullable=False)
+    cooperado_id = db.Column(db.Integer, db.ForeignKey('cooperado.id'), nullable=False, index=True)
+    estabelecimento_id = db.Column(db.Integer, db.ForeignKey('estabelecimento.id'), nullable=False, index=True)
     valor = db.Column(db.Float, nullable=False)
     descricao = db.Column(db.String(250))
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
 
-# =========================
-# AJUSTE DE SCHEMA (sem Alembic)
-# =========================
+# Índices adicionais úteis em filtros/orden.
+Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
+
+# ========= SCHEMA (adaptação leve) =========
 def ensure_schema():
-    """Cria colunas de foto no banco se ainda não existirem."""
+    """Cria colunas de foto no banco se ainda não existirem (sem Alembic)."""
     with app.app_context():
         cols = {r[0] for r in db.session.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
@@ -129,10 +134,10 @@ def ensure_schema():
             db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
             db.session.commit()
 
-# Garante o schema sob gunicorn (no 1º request do worker)
 _SCHEMA_BOOTED = False
 @app.before_request
 def _run_schema_once():
+    # Uma só vez por worker, rápido.
     global _SCHEMA_BOOTED
     if not _SCHEMA_BOOTED:
         try:
@@ -141,11 +146,10 @@ def _run_schema_once():
             pass
         _SCHEMA_BOOTED = True
 
-# =========================
-# HELPERS
-# =========================
+# ========= HELPERS =========
 def is_admin():
     return session.get('user_tipo') == 'admin'
+
 def is_estabelecimento():
     return session.get('user_tipo') == 'estabelecimento'
 
@@ -154,12 +158,28 @@ def parse_date(s):
         return None
     try:
         return datetime.strptime(s, '%Y-%m-%d')
-    except:
+    except Exception:
         return None
 
-# =========================
-# CACHE LEVE para /api/ultimo_lancamento
-# =========================
+def _cache_headers(seconds=None, etag_base: str | None = None):
+    """Gera cabeçalhos Cache-Control e ETag simples."""
+    if seconds is None:
+        seconds = int(app.config.get('SEND_FILE_MAX_AGE_DEFAULT', 3600))
+    headers = {
+        "Cache-Control": f"public, max-age={seconds}, immutable" if seconds >= 86400 else f"public, max-age={seconds}"
+    }
+    if etag_base:
+        etag = hashlib.sha256(etag_base.encode('utf-8')).hexdigest()[:16]
+        headers["ETag"] = etag
+    return headers
+
+def _response_with_cache(resp: Response, seconds=None, etag_base=None):
+    headers = _cache_headers(seconds, etag_base)
+    for k, v in headers.items():
+        resp.headers[k] = v
+    return resp
+
+# ========= CACHE LEVE para /api/ultimo_lancamento =========
 _LAST_LANC_CACHE = {"value": 0, "ts": 0.0}
 _LAST_LANC_TTL = 2.0  # segundos
 
@@ -167,7 +187,6 @@ def _get_cached_last_lanc_id():
     now = time.time()
     if now - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
         return _LAST_LANC_CACHE["value"], True
-    # consulta rápida no banco (MAX(id) usa índice)
     last_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
     _LAST_LANC_CACHE["value"] = int(last_id)
     _LAST_LANC_CACHE["ts"] = now
@@ -180,25 +199,30 @@ def _update_last_lanc_cache_with_value(v: int):
     _LAST_LANC_CACHE["value"] = max(_LAST_LANC_CACHE["value"], int(v))
     _LAST_LANC_CACHE["ts"] = time.time()
 
-# =========================
-# ROTA PARA SERVIR ÁUDIOS/ARQS DA PASTA "statics"
-# =========================
+# ========= ESTÁTICOS =========
 @app.route('/statics/<path:filename>')
 def statics_files(filename):
-    # cache_timeout usa SEND_FILE_MAX_AGE_DEFAULT
-    return send_from_directory(app.config['STATICS_FOLDER'], filename, cache_timeout=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
+    # Em Flask 3/Werkzeug 3, send_from_directory usa get_send_file_max_age por padrão.
+    resp = send_from_directory(app.config['STATICS_FOLDER'], filename)
+    # Reforça cache explícito (e corrige erro de cache_timeout removido)
+    return _response_with_cache(resp, etag_base=f"statics/{filename}")
 
-# =========================
-# LOGIN/LOGOUT
-# =========================
+# ========= HEADERS GERAIS DE PERFORMANCE =========
+@app.after_request
+def add_perf_headers(resp: Response):
+    # Mantém conexões TCP ativas e dá dica de timing
+    resp.headers.setdefault("Connection", "keep-alive")
+    # Pequena dica de timing (não mede tudo, mas ajuda a depurar)
+    resp.headers.setdefault("Server-Timing", "app;desc=\"Coopex-API\"")
+    return resp
+
+# ========= LOGIN/LOGOUT =========
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         tipo = request.form.get('tipo', '').strip()
         username = request.form.get('username', '').strip()
         senha = request.form.get('senha', '')
-
-        # Sessão permanente (evita "cair" pro login logo depois)
         session.permanent = True
 
         if tipo == 'admin':
@@ -214,12 +238,10 @@ def login():
                 session['user_tipo'] = 'estabelecimento'
                 return redirect(url_for('painel_estabelecimento'))
         else:
-            # tipo inválido (evita permanecer na tela "sem motivo")
             flash('Selecione o tipo de usuário.', 'danger')
             return render_template('login.html'), 400
 
         flash('Usuário ou senha inválidos', 'danger')
-        # 200 mantém a tela, mas podemos sinalizar claramente falha
         return render_template('login.html'), 401
 
     return render_template('login.html')
@@ -229,9 +251,7 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# =========================
-# DASHBOARD (ADMIN)
-# =========================
+# ========= DASHBOARD (ADMIN) =========
 @app.route('/')
 @app.route('/dashboard')
 def dashboard():
@@ -263,24 +283,20 @@ def dashboard():
     if df:
         base_q = base_q.filter(Lancamento.data <= df)
 
-    # Totais com agregação SQL (rápido)
+    # Totais
     total_pedidos = base_q.count()
-    total_valor = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
-    if coop_id_i is not None or est_id_i is not None or di or df:
-        # aplica os mesmos filtros
-        sum_q = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
-        if coop_id_i is not None:
-            sum_q = sum_q.filter(Lancamento.cooperado_id == coop_id_i)
-        if est_id_i is not None:
-            sum_q = sum_q.filter(Lancamento.estabelecimento_id == est_id_i)
-        if di:
-            sum_q = sum_q.filter(Lancamento.data >= di)
-        if df:
-            sum_q = sum_q.filter(Lancamento.data <= df)
-        total_valor = sum_q
-    total_valor = total_valor.scalar() or 0.0
+    sum_q = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
+    if coop_id_i is not None:
+        sum_q = sum_q.filter(Lancamento.cooperado_id == coop_id_i)
+    if est_id_i is not None:
+        sum_q = sum_q.filter(Lancamento.estabelecimento_id == est_id_i)
+    if di:
+        sum_q = sum_q.filter(Lancamento.data >= di)
+    if df:
+        sum_q = sum_q.filter(Lancamento.data <= df)
+    total_valor = (sum_q.scalar() or 0.0)
 
-    # Gráfico por cooperado com OUTER JOIN + GROUP BY
+    # Gráfico por cooperado com OUTER JOIN + GROUP BY (mantido)
     sum_per_coop = db.session.query(
         Cooperado.id,
         Cooperado.nome,
@@ -289,7 +305,6 @@ def dashboard():
         Lancamento, Cooperado.id == Lancamento.cooperado_id
     )
 
-    # Filtros se houver (reaplicados sobre Lancamento)
     if coop_id_i is not None:
         sum_per_coop = sum_per_coop.filter(Cooperado.id == coop_id_i)
     if est_id_i is not None:
@@ -304,7 +319,7 @@ def dashboard():
     cooperado_nomes = [row.nome for row in sum_per_coop] or ["Nenhum cooperado"]
     cooperado_valores = [float(row.total) for row in sum_per_coop] or [0.0]
 
-    # ID global do último lançamento (usado para tocar servico.mp3 no dashboard)
+    # ID global do último lançamento
     try:
         ultimo_lancamento_id, _ = _get_cached_last_lanc_id()
     except Exception:
@@ -329,15 +344,13 @@ def dashboard():
 def painel_admin():
     return redirect(url_for('dashboard'))
 
-# =========================
-# APIs para o Dashboard detectar novos lançamentos
-# =========================
+# ========= APIs para o Dashboard detectar novos lançamentos =========
 @app.get('/api/ultimo_lancamento')
 def api_ultimo_lancamento():
     """Retorna o maior ID de lançamento na base (com cache leve para reduzir carga)."""
     last_id, cached = _get_cached_last_lanc_id()
-    # Ajuda o browser/proxy a reusar por 2s (sem quebrar o frontend atual)
     resp = jsonify({"last_id": int(last_id)})
+    # Ajuda navegador/proxy a reusar por 2s
     resp.headers['Cache-Control'] = 'public, max-age=2'
     if cached:
         resp.headers['X-Cache-Hit'] = '1'
@@ -358,9 +371,7 @@ def api_lancamento_info():
         "os_numero": l.os_numero
     })
 
-# =========================
-# COOPERADOS CRUD
-# =========================
+# ========= COOPERADOS CRUD =========
 @app.route('/listar_cooperados')
 def listar_cooperados():
     if not is_admin():
@@ -392,7 +403,7 @@ def novo_cooperado():
             try:
                 with open(os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], foto_filename), 'wb') as f:
                     f.write(raw)
-            except:
+            except Exception:
                 pass
 
         if Cooperado.query.filter_by(username=username).first():
@@ -431,7 +442,7 @@ def editar_cooperado(id):
             try:
                 with open(os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], foto_filename), 'wb') as f:
                     f.write(raw)
-            except:
+            except Exception:
                 pass
 
         db.session.commit()
@@ -449,24 +460,36 @@ def excluir_cooperado(id):
     flash('Cooperado excluído!', 'success')
     return redirect(url_for('listar_cooperados'))
 
-# Serve foto do cooperado (prioriza banco; fallback no disco)
+# Serve foto do cooperado (prioriza banco; fallback no disco) com cache correto
 @app.route('/cooperados/foto/<int:id>')
 def foto_cooperado(id):
     c = Cooperado.query.get_or_404(id)
+    cache_sec = int(app.config.get('SEND_FILE_MAX_AGE_DEFAULT', 86400))
+
     if c.foto_data:
-        return send_file(BytesIO(c.foto_data),
-                         mimetype=c.foto_mimetype or 'image/jpeg',
-                         download_name=c.foto_filename or f'cooperado_{id}.jpg',
-                         max_age=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
+        bio = BytesIO(c.foto_data)
+        resp = send_file(
+            bio,
+            mimetype=c.foto_mimetype or 'image/jpeg',
+            download_name=c.foto_filename or f'cooperado_{id}.jpg'
+        )
+        return _response_with_cache(resp, cache_sec, etag_base=f"cooperado_db_{id}_{len(c.foto_data)}")
+
     if c.foto:
         path = os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], c.foto)
         if os.path.exists(path):
-            return send_file(path, mimetype='image/jpeg', max_age=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
-    return send_file(BytesIO(b''), mimetype='image/jpeg', max_age=app.config['SEND_FILE_MAX_AGE_DEFAULT'])
+            resp = send_file(path, mimetype='image/jpeg')
+            try:
+                size = os.path.getsize(path)
+            except Exception:
+                size = 0
+            return _response_with_cache(resp, cache_sec, etag_base=f"cooperado_fs_{id}_{size}")
 
-# =========================
-# AJUSTAR CRÉDITO (ADMIN ONLY)
-# =========================
+    # vazio
+    resp = send_file(BytesIO(b''), mimetype='image/jpeg')
+    return _response_with_cache(resp, cache_sec, etag_base=f"cooperado_empty_{id}")
+
+# ========= AJUSTAR CRÉDITO =========
 @app.route('/ajustar_credito', methods=['GET', 'POST'])
 def ajustar_credito():
     if not is_admin():
@@ -506,9 +529,7 @@ def ajustar_credito_individual(id):
             return redirect(url_for('listar_cooperados'))
     return render_template('ajustar_credito.html', cooperado=cooperado)
 
-# =========================
-# ESTABELECIMENTOS CRUD
-# =========================
+# ========= ESTABELECIMENTOS CRUD =========
 @app.route('/listar_estabelecimentos')
 def listar_estabelecimentos():
     if not is_admin():
@@ -570,9 +591,7 @@ def excluir_estabelecimento(id):
     flash('Estabelecimento excluído!', 'success')
     return redirect(url_for('listar_estabelecimentos'))
 
-# =========================
-# LANÇAMENTOS (ADMIN)
-# =========================
+# ========= LANÇAMENTOS (ADMIN) =========
 @app.route('/lancamentos')
 def listar_lancamentos():
     if not is_admin():
@@ -614,7 +633,6 @@ def exportar_lancamentos():
     if not is_admin():
         return redirect(url_for('login'))
 
-    # Importa aqui pra não quebrar o deploy se faltar lib
     try:
         from openpyxl import Workbook
         from openpyxl.styles import Font, Alignment
@@ -664,7 +682,6 @@ def exportar_lancamentos():
 
     widths = [20, 16, 32, 32, 16, 60]
     for i, w in enumerate(widths, start=1):
-        from openpyxl.utils import get_column_letter
         ws.column_dimensions[get_column_letter(i)].width = w
 
     for r in range(2, ws.max_row + 1):
@@ -673,16 +690,15 @@ def exportar_lancamentos():
     bio = BytesIO()
     wb.save(bio)
     bio.seek(0)
-    return send_file(
+    resp = send_file(
         bio,
         as_attachment=True,
         download_name="lancamentos.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+    return _response_with_cache(resp, 0, etag_base=f"xlsx_{len(rows)}")
 
-# =========================
-# PAINEL ESTABELECIMENTO
-# =========================
+# ========= PAINEL ESTABELECIMENTO =========
 @app.route('/painel_estabelecimento', methods=['GET', 'POST'])
 def painel_estabelecimento():
     if not is_estabelecimento():
@@ -701,7 +717,7 @@ def painel_estabelecimento():
             if c:
                 valor_f = float(valor)
 
-                # D E B I T O : lançamento diminui o crédito do cooperado
+                # DEBITO: lançamento diminui o crédito do cooperado
                 novo_credito = c.credito - valor_f
                 if novo_credito < 0:
                     flash('Crédito insuficiente para este lançamento.', 'danger')
@@ -717,7 +733,6 @@ def painel_estabelecimento():
                     db.session.add(l)
                     c.credito = novo_credito
                     db.session.commit()
-                    # Atualiza cache de "último lançamento"
                     _update_last_lanc_cache_with_value(l.id)
                     flash('Lançamento realizado com sucesso!', 'success')
             else:
@@ -726,26 +741,25 @@ def painel_estabelecimento():
             flash('Preencha todos os campos obrigatórios!', 'danger')
 
     lancamentos = Lancamento.query.filter_by(estabelecimento_id=est.id).order_by(Lancamento.data.desc()).all()
-    for l in lancamentos:
-        hora_brasilia = l.data
-        try:
-            from pytz import timezone, utc
-            hora_brasilia = l.data.replace(tzinfo=utc).astimezone(timezone('America/Sao_Paulo'))
-        except:
-            pass
-        # adiciona atributo formatado para exibir na tabela
-        l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
+
+    # Timezone conversion (import uma vez só aqui)
+    try:
+        from pytz import timezone, utc
+        tz_sp = timezone('America/Sao_Paulo')
+        for l in lancamentos:
+            hora_brasilia = l.data.replace(tzinfo=utc).astimezone(tz_sp)
+            l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
+    except Exception:
+        for l in lancamentos:
+            l.data_brasilia = l.data.strftime('%d/%m/%Y %H:%M')
+
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
-# =========================
-# ESTAB: EDITAR / EXCLUIR LANÇAMENTO (1h de janela)
-# =========================
+# ========= ESTAB: EDITAR / EXCLUIR LANÇAMENTO (10h de janela) =========
 @app.route('/estab/lancamento/editar/<int:id>', methods=['POST'])
 def estab_editar_lancamento(id):
     if not is_estabelecimento():
         return redirect(url_for('login'))
-
-    from datetime import datetime, timedelta
 
     l = Lancamento.query.get_or_404(id)
 
@@ -754,17 +768,14 @@ def estab_editar_lancamento(id):
         flash('Você não tem permissão para editar este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # janela de 10 hora
     if datetime.utcnow() - l.data > timedelta(hours=10):
         flash('Edição permitida somente até 10 horas após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
 
-    # dados do form
     os_numero = request.form.get('os_numero', '').strip()
     valor_str = request.form.get('valor', '').strip().replace(',', '.')
     descricao = request.form.get('descricao', '').strip()
 
-    # validações
     try:
         novo_valor = float(valor_str)
         if novo_valor <= 0:
@@ -783,42 +794,33 @@ def estab_editar_lancamento(id):
         return redirect(url_for('painel_estabelecimento'))
 
     valor_antigo = l.valor
-    delta = novo_valor - valor_antigo  # positivo => precisa debitar mais crédito
+    delta = novo_valor - valor_antigo
 
     if delta > 0 and cooperado.credito < delta:
         flash('Crédito insuficiente para aumentar o valor deste lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # aplica alterações
     l.os_numero = os_numero
     l.valor = novo_valor
     l.descricao = descricao if descricao else None
 
-    # ajusta crédito do cooperado (subtrai o delta)
     cooperado.credito -= delta
-
     db.session.commit()
-    # invalida cache (pode alterar "último" se o edit afetar IDs futuros por alguma razão)
     _invalidate_last_lanc_cache()
     flash('Lançamento editado com sucesso!', 'success')
     return redirect(url_for('painel_estabelecimento'))
-
 
 @app.route('/estab/lancamento/excluir/<int:id>', methods=['POST'])
 def estab_excluir_lancamento(id):
     if not is_estabelecimento():
         return redirect(url_for('login'))
 
-    from datetime import datetime, timedelta
-
     l = Lancamento.query.get_or_404(id)
 
-    # segurança: só o estabelecimento que criou pode excluir
     if l.estabelecimento_id != session.get('user_id'):
         flash('Você não tem permissão para excluir este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # janela de 10 hora
     if datetime.utcnow() - l.data > timedelta(hours=10):
         flash('Exclusão permitida somente até 10 hora após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
@@ -828,20 +830,15 @@ def estab_excluir_lancamento(id):
         flash('Cooperado não encontrado!', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # devolve o valor ao crédito do cooperado
     cooperado.credito += l.valor
 
     db.session.delete(l)
     db.session.commit()
-    # invalida cache (talvez o último id existente mude)
     _invalidate_last_lanc_cache()
     flash('Lançamento excluído e crédito devolvido ao cooperado.', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
-
-# =========================
-# CRIA BANCO + ADMIN MASTER
-# =========================
+# ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
     with app.app_context():
         db.create_all()
@@ -853,6 +850,8 @@ def criar_banco_e_admin():
             db.session.commit()
             print('Admin criado: coopex / coopex05289')
 
+# ========= MAIN =========
 if __name__ == '__main__':
     criar_banco_e_admin()
+    # Em produção (Render) você usa gunicorn. Aqui é dev/standalone:
     app.run(debug=False, host="0.0.0.0")
