@@ -1,375 +1,386 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>Dashboard Admin - Coopex</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      body {
-        background: #191c20;
-        font-family: "Roboto", Arial, sans-serif;
-        min-height: 100vh;
-        margin: 0;
-        padding: 0;
-        color: #ffd700;
-      }
-      .sidebar {
-        width: 210px;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background: linear-gradient(160deg, #101218 70%, #003399 100%);
-        color: #fff;
-        box-shadow: 3px 0 12px #00339944;
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      .sidebar .logo {
-        width: 160px;         /* 3x maior que antes */
-        margin: 38px auto 8px auto;
-        display: block;
-        filter: drop-shadow(0 0 18px #ffd700cc);
-        transition: width .2s;
-      }
-      .sidebar-funcao {
-        font-family: "Orbitron", sans-serif;
-        color: #ffd700;
-        font-size: 1.01rem;
-        font-weight: 600;
-        text-align: center;
-        margin: 0 0 18px 0;
-        padding: 0 4px;
-        max-width: 110px;
-        line-height: 1.12;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        word-break: break-word;
-        background: none;
-      }
-      .sidebar .nav-link {
-        color: #fff;
-        font-size: 1.08rem;
-        border-radius: 8px;
-        margin: 3px 0;
-        padding: 11px 20px;
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        transition: background 0.22s, color 0.22s;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      .sidebar .nav-link.active,
-      .sidebar .nav-link:hover {
-        background: #ffd70033;
-        color: #ffd700 !important;
-      }
-      .sidebar .nav-link i {
-        font-size: 1.2rem;
-        margin-right: 10px;
-      }
-      .main-content {
-        margin-left: 230px;
-        padding: 38px 32px 20px 32px;
-      }
-      .topbar {
-        background: #101218;
-        height: 62px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        border-bottom: 1.5px solid #23262b;
-        box-shadow: 0 2px 16px #0004;
-        position: sticky;
-        top: 0;
-        z-index: 20;
-      }
-      .topbar span {
-        color: #ffd700;
-        font-weight: 700;
-        font-size: 1.07rem;
-        margin-right: 24px;
-      }
-      .topbar .btn {
-        font-weight: 700;
-        border-radius: 20px;
-      }
-      h2 {
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        color: #ffd700;
-        letter-spacing: 2px;
-        margin-bottom: 30px;
-        text-align: center;
-      }
-      .card-link { text-decoration: none !important; }
-      .card-link .card {
-        background: linear-gradient(120deg, #23262b 90%, #003399 100%);
-        border-radius: 17px;
-        box-shadow: 0 8px 32px #0008, 0 2px 8px #00339944;
-        color: #ffd700;
-        padding: 24px;
-        margin-bottom: 30px;
-        text-align: center;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        font-size: 1.5rem;
-        user-select: none;
-        transition: background 0.3s, box-shadow 0.3s, transform 0.15s;
-        cursor: pointer;
-      }
-      .card-link .card:hover {
-        background: #0044cc;
-        color: #ffd700 !important;
-        box-shadow: 0 6px 22px #00339966, 0 2px 12px #00339933;
-        transform: translateY(-4px) scale(1.04);
-      }
-      .card-link .card i {
-        font-size: 2.8rem;
-        margin-bottom: 12px;
-        display: block;
-        color: #ffe670;
-        transition: color 0.2s;
-      }
-      .card-link .card:hover i { color: #fffbe7; }
-      form .form-control, form .form-select {
-        background: #222; border: 1px solid #555; color: #ffd700;
-      }
-      form label { font-weight: 600; color: #ffd700cc; }
-      form .btn-primary {
-        background: linear-gradient(90deg, #ffd700 60%, #ffe670 100%);
-        color: #191c20; font-weight: bold; border: none; border-radius: 17px;
-        padding: 8px 20px; margin-top: 10px;
-      }
-      form .btn-primary:hover { background: #ffe670; color: #003399; }
-      #graficoCooperados { max-height: 360px; }
-      /* Balão de notificação */
-      #notif-container {
-        position: fixed; top: 16px; right: 16px; z-index: 9999;
-      }
-      .notif {
-        background: #ffd700; color: #003399; font-weight: 800;
-        border-radius: 12px; padding: 10px 14px; margin-top: 8px;
-        box-shadow: 0 10px 24px #0008, 0 2px 6px #00339955;
-        opacity: 0; transform: translateY(-10px);
-        transition: opacity .18s ease, transform .18s ease;
-      }
-      .notif.show { opacity: 1; transform: translateY(0); }
-      @media (max-width: 900px) { .sidebar{display:none;} .main-content{margin-left:0;padding:12px;} }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Dashboard Admin - Coopex</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b0f16;
+      --panel:#121827;
+      --panel2:#0e1322;
+      --line:#223154;
+      --ink:#eaf2ff;
+      --muted:#a9b7db;
+      --gold:#ffd700;
+      --accent:#4b82ff;
+      --ok:#43d38b;
+      --warn:#ffb84d;
+      --danger:#ff6b7a;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:
+      radial-gradient(1200px 500px at 85% -20%, rgba(13,73,204,.22), transparent 60%),
+      linear-gradient(180deg, var(--bg), var(--bg));
+      color:var(--ink);font-family:Roboto,Arial,sans-serif;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      width:230px;height:100vh;position:fixed;left:0;top:0;z-index:10;
+      background:linear-gradient(170deg, #0f1220 70%, #0d49cc 100%);
+      border-right:1px solid rgba(255,255,255,.06);
+      display:flex;flex-direction:column;align-items:center;padding:20px 10px;
+    }
+    .logo{width:168px;filter:drop-shadow(0 0 14px #0d49cc70);margin:8px auto 6px}
+    .sidebar-funcao{font-family:Orbitron,sans-serif;color:var(--gold);font-weight:700;margin:8px 0 18px}
+    .nav-link{width:100%;color:#eaf2ff;border-radius:10px;padding:10px 14px;margin:3px 0;display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-link:hover,.nav-link.active{background:#ffd70033;color:var(--gold)}
+    .nav-link i{font-size:1.2rem}
+
+    /* ===== Main ===== */
+    .main{margin-left:230px;padding:22px 18px}
+    .topbar{
+      background:#0f1220;border:1px solid rgba(255,255,255,.07);
+      border-radius:14px;padding:10px 14px;margin-bottom:16px;
+      display:flex;align-items:center;gap:10px;justify-content:flex-end;
+      box-shadow:0 10px 20px rgba(0,0,0,.25);
+    }
+    .topbar .who{margin-right:auto;color:var(--gold);font-weight:800}
+
+    h2{font-family:Orbitron,sans-serif;color:var(--gold);letter-spacing:1.4px;margin:8px 0 14px}
+
+    /* ===== Cards/KPIs ===== */
+    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+    .kpi{
+      background:linear-gradient(160deg, var(--panel), var(--panel2));
+      border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 14px;
+    }
+    .kpi .label{color:#dfe6ff;display:flex;align-items:center;gap:8px;font-weight:800}
+    .kpi .value{font:900 1.35rem Orbitron,sans-serif;color:var(--gold);margin-top:6px}
+    .kpi .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #284590;background:#132145;color:#fff;font-weight:800;font-size:.85rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
+
+    /* ===== Cards de navegação ===== */
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+    .card-quick{
+      text-decoration:none;background:linear-gradient(160deg,#182339,#0d49cc);
+      border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;text-align:center;
+      color:var(--ink);transition:transform .12s ease, filter .12s ease;
+    }
+    .card-quick:hover{transform:translateY(-3px);filter:brightness(1.05)}
+    .card-quick i{font-size:2rem;color:#ffe670;display:block;margin-bottom:6px}
+    .card-quick .big{font:900 1.2rem Orbitron,sans-serif;color:var(--gold)}
+
+    /* ===== Painéis ===== */
+    .panel{
+      background:linear-gradient(160deg, var(--panel), var(--panel2));
+      border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;
+      margin-top:12px;
+    }
+    .panel h3{font:700 1.05rem Orbitron,sans-serif;color:var(--gold);margin:4px 0 10px}
+    .panel small{color:var(--muted)}
+
+    /* ===== Top cooperados list ===== */
+    .toplist{display:grid;grid-template-columns:1fr;gap:8px}
+    .topitem{display:flex;align-items:center;gap:10px;background:#0f162b;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:8px 10px}
+    .topitem .rank{width:28px;height:28px;border-radius:8px;background:#132145;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+    .bar{height:8px;background:#132145;border-radius:999px;overflow:hidden}
+    .bar>span{display:block;height:100%;background:linear-gradient(90deg,#ffd700,#ffe670);}
+
+    /* ===== Chart area ===== */
+    #graficoCooperados{max-height:360px}
+
+    /* ===== Notify ===== */
+    #notif-container{position:fixed;top:16px;right:16px;z-index:9999}
+    .notif{background:#ffd700;color:#003399;font-weight:900;border-radius:12px;padding:10px 14px;margin-top:8px;box-shadow:0 10px 24px #0008,0 2px 6px #00339955;opacity:0;transform:translateY(-10px);transition:opacity .18s,transform .18s}
+    .notif.show{opacity:1;transform:translateY(0)}
+
+    @media (max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.cards{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:900px){.sidebar{display:none}.main{margin-left:0;padding:12px}.kpis{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-  <div class="sidebar">
-    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo" />
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" class="logo" />
     <div class="sidebar-funcao">Gestor</div>
     <a class="nav-link active" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
     <a class="nav-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people"></i> Cooperados</a>
     <a class="nav-link" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i> Estabelecimentos</a>
     <a class="nav-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i> Lançamentos</a>
     <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i> Sair</a>
-  </div>
+  </aside>
 
-  <div class="main-content">
-    <div class="topbar mb-4">
-      <span>Bem-vindo, {{ admin.nome }}</span>
-      <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="who">Bem-vindo, {{ admin.nome }}</div>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm">Sair <i class="bi bi-power"></i></a>
     </div>
 
     <h2><i class="bi bi-speedometer2"></i> Painel de Controle</h2>
 
-    <form method="get" action="{{ url_for('dashboard') }}" class="mb-4 row g-3">
+    <!-- Filtros -->
+    <form method="get" action="{{ url_for('dashboard') }}" class="row g-3 panel" id="form-filtros">
       <div class="col-md-3">
-        <label for="cooperado_id" class="form-label">Cooperado</label>
-        <select class="form-select" id="cooperado_id" name="cooperado_id" aria-label="Selecione cooperado">
+        <label class="form-label" for="cooperado_id">Cooperado</label>
+        <select class="form-select" id="cooperado_id" name="cooperado_id">
           <option value="">Todos</option>
           {% for c in cooperados %}
-            <option value="{{ c.id }}" {% if filtros.cooperado_id and filtros.cooperado_id|int == c.id %} selected {% endif %}>{{ c.nome }}</option>
+            <option value="{{ c.id }}" {% if filtros.cooperado_id and filtros.cooperado_id|int == c.id %}selected{% endif %}>{{ c.nome }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-3">
-        <label for="estabelecimento_id" class="form-label">Estabelecimento</label>
-        <select class="form-select" id="estabelecimento_id" name="estabelecimento_id" aria-label="Selecione estabelecimento">
+        <label class="form-label" for="estabelecimento_id">Estabelecimento</label>
+        <select class="form-select" id="estabelecimento_id" name="estabelecimento_id">
           <option value="">Todos</option>
           {% for e in estabelecimentos %}
-            <option value="{{ e.id }}" {% if filtros.estabelecimento_id and filtros.estabelecimento_id|int == e.id %} selected {% endif %}>{{ e.nome }}</option>
+            <option value="{{ e.id }}" {% if filtros.estabelecimento_id and filtros.estabelecimento_id|int == e.id %}selected{% endif %}>{{ e.nome }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-3">
-        <label for="data_inicio" class="form-label">Data Início</label>
+        <label class="form-label" for="data_inicio">Data Início</label>
         <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ filtros.data_inicio or '' }}" />
       </div>
       <div class="col-md-3">
-        <label for="data_fim" class="form-label">Data Fim</label>
+        <label class="form-label" for="data_fim">Data Fim</label>
         <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ filtros.data_fim or '' }}" />
       </div>
-      <div class="col-12 text-end">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
+      <div class="col-12 d-flex gap-2 justify-content-end">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filtrar</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light"><i class="bi bi-x-circle"></i> Limpar</a>
       </div>
+
+      <!-- chips dos filtros ativos -->
+      <div class="chips" id="chips-filtros"></div>
     </form>
 
-    <div class="row g-4 mb-4">
-      <div class="col-md-3">
-        <a href="{{ url_for('listar_lancamentos') }}" class="card-link">
-          <div class="card shadow-sm">
-            <i class="bi bi-journal-check"></i>
-            Total de Pedidos
-            <div>{{ total_pedidos or 0 }}</div>
-          </div>
-        </a>
+    <!-- KPIs -->
+    <section class="kpis">
+      <div class="kpi">
+        <div class="label"><i class="bi bi-journal-check"></i> Pedidos</div>
+        <div class="value" id="kpi-pedidos">{{ total_pedidos or 0 }}</div>
+        <div class="sub">Total no período</div>
       </div>
-      <div class="col-md-3">
-        <a href="{{ url_for('listar_lancamentos') }}" class="card-link">
-          <div class="card shadow-sm">
-            <i class="bi bi-cash-stack"></i>
-            Valor Total Lançado
-            <div>R$ {{ ('{:,.2f}'.format(total_valor|default(0))) }}</div>
-          </div>
-        </a>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-cash-stack"></i> Valor total</div>
+        <div class="value" id="kpi-valor">R$ {{ ('{:,.2f}'.format(total_valor|default(0))) }}</div>
+        <div class="sub">Soma dos lançamentos</div>
       </div>
-      <div class="col-md-3">
-        <a href="{{ url_for('listar_cooperados') }}" class="card-link">
-          <div class="card shadow-sm">
-            <i class="bi bi-people"></i>
-            Cooperados Cadastrados
-            <div>{{ total_cooperados or 0 }}</div>
-          </div>
-        </a>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-people"></i> Cooperados</div>
+        <div class="value">{{ total_cooperados or 0 }}</div>
+        <div class="sub">Cadastrados</div>
       </div>
-      <div class="col-md-3">
-        <a href="{{ url_for('listar_estabelecimentos') }}" class="card-link">
-          <div class="card shadow-sm">
-            <i class="bi bi-building"></i>
-            Estabelecimentos
-            <div>{{ total_estabelecimentos or 0 }}</div>
-          </div>
-        </a>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-building"></i> Estabelecimentos</div>
+        <div class="value">{{ total_estabelecimentos or 0 }}</div>
+        <div class="sub">Ativos</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-graph-up"></i> Média por pedido</div>
+        <div class="value" id="kpi-media">—</div>
+        <div class="sub">Calculada no navegador</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-trophy"></i> Top cooperado</div>
+        <div class="value" id="kpi-top">—</div>
+        <div class="sub" id="kpi-top-sub">maior participação</div>
+      </div>
+    </section>
+
+    <!-- atalhos -->
+    <section class="cards">
+      <a class="card-quick" href="{{ url_for('listar_lancamentos') }}">
+        <i class="bi bi-journal-text"></i><span class="big">Lançamentos</span>
+        <div><small>Histórico e exportação</small></div>
+      </a>
+      <a class="card-quick" href="{{ url_for('listar_cooperados') }}">
+        <i class="bi bi-people"></i><span class="big">Cooperados</span>
+        <div><small>Consulta e ajustes</small></div>
+      </a>
+      <a class="card-quick" href="{{ url_for('listar_estabelecimentos') }}">
+        <i class="bi bi-building"></i><span class="big">Estabelecimentos</span>
+        <div><small>Parceiros ativos</small></div>
+      </a>
+      <a class="card-quick" href="{{ url_for('listar_lancamentos') }}">
+        <i class="bi bi-file-earmark-excel"></i><span class="big">Exportar</span>
+        <div><small>Planilha Excel</small></div>
+      </a>
+    </section>
+
+    <!-- gráfico + top lista -->
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="panel">
+          <h3><i class="bi bi-pie-chart"></i> Distribuição por cooperado</h3>
+          <small>Baseada na lista atual ({{ (cooperado_nomes|length) if cooperado_nomes else 0 }} cooperados)</small>
+          <canvas id="graficoCooperados" height="360"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="panel">
+          <h3><i class="bi bi-list-ol"></i> Top 8 cooperados</h3>
+          <div class="toplist" id="toplist"></div>
+        </div>
       </div>
     </div>
+  </main>
 
-    <!-- Gráfico tipo pizza (doughnut) -->
-    <canvas id="graficoCooperados" height="360"></canvas>
-  </div>
-
-  <!-- ÁUDIO: tocar quando novo lançamento aparecer (servico.mp3 em /statics) -->
-  <audio id="snd-servico" preload="auto" playsinline
-         src="{{ url_for('statics_files', filename='servico.mp3') }}"></audio>
-
-  <!-- Balões -->
+  <!-- Som + balão -->
+  <audio id="snd-servico" preload="auto" playsinline src="{{ url_for('statics_files', filename='servico.mp3') }}"></audio>
   <div id="notif-container" aria-live="polite"></div>
 
   <script>
-    // ====== Gráfico Doughnut com “disco de freio” ======
-    (function () {
-      const ctx = document.getElementById("graficoCooperados").getContext("2d");
+    // ===== Helpers
+    const labels = {{ cooperado_nomes|tojson or '[]' }};
+    const valores = {{ lancamentos_contagem|tojson or '[]' }};
+    const totalPedidos = Number({{ total_pedidos or 0 }});
+    const totalValor = Number({{ total_valor or 0 }});
+    const brl = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
-      const labels = {{ cooperado_nomes|tojson }};
-      const valores = {{ lancamentos_contagem|tojson }};
-
-      // --- GERAR ATÉ 300 CORES DISTINTAS (e usar exatamente a quantidade de cooperados) ---
-      function buildColors(total) {
-        const MAX = 300;
-        const n = Math.min(total, MAX);
-        const arr = [];
-        // espaça pelo círculo de matiz e alterna saturação/luminosidade para maior contraste
-        for (let i = 0; i < n; i++) {
-          const hue = Math.round((i * 360) / n);     // 0..360 distribuído
-          const ring = i % 3;                        // 3 níveis para contraste
-          const sat = ring === 0 ? 85 : ring === 1 ? 72 : 60;
-          const light = ring === 0 ? 55 : ring === 1 ? 50 : 45;
-          arr.push(`hsl(${hue} ${sat}% ${light}%)`);
-        }
-        // se houver mais labels que MAX, recicla as cores
-        while (arr.length < total) arr.push(arr[arr.length % n]);
-        return arr;
-      }
-      const colors = buildColors(labels.length);
-
-      const brakeDisc = {
-        id: 'brakeDisc',
-        afterDraw(chart) {
-          const meta = chart.getDatasetMeta(0);
-          if (!meta || !meta.data || !meta.data.length) return;
-          const arc0 = meta.data[0];
-          const {x: cx, y: cy, innerRadius: rIn, outerRadius: rOut} = arc0;
-          const ctx = chart.ctx;
-          ctx.save();
-
-          // ranhuras
-          ctx.strokeStyle = '#ffffff22';
-          ctx.lineWidth = Math.max(1, (rOut - rIn) * 0.02);
-          const grooves = 12;
-          for (let i = 0; i < grooves; i++) {
-            const ang = (i / grooves) * Math.PI * 2;
-            const r1 = rIn * 0.98;
-            const r2 = rOut * 0.98;
-            ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(ang) * r1, cy + Math.sin(ang) * r1);
-            ctx.lineTo(cx + Math.cos(ang) * r2, cy + Math.sin(ang) * r2);
-            ctx.stroke();
-          }
-
-          // hub
-          ctx.fillStyle = '#b9b9b9';
-          ctx.beginPath(); ctx.arc(cx, cy, rIn * 0.9, 0, Math.PI * 2); ctx.fill();
-
-          // hub interno
-          ctx.fillStyle = '#8a8a8a';
-          ctx.beginPath(); ctx.arc(cx, cy, rIn * 0.55, 0, Math.PI * 2); ctx.fill();
-
-          // furos de parafuso
-          ctx.fillStyle = '#191c20';
-          const holes = 5, holeRad = rIn * 0.08, holeDist = rIn * 0.68;
-          for (let i = 0; i < holes; i++) {
-            const ang = (i / holes) * Math.PI * 2 - Math.PI / 2;
-            const hx = cx + Math.cos(ang) * holeDist;
-            const hy = cy + Math.sin(ang) * holeDist;
-            ctx.beginPath(); ctx.arc(hx, hy, holeRad, 0, Math.PI * 2); ctx.fill();
-          }
-
-          ctx.restore();
-        }
-      };
-
-      new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels,
-          datasets: [{
-            label: "Valor (R$)",
-            data: valores,
-            backgroundColor: colors,
-            borderColor: "#222b",
-            borderWidth: 1,
-            hoverOffset: 8
-          }]
-        },
-        options: {
-          cutout: "55%",
-          plugins: {
-            legend: { labels: { color: "#ffd700" } },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => "R$ " + (ctx.parsed || 0).toLocaleString("pt-BR", {minimumFractionDigits:2})
-              }
-            }
-          }
-        },
-        plugins: [brakeDisc]
-      });
+    // KPI média por pedido (sem mexer no backend)
+    (function(){
+      const media = totalPedidos > 0 ? (totalValor/totalPedidos) : 0;
+      document.getElementById('kpi-media').textContent = brl(media);
     })();
 
-    // ====== Som + Balão: detectar novos lançamentos ======
+    // Chips de filtro (sem back extra)
+    (function(){
+      const chipsBox = document.getElementById('chips-filtros');
+      const add = (icon, txt) => {
+        const s = document.createElement('span');
+        s.className = 'chip';
+        s.innerHTML = `<i class="bi ${icon}"></i> ${txt}`;
+        chipsBox.appendChild(s);
+      };
+      const di = "{{ filtros.data_inicio or '' }}";
+      const df = "{{ filtros.data_fim or '' }}";
+      const co = "{{ filtros.cooperado_id or '' }}";
+      const es = "{{ filtros.estabelecimento_id or '' }}";
+      if (co){ const sel = document.getElementById('cooperado_id'); add('bi-person', sel.options[sel.selectedIndex].text); }
+      if (es){ const sel = document.getElementById('estabelecimento_id'); add('bi-building', sel.options[sel.selectedIndex].text); }
+      if (di){ add('bi-calendar-plus', new Date(di).toLocaleDateString('pt-BR')); }
+      if (df){ add('bi-calendar-minus', new Date(df).toLocaleDateString('pt-BR')); }
+    })();
+
+    // Cores (até 300)
+    function buildColors(n){
+      const max=300, k=Math.min(n,max); const out=[];
+      for (let i=0;i<k;i++){
+        const hue=Math.round(i*360/k), ring=i%3, sat= ring===0?85: ring===1?72:62, light= ring===0?55:50;
+        out.push(`hsl(${hue} ${sat}% ${light}%)`);
+      }
+      while(out.length<n) out.push(out[out.length%k]);
+      return out;
+    }
+
+    // Plugin: label central + disco de freio
+    const donutCenter = {
+      id:'donutCenter',
+      afterDraw(chart,args,plug){
+        const {ctx} = chart; const meta=chart.getDatasetMeta(0);
+        if(!meta || !meta.data || !meta.data.length) return;
+        const a0=meta.data[0]; const {x:cx,y:cy,innerRadius:rIn,outerRadius:rOut}=a0;
+
+        // Grooves
+        ctx.save();
+        ctx.strokeStyle = '#ffffff22'; ctx.lineWidth = Math.max(1,(rOut-rIn)*.02);
+        for(let i=0;i<12;i++){ const ang=i*Math.PI*2/12; ctx.beginPath();
+          ctx.moveTo(cx+Math.cos(ang)*rIn*0.98, cy+Math.sin(ang)*rIn*0.98);
+          ctx.lineTo(cx+Math.cos(ang)*rOut*0.98, cy+Math.sin(ang)*rOut*0.98); ctx.stroke(); }
+        // Hub
+        ctx.fillStyle='#b9b9b9'; ctx.beginPath(); ctx.arc(cx,cy,rIn*0.9,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#8a8a8a'; ctx.beginPath(); ctx.arc(cx,cy,rIn*0.55,0,Math.PI*2); ctx.fill();
+        // Holes
+        ctx.fillStyle='#0b0f16'; const holes=5, rr=rIn*0.08, dist=rIn*0.68;
+        for(let i=0;i<holes;i++){ const ang=i*Math.PI*2/holes-Math.PI/2; const x=cx+Math.cos(ang)*dist, y=cy+Math.sin(ang)*dist;
+          ctx.beginPath(); ctx.arc(x,y,rr,0,Math.PI*2); ctx.fill(); }
+        // Center text (total)
+        const total = valores.reduce((a,b)=>a+(+b||0),0);
+        ctx.fillStyle='#ffd700'; ctx.font='900 18px Orbitron, sans-serif'; ctx.textAlign='center';
+        ctx.fillText('Total', cx, cy-6);
+        ctx.fillStyle='#fff'; ctx.font='700 14px Roboto, sans-serif';
+        ctx.fillText(total.toLocaleString('pt-BR'), cx, cy+14);
+        ctx.restore();
+      }
+    };
+
+    // Gráfico
+    (function(){
+      const el=document.getElementById('graficoCooperados');
+      if(!el) return;
+      const dataValid = Array.isArray(labels) && labels.length && Array.isArray(valores) && valores.length;
+      const colors = buildColors(labels.length || 1);
+
+      const chart = new Chart(el.getContext('2d'), {
+        type:'doughnut',
+        data:{
+          labels: dataValid? labels : ['Sem dados'],
+          datasets:[{ data: dataValid? valores : [1], backgroundColor: colors, borderColor:'#222b', borderWidth:1, hoverOffset:8 }]
+        },
+        options:{
+          cutout:'55%',
+          plugins:{
+            legend:{ labels:{ color:'#ffd700' } },
+            tooltip:{ callbacks:{ label:(c)=> (c.label? c.label+': ':'') + (c.parsed||0).toLocaleString('pt-BR') } }
+          }
+        },
+        plugins:[donutCenter]
+      });
+
+      // KPIs derivados: top cooperado
+      if (dataValid){
+        const total = valores.reduce((a,b)=>a+(+b||0),0) || 1;
+        let topI=0; for(let i=1;i<valores.length;i++){ if((+valores[i])>(+valores[topI])) topI=i; }
+        const topNome = labels[topI] || '—';
+        const topPct = ((+valores[topI]||0)/total)*100;
+        document.getElementById('kpi-top').textContent = topNome;
+        document.getElementById('kpi-top-sub').textContent = topPct.toFixed(1)+'% dos pedidos';
+      } else {
+        document.getElementById('kpi-top').textContent = '—';
+      }
+    })();
+
+    // Toplist (Top 8) com barras
+    (function(){
+      const box = document.getElementById('toplist');
+      if(!box) return;
+      const arr = (labels||[]).map((n,i)=>({nome:n, qtd:+(valores[i]||0)}));
+      arr.sort((a,b)=>b.qtd-a.qtd);
+      const total = arr.reduce((s,x)=>s+x.qtd,0) || 1;
+      (arr.slice(0,8)).forEach((it,idx)=>{
+        const li = document.createElement('div');
+        const pct = (it.qtd/total)*100;
+        li.className='topitem';
+        li.innerHTML = `
+          <div class="rank">${idx+1}</div>
+          <div class="flex-grow-1">
+            <div style="display:flex;justify-content:space-between;gap:8px;">
+              <strong>${it.nome}</strong>
+              <span>${it.qtd.toLocaleString('pt-BR')} <small>(${pct.toFixed(1)}%)</small></span>
+            </div>
+            <div class="bar mt-1"><span style="width:${pct.toFixed(2)}%"></span></div>
+          </div>`;
+        box.appendChild(li);
+      });
+      if (arr.length===0){
+        const li=document.createElement('div');
+        li.className='topitem'; li.innerHTML='<div class="flex-grow-1 text-center">Sem dados para exibir.</div>';
+        box.appendChild(li);
+      }
+    })();
+
+    // Som + balões para novos lançamentos (mantido)
     (function () {
       let lastId = {{ ultimo_lancamento_id or 0 }};
       const audio = document.getElementById('snd-servico');
@@ -380,13 +391,9 @@
         div.className = 'notif';
         div.textContent = nome ? `Novo lançamento: ${nome}` : 'Novo lançamento';
         notifBox.appendChild(div);
-        void div.offsetWidth; // reflow
+        void div.offsetWidth;
         div.classList.add('show');
-        // DURAÇÃO DO BALÃO: 3000ms (3 segundos)
-        setTimeout(() => {
-          div.classList.remove('show');
-          setTimeout(() => div.remove(), 300);
-        }, 3000);
+        setTimeout(() => { div.classList.remove('show'); setTimeout(() => div.remove(), 300); }, 3000);
       }
 
       async function ping() {
@@ -396,7 +403,6 @@
           const novo = parseInt(j.last_id || 0);
           if (novo > lastId) {
             lastId = novo;
-            // tocar som (se o navegador bloquear autoplay, falha silenciosa)
             audio && audio.play().catch(()=>{});
             try {
               const r2 = await fetch('{{ url_for("api_lancamento_info") }}?id=' + novo, { cache: 'no-store' });
@@ -405,10 +411,9 @@
               showBalloon(nome);
             } catch (_) { showBalloon(''); }
           }
-        } catch (_) { /* silencioso */ }
+        } catch (_) {}
       }
-
-      setInterval(ping, 5000); // checa a cada 5s
+      setInterval(ping, 5000);
     })();
   </script>
 
