@@ -1,198 +1,247 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Cooperados - Coopex</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google Fonts, Bootstrap e Icons -->
+  <meta charset="UTF-8" />
+  <title>Cooperados - Coopex (Página Completa)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonts + Bootstrap + Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
   <style>
     :root{
-      --bg:#191c20;
-      --ink:#eaf2ff;          /* texto principal (quase branco) */
-      --muted:#a9b7db;        /* textos secundarios */
-      --gold:#ffd700;         /* destaque */
+      --bg:#0f1216;
+      --ink:#eaf2ff;
+      --muted:#a9b7db;
+      --gold:#ffd700;
+      --accent:#4b82ff;
       --card1:#23262b;
       --card2:#003399;
-      --thead:#1d2240;
-      --rowOdd:#263155;
-      --rowEven:#202a4a;
+      --thead:#1b2040;
+      --rowOdd:#243158;
+      --rowEven:#1d294b;
       --line:#2b3346;
-      --field:#0f172a;        /* fundo inputs */
+      --field:#0f172a;
       --fieldBorder:#3b4565;
       --fieldFocus:#4b82ff;
     }
 
+    /* ====== Layout base (página completa) ====== */
+    html,body{height:100%; margin:0;}
     body{
       background:var(--bg);
+      color:var(--ink);
       font-family:Roboto, Arial, sans-serif;
-      min-height:100vh;
-      margin:0;
-      color:var(--ink);
-      text-shadow:none; /* sem blur global */
+      text-shadow:none;
+      overflow-x:hidden;
     }
-
-    .main-container-flex{
+    .page{
+      min-height:100%;
       display:flex;
-      flex-direction:row;
-      align-items:flex-start;
-      min-height:100vh;
-      max-width:100vw;
-      gap:24px;
-      padding:24px 12px;
+      flex-direction:column;
     }
 
-    .main-content{
-      width:100%;
-      max-width:980px;
+    /* ====== Topbar ====== */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      height:64px; display:flex; align-items:center; gap:12px;
+      padding:0 16px;
+      background:linear-gradient(90deg,#0f1216 70%, #0f1216 70%), radial-gradient(1200px 120px at 80% -20%, #00339966, transparent 60%);
+      border-bottom:1px solid #1c2230;
+      box-shadow:0 6px 22px rgba(0,0,0,.35);
     }
+    .brand{
+      display:flex; align-items:center; gap:10px; min-width:0;
+    }
+    .brand img{height:36px; width:auto; filter: drop-shadow(0 0 8px #00339966);}
+    .brand h1{
+      margin:0; font:700 1.1rem/1 Orbitron, sans-serif; letter-spacing:1px; color:var(--gold);
+      text-shadow:0 1px 1px rgba(0,0,0,.55);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .topbar .spacer{flex:1;}
+    .topbar .back{
+      color:#eaf2ff; border-color:#3a4569; border-radius:999px;
+    }
+    .topbar .back:hover{background:#223157; color:#fff;}
 
-    .dashboard-card{
+    /* ====== Cards ====== */
+    .card-xx{
       background:linear-gradient(120deg, var(--card1) 90%, var(--card2) 100%);
-      border-radius:17px;
-      box-shadow:0 8px 32px #0008, 0 2px 8px #00339944;
-      padding:24px 18px 18px;
-      margin-bottom:28px;
-      color:var(--ink);
+      border-radius:18px;
+      box-shadow:0 8px 32px rgba(0,0,0,.55), 0 2px 8px #00339944;
+      padding:18px 16px;
+    }
+    .section{
+      width:100%;
+      padding:22px 16px 28px;
     }
 
-    .dashboard-card h4{
-      margin:0 0 14px 0;
-      font-family:Orbitron, sans-serif;
-      font-weight:700;
-      letter-spacing:1.2px;
-      color:var(--gold);
-      text-shadow:0 1px 1px rgba(0,0,0,.55); /* leve e nítida */
+    /* ====== Barra de filtros (interativa + sticky) ====== */
+    .filters.card-xx{ position:sticky; top:72px; z-index:40; }
+    .filters h4{
+      margin:0 0 10px; font:700 1.05rem Orbitron, sans-serif; letter-spacing:1px; color:var(--gold);
+      text-shadow:0 1px 1px rgba(0,0,0,.55);
     }
-
-    /* Filtros */
-    .filtros-row{
-      display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;
+    .filters .rowx{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .filters .rowx .grow{ flex:1 1 240px; }
+    .filters input{
+      height:44px; border-radius:12px; border:1.5px solid var(--fieldBorder);
+      background:var(--field); color:var(--ink); padding:10px 14px; font-size:1rem;
+      width:100%;
     }
-    .filtros-row input[type="text"],
-    .filtros-row input[type="number"]{
-      border-radius:10px;
-      border:1.5px solid var(--fieldBorder);
-      padding:8px 14px;
-      font-size:1.02rem;
-      background:var(--field);
-      color:var(--ink);
-      max-width:260px;
-    }
-    .filtros-row input::placeholder{color:var(--muted);}
-    .filtros-row input:focus{
-      outline:none;
-      border-color:var(--fieldFocus);
+    .filters input::placeholder{ color:var(--muted); }
+    .filters input:focus{
+      outline:none; border-color:var(--fieldFocus);
       box-shadow:0 0 0 .2rem rgba(75,130,255,.15);
     }
-    .filtros-row input[type="number"]::-webkit-inner-spin-button,
-    .filtros-row input[type="number"]::-webkit-outer-spin-button{
-      -webkit-appearance:none; margin:0;
+    .switch{
+      display:inline-flex; align-items:center; gap:8px; color:var(--ink);
+      padding:10px 12px; border-radius:12px; border:1px solid #2a3552;
+      background:#131a2e;
     }
-    .form-check-label{ color:var(--ink); margin-left:7px; font-size:.96em; }
+    .chips{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      margin-left:auto;
+    }
+    .chip{
+      display:inline-flex; gap:6px; align-items:center;
+      padding:8px 12px; border-radius:999px; border:1px solid #3254a8;
+      background:#162a56; color:#cfe0ff; font-weight:600; font-size:.92rem;
+    }
+    .chip .count{ background:#26407f; padding:1px 8px; border-radius:999px; font-weight:700; color:#fff; }
 
-    /* Botões */
-    .btn-primary{
-      background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
-      color:#191c20; font-weight:700; border:none; border-radius:14px;
+    /* ====== Tabela ====== */
+    .table-wrap{ width:100%; }
+    .table-title{
+      margin:14px 0 10px; font:700 1.05rem Orbitron, sans-serif; color:var(--gold); letter-spacing:1px;
+      text-shadow:0 1px 1px rgba(0,0,0,.55);
+      display:flex; align-items:center; gap:10px;
     }
-    .btn-primary:hover{ filter:brightness(1.06); }
-    .btn-outline-primary{ color:#9ec0ff; border-color:#2d6cdf; }
-    .btn-outline-primary:hover{ color:#eaf2ff; background:#2d6cdf22; border-color:#4b82ff; }
-    .btn-outline-warning{ color:#ffdf7a; border-color:#e4b900; }
-    .btn-outline-warning:hover{ color:#191c20; background:#ffd700; border-color:#ffd700; }
-    .btn-outline-danger{ color:#ff9aa4; border-color:#e34b5a; }
-    .btn-outline-danger:hover{ color:#ffe6e8; background:#e34b5a22; border-color:#ff7180; }
-
-    /* Tabela */
-    .table{ color:var(--ink); border-radius:10px; overflow:hidden; margin:0; }
-    .table thead th{
-      background:var(--thead);
-      color:var(--gold) !important;
-      font-family:Orbitron, sans-serif;
-      letter-spacing:1.1px;
-      text-align:center;
-      border-bottom:1px solid var(--line);
+    .table-responsive{ border-radius:14px; overflow:auto; box-shadow:0 4px 20px rgba(0,0,0,.4); }
+    table.table{
+      width:100%; margin:0; color:var(--ink);
     }
-    .table tbody td{
-      color:var(--ink);
-      border-top:1px solid var(--line);
-      text-shadow:none; /* nítido */
-      vertical-align:middle;
-      padding-top:12px; padding-bottom:12px;
+    thead th{
+      position:sticky; top:0; z-index:10;
+      background:var(--thead); color:var(--gold)!important;
+      font-family:Orbitron, sans-serif; letter-spacing:1px; text-align:center;
+      border-bottom:1px solid var(--line); padding:14px 10px;
+      white-space:nowrap;
+    }
+    tbody td{
+      border-top:1px solid var(--line); padding:12px 10px; vertical-align:middle; text-shadow:none;
     }
     .table-striped>tbody>tr:nth-of-type(odd)>*{ background-color:var(--rowOdd) !important; }
     .table-striped>tbody>tr:nth-of-type(even)>*{ background-color:var(--rowEven) !important; }
     .table-hover tbody tr:hover>*{ background-color:#2b375e !important; }
 
-    .foto-cooperado{
-      width:60px; height:60px; object-fit:cover;
-      border-radius:50%; border:2.5px solid var(--gold);
-      background:#101218; box-shadow:0 0 7px #00339944;
+    /* Sortable headers */
+    th.sortable{ cursor:pointer; user-select:none; }
+    th.sortable .sort{
+      margin-left:6px; opacity:.75; font-size:.95em; color:#cdd9ff;
+    }
+    th.sortable.active .sort{ opacity:1; color:#fff; }
+
+    /* Foto + textos */
+    .foto{
+      width:56px; height:56px; object-fit:cover; border-radius:50%;
+      border:2px solid var(--gold); background:#0c111b; box-shadow:0 0 6px #00339955;
+    }
+    .gold{ color:var(--gold)!important; font-weight:700; }
+    .username{ color:#d6e2ff; }
+
+    /* Rodapé/infos */
+    .foot-info{
+      margin-top:10px; color:var(--muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap;
     }
 
-    .txt-amarelo{ color:var(--gold) !important; font-weight:700; letter-spacing:.2px; text-shadow:none; }
-
-    .alert{
-      background:var(--gold); color:#222; font-weight:700; border-radius:9px;
-      margin-bottom:10px; text-align:center;
-    }
-
-    @media (max-width:900px){
-      .main-container-flex{ flex-direction:column; gap:14px; padding:14px 8px; }
-      .dashboard-card{ padding:16px 10px; }
-      .table thead th{ font-size:.9rem; }
-      .table tbody td{ font-size:.95rem; }
-      .foto-cooperado{ width:46px; height:46px; }
+    /* Responsivo */
+    @media (max-width: 900px){
+      .filters.card-xx{ top:64px; }
+      thead th{ font-size:.9rem; }
+      tbody td{ font-size:.95rem; }
+      .foto{ width:44px; height:44px; }
     }
   </style>
 </head>
 <body>
-  <div class="main-container-flex">
-    <div class="main-content">
+  <div class="page">
 
-      <!-- Voltar -->
-      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light mb-3">
-        <i class="bi bi-arrow-left-circle"></i> Voltar ao Dashboard
+    <!-- ===== TOPBAR ===== -->
+    <div class="topbar">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light back">
+        <i class="bi bi-arrow-left-circle"></i>
       </a>
+      <div class="brand">
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" />
+        <h1>Cooperados — Coopex</h1>
+      </div>
+      <div class="spacer"></div>
+      <span class="chip">
+        Total <span class="count" id="count-total">{{ cooperados|length }}</span>
+      </span>
+    </div>
 
-      <div class="dashboard-card">
-        <h4><i class="bi bi-people-fill"></i> Cooperados</h4>
+    <!-- ===== CONTEÚDO ===== -->
+    <section class="section">
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }} text-center">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} text-center card-xx" style="border-radius:14px; border:none;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-        <!-- Filtros -->
-        <div class="filtros-row">
-          <input type="text" id="busca-cooperado" placeholder="Buscar por nome ou usuário…">
-          <input type="number" step="0.01" min="0" id="filtro-credito" placeholder="Valor máximo de crédito" style="max-width:180px;">
-          <div class="form-check form-switch" style="display:inline-flex;align-items:center;">
-            <input class="form-check-input" type="checkbox" id="filtrar-diferente">
-            <label class="form-check-label" for="filtrar-diferente">Mostrar apenas crédito diferente</label>
+      <!-- ===== FILTROS (STICKY) ===== -->
+      <div class="filters card-xx mb-3">
+        <h4><i class="bi bi-funnel"></i> Filtros</h4>
+        <div class="rowx">
+          <div class="grow">
+            <input id="f-busca" type="text" placeholder="Buscar por nome ou usuário…" />
           </div>
-          <a href="{{ url_for('novo_cooperado') }}" class="btn btn-primary btn-sm ms-auto">
-            <i class="bi bi-person-plus"></i> Novo Cooperado
-          </a>
-        </div>
+          <div class="grow" style="max-width:220px;">
+            <input id="f-credito" type="number" step="0.01" min="0" placeholder="Crédito máximo (R$)" />
+          </div>
+          <label class="switch">
+            <input id="f-diferente" class="form-check-input" type="checkbox" />
+            <span>Somente crédito diferente</span>
+          </label>
 
-        <!-- Tabela -->
+          <div class="chips">
+            <span class="chip" title="Itens visíveis após aplicar filtros">
+              Visíveis <span class="count" id="count-visiveis">{{ cooperados|length }}</span>
+            </span>
+            <a href="{{ url_for('novo_cooperado') }}" class="btn btn-primary btn-sm">
+              <i class="bi bi-person-plus"></i> Novo Cooperado
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== LISTA ===== -->
+      <div class="card-xx table-wrap">
+        <div class="table-title"><i class="bi bi-people-fill"></i> Lista de cooperados</div>
         <div class="table-responsive">
-          <table class="table table-striped table-hover align-middle text-center" id="tabela-cooperados">
+          <table class="table table-striped table-hover align-middle text-center" id="t-coops">
             <thead>
               <tr>
                 <th>Foto</th>
-                <th>Nome</th>
-                <th>Usuário</th>
-                <th>Crédito (R$)</th>
-                <th style="width:160px">Ações</th>
+                <th class="sortable" data-key="nome" data-type="text">
+                  Nome <i class="bi bi-arrow-down-up sort"></i>
+                </th>
+                <th class="sortable" data-key="username" data-type="text">
+                  Usuário <i class="bi bi-arrow-down-up sort"></i>
+                </th>
+                <th class="sortable" data-key="credito" data-type="number">
+                  Crédito (R$) <i class="bi bi-arrow-down-up sort"></i>
+                </th>
+                <th style="width:180px">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -200,17 +249,17 @@
               <tr>
                 <td>
                   {% if c.foto_data or c.foto %}
-                    <img src="{{ url_for('foto_cooperado', id=c.id) }}" alt="Foto de {{ c.nome }}" class="foto-cooperado" loading="lazy">
+                    <img class="foto" src="{{ url_for('foto_cooperado', id=c.id) }}" alt="Foto de {{ c.nome }}" loading="lazy" />
                   {% else %}
-                    <span style="font-size:1.4em; color:var(--gold);"><i class="bi bi-person-circle"></i></span>
+                    <span style="font-size:1.6em; color:var(--gold);"><i class="bi bi-person-circle"></i></span>
                   {% endif %}
                 </td>
-                <td class="txt-amarelo">{{ c.nome }}</td>
-                <td>{{ c.username }}</td>
-                <td class="txt-amarelo" data-credito="{{ "%.2f"|format(c.credito) }}">{{ "{:,.2f}".format(c.credito) }}</td>
+                <td class="gold" data-nome="{{ c.nome }}">{{ c.nome }}</td>
+                <td class="username" data-username="{{ c.username }}">{{ c.username }}</td>
+                <td class="gold" data-credito="{{ '%.2f'|format(c.credito) }}">{{ "{:,.2f}".format(c.credito) }}</td>
                 <td>
                   <a href="{{ url_for('editar_cooperado', id=c.id) }}" class="btn btn-outline-primary btn-sm">Editar</a>
-                  <a href="{{ url_for('ajustar_credito_individual', id=c.id) }}" class="btn btn-outline-warning btn-sm">Ajustar Crédito</a>
+                  <a href="{{ url_for('ajustar_credito_individual', id=c.id) }}" class="btn btn-outline-warning btn-sm">Ajustar</a>
                   <a href="{{ url_for('excluir_cooperado', id=c.id) }}" class="btn btn-outline-danger btn-sm"
                      onclick="return confirm('Excluir este cooperado?')">Excluir</a>
                 </td>
@@ -222,54 +271,112 @@
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
 
-    <!-- (Calculadora removida conforme solicitado) -->
+        <div class="foot-info">
+          <small><i class="bi bi-info-circle"></i> Clique nos cabeçalhos com seta para ordenar.</small>
+          <small id="hint-filtro" class="d-none"><i class="bi bi-lightning-charge"></i> Resultados filtrados destacados.</small>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
-    // ====== Filtros cooperados (sem calculadora) ======
-    function normalize(str){
-      return (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+    // ===== Utilidades
+    const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+
+    // ===== Contadores
+    const elCountVisiveis = document.getElementById('count-visiveis');
+    function atualizarContagem(){
+      const rows = [...document.querySelectorAll('#t-coops tbody tr')];
+      const vis = rows.filter(r => r.style.display !== 'none').length;
+      elCountVisiveis.textContent = vis;
     }
 
-    function filtrarCooperados(){
-      const busca = normalize(document.getElementById('busca-cooperado').value);
-      const creditoFiltro = parseFloat((document.getElementById('filtro-credito').value || "").replace(",", "."));
-      const filtrarDiferente = document.getElementById('filtrar-diferente').checked;
-      const linhas = document.querySelectorAll("#tabela-cooperados tbody tr");
-      let algumMostrado = false;
+    // ===== Filtros
+    const fBusca = document.getElementById('f-busca');
+    const fCredito = document.getElementById('f-credito');
+    const fDif = document.getElementById('f-diferente');
+    const hintFiltro = document.getElementById('hint-filtro');
 
-      linhas.forEach(linha=>{
-        const nome = normalize(linha.cells[1]?.innerText);
-        const usuario = normalize(linha.cells[2]?.innerText);
-        const credito = parseFloat(linha.cells[3]?.getAttribute("data-credito"));
-        let exibe = (!busca || nome.includes(busca) || usuario.includes(busca));
-        if (!isNaN(creditoFiltro)){
-          exibe = exibe && (filtrarDiferente ? (credito !== creditoFiltro) : (credito <= creditoFiltro));
+    function aplicarFiltros(){
+      const q = norm(fBusca.value);
+      const cred = parseFloat((fCredito.value||"").replace(",","."));
+      const dif = fDif.checked;
+      const rows = document.querySelectorAll('#t-coops tbody tr');
+      let algumFiltro = !!q || !isNaN(cred) || dif;
+      let algumVis = false;
+
+      rows.forEach(tr=>{
+        // cols: [img, nome, username, credito, acoes]
+        const nome = norm(tr.children[1]?.innerText);
+        const user = norm(tr.children[2]?.innerText);
+        const credito = parseFloat(tr.children[3]?.getAttribute('data-credito'));
+        let show = (!q || nome.includes(q) || user.includes(q));
+        if (!isNaN(cred)){
+          show = show && (dif ? (credito !== cred) : (credito <= cred));
         }
-        linha.style.display = exibe ? "" : "none";
-        if (exibe) algumMostrado = true;
+        tr.style.display = show ? '' : 'none';
+        if (show) algumVis = true;
+
+        // destaque quando filtrado
+        tr.classList.toggle('table-warning', show && algumFiltro && q && (nome.includes(q) || user.includes(q)));
       });
 
-      const tabela = document.getElementById("tabela-cooperados");
-      let noResult = tabela.querySelector(".no-result");
-      if (!algumMostrado){
-        if (!noResult){
-          noResult = document.createElement("tr");
-          noResult.className = "no-result";
-          noResult.innerHTML = `<td colspan="5" class="text-center">Nenhum cooperado encontrado.</td>`;
-          tabela.querySelector("tbody").appendChild(noResult);
+      hintFiltro.classList.toggle('d-none', !algumFiltro);
+      atualizarContagem();
+
+      // linha "Nenhum resultado"
+      const tbody = document.querySelector('#t-coops tbody');
+      let noRow = tbody.querySelector('.no-result');
+      if (!algumVis){
+        if (!noRow){
+          noRow = document.createElement('tr');
+          noRow.className = 'no-result';
+          noRow.innerHTML = `<td colspan="5" class="text-center">Nenhum cooperado encontrado.</td>`;
+          tbody.appendChild(noRow);
         }
-      } else if (noResult){
-        noResult.remove();
-      }
+      } else if (noRow){ noRow.remove(); }
+    }
+    ['input','change'].forEach(evt=>{
+      fBusca.addEventListener(evt, aplicarFiltros);
+      fCredito.addEventListener(evt, aplicarFiltros);
+      fDif.addEventListener(evt, aplicarFiltros);
+    });
+
+    // ===== Ordenação (sortable)
+    const ths = document.querySelectorAll('th.sortable');
+    let sortState = {}; // key -> 'asc' | 'desc'
+    ths.forEach(th=>{
+      th.addEventListener('click', ()=>{
+        const key = th.dataset.key;
+        const type = th.dataset.type;
+        sortState[key] = (sortState[key]==='asc'?'desc':'asc');
+
+        ths.forEach(x=>x.classList.toggle('active', x===th));
+
+        const rows = [...document.querySelectorAll('#t-coops tbody tr')].filter(r=>!r.classList.contains('no-result'));
+        rows.sort((a,b)=>{
+          const va = getVal(a, key, type);
+          const vb = getVal(b, key, type);
+          if (type==='number'){
+            return (sortState[key]==='asc') ? (va-vb) : (vb-va);
+          } else {
+            return (sortState[key]==='asc') ? (va>vb?1:va<vb?-1:0) : (va<vb?1:va>vb?-1:0);
+          }
+        });
+        const tbody = document.querySelector('#t-coops tbody');
+        rows.forEach(r=>tbody.appendChild(r));
+      });
+    });
+    function getVal(row, key, type){
+      if (key==='nome')     return norm(row.children[1]?.dataset.nome || row.children[1]?.innerText);
+      if (key==='username') return norm(row.children[2]?.dataset.username || row.children[2]?.innerText);
+      if (key==='credito')  return parseFloat(row.children[3]?.dataset.credito || '0') || 0;
+      return type==='number' ? 0 : '';
     }
 
-    document.getElementById('busca-cooperado').addEventListener('input', filtrarCooperados);
-    document.getElementById('filtro-credito').addEventListener('input', filtrarCooperados);
-    document.getElementById('filtrar-diferente').addEventListener('change', filtrarCooperados);
+    // inicial
+    atualizarContagem();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
