@@ -1,189 +1,228 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Lançamentos - Coopex</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Lançamentos - Coopex</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-    <style>
-        body {
-            background: #191c20;
-            font-family: 'Roboto', Arial, sans-serif;
-            min-height: 100vh;
-            padding: 0;
-            margin: 0;
-            color: #ffd700;
-            text-shadow: 0 0 4px #222, 0 1px 2px #00339988;
-        }
-        .main-content {
-            margin: 0 auto;
-            max-width: 1100px;
-            padding: 42px 8px 28px 8px;
-        }
-        h2 {
-            font-family: 'Orbitron', sans-serif;
-            color: #ffd700;
-            margin-bottom: 24px;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-        .dashboard-card {
-            background: linear-gradient(120deg, #23262b 90%, #003399 100%);
-            border-radius: 17px;
-            box-shadow: 0 8px 32px #0008, 0 2px 8px #00339944;
-            padding: 28px 24px 20px 24px;
-            margin-bottom: 38px;
-            font-family: 'Orbitron', sans-serif;
-        }
-        label {
-            font-weight: 600;
-            color: #ffd700;
-            text-shadow: 0 0 4px #222;
-        }
-        .table {
-            color: #ffd700;
-            background: #222;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .table thead th {
-            background: #22263d;
-            color: #ffd700;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1.1px;
-            text-align: center;
-        }
-        .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #1d2024;
-        }
-        .table-striped > tbody > tr:nth-of-type(even) > * {
-            background-color: #2a2f3c;
-        }
-        .table-striped > tbody > tr > * {
-            color: #ffd700;
-        }
-        .alert {
-            background: #ffd700;
-            color: #222;
-            font-weight: 600;
-            border-radius: 9px;
-            margin-bottom: 10px;
-        }
-        @media (max-width: 900px) {
-            .main-content { padding: 8px 2px; }
-            .dashboard-card { padding: 14px 3px 6px 3px; }
-        }
-    </style>
+  <style>
+    :root{
+      --bg:#191c20;
+      --ink:#eaf2ff;        /* texto principal (quase branco) */
+      --muted:#a9b7db;      /* texto secundário */
+      --gold:#ffd700;       /* destaque */
+      --card1:#23262b;
+      --card2:#003399;
+      --thead:#1d2240;
+      --rowOdd:#263155;
+      --rowEven:#202a4a;
+      --line:#2b3346;
+      --field:#0f172a;      /* fundo dos inputs */
+      --fieldBorder:#3b4565;
+      --fieldFocus:#4b82ff;
+    }
+
+    body{
+      background:var(--bg);
+      font-family:Roboto, Arial, sans-serif;
+      min-height:100vh;
+      padding:0; margin:0;
+      color:var(--ink);
+      text-shadow:none;      /* remove blur global */
+    }
+
+    .main-content{
+      margin:0 auto;
+      max-width:1100px;
+      padding:42px 10px 28px;
+    }
+
+    h2{
+      font-family:Orbitron, sans-serif;
+      color:var(--gold);
+      margin-bottom:24px;
+      text-align:center;
+      letter-spacing:1.5px;
+      text-shadow:0 1px 1px rgba(0,0,0,.6); /* leve e nítida */
+    }
+
+    .dashboard-card{
+      background:linear-gradient(120deg, var(--card1) 90%, var(--card2) 100%);
+      border-radius:17px;
+      box-shadow:0 8px 32px #0008, 0 2px 8px #00339944;
+      padding:22px 18px 18px;
+      margin-bottom:28px;
+      color:var(--ink);
+    }
+
+    /* Formulário de filtros */
+    label{font-weight:700;color:var(--ink);letter-spacing:.2px;}
+    .form-control, .form-select{
+      background:var(--field);
+      color:var(--ink);
+      border-color:var(--fieldBorder);
+    }
+    .form-control::placeholder{color:var(--muted);}
+    .form-control:focus, .form-select:focus{
+      border-color:var(--fieldFocus);
+      box-shadow:0 0 0 .2rem rgba(75,130,255,.15);
+    }
+
+    .btn-primary{
+      background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
+      color:#191c20;
+      font-weight:700;
+      border:none;
+      border-radius:14px;
+    }
+    .btn-primary:hover{filter:brightness(1.06);}
+    .btn-success{font-weight:700;border-radius:14px;}
+
+    /* Tabela */
+    .table{color:var(--ink);border-radius:10px;overflow:hidden;margin:0;}
+    .table thead th{
+      background:var(--thead);
+      color:var(--gold)!important;
+      font-family:Orbitron, sans-serif;
+      letter-spacing:1.1px;
+      text-align:center;
+      border-bottom:1px solid var(--line);
+    }
+    .table tbody td{
+      color:var(--ink);
+      border-top:1px solid var(--line);
+      text-shadow:none;
+      vertical-align:middle;
+      padding-top:12px; padding-bottom:12px;
+    }
+    .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd);}
+    .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven);}
+    .table-hover tbody tr:hover>*{background-color:#2b375e!important;}
+
+    .alert{
+      background:var(--gold);
+      color:#222;
+      font-weight:700;
+      border-radius:9px;
+      margin-bottom:10px;
+      text-align:center;
+    }
+
+    @media (max-width:900px){
+      .main-content{padding:14px 6px;}
+      .dashboard-card{padding:14px 8px;}
+      .table thead th{font-size:.9rem;}
+      .table tbody td{font-size:.95rem;}
+    }
+  </style>
 </head>
 <body>
-    <div class="main-content">
-        <!-- Botão de voltar ao Dashboard (ADICIONADO) -->
-        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light mb-3">
-            <i class="bi bi-arrow-left-circle"></i> Voltar ao Dashboard
-        </a>
+  <div class="main-content">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light mb-3">
+      <i class="bi bi-arrow-left-circle"></i> Voltar ao Dashboard
+    </a>
 
-        <h2><i class="bi bi-journal-text"></i> Histórico de Lançamentos</h2>
+    <h2><i class="bi bi-journal-text"></i> Histórico de Lançamentos</h2>
 
-        <div class="dashboard-card mb-4">
-            <form method="get" action="{{ url_for('listar_lancamentos') }}">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label for="cooperado_id">Cooperado</label>
-                        <select name="cooperado_id" id="cooperado_id" class="form-select">
-                            <option value="">Todos</option>
-                            {% for c in cooperados %}
-                                <option value="{{ c.id }}" {% if filtros.cooperado_id == c.id|string %}selected{% endif %}>{{ c.nome }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+    <div class="dashboard-card mb-4">
+      <form method="get" action="{{ url_for('listar_lancamentos') }}">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label for="cooperado_id">Cooperado</label>
+            <select name="cooperado_id" id="cooperado_id" class="form-select">
+              <option value="">Todos</option>
+              {% for c in cooperados %}
+                <option value="{{ c.id }}" {% if filtros.cooperado_id == c.id|string %}selected{% endif %}>{{ c.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-                    <div class="col-md-3">
-                        <label for="estabelecimento_id">Estabelecimento</label>
-                        <select name="estabelecimento_id" id="estabelecimento_id" class="form-select">
-                            <option value="">Todos</option>
-                            {% for e in estabelecimentos %}
-                                <option value="{{ e.id }}" {% if filtros.estabelecimento_id == e.id|string %}selected{% endif %}>{{ e.nome }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+          <div class="col-md-3">
+            <label for="estabelecimento_id">Estabelecimento</label>
+            <select name="estabelecimento_id" id="estabelecimento_id" class="form-select">
+              <option value="">Todos</option>
+              {% for e in estabelecimentos %}
+                <option value="{{ e.id }}" {% if filtros.estabelecimento_id == e.id|string %}selected{% endif %}>{{ e.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-                    <div class="col-md-2">
-                        <label for="data_inicio">Data Início</label>
-                        <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ filtros.data_inicio or '' }}">
-                    </div>
+          <div class="col-md-2">
+            <label for="data_inicio">Data Início</label>
+            <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ filtros.data_inicio or '' }}">
+          </div>
 
-                    <div class="col-md-2">
-                        <label for="data_fim">Data Fim</label>
-                        <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ filtros.data_fim or '' }}">
-                    </div>
+          <div class="col-md-2">
+            <label for="data_fim">Data Fim</label>
+            <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ filtros.data_fim or '' }}">
+          </div>
 
-                    <div class="col-md-2 d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-funnel"></i> Filtrar
-                        </button>
-                    </div>
+          <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-funnel"></i> Filtrar
+            </button>
+          </div>
 
-                    <!-- Botão Exportar Excel (adicionado) -->
-                    <div class="col-md-2 d-grid">
-                        <button type="button" class="btn btn-success" onclick="exportarExcel()">
-                            <i class="bi bi-file-earmark-excel"></i> Exportar Excel
-                        </button>
-                    </div>
-                </div>
-            </form>
+          <div class="col-md-2 d-grid">
+            <button type="button" class="btn btn-success" onclick="exportarExcel()">
+              <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+            </button>
+          </div>
         </div>
-
-        <div class="dashboard-card">
-            <div class="table-responsive">
-                <table class="table table-striped text-center align-middle">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Nº OS</th>
-                            <th>Cooperado</th>
-                            <th>Estabelecimento</th>
-                            <th>Valor (R$)</th>
-                            <th>Descrição</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if lancamentos %}
-                            {% for l in lancamentos %}
-                                <tr>
-                                    <td>{{ l.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                                    <td>{{ l.os_numero }}</td>
-                                    <td>{{ l.cooperado.nome }}</td>
-                                    <td>{{ l.estabelecimento.nome }}</td>
-                                    <td>{{ "{:,.2f}".format(l.valor) }}</td>
-                                    <td>{{ l.descricao or '' }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="6">Nenhum lançamento encontrado.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      </form>
     </div>
 
-<script>
-function exportarExcel() {
-    const params = new URLSearchParams({
+    <div class="dashboard-card">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover text-center align-middle">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Nº OS</th>
+              <th>Cooperado</th>
+              <th>Estabelecimento</th>
+              <th>Valor (R$)</th>
+              <th>Descrição</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if lancamentos %}
+              {% for l in lancamentos %}
+                <tr>
+                  <td>{{ l.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                  <td>{{ l.os_numero }}</td>
+                  <td>{{ l.cooperado.nome }}</td>
+                  <td>{{ l.estabelecimento.nome }}</td>
+                  <td style="white-space:nowrap;font-weight:700;color:var(--gold);">
+                    {{ "{:,.2f}".format(l.valor) }}
+                  </td>
+                  <td>{{ l.descricao or '' }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="6">Nenhum lançamento encontrado.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportarExcel(){
+      const params = new URLSearchParams({
         cooperado_id: document.getElementById('cooperado_id').value || '',
         estabelecimento_id: document.getElementById('estabelecimento_id').value || '',
         data_inicio: document.getElementById('data_inicio').value || '',
         data_fim: document.getElementById('data_fim').value || ''
-    });
-    window.location.href = "{{ url_for('exportar_lancamentos') }}?" + params.toString();
-}
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      });
+      window.location.href = "{{ url_for('exportar_lancamentos') }}?" + params.toString();
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
