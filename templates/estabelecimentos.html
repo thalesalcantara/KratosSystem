@@ -1,252 +1,365 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>Estabelecimentos - Coopex</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Google Fonts, Bootstrap e Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-    <style>
-        body {
-            background: #191c20;
-            font-family: 'Roboto', Arial, sans-serif;
-            min-height: 100vh;
-        }
-        .sidebar {
-            width: 220px;
-            height: 100vh;
-            position: fixed;
-            top: 0; left: 0;
-            background: linear-gradient(160deg, #101218 60%, #003399 100%);
-            color: #fff;
-            box-shadow: 3px 0 12px #00339944;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .sidebar .logo {
-            width: 200px;  /* LOGO MAIOR */
-            max-width: 90%;
-            margin: 30px auto 8px auto;
-            display: block;
-            filter: drop-shadow(0 0 18px #ffd700cc);
-            transition: width 0.2s;
-        }
-        .sidebar h3 {
-            font-family: 'Orbitron', sans-serif;
-            color: #ffd700;
-            text-align: center;
-            letter-spacing: 2px;
-            margin-bottom: 22px;
-            font-size: 1.18rem;
-            font-weight: 600;
-        }
-        .sidebar .nav-link {
-            color: #fff;
-            font-size: 1.1rem;
-            border-radius: 8px;
-            margin: 4px 0;
-            transition: background 0.22s, color 0.22s;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover {
-            background: #ffd70033;
-            color: #ffd700 !important;
-        }
-        .sidebar .nav-link i {
-            font-size: 1.4rem;
-            margin-right: 13px;
-        }
-        .main-content {
-            margin-left: 240px;
-            padding: 35px 32px 20px 32px;
-        }
-        .topbar {
-            background: #101218;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            border-bottom: 1.5px solid #23262b;
-            box-shadow: 0 2px 16px #0004;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-        }
-        .topbar span {
-            color: #ffd700;
-            font-weight: 700;
-            font-size: 1.08rem;
-            margin-right: 25px;
-        }
-        .topbar .btn {
-            font-weight: 700;
-            border-radius: 20px;
-        }
-        .dashboard-card {
-            background: linear-gradient(120deg, #23262b 90%, #003399 100%);
-            border-radius: 17px;
-            box-shadow: 0 8px 32px #0008, 0 2px 8px #00339944;
-            padding: 28px 24px 20px 24px;
-            margin-bottom: 38px;
-            color: #ffd700;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 4px #222, 0 1px 2px #00339988;
-        }
-        .dashboard-card h4 {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 1.5px;
-            margin-bottom: 20px;
-        }
-        .btn-primary {
-            background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
-            color: #191c20;
-            font-weight: bold;
-            border: none;
-            transition: background .17s;
-            border-radius: 17px;
-            padding: 8px 18px;
-        }
-        .btn-primary:hover {
-            background: #ffe670;
-            color: #003399;
-        }
-        .table {
-            color: #fff;
-            background: #23262b;
-            border-radius: 10px;
-            overflow: hidden;
-            text-align: center;
-        }
-        .table thead th {
-            background: #22263d;
-            color: #ffd700;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1.1px;
-            text-align: center;
-        }
-        /* Sobrescreve qualquer fundo branco do Bootstrap table-striped */
-        .table-striped > tbody > tr > td,
-        .table-striped > tbody > tr > th {
-            background-color: #23262b !important;
-        }
-        .table-striped > tbody > tr:nth-of-type(odd) > td,
-        .table-striped > tbody > tr:nth-of-type(odd) > th {
-            background-color: #1d2024 !important;
-        }
-        .td-yellow {
-            color: #ffd700 !important;
-            font-weight: 700 !important;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.97rem !important;  /* NOME MENOR */
-            max-width: 130px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .estab-foto {
-            width: 108px;
-            height: 108px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 4px solid #ffd700;
-            box-shadow: 0 0 14px #00339944;
-            display: block;
-            margin: 0 auto;
-            background: #23262b;
-        }
-        .alert {
-            background: #ffd700;
-            color: #222;
-            font-weight: 600;
-            border-radius: 9px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        a {
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        @media (max-width: 900px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; padding: 10px; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Estabelecimentos - Coopex</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Google Fonts, Bootstrap e Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <style>
+    :root{
+      --bg:#0b0f16;
+      --panel:#141a2a;
+      --panel2:#0f1526;
+      --line:#203054;
+      --ink:#eaf2ff;
+      --muted:#a9b7db;
+      --gold:#ffd700;
+      --blue:#003399;
+      --accent:#4b82ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      background:
+        radial-gradient(1200px 520px at 85% -20%, rgba(13,73,204,.22), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg));
+      font-family: 'Roboto', Arial, sans-serif;
+      min-height: 100vh; margin:0; color:var(--ink);
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      width: 220px; height: 100vh; position: fixed; inset: 0 auto 0 0;
+      background: linear-gradient(160deg, #101218 60%, #0d49cc 100%);
+      color: #fff; box-shadow: 3px 0 12px #00339944; z-index: 10;
+      display:flex; flex-direction:column; align-items:center; padding:16px 10px;
+      border-right: 1px solid rgba(255,255,255,.06);
+    }
+    .sidebar .logo{
+      width: 200px; max-width: 90%; margin: 24px auto 6px; display:block;
+      filter: drop-shadow(0 0 18px #ffd700cc);
+    }
+    .sidebar h3{
+      font-family: 'Orbitron', sans-serif; color: var(--gold);
+      text-align:center; letter-spacing:1.6px; margin: 6px 0 16px 0; font-size: 1.06rem;
+    }
+    .sidebar .nav-link{
+      color:#eaf2ff; font-size:1.06rem; border-radius:10px; margin:3px 0;
+      transition: background .22s, color .22s; padding:10px 14px; display:flex; align-items:center; gap:10px; width:100%;
+    }
+    .sidebar .nav-link.active, .sidebar .nav-link:hover{ background:#ffd70033; color:var(--gold)!important; }
+    .sidebar .nav-link i{ font-size:1.25rem; }
+
+    /* ===== Main ===== */
+    .main-content{ margin-left:240px; padding: 28px 24px; }
+    .topbar{
+      background:#101218; height: 62px; display:flex; align-items:center; justify-content:flex-end;
+      border:1px solid rgba(255,255,255,.08); box-shadow:0 10px 22px rgba(0,0,0,.25);
+      border-radius:14px; padding: 8px 12px; position: sticky; top: 14px; z-index: 20;
+    }
+    .topbar span{ color: var(--gold); font-weight: 900; font-size: 1.02rem; margin-right: 16px; }
+
+    /* ===== Painel principal ===== */
+    .dashboard-card{
+      background: linear-gradient(120deg, var(--panel) 80%, #0d49cc 100%);
+      border-radius: 16px; border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+      padding: 18px 16px; margin-bottom: 26px; color: var(--ink);
+    }
+    .dashboard-card h4{
+      font-family:'Orbitron',sans-serif; font-weight:800; color:#fff; letter-spacing:1.4px; margin:0 0 12px 4px;
+      text-shadow:0 1px 1px rgba(0,0,0,.6);
+    }
+
+    /* ===== Header da seção (ações, busca, métricas) ===== */
+    .toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .btn-primary{
+      background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
+      color:#191c20; font-weight:900; border:none; border-radius:14px; padding:10px 16px;
+    }
+    .btn-primary:hover{ filter: brightness(1.06); color:#0b1a3a; }
+    .btn-toggle{ border-radius:14px; border:1px solid #2a3a60; color:#eaf2ff; background:#0e162c; font-weight:700; }
+    .btn-toggle.active, .btn-toggle:hover{ background:#1b294d; color:#fff; }
+
+    .search{
+      display:flex; align-items:center; gap:8px; background:#0f172a; border:1px solid #31436d; border-radius:12px; padding:6px 10px; min-width: 260px;
+    }
+    .search i{color:#9fb0d6}
+    .search input{
+      background:transparent; border:none; outline:none; color:var(--ink); width: 220px;
+    }
+    .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+    .chip{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#162a56; color:#fff; border:1px solid #3254a8; font-weight:800; font-size:.86rem; }
+    .chip .count{ background:#27428a; padding:1px 8px; border-radius:999px; font-weight:900; }
+
+    /* ===== KPIs ===== */
+    .kpis{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; margin: 6px 0 10px; }
+    .kpi{ background:#0f162b; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; }
+    .kpi .label{ color:#dfe6ff; font-weight:800; display:flex; gap:8px; align-items:center; }
+    .kpi .value{ font:900 1.25rem Orbitron, sans-serif; color:var(--gold); margin-top:6px }
+
+    /* ===== Tabela ===== */
+    .table-wrap{ border-radius:12px; overflow:auto; background:#0e1533; }
+    table{ width:100%; margin:0; color:var(--ink); text-align:center; }
+    thead th{
+      position: sticky; top:0; z-index:5; background:#1b2548; color:var(--gold)!important;
+      font-family:Orbitron, sans-serif; letter-spacing:1px; border-bottom:1px solid var(--line); padding:12px 8px;
+      box-shadow:0 2px 0 rgba(0,0,0,.35);
+    }
+    tbody td{ border-top:1px solid var(--line); padding:12px 8px; vertical-align:middle; }
+    .table-striped>tbody>tr:nth-of-type(odd)>*{ background-color:#1d223b!important; }
+    .table-striped>tbody>tr:nth-of-type(even)>*{ background-color:#18213c!important; }
+    .table-hover tbody tr:hover>*{ background-color:#233762!important; }
+
+    .estab-foto{
+      width:96px; height:96px; object-fit:cover; border-radius:50%;
+      border:3px solid var(--gold); box-shadow:0 0 10px #0d49cc77; background:#0d1326; display:block; margin:0 auto;
+    }
+    .avatar-fallback{
+      width:96px; height:96px; border-radius:50%; border:3px solid var(--gold);
+      display:flex; align-items:center; justify-content:center; margin:0 auto;
+      color:#ffe670; background:#0d1326; box-shadow:0 0 10px #0d49cc77; font-size:2rem;
+    }
+    .td-yellow{ color:var(--gold)!important; font-weight:900!important; font-family:Orbitron,sans-serif; font-size:1rem!important; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+    /* ===== Cards (modo alternativo) ===== */
+    .cards{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+    .card-estab{
+      background:#0f162b; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; text-align:center;
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .card-estab:hover{ transform: translateY(-3px); filter: brightness(1.04); }
+    .card-estab .name{ font:900 1.05rem Orbitron, sans-serif; color:var(--gold); margin-top:8px; }
+    .card-estab .user{ color:#dfe6ff; font-weight:700; font-size:.95rem; }
+    .actions{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+    .btn-outline-primary{ color:#eaf2ff; border-color:#4b82ff; }
+    .btn-outline-primary:hover{ color:#0b142d; background:#4b82ff; border-color:#4b82ff; }
+    .btn-outline-danger{ color:#ffe6e8; border-color:#ff6b7a; }
+    .btn-outline-danger:hover{ color:#0b142d; background:#ff6b7a; border-color:#ff6b7a; }
+
+    .view-switch{ display:flex; gap:8px; }
+
+    @media (max-width: 1200px){
+      .cards{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 900px){
+      .sidebar{ display:none; }
+      .main-content{ margin-left:0; padding:12px; }
+      .cards{ grid-template-columns: 1fr; }
+      .kpis{ grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-    <div class="sidebar">
-        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
-        <h3>Coopex Parcerias</h3>
-        <nav class="nav flex-column">
-            <a class="nav-link" href="{{ url_for('painel_admin') }}"><i class="bi bi-speedometer2"></i>Dashboard</a>
-            <a class="nav-link active" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i>Estabelecimentos</a>
-            <a class="nav-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people-fill"></i>Cooperados</a>
-            <a class="nav-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-currency-dollar"></i>Lançamentos</a>
-            <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
-        </nav>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo" />
+    <h3>Coopex Parcerias</h3>
+    <nav class="nav flex-column">
+      <a class="nav-link" href="{{ url_for('painel_admin') }}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+      <a class="nav-link active" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i>Estabelecimentos</a>
+      <a class="nav-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people-fill"></i>Cooperados</a>
+      <a class="nav-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-currency-dollar"></i>Lançamentos</a>
+      <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
+    </nav>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar mb-3">
+      <span>Bem-vindo, {{ admin.nome }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
     </div>
-    <div class="main-content">
-        <div class="topbar mb-4">
-            <span>Bem-vindo, {{ admin.nome }}</span>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} text-center" style="background:#ffd700;color:#222;font-weight:800;border-radius:10px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="dashboard-card">
+      <div class="toolbar">
+        <h4 class="m-0"><i class="bi bi-building"></i> Estabelecimentos Cadastrados</h4>
+
+        <div class="view-switch">
+          <button class="btn btn-toggle active" id="btn-view-table"><i class="bi bi-table"></i> Tabela</button>
+          <button class="btn btn-toggle" id="btn-view-cards"><i class="bi bi-grid-3x3-gap"></i> Cartões</button>
         </div>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        <div class="dashboard-card">
-            <h4><i class="bi bi-building"></i> Estabelecimentos Cadastrados</h4>
-            <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-primary mb-3">+ Novo Estabelecimento</a>
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr>
-                            <th>Logo</th>
-                            <th>Nome</th>
-                            <th>Usuário</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for est in estabelecimentos %}
-                        <tr>
-                            <td>
-                              {% if est.logo %}
-                                <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}" alt="Logo do Estabelecimento" class="estab-foto">
-                              {% else %}
-                                <span style="color:#666;font-size:0.93rem">Sem logo</span>
-                              {% endif %}
-                            </td>
-                            <td class="td-yellow" title="{{ est.nome }}">{{ est.nome }}</td>
-                            <td class="td-yellow">{{ est.username }}</td>
-                            <td>
-                                <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
-                                <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir este estabelecimento?')">Excluir</a>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="4">Nenhum estabelecimento cadastrado.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <div class="search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="busca" placeholder="Buscar por nome ou usuário…" />
+          </div>
+          <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo</a>
         </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="label"><i class="bi bi-buildings"></i> Total</div>
+          <div class="value" id="kpi-total">0</div>
+        </div>
+        <div class="kpi">
+          <div class="label"><i class="bi bi-image"></i> Com logo</div>
+          <div class="value" id="kpi-comlogo">0</div>
+        </div>
+        <div class="kpi">
+          <div class="label"><i class="bi bi-image-alt"></i> Sem logo</div>
+          <div class="value" id="kpi-semlogo">0</div>
+        </div>
+      </div>
+
+      <!-- Chips -->
+      <div class="chips">
+        <span class="chip">Visíveis <span class="count" id="count-visiveis">0</span></span>
+      </div>
+
+      <!-- VIEW: TABELA -->
+      <div class="table-wrap" id="view-table">
+        <table class="table table-striped table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Logo</th>
+              <th>Nome</th>
+              <th>Usuário</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-estabs">
+            {% for est in estabelecimentos %}
+            <tr class="tbl-row" data-name="{{ est.nome|lower }}" data-user="{{ est.username|lower }}" data-has-logo="{{ 1 if est.logo else 0 }}">
+              <td>
+                {% if est.logo %}
+                  <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}" alt="Logo do Estabelecimento" class="estab-foto"
+                       onerror="this.closest('td').innerHTML=fallbackAvatar();" />
+                {% else %}
+                  <div class="avatar-fallback"><i class="bi bi-buildings"></i></div>
+                {% endif %}
+              </td>
+              <td class="td-yellow" title="{{ est.nome }}">{{ est.nome }}</td>
+              <td class="td-yellow">{{ est.username }}</td>
+              <td>
+                <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}"
+                   class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('Excluir este estabelecimento?')">Excluir</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">Nenhum estabelecimento cadastrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- VIEW: CARTÕES -->
+      <div class="cards mt-3" id="view-cards" style="display:none">
+        {% for est in estabelecimentos %}
+        <div class="card-estab card-item" data-name="{{ est.nome|lower }}" data-user="{{ est.username|lower }}" data-has-logo="{{ 1 if est.logo else 0 }}">
+          {% if est.logo %}
+            <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}" alt="Logo do Estabelecimento" class="estab-foto"
+                 onerror="this.outerHTML=fallbackAvatar();" />
+          {% else %}
+            <div class="avatar-fallback"><i class="bi bi-buildings"></i></div>
+          {% endif %}
+          <div class="name" title="{{ est.nome }}">{{ est.nome }}</div>
+          <div class="user">{{ est.username }}</div>
+          <div class="actions">
+            <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Excluir este estabelecimento?')">Excluir</a>
+          </div>
+        </div>
+        {% else %}
+        <div class="card-estab text-center">Nenhum estabelecimento cadastrado.</div>
+        {% endfor %}
+      </div>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </div>
+
+  <script>
+    // Avatar de fallback (HTML pronto)
+    function fallbackAvatar(){
+      return '<div class="avatar-fallback"><i class="bi bi-buildings"></i></div>';
+    }
+
+    // KPIs (contagem por DOM)
+    function atualizarKPIs(){
+      const rows = [...document.querySelectorAll('.tbl-row')];
+      const total = rows.length;
+      const comLogo = rows.filter(r => r.dataset.hasLogo === '1').length;
+      const semLogo = total - comLogo;
+      document.getElementById('kpi-total').textContent = total;
+      document.getElementById('kpi-comlogo').textContent = comLogo;
+      document.getElementById('kpi-semlogo').textContent = semLogo;
+      // visíveis (na view atual)
+      atualizarContagemVisiveis();
+    }
+
+    function atualizarContagemVisiveis(){
+      const isCards = document.getElementById('view-cards').style.display !== 'none';
+      const sel = isCards ? '.card-item' : '.tbl-row';
+      const vis = [...document.querySelectorAll(sel)].filter(el => el.style.display !== 'none').length;
+      document.getElementById('count-visiveis').textContent = vis;
+    }
+
+    // Busca (nome/usuário) – afeta Tabela e Cartões simultaneamente
+    function aplicarBusca(){
+      const q = (document.getElementById('busca').value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const match = (name,user) => {
+        const n = (name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+        const u = (user||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+        return !q || n.includes(q) || u.includes(q);
+      };
+
+      // tabela
+      document.querySelectorAll('.tbl-row').forEach(tr=>{
+        const show = match(tr.dataset.name, tr.dataset.user);
+        tr.style.display = show ? '' : 'none';
+      });
+      // cards
+      document.querySelectorAll('.card-item').forEach(card=>{
+        const show = match(card.dataset.name, card.dataset.user);
+        card.style.display = show ? '' : 'none';
+      });
+      atualizarContagemVisiveis();
+    }
+
+    // Alternar visualização
+    function setView(mode){ // 'table' | 'cards'
+      const vt = document.getElementById('view-table');
+      const vc = document.getElementById('view-cards');
+      const bt = document.getElementById('btn-view-table');
+      const bc = document.getElementById('btn-view-cards');
+      const showTable = (mode === 'table');
+      vt.style.display = showTable ? '' : 'none';
+      vc.style.display = showTable ? 'none' : '';
+      bt.classList.toggle('active', showTable);
+      bc.classList.toggle('active', !showTable);
+      atualizarContagemVisiveis();
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', ()=>{
+      atualizarKPIs();
+      aplicarBusca();
+      document.getElementById('busca').addEventListener('input', aplicarBusca);
+      document.getElementById('btn-view-table').addEventListener('click', ()=>setView('table'));
+      document.getElementById('btn-view-cards').addEventListener('click', ()=>setView('cards'));
+    });
+
+    // Ajusta contagem caso imagens falhem e mudem o DOM
+    window.addEventListener('load', atualizarKPIs);
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
