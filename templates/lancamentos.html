@@ -12,27 +12,28 @@
   <style>
     :root{
       --bg:#191c20;
-      --ink:#eaf2ff;        /* texto principal (quase branco) */
+      --ink:#eaf2ff;        /* texto principal */
       --muted:#a9b7db;      /* texto secundário */
       --gold:#ffd700;       /* destaque */
+      --accent:#4b82ff;     /* foco/bordas */
       --card1:#23262b;
       --card2:#003399;
       --thead:#1d2240;
       --rowOdd:#263155;
       --rowEven:#202a4a;
       --line:#2b3346;
-      --field:#0f172a;      /* fundo dos inputs */
+      --field:#0f172a;
       --fieldBorder:#3b4565;
       --fieldFocus:#4b82ff;
+      --danger:#ff6b7a;
     }
 
     body{
       background:var(--bg);
       font-family:Roboto, Arial, sans-serif;
       min-height:100vh;
-      padding:0; margin:0;
+      margin:0;
       color:var(--ink);
-      text-shadow:none;      /* remove blur global */
     }
 
     .main-content{
@@ -44,12 +45,13 @@
     h2{
       font-family:Orbitron, sans-serif;
       color:var(--gold);
-      margin-bottom:24px;
+      margin-bottom:16px;
       text-align:center;
       letter-spacing:1.5px;
-      text-shadow:0 1px 1px rgba(0,0,0,.6); /* leve e nítida */
+      text-shadow:0 1px 1px rgba(0,0,0,.6);
     }
 
+    /* Cards e containers */
     .dashboard-card{
       background:linear-gradient(120deg, var(--card1) 90%, var(--card2) 100%);
       border-radius:17px;
@@ -59,7 +61,24 @@
       color:var(--ink);
     }
 
-    /* Formulário de filtros */
+    /* Mini cards de métricas */
+    .stats{
+      display:grid; gap:12px;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      margin-bottom:6px;
+    }
+    .stat{
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      padding:12px 14px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    .stat .label{ color:#dfe6ff; font-weight:800; letter-spacing:.3px; display:flex; align-items:center; gap:8px; }
+    .stat .value{ font:900 1.4rem/1 Orbitron, sans-serif; color:var(--gold); margin-top:6px; text-shadow:0 1px 1px rgba(0,0,0,.7); }
+    .stat .sub{ color:var(--muted); font-size:.92rem; margin-top:4px; }
+
+    /* Filtros */
     label{font-weight:700;color:var(--ink);letter-spacing:.2px;}
     .form-control, .form-select{
       background:var(--field);
@@ -71,7 +90,6 @@
       border-color:var(--fieldFocus);
       box-shadow:0 0 0 .2rem rgba(75,130,255,.15);
     }
-
     .btn-primary{
       background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
       color:#191c20;
@@ -81,27 +99,52 @@
     }
     .btn-primary:hover{filter:brightness(1.06);}
     .btn-success{font-weight:700;border-radius:14px;}
+    .btn-outline-light{border-radius:14px;}
+
+    /* Chips dos filtros ativos */
+    .active-filters{
+      display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:999px; border:1px solid #3254a8;
+      background:#162a56; color:#fff; font-weight:700; font-size:.9rem;
+    }
+    .chip i{opacity:.8;}
 
     /* Tabela */
     .table{color:var(--ink);border-radius:10px;overflow:hidden;margin:0;}
     .table thead th{
+      position:sticky; top:0; z-index:5;
       background:var(--thead);
       color:var(--gold)!important;
       font-family:Orbitron, sans-serif;
       letter-spacing:1.1px;
       text-align:center;
       border-bottom:1px solid var(--line);
+      box-shadow:0 2px 0 rgba(0,0,0,.35);
     }
     .table tbody td{
       color:var(--ink);
       border-top:1px solid var(--line);
-      text-shadow:none;
       vertical-align:middle;
       padding-top:12px; padding-bottom:12px;
     }
     .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd);}
     .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven);}
     .table-hover tbody tr:hover>*{background-color:#2b375e!important;}
+
+    /* Rodapé de totais */
+    tfoot td{
+      background:#0f1a3a;
+      border-top:2px solid var(--line);
+      font-weight:800;
+      color:#fff;
+    }
+
+    /* Valor em destaque */
+    .valor{white-space:nowrap; font-weight:800; color:var(--gold);}
+    .valor.neg{color:var(--danger);}
 
     .alert{
       background:var(--gold);
@@ -117,6 +160,7 @@
       .dashboard-card{padding:14px 8px;}
       .table thead th{font-size:.9rem;}
       .table tbody td{font-size:.95rem;}
+      .stats{grid-template-columns:1fr;}
     }
   </style>
 </head>
@@ -128,8 +172,27 @@
 
     <h2><i class="bi bi-journal-text"></i> Histórico de Lançamentos</h2>
 
+    <!-- Cards de métricas (preenchidos via JS) -->
+    <div class="stats dashboard-card" style="padding:14px 14px;">
+      <div class="stat">
+        <div class="label"><i class="bi bi-list-ul"></i> Lançamentos</div>
+        <div class="value" id="m-qtd">—</div>
+        <div class="sub">Quantidade visível</div>
+      </div>
+      <div class="stat">
+        <div class="label"><i class="bi bi-cash-coin"></i> Valor total</div>
+        <div class="value" id="m-total">—</div>
+        <div class="sub">Somatório dos valores</div>
+      </div>
+      <div class="stat">
+        <div class="label"><i class="bi bi-graph-up"></i> Ticket médio</div>
+        <div class="value" id="m-media">—</div>
+        <div class="sub">Média por lançamento</div>
+      </div>
+    </div>
+
     <div class="dashboard-card mb-4">
-      <form method="get" action="{{ url_for('listar_lancamentos') }}">
+      <form id="form-filtros" method="get" action="{{ url_for('listar_lancamentos') }}">
         <div class="row g-3 align-items-end">
           <div class="col-md-3">
             <label for="cooperado_id">Cooperado</label>
@@ -172,47 +235,128 @@
               <i class="bi bi-file-earmark-excel"></i> Exportar Excel
             </button>
           </div>
+
+          <div class="col-md-2 d-grid">
+            <button type="button" class="btn btn-outline-light" id="btn-limpar">
+              <i class="bi bi-x-circle"></i> Limpar filtros
+            </button>
+          </div>
         </div>
+
+        <!-- Chips com filtros ativos (preenchidos via JS) -->
+        <div class="active-filters" id="chips-filtros"></div>
       </form>
     </div>
 
     <div class="dashboard-card">
       <div class="table-responsive">
-        <table class="table table-striped table-hover text-center align-middle">
+        <table class="table table-striped table-hover text-center align-middle" id="t-lanc">
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Nº OS</th>
-              <th>Cooperado</th>
-              <th>Estabelecimento</th>
-              <th>Valor (R$)</th>
-              <th>Descrição</th>
+              <th><i class="bi bi-calendar-event"></i> Data</th>
+              <th><i class="bi bi-file-earmark-text"></i> Nº OS</th>
+              <th><i class="bi bi-person"></i> Cooperado</th>
+              <th><i class="bi bi-shop"></i> Estabelecimento</th>
+              <th><i class="bi bi-currency-dollar"></i> Valor (R$)</th>
+              <th><i class="bi bi-justify-left"></i> Descrição</th>
             </tr>
           </thead>
           <tbody>
             {% if lancamentos %}
               {% for l in lancamentos %}
                 <tr>
-                  <td>{{ l.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                  <td>{{ l.os_numero }}</td>
-                  <td>{{ l.cooperado.nome }}</td>
-                  <td>{{ l.estabelecimento.nome }}</td>
-                  <td style="white-space:nowrap;font-weight:700;color:var(--gold);">
+                  <td data-data="{{ l.data.strftime('%Y-%m-%dT%H:%M:%S') }}">{{ l.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                  <td class="os">{{ l.os_numero }}</td>
+                  <td class="coop">{{ l.cooperado.nome }}</td>
+                  <td class="estab">{{ l.estabelecimento.nome }}</td>
+                  <td class="valor"
+                      data-valor="{{ '%.2f'|format(l.valor) }}">
                     {{ "{:,.2f}".format(l.valor) }}
                   </td>
-                  <td>{{ l.descricao or '' }}</td>
+                  <td class="desc">{{ l.descricao or '' }}</td>
                 </tr>
               {% endfor %}
             {% else %}
               <tr><td colspan="6">Nenhum lançamento encontrado.</td></tr>
             {% endif %}
           </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-end">Totais (visíveis):</td>
+              <td id="tf-total" class="valor">—</td>
+              <td id="tf-qtd" class="text-start">— itens</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
   </div>
 
   <script>
+    // ---- Utilidades
+    const brl = v => v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    const parseNum = s => parseFloat(String(s).replace(/\./g,'').replace(',', '.'));
+
+    // Marca valores negativos
+    function pintarNegativos(){
+      document.querySelectorAll('#t-lanc .valor').forEach(td=>{
+        const v = parseFloat(td.dataset.valor);
+        td.classList.toggle('neg', !isNaN(v) && v < 0);
+      });
+    }
+
+    // Atualiza métricas e rodapé com base nas linhas VISÍVEIS
+    function atualizarMetricas(){
+      const linhas = [...document.querySelectorAll('#t-lanc tbody tr')]
+        .filter(tr => tr.style.display !== 'none');
+      let soma = 0, qtd = 0;
+      linhas.forEach(tr=>{
+        const td = tr.querySelector('.valor');
+        if (!td) return;
+        const v = parseFloat(td.dataset.valor);
+        if (!isNaN(v)){ soma += v; qtd++; }
+      });
+      const media = qtd ? (soma / qtd) : 0;
+
+      // Top cards
+      document.getElementById('m-qtd').textContent   = qtd.toLocaleString('pt-BR');
+      document.getElementById('m-total').textContent = brl(soma);
+      document.getElementById('m-media').textContent = brl(media);
+
+      // Rodapé
+      document.getElementById('tf-total').textContent = brl(soma);
+      document.getElementById('tf-qtd').textContent   = `${qtd.toLocaleString('pt-BR')} itens`;
+    }
+
+    // Gera chips dos filtros ativos
+    function atualizarChips(){
+      const chips = document.getElementById('chips-filtros');
+      chips.innerHTML = '';
+      const coopSel  = document.getElementById('cooperado_id');
+      const estabSel = document.getElementById('estabelecimento_id');
+      const di = document.getElementById('data_inicio').value;
+      const df = document.getElementById('data_fim').value;
+
+      const add = (icon, txt) => {
+        const b = document.createElement('span');
+        b.className = 'chip';
+        b.innerHTML = `<i class="bi ${icon}"></i> ${txt}`;
+        chips.appendChild(b);
+      };
+
+      if (coopSel.value)  add('bi-person', coopSel.options[coopSel.selectedIndex].text);
+      if (estabSel.value) add('bi-shop', estabSel.options[estabSel.selectedIndex].text);
+      if (di) add('bi-calendar-plus',  `Início: ${new Date(di).toLocaleDateString('pt-BR')}`);
+      if (df) add('bi-calendar-minus', `Fim: ${new Date(df).toLocaleDateString('pt-BR')}`);
+    }
+
+    // Limpar filtros (volta para a rota sem querystring)
+    document.getElementById('btn-limpar').addEventListener('click', () => {
+      const base = "{{ url_for('listar_lancamentos') }}";
+      window.location.href = base;
+    });
+
+    // Export Excel (mantido)
     function exportarExcel(){
       const params = new URLSearchParams({
         cooperado_id: document.getElementById('cooperado_id').value || '',
@@ -222,7 +366,16 @@
       });
       window.location.href = "{{ url_for('exportar_lancamentos') }}?" + params.toString();
     }
+    window.exportarExcel = exportarExcel;
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      pintarNegativos();
+      atualizarMetricas();
+      atualizarChips();
+    });
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
