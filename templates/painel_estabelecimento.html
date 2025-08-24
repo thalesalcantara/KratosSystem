@@ -1,448 +1,428 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Painel Estabelecimento - Coopex</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Fonts, Bootstrap e Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <style>
-        body {
-            background: #191c20;
-            font-family: 'Roboto', Arial, sans-serif;
-            min-height: 100vh;
-        }
-        .sidebar {
-            width: 210px;
-            height: 100vh;
-            position: fixed;
-            top: 0; left: 0;
-            background: linear-gradient(160deg, #101218 70%, #003399 100%);
-            color: #fff;
-            box-shadow: 3px 0 12px #00339944;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .sidebar .logo {
-            width: 170px;
-            max-width: 95%;
-            margin: 28px auto 10px auto;
-            display: block;
-            filter: drop-shadow(0 0 18px #ffd700cc);
-        }
-        .sidebar h3 {
-            font-family: 'Orbitron', sans-serif;
-            color: #ffd700;
-            text-align: center;
-            letter-spacing: 1px;
-            margin-bottom: 30px;
-            font-size: 1.02rem;
-            font-weight: 700;
-            text-shadow: 0 0 5px #00339977;
-            background: rgba(0,0,0,0.11);
-            border-radius: 6px;
-            padding: 2px 0;
-            width: 100%;
-        }
-        .sidebar .nav-link {
-            color: #fff;
-            font-size: 1.15rem;
-            border-radius: 8px;
-            margin: 3px 0;
-            padding: 11px 20px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            transition: background 0.22s, color 0.22s;
-        }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover {
-            background: #ffd70033;
-            color: #ffd700 !important;
-        }
-        .sidebar .nav-link i {
-            font-size: 1.3rem;
-            margin-right: 10px;
-        }
-        .main-content {
-            margin-left: 230px;
-            padding: 38px 32px 20px 32px;
-        }
-        .topbar {
-            background: #101218;
-            height: 62px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            border-bottom: 1.5px solid #23262b;
-            box-shadow: 0 2px 16px #0004;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-        }
-        .topbar span {
-            color: #ffd700;
-            font-weight: 700;
-            font-size: 1.07rem;
-            margin-right: 24px;
-        }
-        .topbar .btn {
-            font-weight: 700;
-            border-radius: 20px;
-        }
-        .dashboard-card {
-            background: linear-gradient(120deg, #23262b 90%, #003399 100%);
-            border-radius: 17px;
-            box-shadow: 0 8px 32px #0008, 0 2px 8px #00339944;
-            padding: 28px 24px 20px 24px;
-            margin-bottom: 38px;
-            color: #ffd700;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 4px #ffd700cc, 0 1px 2px #000000;
-        }
-        .dashboard-card h4 {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 1.5px;
-        }
-        .btn-primary {
-            background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
-            color: #191c20;
-            font-weight: bold;
-            border: none;
-            transition: background .17s;
-            border-radius: 17px;
-        }
-        .btn-primary:hover {
-            background: #ffe670;
-            color: #003399;
-        }
-        .table {
-            color: #fff;
-            background: #222;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .table thead th {
-            background: #22263d;
-            color: #ffd700;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1.1px;
-            text-align: center;
-        }
-        .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #28345c;
-        }
-        .table-striped > tbody > tr:nth-of-type(even) > * {
-            background-color: #1a2341;
-        }
-        .alert {
-            background: #ffd700;
-            color: #222;
-            font-weight: 600;
-            border-radius: 9px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        @media (max-width: 900px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; padding: 12px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
-        <h3>Parceiro<br>Coopex</h3>
-        <a class="nav-link active" href="#"><i class="bi bi-currency-dollar"></i>Lançar Crédito</a>
-        <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
-    </div>
+  <meta charset="UTF-8">
+  <title>Painel Estabelecimento - Coopex</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div class="main-content">
-        <div class="topbar mb-4">
-            <span>Bem-vindo, {{ est.nome }}</span>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
-        </div>
+  <!-- Google Fonts, Bootstrap e Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} text-center">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="dashboard-card mb-4">
-            <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
-            <form method="post" action="{{ url_for('painel_estabelecimento') }}">
-                <div class="row g-3 align-items-center mb-2">
-                    <div class="col-md-4">
-                        <label class="form-label" for="cooperado_id"><i class="bi bi-person-lines-fill"></i> Cooperado</label>
-                        <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
-                            <option value="">Selecione...</option>
-                            {% for c in cooperados %}
-                                <option 
-                                    value="{{ c.id }}" 
-                                    data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
-                                    data-saldo-raw="{{ c.credito }}"
-                                    data-foto="{{ url_for('foto_cooperado', id=c.id) if (c.foto_data or c.foto) else '' }}"
-                                >{{ c.nome }}</option>
-                            {% endfor %}
-                        </select>
-                        <div id="foto-cooperado-preview" style="text-align:center; margin:10px 0 0 0;"></div>
-                        <div id="saldo-cooperado" style="color:#ffd700; font-weight:700; margin:8px 0 6px 0; font-size:1.13em;"></div>
-                        <div id="erro-lancar" style="color:#ffd700; font-size:0.97em; font-weight:500; margin-top:5px;"></div>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label" for="valor"><i class="bi bi-cash-stack"></i> Valor (R$)</label>
-                        <input type="number" step="0.01" min="0.01" class="form-control" id="valor" name="valor" required oninput="checarCreditoSuficiente()">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="os_numero"><i class="bi bi-file-earmark-text"></i> Nº OS</label>
-                        <input type="text" class="form-control" id="os_numero" name="os_numero" required placeholder="Ex: 12345">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="descricao"><i class="bi bi-justify-left"></i> Descrição</label>
-                        <input type="text" class="form-control" id="descricao" name="descricao" placeholder="(opcional)">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary mt-2" id="btn-lancar"><i class="bi bi-plus-circle"></i> Lançar Valor</button>
-            </form>
-        </div>
-
-        <div class="dashboard-card">
-            <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
-            <div class="table-responsive">
-                <table class="table table-striped text-center align-middle">
-                    <thead>
-                        <tr>
-                            <th>Data (Brasília)</th>
-                            <th>Nº OS</th>
-                            <th>Cooperado</th>
-                            <th>Valor (R$)</th>
-                            <th>Descrição</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for l in lancamentos %}
-                        <tr data-created="{{ l.data.isoformat() }}Z" data-id="{{ l.id }}">
-                            <td>{{ l.data_brasilia }}</td>
-                            <td class="os">{{ l.os_numero }}</td>
-                            <td class="coop">{{ l.cooperado.nome }}</td>
-                            <td class="valor" data-valor="{{ '%.2f'|format(l.valor) }}">{{ "{:,.2f}".format(l.valor) }}</td>
-                            <td class="desc">{{ l.descricao or '' }}</td>
-                            <td class="acoes">
-                                <button type="button"
-                                        class="btn btn-outline-primary btn-sm btn-editar"
-                                        data-id="{{ l.id }}"
-                                        data-os="{{ l.os_numero }}"
-                                        data-valor="{{ '%.2f'|format(l.valor) }}"
-                                        data-desc="{{ l.descricao or '' }}"
-                                        onclick="abrirModalEditar(this)">
-                                    <i class="bi bi-pencil-square"></i> Editar
-                                </button>
-                                <form method="post"
-                                      action="{{ url_for('estab_excluir_lancamento', id=l.id) }}"
-                                      style="display:inline-block;"
-                                      onsubmit="return confirmarExcluir(this);">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm btn-excluir">
-                                        <i class="bi bi-trash"></i> Excluir
-                                    </button>
-                                </form>
-                                <div class="text-warning small mt-1 aviso-expirado" style="display:none;">(período de 1h expirado)</div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr><td colspan="6">Nenhum lançamento realizado.</td></tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR LANÇAMENTO -->
-    <div class="modal fade" id="modalEditarLanc" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <form class="modal-content" method="post" id="form-editar-modal">
-          <div class="modal-header">
-            <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Lançamento</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-          </div>
-          <div class="modal-body">
-              <div class="mb-3">
-                  <label class="form-label">Nº OS</label>
-                  <input type="text" class="form-control" id="edit-os" name="os_numero" required>
-              </div>
-              <div class="mb-3">
-                  <label class="form-label">Valor (R$)</label>
-                  <input type="number" step="0.01" min="0.01" class="form-control" id="edit-valor" name="valor" required>
-              </div>
-              <div class="mb-3">
-                  <label class="form-label">Descrição</label>
-                  <input type="text" class="form-control" id="edit-desc" name="descricao">
-              </div>
-              <div class="form-text text-warning">
-                * Edição permitida até 1 hora após a criação.
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-primary" type="submit">Salvar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ÁUDIO: VENDA -->
-    <audio id="snd-venda" preload="auto" playsinline
-           src="{{ url_for('statics_files', filename='venda.mp3') }}"></audio>
-
-    <script>
-    // ---- Foto + Saldo do Cooperado ao selecionar
-    function mostrarInfoCooperado() {
-        var select = document.getElementById("cooperado_id");
-        var saldoDiv = document.getElementById("saldo-cooperado");
-        var fotoDiv = document.getElementById("foto-cooperado-preview");
-        var option = select.options[select.selectedIndex];
-        var saldo = option ? option.getAttribute("data-saldo") : null;
-        var foto = option ? option.getAttribute("data-foto") : null;
-        if (saldo && select.value) {
-            saldoDiv.innerHTML = '<i class="bi bi-cash-coin"></i> Saldo atual: <b>R$ ' + saldo + '</b>';
-        } else {
-            saldoDiv.innerHTML = '';
-        }
-        if (foto && select.value) {
-            fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #ffd700;box-shadow:0 0 8px #00339955;">';
-        } else {
-            fotoDiv.innerHTML = '';
-        }
-        checarCreditoSuficiente();
+  <style>
+    :root{
+      --bg:#191c20;
+      --ink:#eaf2ff;           /* texto principal, claro */
+      --muted:#a9b7db;         /* textos secundários */
+      --gold:#ffd700;          /* destaque dourado */
+      --line:#2b3346;          /* linhas/tabela */
+      --card1:#23262b;         /* fundo card */
+      --card2:#003399;         /* gradiente card */
+      --rowEven:#202a4a;       /* linhas tabela */
+      --rowOdd:#263155;
     }
 
-    function checarCreditoSuficiente() {
-        var select = document.getElementById("cooperado_id");
-        var valorInput = document.getElementById("valor");
-        var erroDiv = document.getElementById("erro-lancar");
-        var btn = document.getElementById("btn-lancar");
-        var option = select.options[select.selectedIndex];
-        var saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
-        var valor = valorInput.value ? parseFloat(valorInput.value) : null;
+    body{
+      background:var(--bg);
+      font-family:Roboto, Arial, sans-serif;
+      min-height:100vh;
+      color:var(--ink);
+    }
 
-        if (!select.value) { erroDiv.innerHTML = ""; btn.disabled = true; return; }
-        if (saldo == null || isNaN(saldo) || saldo <= 0) {
-            erroDiv.innerHTML = "Este cooperado está sem crédito disponível!";
-            btn.disabled = true; return;
-        }
-        if (valor && valor > saldo) {
-            erroDiv.innerHTML = "O valor excede o saldo disponível!";
-            btn.disabled = true;
-        } else {
-            erroDiv.innerHTML = "";
-            btn.disabled = false;
-        }
+    /* ============ Sidebar ============ */
+    .sidebar{
+      width:210px;height:100vh;position:fixed;top:0;left:0;
+      background:linear-gradient(160deg, #101218 70%, #003399 100%);
+      color:#fff;box-shadow:3px 0 12px #00339944;z-index:10;
+      display:flex;flex-direction:column;align-items:center;
+    }
+    .sidebar .logo{
+      width:170px;max-width:95%;margin:28px auto 10px auto;display:block;
+      filter: drop-shadow(0 0 10px #003399aa);
+    }
+    .sidebar h3{
+      font-family:Orbitron, sans-serif;color:var(--gold);text-align:center;
+      letter-spacing:1px;margin-bottom:22px;font-size:1.02rem;font-weight:700;
+      background:rgba(0,0,0,.18);border-radius:6px;padding:3px 0;width:100%;
+      text-shadow:0 1px 1px rgba(0,0,0,.6);
+    }
+    .sidebar .nav-link{
+      color:#e8eeff;font-size:1.05rem;border-radius:8px;margin:3px 0;
+      padding:11px 16px;display:flex;align-items:center;text-decoration:none;
+      transition:background .2s,color .2s;
+    }
+    .sidebar .nav-link i{font-size:1.25rem;margin-right:10px;}
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover{background:#ffd70033;color:var(--gold)!important;}
+
+    /* ============ Main/Topbar ============ */
+    .main-content{margin-left:230px;padding:38px 32px 20px 32px;}
+    .topbar{
+      background:#101218;height:62px;display:flex;align-items:center;
+      justify-content:flex-end;border-bottom:1.5px solid #23262b;
+      box-shadow:0 2px 16px #0004;position:sticky;top:0;z-index:20;
+      padding:0 16px;
+    }
+    .topbar span{color:var(--gold);font-weight:700;font-size:1.05rem;margin-right:16px;}
+    .topbar .btn{font-weight:700;border-radius:20px;}
+
+    /* ============ Cards ============ */
+    .dashboard-card{
+      background:linear-gradient(120deg, var(--card1) 90%, var(--card2) 100%);
+      border-radius:17px;box-shadow:0 8px 32px #0008, 0 2px 8px #00339944;
+      padding:24px 22px 20px;margin-bottom:28px;color:var(--ink);
+      text-shadow:none;        /* sem blur global */
+    }
+    .dashboard-card h4{
+      margin-bottom:12px;
+      font-family:Orbitron, sans-serif;font-weight:700;letter-spacing:1.2px;
+      color:var(--gold);
+      text-shadow:0 1px 1px rgba(0,0,0,.6); /* leve e nítida */
+    }
+
+    /* ============ Botões ============ */
+    .btn-primary{
+      background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
+      color:#191c20;font-weight:700;border:none;border-radius:14px;
+      transition:filter .15s, transform .03s;
+    }
+    .btn-primary:hover{filter:brightness(1.06);}
+    .btn-primary:active{transform:translateY(1px);}
+
+    .btn-outline-primary{
+      color:#9ec0ff;border-color:#2d6cdf;background:transparent;
+    }
+    .btn-outline-primary:hover{
+      color:#eaf2ff;background:#2d6cdf22;border-color:#4b82ff;
+    }
+    .btn-outline-danger{
+      color:#ff9aa4;border-color:#e34b5a;background:transparent;
+    }
+    .btn-outline-danger:hover{
+      color:#ffe6e8;background:#e34b5a22;border-color:#ff7180;
+    }
+    .btn.disabled, .btn:disabled{opacity:.55;cursor:not-allowed;}
+
+    /* ============ Tabela ============ */
+    .table{color:var(--ink);border-radius:10px;overflow:hidden;margin:0;}
+    .table thead th{
+      background:#1d2240;color:var(--gold)!important;
+      font-family:Orbitron, sans-serif;letter-spacing:1.1px;text-align:center;
+      border-bottom:1px solid var(--line);
+    }
+    .table tbody td{
+      border-top:1px solid var(--line);
+      text-shadow:none;                  /* nítido */
+      color:var(--ink);
+    }
+    .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd);}
+    .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven);}
+
+    .aviso-expirado{color:var(--muted);}
+
+    /* Alertas */
+    .alert{
+      background:var(--gold);color:#222;font-weight:700;border-radius:9px;
+      margin-bottom:10px;text-align:center;
+    }
+
+    /* Responsivo */
+    @media (max-width:900px){
+      .sidebar{display:none;}
+      .main-content{margin-left:0;padding:14px;}
+      .table thead th{font-size:.9rem;}
+      .table tbody td{font-size:.95rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
+    <h3>Parceiro<br>Coopex</h3>
+    <a class="nav-link active" href="#"><i class="bi bi-currency-dollar"></i>Lançar Crédito</a>
+    <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
+  </div>
+
+  <div class="main-content">
+    <div class="topbar mb-4">
+      <span>Bem-vindo, {{ est.nome }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- ===== Card de Lançamento ===== -->
+    <div class="dashboard-card mb-4">
+      <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
+      <form method="post" action="{{ url_for('painel_estabelecimento') }}">
+        <div class="row g-3 align-items-center mb-2">
+          <div class="col-md-4">
+            <label class="form-label" for="cooperado_id">
+              <i class="bi bi-person-lines-fill"></i> Cooperado
+            </label>
+            <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
+              <option value="">Selecione...</option>
+              {% for c in cooperados %}
+              <option
+                value="{{ c.id }}"
+                data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
+                data-saldo-raw="{{ c.credito }}"
+                data-foto="{{ url_for('foto_cooperado', id=c.id) if (c.foto_data or c.foto) else '' }}"
+              >{{ c.nome }}</option>
+              {% endfor %}
+            </select>
+
+            <div id="foto-cooperado-preview" style="text-align:center; margin:10px 0 0 0;"></div>
+            <div id="saldo-cooperado" style="color:var(--gold); font-weight:700; margin:8px 0 6px 0; font-size:1.05em;"></div>
+            <div id="erro-lancar" style="color:var(--gold); font-size:.97em; font-weight:600; margin-top:5px;"></div>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label" for="valor"><i class="bi bi-cash-stack"></i> Valor (R$)</label>
+            <input type="number" step="0.01" min="0.01" class="form-control" id="valor" name="valor" required oninput="checarCreditoSuficiente()">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label" for="os_numero"><i class="bi bi-file-earmark-text"></i> Nº OS</label>
+            <input type="text" class="form-control" id="os_numero" name="os_numero" required placeholder="Ex: 12345">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label" for="descricao"><i class="bi bi-justify-left"></i> Descrição</label>
+            <input type="text" class="form-control" id="descricao" name="descricao" placeholder="(opcional)">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2" id="btn-lancar">
+          <i class="bi bi-plus-circle"></i> Lançar Valor
+        </button>
+      </form>
+    </div>
+
+    <!-- ===== Card de Lista ===== -->
+    <div class="dashboard-card">
+      <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
+      <div class="table-responsive">
+        <table class="table table-striped text-center align-middle">
+          <thead>
+            <tr>
+              <th>Data (Brasília)</th>
+              <th>Nº OS</th>
+              <th>Cooperado</th>
+              <th>Valor (R$)</th>
+              <th>Descrição</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in lancamentos %}
+            <tr data-created="{{ l.data.isoformat() }}Z" data-id="{{ l.id }}">
+              <td>{{ l.data_brasilia }}</td>
+              <td class="os">{{ l.os_numero }}</td>
+              <td class="coop">{{ l.cooperado.nome }}</td>
+              <td class="valor" data-valor="{{ '%.2f'|format(l.valor) }}">{{ "{:,.2f}".format(l.valor) }}</td>
+              <td class="desc">{{ l.descricao or '' }}</td>
+              <td class="acoes">
+                <button type="button"
+                        class="btn btn-outline-primary btn-sm btn-editar"
+                        data-id="{{ l.id }}"
+                        data-os="{{ l.os_numero }}"
+                        data-valor="{{ '%.2f'|format(l.valor) }}"
+                        data-desc="{{ l.descricao or '' }}"
+                        onclick="abrirModalEditar(this)">
+                  <i class="bi bi-pencil-square"></i> Editar
+                </button>
+
+                <form method="post"
+                      action="{{ url_for('estab_excluir_lancamento', id=l.id) }}"
+                      style="display:inline-block;"
+                      onsubmit="return confirmarExcluir(this);">
+                  <button type="submit" class="btn btn-outline-danger btn-sm btn-excluir">
+                    <i class="bi bi-trash"></i> Excluir
+                  </button>
+                </form>
+
+                <div class="aviso-expirado small mt-1" style="display:none;">Bloqueado (1h)</div>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6">Nenhum lançamento realizado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR LANÇAMENTO -->
+  <div class="modal fade" id="modalEditarLanc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content" method="post" id="form-editar-modal">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Lançamento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nº OS</label>
+            <input type="text" class="form-control" id="edit-os" name="os_numero" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Valor (R$)</label>
+            <input type="number" step="0.01" min="0.01" class="form-control" id="edit-valor" name="valor" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <input type="text" class="form-control" id="edit-desc" name="descricao">
+          </div>
+          <div class="form-text text-warning">
+            * Edição permitida até 1 hora após a criação.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" type="submit">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ÁUDIO: VENDA -->
+  <audio id="snd-venda" preload="auto" playsinline
+         src="{{ url_for('statics_files', filename='venda.mp3') }}"></audio>
+
+  <script>
+    // ---- Foto + Saldo ao selecionar cooperado
+    function mostrarInfoCooperado(){
+      const select = document.getElementById("cooperado_id");
+      const saldoDiv = document.getElementById("saldo-cooperado");
+      const fotoDiv  = document.getElementById("foto-cooperado-preview");
+      const option   = select.options[select.selectedIndex];
+      const saldo    = option ? option.getAttribute("data-saldo") : null;
+      const foto     = option ? option.getAttribute("data-foto") : null;
+
+      saldoDiv.innerHTML = (saldo && select.value)
+        ? '<i class="bi bi-cash-coin"></i> Saldo atual: <b>R$ '+saldo+'</b>' : '';
+
+      fotoDiv.innerHTML = (foto && select.value)
+        ? '<img src="'+foto+'" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 8px #00339955;">'
+        : '';
+
+      checarCreditoSuficiente();
+    }
+
+    function checarCreditoSuficiente(){
+      const select = document.getElementById("cooperado_id");
+      const valorInput = document.getElementById("valor");
+      const erroDiv = document.getElementById("erro-lancar");
+      const btn = document.getElementById("btn-lancar");
+
+      const option = select.options[select.selectedIndex];
+      const saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
+      const valor = valorInput.value ? parseFloat(valorInput.value) : null;
+
+      if (!select.value){ erroDiv.innerHTML=""; btn.disabled=true; return; }
+      if (saldo == null || isNaN(saldo) || saldo <= 0){
+        erroDiv.innerHTML="Este cooperado está sem crédito disponível!";
+        btn.disabled=true; return;
+      }
+      if (valor && valor > saldo){
+        erroDiv.innerHTML="O valor excede o saldo disponível!";
+        btn.disabled=true;
+      } else {
+        erroDiv.innerHTML="";
+        btn.disabled=false;
+      }
     }
 
     // ---- Modal Editar
     let editarModal;
-    document.addEventListener('DOMContentLoaded', function() {
-        mostrarInfoCooperado();
-        document.getElementById("cooperado_id").addEventListener("change", mostrarInfoCooperado);
-        document.getElementById("valor").addEventListener("input", checarCreditoSuficiente);
+    document.addEventListener('DOMContentLoaded', function(){
+      mostrarInfoCooperado();
+      document.getElementById("cooperado_id").addEventListener("change", mostrarInfoCooperado);
+      document.getElementById("valor").addEventListener("input", checarCreditoSuficiente);
 
-        editarModal = new bootstrap.Modal(document.getElementById('modalEditarLanc'));
+      editarModal = new bootstrap.Modal(document.getElementById('modalEditarLanc'));
 
-        // Desabilita botões Editar/Excluir após 1h (cheque visual; o backend também valida)
-        aplicarRestricaoUmaHora();
-        // Atualiza a cada minuto (opcional)
-        setInterval(aplicarRestricaoUmaHora, 60 * 1000);
+      aplicarRestricaoUmaHora();
+      setInterval(aplicarRestricaoUmaHora, 60*1000);
 
-        // Tenta tocar se houve sucesso (pós-resposta)
-        if (document.querySelector('.alert.alert-success')) {
-            const a = document.getElementById('snd-venda');
-            a && a.play().catch(()=>{});
-        }
-    });
-
-    // Toca o áudio no clique do botão (gesto do usuário) ANTES do submit
-    document.addEventListener('click', function(ev){
-        const tgt = ev.target.closest('#btn-lancar');
-        if (!tgt) return;
-        if (tgt.disabled) return;
-        const a = document.getElementById('snd-venda');
+      if (document.querySelector('.alert.alert-success')){
+        const a=document.getElementById('snd-venda');
         a && a.play().catch(()=>{});
-        // não cancela o submit
+      }
     });
 
-    function abrirModalEditar(btn) {
-        // Checa restrição (se já expirou, não abre)
-        const tr = btn.closest('tr');
-        if (estaExpirado(tr.getAttribute('data-created'))) {
-            return;
+    // toca o áudio no clique (gesto do usuário) antes do submit
+    document.addEventListener('click', function(ev){
+      const tgt = ev.target.closest('#btn-lancar');
+      if (!tgt || tgt.disabled) return;
+      const a=document.getElementById('snd-venda');
+      a && a.play().catch(()=>{});
+    });
+
+    function abrirModalEditar(btn){
+      const tr = btn.closest('tr');
+      if (estaExpirado(tr.getAttribute('data-created'))) return;
+
+      const id    = btn.getAttribute('data-id');
+      const os    = btn.getAttribute('data-os') || '';
+      const valor = btn.getAttribute('data-valor') || '';
+      const desc  = btn.getAttribute('data-desc') || '';
+
+      document.getElementById('edit-os').value = os;
+      document.getElementById('edit-valor').value = valor.replace(',', '.');
+      document.getElementById('edit-desc').value = desc;
+
+      const form = document.getElementById('form-editar-modal');
+      form.action = "{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0', '/' + id);
+
+      editarModal.show();
+    }
+
+    function confirmarExcluir(formEl){
+      const tr = formEl.closest('tr');
+      if (estaExpirado(tr.getAttribute('data-created'))) return false;
+      return confirm('Confirma excluir este lançamento? O crédito será devolvido ao cooperado.');
+    }
+
+    function aplicarRestricaoUmaHora(){
+      document.querySelectorAll('table tbody tr[data-created]').forEach(tr=>{
+        const createdIso = tr.getAttribute('data-created');
+        const expirado = estaExpirado(createdIso);
+
+        const btnEditar = tr.querySelector('.btn-editar');
+        const btnExcluir = tr.querySelector('.btn-excluir');
+        const aviso = tr.querySelector('.aviso-expirado');
+
+        if (expirado){
+          if (btnEditar){ btnEditar.disabled=true; btnEditar.classList.add('disabled'); }
+          if (btnExcluir){ btnExcluir.disabled=true; btnExcluir.classList.add('disabled'); }
+          if (aviso) aviso.style.display='block';
+        } else {
+          if (btnEditar){ btnEditar.disabled=false; btnEditar.classList.remove('disabled'); }
+          if (btnExcluir){ btnExcluir.disabled=false; btnExcluir.classList.remove('disabled'); }
+          if (aviso) aviso.style.display='none';
         }
-        const id = btn.getAttribute('data-id');
-        const os = btn.getAttribute('data-os') || '';
-        const valor = btn.getAttribute('data-valor') || '';
-        const desc = btn.getAttribute('data-desc') || '';
-
-        document.getElementById('edit-os').value = os;
-        document.getElementById('edit-valor').value = valor.replace(',', '.');
-        document.getElementById('edit-desc').value = desc;
-
-        // Define a action do form para a rota de edição
-        const form = document.getElementById('form-editar-modal');
-        form.action = "{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0', '/' + id);
-
-        editarModal.show();
+      });
     }
 
-    function confirmarExcluir(formEl) {
-        const tr = formEl.closest('tr');
-        if (estaExpirado(tr.getAttribute('data-created'))) {
-            return false;
-        }
-        return confirm('Confirma excluir este lançamento? O crédito será devolvido ao cooperado.');
+    function estaExpirado(createdIso){
+      if (!createdIso) return false;
+      const criado = new Date(createdIso);  // UTC
+      const agora  = new Date();
+      const diffMs = agora - criado;
+      return diffMs > (60*60*1000); // 1 hora
     }
+  </script>
 
-    function aplicarRestricaoUmaHora() {
-        const linhas = document.querySelectorAll('table tbody tr[data-created]');
-        linhas.forEach(tr => {
-            const createdIso = tr.getAttribute('data-created');
-            const expirado = estaExpirado(createdIso);
-
-            const btnEditar = tr.querySelector('.btn-editar');
-            const btnExcluir = tr.querySelector('.btn-excluir');
-            const aviso = tr.querySelector('.aviso-expirado');
-
-            if (expirado) {
-                if (btnEditar) { btnEditar.disabled = true; btnEditar.classList.add('disabled'); }
-                if (btnExcluir) { btnExcluir.disabled = true; btnExcluir.classList.add('disabled'); }
-                if (aviso) aviso.style.display = 'block';
-            } else {
-                if (btnEditar) { btnEditar.disabled = false; btnEditar.classList.remove('disabled'); }
-                if (btnExcluir) { btnExcluir.disabled = false; btnExcluir.classList.remove('disabled'); }
-                if (aviso) aviso.style.display = 'none';
-            }
-        });
-    }
-
-    function estaExpirado(createdIso) {
-        if (!createdIso) return false;
-        // createdIso vem do servidor como UTC (l.data é datetime.utcnow())
-        const criado = new Date(createdIso); // trata como UTC
-        const agora = new Date();
-        const diffMs = agora - criado;
-        return diffMs > (60 * 60 * 1000); // 1 hora
-    }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
