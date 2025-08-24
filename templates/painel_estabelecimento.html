@@ -13,34 +13,28 @@
   <style>
     :root{
       --bg:#191c20;
-      --ink:#eaf2ff;           /* texto principal, claro */
-      --muted:#a9b7db;         /* textos secundários */
-      --gold:#ffd700;          /* destaque dourado */
-      --line:#2b3346;          /* linhas/tabela */
-      --card1:#23262b;         /* fundo card */
-      --card2:#003399;         /* gradiente card */
-      --rowEven:#202a4a;       /* linhas tabela */
+      --ink:#eaf2ff;
+      --muted:#a9b7db;
+      --gold:#ffd700;
+      --line:#2b3346;
+      --card1:#23262b;
+      --card2:#003399;
+      --rowEven:#202a4a;
       --rowOdd:#263155;
+      --kpi:#0f162b;
+      --kpiLine:#2a3a60;
     }
 
-    body{
-      background:var(--bg);
-      font-family:Roboto, Arial, sans-serif;
-      min-height:100vh;
-      color:var(--ink);
-    }
+    body{ background:var(--bg); font-family:Roboto, Arial, sans-serif; min-height:100vh; color:var(--ink); }
 
-    /* ============ Sidebar ============ */
+    /* === Sidebar === */
     .sidebar{
       width:210px;height:100vh;position:fixed;top:0;left:0;
-      background:linear-gradient(160deg, #101218 70%, #003399 100%);
+      background:linear-gradient(160deg,#101218 70%,#003399 100%);
       color:#fff;box-shadow:3px 0 12px #00339944;z-index:10;
       display:flex;flex-direction:column;align-items:center;
     }
-    .sidebar .logo{
-      width:170px;max-width:95%;margin:28px auto 10px auto;display:block;
-      filter: drop-shadow(0 0 10px #003399aa);
-    }
+    .sidebar .logo{ width:170px;max-width:95%;margin:28px auto 10px;display:block;filter: drop-shadow(0 0 10px #003399aa); }
     .sidebar h3{
       font-family:Orbitron, sans-serif;color:var(--gold);text-align:center;
       letter-spacing:1px;margin-bottom:22px;font-size:1.02rem;font-weight:700;
@@ -53,71 +47,79 @@
       transition:background .2s,color .2s;
     }
     .sidebar .nav-link i{font-size:1.25rem;margin-right:10px;}
-    .sidebar .nav-link.active,
-    .sidebar .nav-link:hover{background:#ffd70033;color:var(--gold)!important;}
+    .sidebar .nav-link.active,.sidebar .nav-link:hover{background:#ffd70033;color:var(--gold)!important;}
 
-    /* ============ Main/Topbar ============ */
+    /* === Main / Topbar === */
     .main-content{margin-left:230px;padding:38px 32px 20px 32px;}
     .topbar{
       background:#101218;height:62px;display:flex;align-items:center;
-      justify-content:flex-end;border-bottom:1.5px solid #23262b;
-      box-shadow:0 2px 16px #0004;position:sticky;top:0;z-index:20;
-      padding:0 16px;
+      justify-content:space-between;border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 10px 22px rgba(0,0,0,.25);border-radius:14px;padding:0 14px;
+      position:sticky;top:0;z-index:20;
     }
-    .topbar span{color:var(--gold);font-weight:700;font-size:1.05rem;margin-right:16px;}
+    .topbar .who{ color:var(--gold); font-weight:700; font-size:1.02rem; }
+    .topbar .clock{ color:#ffeaa6; font-weight:800; letter-spacing:.4px; }
     .topbar .btn{font-weight:700;border-radius:20px;}
 
-    /* ============ Cards ============ */
+    /* === Cards base === */
     .dashboard-card{
-      background:linear-gradient(120deg, var(--card1) 90%, var(--card2) 100%);
+      background:linear-gradient(120deg,var(--card1) 90%,var(--card2) 100%);
       border-radius:17px;box-shadow:0 8px 32px #0008, 0 2px 8px #00339944;
       padding:24px 22px 20px;margin-bottom:28px;color:var(--ink);
-      text-shadow:none;        /* sem blur global */
     }
     .dashboard-card h4{
-      margin-bottom:12px;
-      font-family:Orbitron, sans-serif;font-weight:700;letter-spacing:1.2px;
-      color:var(--gold);
-      text-shadow:0 1px 1px rgba(0,0,0,.6); /* leve e nítida */
+      margin-bottom:12px;font-family:Orbitron, sans-serif;font-weight:700;letter-spacing:1.2px;color:var(--gold);
+      text-shadow:0 1px 1px rgba(0,0,0,.6);
     }
 
-    /* ============ Botões ============ */
+    /* === KPIs (indicadores) === */
+    .kpis{
+      display:grid; gap:10px; grid-template-columns: repeat(5, minmax(0,1fr));
+      margin-bottom:10px;
+    }
+    .kpi{
+      background:var(--kpi); border:1px solid var(--kpiLine); border-radius:14px; padding:12px 14px;
+      display:flex; flex-direction:column; gap:6px; min-height:84px;
+    }
+    .kpi .label{ color:#dfe6ff; font-weight:800; display:flex; align-items:center; gap:8px; }
+    .kpi .value{ font:900 1.25rem Orbitron, sans-serif; color:var(--gold); letter-spacing:.5px; }
+    .kpi .sub{ color:var(--muted); font-size:.9rem; }
+
+    /* === Botões === */
     .btn-primary{
-      background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
+      background:linear-gradient(90deg,var(--gold) 60%, #ffe670 100%);
       color:#191c20;font-weight:700;border:none;border-radius:14px;
       transition:filter .15s, transform .03s;
     }
     .btn-primary:hover{filter:brightness(1.06);}
     .btn-primary:active{transform:translateY(1px);}
+    .btn-outline-primary{ color:#9ec0ff;border-color:#2d6cdf;background:transparent; }
+    .btn-outline-primary:hover{ color:#eaf2ff;background:#2d6cdf22;border-color:#4b82ff; }
+    .btn-outline-danger{ color:#ff9aa4;border-color:#e34b5a;background:transparent; }
+    .btn-outline-danger:hover{ color:#ffe6e8;background:#e34b5a22;border-color:#ff7180; }
+    .btn.disabled,.btn:disabled{opacity:.55;cursor:not-allowed;}
 
-    .btn-outline-primary{
-      color:#9ec0ff;border-color:#2d6cdf;background:transparent;
+    /* === Form === */
+    label{font-weight:700;color:var(--ink);letter-spacing:.2px;}
+    .form-control,.form-select{ background:#0f172a; color:var(--ink); border-color:#324167; }
+    .form-control::placeholder{color:var(--muted);}
+    .form-control:focus,.form-select:focus{
+      border-color:#4b82ff; box-shadow:0 0 0 .2rem rgba(75,130,255,.15);
     }
-    .btn-outline-primary:hover{
-      color:#eaf2ff;background:#2d6cdf22;border-color:#4b82ff;
-    }
-    .btn-outline-danger{
-      color:#ff9aa4;border-color:#e34b5a;background:transparent;
-    }
-    .btn-outline-danger:hover{
-      color:#ffe6e8;background:#e34b5a22;border-color:#ff7180;
-    }
-    .btn.disabled, .btn:disabled{opacity:.55;cursor:not-allowed;}
 
-    /* ============ Tabela ============ */
-    .table{color:var(--ink);border-radius:10px;overflow:hidden;margin:0;}
-    .table thead th{
-      background:#1d2240;color:var(--gold)!important;
-      font-family:Orbitron, sans-serif;letter-spacing:1.1px;text-align:center;
-      border-bottom:1px solid var(--line);
+    /* === Tabela === */
+    .table-wrap{ border-radius:12px; overflow:auto; background:#0e1533; }
+    .table{color:var(--ink);border-radius:10px;margin:0;}
+    thead th{
+      position:sticky; top:0; z-index:5; background:#1d2240; color:var(--gold)!important;
+      font-family:Orbitron, sans-serif; letter-spacing:1.1px; text-align:center;
+      border-bottom:1px solid var(--line); padding:12px 8px; box-shadow:0 2px 0 rgba(0,0,0,.35);
     }
-    .table tbody td{
-      border-top:1px solid var(--line);
-      text-shadow:none;                  /* nítido */
-      color:var(--ink);
-    }
+    tbody td{ border-top:1px solid var(--line); color:var(--ink); vertical-align:middle; }
     .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd);}
     .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven);}
+    .table-hover tbody tr:hover>*{ background-color:#2b375e!important; }
+    td.valor{ font-weight:800; color:var(--gold); white-space:nowrap; }
 
     .aviso-expirado{color:var(--muted);}
 
@@ -128,15 +130,18 @@
     }
 
     /* Responsivo */
+    @media (max-width:1200px){ .kpis{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
     @media (max-width:900px){
       .sidebar{display:none;}
       .main-content{margin-left:0;padding:14px;}
-      .table thead th{font-size:.9rem;}
-      .table tbody td{font-size:.95rem;}
+      .kpis{ grid-template-columns: 1fr; }
+      thead th{font-size:.92rem;}
+      tbody td{font-size:.96rem;}
     }
   </style>
 </head>
 <body>
+  <!-- Sidebar -->
   <div class="sidebar">
     <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
     <h3>Parceiro<br>Coopex</h3>
@@ -144,10 +149,14 @@
     <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
   </div>
 
+  <!-- Main -->
   <div class="main-content">
     <div class="topbar mb-4">
-      <span>Bem-vindo, {{ est.nome }}</span>
-      <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm ms-2">Sair <i class="bi bi-power"></i></a>
+      <div class="who">Bem-vindo, {{ est.nome }}</div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="clock" id="clock-br">Brasilía — --:--:--</div>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm">Sair <i class="bi bi-power"></i></a>
+      </div>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -157,6 +166,35 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
+    <!-- ===== Indicadores (calculados da tabela) ===== -->
+    <div class="kpis" id="kpis">
+      <div class="kpi">
+        <div class="label"><i class="bi bi-list-check"></i> Lançamentos</div>
+        <div class="value" id="k-count">0</div>
+        <div class="sub">Total (tabela abaixo)</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-cash-stack"></i> Valor Total</div>
+        <div class="value" id="k-sum">R$ 0,00</div>
+        <div class="sub">Soma de todos</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-graph-up-arrow"></i> Maior Lançamento</div>
+        <div class="value" id="k-max">R$ 0,00</div>
+        <div class="sub">Valor único máximo</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-person-fill-check"></i> Top Cooperado</div>
+        <div class="value" id="k-top">—</div>
+        <div class="sub" id="k-top-sub">Maior soma</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><i class="bi bi-clock-history"></i> Último Lançamento</div>
+        <div class="value" id="k-last">—</div>
+        <div class="sub">Horário de Brasília</div>
+      </div>
+    </div>
 
     <!-- ===== Card de Lançamento ===== -->
     <div class="dashboard-card mb-4">
@@ -179,8 +217,8 @@
               {% endfor %}
             </select>
 
-            <div id="foto-cooperado-preview" style="text-align:center; margin:10px 0 0 0;"></div>
-            <div id="saldo-cooperado" style="color:var(--gold); font-weight:700; margin:8px 0 6px 0; font-size:1.05em;"></div>
+            <div id="foto-cooperado-preview" style="text-align:center; margin:10px 0 0;"></div>
+            <div id="saldo-cooperado" style="color:var(--gold); font-weight:700; margin:8px 0 6px; font-size:1.05em;"></div>
             <div id="erro-lancar" style="color:var(--gold); font-size:.97em; font-weight:600; margin-top:5px;"></div>
           </div>
 
@@ -209,8 +247,8 @@
     <!-- ===== Card de Lista ===== -->
     <div class="dashboard-card">
       <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
-      <div class="table-responsive">
-        <table class="table table-striped text-center align-middle">
+      <div class="table-wrap">
+        <table class="table table-striped table-hover text-center align-middle">
           <thead>
             <tr>
               <th>Data (Brasília)</th>
@@ -221,10 +259,10 @@
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="tbody-lanc">
             {% for l in lancamentos %}
             <tr data-created="{{ l.data.isoformat() }}Z" data-id="{{ l.id }}">
-              <td>{{ l.data_brasilia }}</td>
+              <td class="dt">{{ l.data_brasilia }}</td>
               <td class="os">{{ l.os_numero }}</td>
               <td class="coop">{{ l.cooperado.nome }}</td>
               <td class="valor" data-valor="{{ '%.2f'|format(l.valor) }}">{{ "{:,.2f}".format(l.valor) }}</td>
@@ -282,9 +320,7 @@
             <label class="form-label">Descrição</label>
             <input type="text" class="form-control" id="edit-desc" name="descricao">
           </div>
-          <div class="form-text text-warning">
-            * Edição permitida até 1 hora após a criação.
-          </div>
+          <div class="form-text text-warning">* Edição permitida até 1 hora após a criação.</div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
@@ -299,7 +335,20 @@
          src="{{ url_for('statics_files', filename='venda.mp3') }}"></audio>
 
   <script>
-    // ---- Foto + Saldo ao selecionar cooperado
+    // ===== Relógio de Brasília =====
+    function tickClock(){
+      const el = document.getElementById('clock-br');
+      if(!el) return;
+      const now = new Date();
+      const s = now.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour12: false
+      });
+      el.textContent = 'Brasília — ' + s;
+    }
+    setInterval(tickClock, 1000); tickClock();
+
+    // ===== Foto + Saldo ao selecionar cooperado
     function mostrarInfoCooperado(){
       const select = document.getElementById("cooperado_id");
       const saldoDiv = document.getElementById("saldo-cooperado");
@@ -342,17 +391,74 @@
       }
     }
 
-    // ---- Modal Editar
+    // ===== Indicadores (lidos da tabela)
+    function formatBR(n){
+      return n.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+    function atualizarIndicadores(){
+      const rows = [...document.querySelectorAll('#tbody-lanc tr')];
+      let count=0, sum=0, max=0, lastTs=0;
+      const porCoop = Object.create(null);
+
+      rows.forEach(tr=>{
+        const valTd = tr.querySelector('.valor');
+        if(!valTd) return;
+        const v = parseFloat(valTd.dataset.valor || '0');
+        if(isNaN(v)) return;
+        count++;
+        sum += v;
+        if (v>max) max=v;
+
+        // último lançamento por data-created (UTC)
+        const created = Date.parse(tr.getAttribute('data-created') || '') || 0;
+        if (created>lastTs) lastTs = created;
+
+        // soma por cooperado
+        const nome = (tr.querySelector('.coop')?.textContent || '').trim();
+        if (nome){
+          porCoop[nome] = (porCoop[nome]||0) + v;
+        }
+      });
+
+      // top cooperado
+      let topNome='—', topVal=0;
+      for (const k in porCoop){
+        if (porCoop[k]>topVal){ topVal=porCoop[k]; topNome=k; }
+      }
+
+      // escreve
+      document.getElementById('k-count').textContent = count;
+      document.getElementById('k-sum').textContent   = 'R$ ' + formatBR(sum);
+      document.getElementById('k-max').textContent   = 'R$ ' + formatBR(max);
+      document.getElementById('k-top').textContent   = topNome!=='—' ? topNome : '—';
+      document.getElementById('k-top-sub').textContent = topNome!=='—' ? ('Soma: R$ ' + formatBR(topVal)) : 'Maior soma';
+
+      if (lastTs){
+        // mostra em horário de Brasília
+        const dt = new Date(lastTs);
+        const br = dt.toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
+        document.getElementById('k-last').textContent = br;
+      } else {
+        document.getElementById('k-last').textContent = '—';
+      }
+    }
+
+    // ===== Modal Editar / restrição 1h =====
     let editarModal;
     document.addEventListener('DOMContentLoaded', function(){
       mostrarInfoCooperado();
-      document.getElementById("cooperado_id").addEventListener("change", mostrarInfoCooperado);
-      document.getElementById("valor").addEventListener("input", checarCreditoSuficiente);
+      const sel = document.getElementById("cooperado_id");
+      sel && sel.addEventListener("change", mostrarInfoCooperado);
+      const val = document.getElementById("valor");
+      val && val.addEventListener("input", checarCreditoSuficiente);
 
       editarModal = new bootstrap.Modal(document.getElementById('modalEditarLanc'));
 
       aplicarRestricaoUmaHora();
       setInterval(aplicarRestricaoUmaHora, 60*1000);
+
+      atualizarIndicadores();          // calcula já na carga
+      setInterval(atualizarIndicadores, 15*1000); // atualiza periodicamente (barato)
 
       if (document.querySelector('.alert.alert-success')){
         const a=document.getElementById('snd-venda');
