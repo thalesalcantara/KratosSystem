@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Cooperados - Coopex</title>
+  <title>Cooperados - Coopex (Lista contínua)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Fonts + Bootstrap + Icons -->
@@ -12,29 +12,33 @@
 
   <style>
     :root{
-      --bg:#0c1016;
-      --ink:#eaf2ff;
-      --muted:#a9b7db;
-      --gold:#ffd700;
-      --accent:#4b82ff;
-      --card1:#1a1f2b;
-      --card2:#003399;
-      --thead:#151d36;
-      --rowOdd:#1a2345;
-      --rowEven:#132039;
-      --line:#27324c;
+      /* Paleta alto contraste */
+      --bg:#0b0f16;
+      --ink:#ffffff;          /* texto principal branco */
+      --muted:#c8d2ee;        /* secundário claro */
+      --gold:#ffd700;         /* destaque dourado */
+      --accent:#4b82ff;       /* azul vivo p/ focos/bordas */
+      --card1:#1a2131;
+      --card2:#0d49cc;
+      --thead:#0f1a3a;        /* fundo do cabeçalho da tabela */
+      --rowOdd:#1b2b57;
+      --rowEven:#16264a;
+      --line:#3a4b76;
       --field:#0f172a;
-      --fieldBorder:#3b4565;
+      --fieldBorder:#576898;
       --fieldFocus:#4b82ff;
-      --glass:rgba(255,255,255,.06);
+      --glass:rgba(255,255,255,.07);
     }
 
     html,body{height:100%}
+    *{box-sizing:border-box}
     body{
       margin:0; background:
-        radial-gradient(1200px 400px at 80% -40%, rgba(0,51,153,.25), transparent 70%),
-        linear-gradient(180deg, #0c1016, #0c1016);
-      color:var(--ink); font-family:Roboto, Arial, sans-serif;
+        radial-gradient(1400px 480px at 80% -40%, rgba(13,73,204,.25), transparent 70%),
+        linear-gradient(180deg, #0b0f16, #0b0f16);
+      color:var(--ink);
+      font-family:Roboto, Arial, sans-serif;
+      text-shadow:none;
       overflow-x:hidden;
     }
 
@@ -42,149 +46,152 @@
     .topbar{
       position:sticky; top:0; z-index:60; height:68px;
       display:flex; align-items:center; gap:12px; padding:0 16px;
-      background:linear-gradient(90deg, rgba(12,16,22,.9) 40%, rgba(12,16,22,.75) 100%);
+      background:linear-gradient(90deg, rgba(11,15,22,.95) 35%, rgba(11,15,22,.8) 100%);
       backdrop-filter: blur(8px);
-      border-bottom:1px solid #101827;
+      border-bottom:1px solid #19223b;
       box-shadow:0 8px 28px rgba(0,0,0,.45);
     }
     .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .brand img{ height:36px; width:auto; filter: drop-shadow(0 0 8px #00339966); }
+    .brand img{ height:36px; width:auto; filter: drop-shadow(0 0 8px #0d49cc66); }
     .brand h1{
       margin:0; font:700 1.08rem/1 Orbitron, sans-serif; letter-spacing:1.2px; color:var(--gold);
-      text-shadow:0 1px 1px rgba(0,0,0,.55);
+      text-shadow:0 1px 1px rgba(0,0,0,.6);
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .topbar .spacer{flex:1}
-    .topbar .btn-new{
+    .btn-new{
       background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
-      color:#191c20; font-weight:800; border:none; border-radius:999px; padding:.6rem 1rem;
-      box-shadow:0 6px 18px rgba(255,215,0,.2);
+      color:#1b1e2a; font-weight:800; border:none; border-radius:999px; padding:.6rem 1rem;
+      box-shadow:0 6px 18px rgba(255,215,0,.22);
     }
-    .topbar .btn-new:hover{ filter:brightness(1.06); }
-    .topbar .btn-back{ color:#cfe0ff; border-color:#2b3a61; border-radius:999px; }
-    .topbar .btn-back:hover{ background:#1b294d; color:#fff; }
+    .btn-new:hover{ filter:brightness(1.06); }
+    .btn-back{ color:#eaf2ff; border-color:#2b3a61; border-radius:999px; }
+    .btn-back:hover{ background:#1b294d; color:#fff; }
 
     /* ===== Container ===== */
-    .wrap{ max-width:1200px; margin:0 auto; padding:22px 14px 34px; }
+    .wrap{ max-width:1280px; margin:0 auto; padding:22px 14px 34px; }
 
     /* ===== Cards de métricas ===== */
     .stats{ display:grid; gap:14px; grid-template-columns: repeat(3, minmax(0,1fr)); margin:14px 0 18px; }
     .stat{
       background:linear-gradient(120deg, var(--card1), var(--card2));
-      border:1px solid rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
       border-radius:16px; padding:14px 16px;
-      box-shadow:0 8px 26px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.02);
+      box-shadow:0 8px 26px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
     }
-    .stat .label{ color:#cfe0ff; font-weight:700; letter-spacing:.4px; display:flex; align-items:center; gap:8px; }
-    .stat .value{ font:800 1.6rem/1.2 Orbitron, sans-serif; color:var(--gold); margin-top:6px; text-shadow:0 1px 1px rgba(0,0,0,.6); }
-    .stat .sub{ color:var(--muted); font-size:.92rem; margin-top:6px; }
+    .stat .label{ color:#e0e8ff; font-weight:800; letter-spacing:.4px; display:flex; align-items:center; gap:8px; }
+    .stat .value{ font:900 1.7rem/1.2 Orbitron, sans-serif; color:var(--gold); margin-top:6px; text-shadow:0 1px 1px rgba(0,0,0,.7); }
+    .stat .sub{ color:var(--muted); font-size:.95rem; margin-top:6px; }
 
     /* ===== Filtros (sticky) ===== */
     .filters{
       position:sticky; top:78px; z-index:50;
       display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-      background:var(--glass); border:1px solid rgba(255,255,255,.08);
+      background:var(--glass); border:1px solid rgba(255,255,255,.14);
       border-radius:16px; padding:12px; backdrop-filter: blur(8px);
       box-shadow:0 8px 26px rgba(0,0,0,.35);
     }
-    .filters .field{ flex:1 1 240px; position:relative; }
+    .filters .field{ flex:1 1 260px; position:relative; }
     .filters input[type="text"],
     .filters input[type="number"]{
-      width:100%; height:46px; border-radius:12px; border:1.5px solid var(--fieldBorder);
+      width:100%; height:46px; border-radius:12px; border:2px solid var(--fieldBorder);
       background:var(--field); color:var(--ink); padding:10px 14px; font-size:1rem;
     }
     .filters input::placeholder{ color:var(--muted); }
-    .filters input:focus{ outline:none; border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(75,130,255,.15); }
+    .filters input:focus{ outline:none; border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(75,130,255,.2); }
 
     .switch{
       display:inline-flex; align-items:center; gap:8px; color:var(--ink);
       padding:10px 12px; border-radius:12px; border:1px solid #2a3552; background:#0f162c;
+      font-weight:700;
     }
     .chip{ display:inline-flex; gap:6px; align-items:center; padding:8px 12px; border-radius:999px;
-      border:1px solid #3254a8; background:#162a56; color:#cfe0ff; font-weight:600; }
-    .chip .count{ background:#26407f; padding:1px 8px; border-radius:999px; color:#fff; font-weight:800; }
+      border:1px solid #3254a8; background:#162a56; color:#fff; font-weight:800; }
+    .chip .count{ background:#27428a; padding:1px 8px; border-radius:999px; color:#fff; font-weight:900; }
 
     .btn-clear{
-      color:#cfe0ff; border-color:#2b3a61; border-radius:12px; height:46px;
+      color:#eaf2ff; border-color:#2b3a61; border-radius:12px; height:46px; font-weight:700;
     }
     .btn-clear:hover{ background:#1b294d; color:#fff; }
 
-    /* ===== Tabela ===== */
+    /* ===== Tabela (rolagem contínua) ===== */
     .card-table{
-      margin-top:16px; background:linear-gradient(120deg, rgba(26,31,43,.9), rgba(0,51,153,.8));
-      border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:10px;
+      margin-top:16px; background:linear-gradient(120deg, rgba(26,33,49,.96), rgba(13,73,204,.88));
+      border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:10px;
       box-shadow:0 8px 26px rgba(0,0,0,.45);
     }
     .table-title{
       display:flex; align-items:center; gap:10px; padding:6px 8px 10px 8px;
-      font:700 1.02rem Orbitron, sans-serif; color:var(--gold);
-      text-shadow:0 1px 1px rgba(0,0,0,.55);
+      font:800 1.04rem Orbitron, sans-serif; color:var(--gold);
+      text-shadow:0 1px 1px rgba(0,0,0,.65);
     }
-    .table-responsive{ border-radius:12px; overflow:auto; }
+    .table-responsive{
+      border-radius:12px; overflow:auto;
+      background:#0e1533; /* garante fundo atrás do thead */
+    }
     table{ width:100%; margin:0; color:var(--ink); }
+
+    /* Cabeçalho SUPER VISÍVEL */
     thead th{
-      position:sticky; top:0; z-index:10; background:var(--thead);
-      color:var(--gold) !important; font-family:Orbitron, sans-serif;
-      letter-spacing:1px; text-align:center; border-bottom:1px solid var(--line);
+      position:sticky; top:0; z-index:20;
+      background:var(--thead) !important;     /* fundo escuro sólido */
+      color:#fff !important;                   /* texto branco para máximo contraste */
+      font-family:Orbitron, sans-serif;
+      letter-spacing:1px; text-align:center;
+      border-bottom:2px solid var(--line) !important;
       padding:14px 10px; white-space:nowrap;
+      box-shadow:0 2px 0 rgba(0,0,0,.35);
     }
+    th.sortable{ cursor:pointer; user-select:none; }
+    th.sortable .sort{ margin-left:6px; opacity:1; font-size:1.05em; color:#fff; }
+
+    /* Corpo da tabela */
     tbody td{
-      border-top:1px solid var(--line); padding:12px 10px; vertical-align:middle; text-shadow:none;
+      border-top:1px solid var(--line);
+      padding:12px 10px; vertical-align:middle; text-shadow:none;
+      color:#fff; /* texto claro */
     }
     .table-striped>tbody>tr:nth-of-type(odd)>*{ background-color:var(--rowOdd) !important; }
     .table-striped>tbody>tr:nth-of-type(even)>*{ background-color:var(--rowEven) !important; }
-    .table-hover tbody tr:hover>*{ background-color:#2b375e !important; }
-
-    th.sortable{ cursor:pointer; user-select:none; }
-    th.sortable .sort{ margin-left:6px; opacity:.75; font-size:.95em; color:#cdd9ff; }
-    th.sortable.active .sort{ opacity:1; color:#fff; }
+    .table-hover tbody tr:hover>*{ background-color:#21407b !important; }
 
     /* Foto e textos */
     .foto{
-      width:52px; height:52px; object-fit:cover; border-radius:50%;
-      border:2px solid var(--gold); background:#0c111b; box-shadow:0 0 6px #00339955;
+      width:56px; height:56px; object-fit:cover; border-radius:50%;
+      border:2px solid var(--gold); background:#0c111b; box-shadow:0 0 6px #0d49cc77;
     }
-    .gold{ color:var(--gold)!important; font-weight:800; letter-spacing:.2px; }
-    .username{ color:#d6e2ff; font-weight:600; }
+    .gold{ color:var(--gold)!important; font-weight:900; letter-spacing:.2px; }
+    .username{ color:#ffffff; font-weight:700; }
 
     /* Ações */
-    .btn-outline-primary{ color:#9ec0ff; border-color:#2d6cdf; }
-    .btn-outline-primary:hover{ color:#eaf2ff; background:#2d6cdf22; border-color:#4b82ff; }
-    .btn-outline-warning{ color:#ffdf7a; border-color:#e4b900; }
-    .btn-outline-warning:hover{ color:#191c20; background:#ffd700; border-color:#ffd700; }
-    .btn-outline-danger{ color:#ff9aa4; border-color:#e34b5a; }
-    .btn-outline-danger:hover{ color:#ffe6e8; background:#e34b5a22; border-color:#ff7180; }
-
-    /* Paginação */
-    .pager{
-      display:flex; justify-content:center; align-items:center; gap:8px; margin:12px 0 4px;
-    }
-    .pager .page-link{
-      border-radius:10px; background:#122040; border:1px solid #2e4376; color:#dce6ff;
-    }
-    .pager .page-link.active{ background:#2747d9; color:#fff; border-color:#2747d9; }
+    .btn-outline-primary{ color:#eaf2ff; border-color:#4b82ff; }
+    .btn-outline-primary:hover{ color:#0b142d; background:#4b82ff; border-color:#4b82ff; }
+    .btn-outline-warning{ color:#1b1e2a; background:#ffd700; border-color:#ffd700; }
+    .btn-outline-warning:hover{ filter:brightness(1.05); }
+    .btn-outline-danger{ color:#ffe6e8; border-color:#ff6b7a; }
+    .btn-outline-danger:hover{ color:#0b142d; background:#ff6b7a; border-color:#ff6b7a; }
 
     /* Offcanvas (painel lateral) */
     .offcanvas{
       background:linear-gradient(180deg, #0f1220, #0c1018);
       color:var(--ink);
-      border-left:1px solid rgba(255,255,255,.08);
+      border-left:1px solid rgba(255,255,255,.14);
     }
     .oc-head{ font-family:Orbitron, sans-serif; color:var(--gold); letter-spacing:1px; }
-    .oc-data .lbl{ color:#cfe0ff; font-weight:700; }
-    .oc-data .val{ color:#fff; font-weight:600; }
+    .oc-data .lbl{ color:#eaf2ff; font-weight:800; }
+    .oc-data .val{ color:#fff; font-weight:800; }
 
     /* Alertas */
     .alert{
-      background:var(--gold); color:#222; font-weight:800; border:none; border-radius:12px;
-      text-align:center; box-shadow:0 8px 22px rgba(255,215,0,.15);
+      background:var(--gold); color:#101320; font-weight:900; border:none; border-radius:12px;
+      text-align:center; box-shadow:0 8px 22px rgba(255,215,0,.18);
     }
 
     @media (max-width: 992px){
       .stats{ grid-template-columns:1fr; }
-      thead th{ font-size:.9rem; }
-      tbody td{ font-size:.95rem; }
-      .foto{ width:44px; height:44px; }
+      thead th{ font-size:.95rem; }
+      tbody td{ font-size:1rem; }
+      .foto{ width:48px; height:48px; }
     }
   </style>
 </head>
@@ -201,7 +208,6 @@
     </div>
     <div class="spacer"></div>
 
-    <!-- Contadores rápidos -->
     <span class="chip" title="Total de cooperados">
       Total <span class="count" id="count-total">{{ cooperados|length }}</span>
     </span>
@@ -246,7 +252,7 @@
       <div class="field">
         <input id="f-busca" type="text" placeholder="Buscar por nome ou usuário…" />
       </div>
-      <div class="field" style="max-width:220px">
+      <div class="field" style="max-width:240px">
         <input id="f-credito" type="number" step="0.01" min="0" placeholder="Crédito máximo (R$)" />
       </div>
       <label class="switch">
@@ -261,7 +267,7 @@
       </span>
     </div>
 
-    <!-- ===== TABELA ===== -->
+    <!-- ===== TABELA (SEM PAGINAÇÃO — rolagem contínua) ===== -->
     <div class="card-table">
       <div class="table-title"><i class="bi bi-people-fill"></i> Lista de cooperados</div>
       <div class="table-responsive">
@@ -278,11 +284,15 @@
               <th class="sortable" data-key="credito" data-type="number">
                 Crédito (R$) <i class="bi bi-arrow-down-up sort"></i>
               </th>
-              <th style="width:210px">Ações</th>
+              <th class="sortable" data-key="ajuste" data-type="date">
+                Último ajuste <i class="bi bi-arrow-down-up sort"></i>
+              </th>
+              <th style="width:220px">Ações</th>
             </tr>
           </thead>
           <tbody>
             {% for c in cooperados %}
+            {% set ts = c.credito_atualizado_em or c.atualizado_em or c.updated_at or c.modificado_em %}
             <tr data-id="{{ c.id }}">
               <td>
                 {% if c.foto_data or c.foto %}
@@ -294,6 +304,10 @@
               <td class="gold" data-nome="{{ c.nome }}">{{ c.nome }}</td>
               <td class="username" data-username="{{ c.username }}">{{ c.username }}</td>
               <td class="gold" data-credito="{{ '%.2f'|format(c.credito) }}">{{ "{:,.2f}".format(c.credito) }}</td>
+              <td class="ajuste"
+                  data-ajuste="{{ ts.strftime('%Y-%m-%dT%H:%M:%S') if ts else '' }}">
+                {{ ts.strftime('%d/%m/%Y %H:%M') if ts else '—' }}
+              </td>
               <td>
                 <div class="d-flex flex-wrap gap-1 justify-content-center">
                   <button class="btn btn-outline-primary btn-sm" onclick="abrirPainel(this)" title="Ver detalhes">
@@ -308,18 +322,11 @@
             </tr>
             {% endfor %}
             {% if not cooperados %}
-              <tr><td colspan="5" class="text-center">Nenhum cooperado cadastrado.</td></tr>
+              <tr><td colspan="6" class="text-center">Nenhum cooperado cadastrado.</td></tr>
             {% endif %}
           </tbody>
         </table>
       </div>
-
-      <!-- Paginação -->
-      <nav class="pager" aria-label="Paginação">
-        <button class="btn page-link" id="pg-prev"><i class="bi bi-chevron-left"></i></button>
-        <div id="pg-pages" class="d-flex gap-1"></div>
-        <button class="btn page-link" id="pg-next"><i class="bi bi-chevron-right"></i></button>
-      </nav>
     </div>
   </div>
 
@@ -343,6 +350,10 @@
           <span class="lbl"><i class="bi bi-cash-coin"></i> Crédito</span>
           <span class="val" id="oc-credito">—</span>
         </div>
+        <div class="d-flex justify-content-between mt-2">
+          <span class="lbl"><i class="bi bi-clock-history"></i> Último ajuste</span>
+          <span class="val" id="oc-ajuste">—</span>
+        </div>
       </div>
 
       <div class="d-grid gap-2">
@@ -357,7 +368,6 @@
   <script>
     // ===== Helpers
     const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
-    const valNum = v => parseFloat((v||"").toString().replace(/\./g,"").replace(",","."));
 
     // ===== Métricas (sum/avg a partir da tabela)
     function atualizarMetricas(){
@@ -368,6 +378,8 @@
       document.getElementById('m-sum').textContent = sum.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
       document.getElementById('m-avg').textContent = avg.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
       document.getElementById('m-total').textContent = document.querySelectorAll('#t-coops tbody tr').length;
+      document.getElementById('count-total').textContent = document.getElementById('m-total').textContent;
+      document.getElementById('count-visiveis').textContent = document.querySelectorAll('#t-coops tbody tr').length;
     }
 
     // ===== Filtros
@@ -385,6 +397,7 @@
       let vis = 0;
 
       rows.forEach(tr=>{
+        if (tr.classList.contains('no-result')) return;
         const nome = norm(tr.children[1]?.innerText);
         const user = norm(tr.children[2]?.innerText);
         const credito = parseFloat(tr.children[3]?.dataset.credito);
@@ -403,14 +416,13 @@
         if(!noRow){
           noRow = document.createElement('tr');
           noRow.className='no-result';
-          noRow.innerHTML = `<td colspan="5" class="text-center">Nenhum cooperado encontrado.</td>`;
+          noRow.innerHTML = `<td colspan="6" class="text-center">Nenhum cooperado encontrado.</td>`;
           tbody.appendChild(noRow);
         }
       } else if(noRow){ noRow.remove(); }
 
-      // Atualiza contagem e paginação
+      // Atualiza contagem
       elCountVisiveis.textContent = vis;
-      paginaAtual = 1; prepararPaginacao(); aplicarPaginacao();
     }
 
     btnClear.addEventListener('click', ()=>{
@@ -422,7 +434,7 @@
       fDif.addEventListener(evt, aplicarFiltros);
     });
 
-    // ===== Ordenação
+    // ===== Ordenação (inclui data de "Último ajuste")
     const ths = document.querySelectorAll('th.sortable');
     let sortState = {};
     ths.forEach(th=>{
@@ -436,52 +448,19 @@
           const va = getVal(a, key, type);
           const vb = getVal(b, key, type);
           if (type==='number') return (sortState[key]==='asc') ? (va-vb) : (vb-va);
+          if (type==='date')   return (sortState[key]==='asc') ? (va-vb) : (vb-va);
           return (sortState[key]==='asc') ? (va>vb?1:va<vb?-1:0) : (va<vb?1:va>vb?-1:0);
         });
         const tbody = document.querySelector('#t-coops tbody');
         rows.forEach(r=>tbody.appendChild(r));
-
-        paginaAtual = 1; aplicarPaginacao();
       });
     });
     function getVal(row, key, type){
       if (key==='nome')     return norm(row.children[1]?.dataset.nome || row.children[1]?.innerText);
       if (key==='username') return norm(row.children[2]?.dataset.username || row.children[2]?.innerText);
       if (key==='credito')  return parseFloat(row.children[3]?.dataset.credito || '0') || 0;
+      if (key==='ajuste')   return Date.parse(row.children[4]?.dataset.ajuste || '') || 0;
       return type==='number' ? 0 : '';
-    }
-
-    // ===== Paginação
-    const pgPrev = document.getElementById('pg-prev');
-    const pgNext = document.getElementById('pg-next');
-    const pgPages = document.getElementById('pg-pages');
-    let paginaAtual = 1;
-    const porPagina = 12;
-
-    function prepararPaginacao(){
-      const visiveis = [...document.querySelectorAll('#t-coops tbody tr')].filter(r=>r.style.display !== 'none' && !r.classList.contains('no-result'));
-      const total = visiveis.length;
-      const paginas = Math.max(1, Math.ceil(total/porPagina));
-      pgPages.innerHTML = '';
-      for(let i=1;i<=paginas;i++){
-        const b = document.createElement('button');
-        b.className = 'btn page-link' + (i===paginaAtual ? ' active':'');
-        b.textContent = i;
-        b.addEventListener('click', ()=>{ paginaAtual=i; aplicarPaginacao(); });
-        pgPages.appendChild(b);
-      }
-      pgPrev.onclick = ()=>{ if(paginaAtual>1){ paginaAtual--; aplicarPaginacao(); } };
-      pgNext.onclick = ()=>{ if(paginaAtual<paginas){ paginaAtual++; aplicarPaginacao(); } };
-    }
-
-    function aplicarPaginacao(){
-      const rows = [...document.querySelectorAll('#t-coops tbody tr')].filter(r=>r.style.display !== 'none' && !r.classList.contains('no-result'));
-      const total = rows.length;
-      const inicio = (paginaAtual-1)*porPagina;
-      const fim = inicio + porPagina;
-      rows.forEach((r,idx)=>{ r.style.visibility = (idx>=inicio && idx<fim) ? 'visible' : 'hidden'; r.style.position = (idx>=inicio && idx<fim) ? '' : 'absolute'; });
-      // atualizar botões
-      [...pgPages.children].forEach((btn,i)=>btn.classList.toggle('active', (i+1)===paginaAtual));
     }
 
     // ===== Offcanvas / Painel lateral
@@ -497,15 +476,17 @@
       const nome = tr.children[1]?.innerText || '—';
       const user = tr.children[2]?.innerText || '—';
       const credito = tr.children[3]?.innerText || '—';
+      const ajuste = tr.children[4]?.innerText || '—';
       const img = tr.querySelector('img.foto')?.getAttribute('src');
 
       document.getElementById('oc-nome').textContent = nome;
       document.getElementById('oc-user').textContent = '@' + user;
       document.getElementById('oc-credito').textContent = credito;
+      document.getElementById('oc-ajuste').textContent = ajuste;
       const f = document.getElementById('oc-foto');
       if(img){ f.src = img; f.style.visibility='visible'; } else { f.src=''; f.style.visibility='hidden'; }
 
-      // Rotas
+      // Rotas (sem mexer no app.py)
       document.getElementById('oc-editar').href  = "{{ url_for('editar_cooperado', id=0) }}".replace('/0','/'+id);
       document.getElementById('oc-ajustar').href = "{{ url_for('ajustar_credito_individual', id=0) }}".replace('/0','/'+id);
       document.getElementById('oc-excluir').href = "{{ url_for('excluir_cooperado', id=0) }}".replace('/0','/'+id);
@@ -517,8 +498,6 @@
     document.addEventListener('DOMContentLoaded', ()=>{
       atualizarMetricas();
       aplicarFiltros();
-      prepararPaginacao();
-      aplicarPaginacao();
     });
   </script>
 
