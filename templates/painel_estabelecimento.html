@@ -12,23 +12,23 @@
 
   <style>
     :root{
-      /* Paleta com contraste reforçado */
+      /* Paleta (padrão Coopex) */
       --bg:#0b0f16;
-      --ink:#ffffff;
+      --ink:#eaf2ff;
+      --ink-strong:#ffffff;
       --muted:#c8d2ee;
       --gold:#ffd700;
-      --line:#2c375a;
 
       --card1:#182033;
       --card2:#0d49cc;
 
-      /* Tabela mais visível */
-      --thead:#0f1a3a;       /* cabeçalho */
-      --rowOdd:#12244e;      /* listras ímpares */
-      --rowEven:#0c1b3b;     /* listras pares */
+      /* Tabela com maior visibilidade */
+      --thead:#1a2f63;     /* cabeçalho mais claro */
+      --thead2:#0f204e;
+      --rowOdd:#162a56;    /* listras ímpares */
+      --rowEven:#102348;   /* listras pares */
+      --line:#2a3c6a;
 
-      --kpi:#0e1533;
-      --kpiLine:#2a3a60;
       --field:#0f172a;
       --fieldBorder:#3d528b;
       --fieldFocus:#4b82ff;
@@ -37,151 +37,115 @@
     html,body{height:100%}
     *{box-sizing:border-box}
     body{
-      margin:0; background:
-        radial-gradient(1400px 500px at 80% -40%, rgba(13,73,204,.28), transparent 70%),
+      margin:0;
+      background:
+        radial-gradient(1400px 520px at 80% -40%, rgba(13,73,204,.28), transparent 70%),
         linear-gradient(180deg, var(--bg), var(--bg));
       color:var(--ink);
       font-family:Roboto, Arial, sans-serif;
-      line-height:1.45;
       -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       text-shadow:none;
-    }
-
-    /* ===== Acessibilidade: foco visível ===== */
-    :focus-visible{
-      outline:3px solid var(--gold);
-      outline-offset:2px;
-      border-radius:8px;
     }
 
     /* ===== Sidebar ===== */
     .sidebar{
-      width:210px; height:100vh; position:fixed; top:0; left:0;
+      width:210px;height:100vh;position:fixed;top:0;left:0;
       background:linear-gradient(160deg,#101218 70%,#003399 100%);
-      color:#fff; box-shadow:3px 0 12px #00339944; z-index:10;
-      display:flex; flex-direction:column; align-items:center;
+      color:#fff;box-shadow:3px 0 12px #00339944;z-index:10;
+      display:flex;flex-direction:column;align-items:center;
     }
-    .sidebar .logo{ width:176px; max-width:95%; margin:28px auto 10px; display:block; filter: drop-shadow(0 0 12px #003399aa); }
+    .sidebar .logo{width:176px;max-width:95%;margin:28px auto 10px;display:block;filter: drop-shadow(0 0 12px #003399aa);}
     .sidebar h3{
-      font-family:Orbitron, sans-serif; color:var(--gold); text-align:center;
-      letter-spacing:1px; margin-bottom:22px; font-size:1.05rem; font-weight:700;
-      background:rgba(0,0,0,.2); border-radius:8px; padding:5px 0; width:100%;
+      font-family:Orbitron, sans-serif;color:var(--gold);text-align:center;
+      letter-spacing:1px;margin-bottom:22px;font-size:1.05rem;font-weight:700;
+      background:rgba(0,0,0,.2);border-radius:8px;padding:5px 0;width:100%;
     }
     .sidebar .nav-link{
-      color:#eef3ff; font-size:1.08rem; border-radius:10px; margin:4px 8px;
-      padding:12px 16px; display:flex; align-items:center; gap:10px; text-decoration:none;
-      transition:background .18s ease, color .18s ease;
+      color:#eef3ff;font-size:1.08rem;border-radius:10px;margin:4px 8px;
+      padding:12px 16px;display:flex;align-items:center;gap:10px;text-decoration:none;
+      transition:background .18s,color .18s;
     }
     .sidebar .nav-link i{font-size:1.25rem;}
-    .sidebar .nav-link.active, .sidebar .nav-link:hover{ background:#ffd70033; color:var(--gold)!important; }
+    .sidebar .nav-link.active,.sidebar .nav-link:hover{background:#ffd70033;color:var(--gold)!important;}
 
-    /* ===== Main / Topbar ===== */
-    .main-content{ margin-left:230px; padding:32px 28px 24px; }
+    /* ===== Main/Topbar ===== */
+    .main-content{margin-left:230px;padding:32px 28px 24px;}
     .topbar{
-      height:68px; display:flex; align-items:center; justify-content:space-between;
+      height:68px;display:flex;align-items:center;justify-content:space-between;
       background:rgba(16,18,24,.95);
       border:1px solid rgba(255,255,255,.08);
-      border-radius:14px;
-      padding:0 16px;
+      border-radius:14px;padding:0 16px;
       box-shadow:0 12px 26px rgba(0,0,0,.35);
-      position:sticky; top:0; z-index:20;
+      position:sticky;top:0;z-index:20;
     }
-    .who{ color:var(--gold); font-weight:800; font-size:1.06rem; letter-spacing:.2px; }
-    .clock{ color:#ffeaa6; font-weight:900; letter-spacing:.4px; font-size:1.02rem; }
+    .who{color:var(--gold);font-weight:800;font-size:1.06rem;}
+    .clock{color:#ffeaa6;font-weight:900;letter-spacing:.3px;font-size:1.02rem;}
 
     /* ===== Cards ===== */
     .dashboard-card{
       background:linear-gradient(120deg,var(--card1) 88%, var(--card2) 100%);
       border:1px solid rgba(255,255,255,.12);
-      border-radius:18px;
-      box-shadow:0 10px 36px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
-      padding:24px 20px 20px;
-      color:var(--ink);
+      border-radius:18px; box-shadow:0 10px 36px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+      padding:24px 20px 20px; color:var(--ink);
     }
     .dashboard-card h4{
-      margin:0 0 12px;
-      font-family:Orbitron, sans-serif; font-weight:800; letter-spacing:1.1px; color:var(--gold);
+      margin:0 0 12px; font-family:Orbitron, sans-serif; font-weight:800; letter-spacing:1.1px; color:var(--gold);
       text-shadow:0 1px 1px rgba(0,0,0,.6);
     }
 
-    /* ===== KPIs ===== */
-    .kpis{
-      display:grid; gap:12px; grid-template-columns: repeat(5, minmax(0,1fr));
-      margin-bottom:14px;
-    }
-    .kpi{
-      background:var(--kpi); border:1px solid var(--kpiLine); border-radius:14px; padding:14px 16px;
-      display:flex; flex-direction:column; gap:6px; min-height:92px;
-      box-shadow:0 8px 24px rgba(0,0,0,.28);
-    }
-    .kpi .label{ color:#e7edff; font-weight:900; display:flex; align-items:center; gap:8px; }
-    .kpi .value{ font:900 1.35rem/1 Orbitron, sans-serif; color:var(--gold); letter-spacing:.5px; }
-    .kpi .sub{ color:var(--muted); font-size:.94rem; }
-
     /* ===== Form ===== */
-    label{font-weight:800;color:#f7f9ff;letter-spacing:.25px;}
+    label{font-weight:800;color:var(--ink-strong);}
     .form-control,.form-select{
-      background:var(--field); color:#fff; border:2px solid var(--fieldBorder);
-      border-radius:12px; height:46px; font-size:1rem; padding:10px 12px;
+      background:var(--field);color:#fff;border:2px solid var(--fieldBorder);
+      border-radius:12px;height:46px;font-size:1rem;padding:10px 12px;
     }
     .form-control::placeholder{color:#afbdde;}
-    .form-control:focus,.form-select:focus{
-      border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(75,130,255,.22);
-    }
+    .form-control:focus,.form-select:focus{border-color:var(--fieldFocus);box-shadow:0 0 0 .2rem rgba(75,130,255,.22);}
 
     /* ===== Botões ===== */
     .btn-primary{
       background:linear-gradient(90deg,var(--gold) 60%, #ffe670 100%);
-      color:#111827; font-weight:900; border:none; border-radius:14px; padding:10px 18px;
-      transition:filter .15s ease, transform .02s;
+      color:#111827;font-weight:900;border:none;border-radius:14px;padding:10px 18px;
     }
     .btn-primary:hover{filter:brightness(1.06);}
-    .btn-primary:active{transform:translateY(1px);}
-    .btn-outline-primary{
-      color:#cfe1ff; border-color:#4b82ff; font-weight:800;
-    }
-    .btn-outline-primary:hover{ background:#4b82ff; color:#0b142d; }
-    .btn-outline-danger{ color:#ffd3d8; border-color:#ff6b7a; font-weight:800; }
-    .btn-outline-danger:hover{ background:#ff6b7a; color:#0b142d; }
+    .btn-outline-primary{color:#cfe1ff;border-color:#4b82ff;font-weight:800;}
+    .btn-outline-primary:hover{background:#4b82ff;color:#0b142d;}
+    .btn-outline-danger{color:#ffd3d8;border-color:#ff6b7a;font-weight:800;}
+    .btn-outline-danger:hover{background:#ff6b7a;color:#0b142d;}
 
-    /* ===== Tabela ===== */
-    .table-wrap{ border-radius:14px; overflow:auto; background:#0e1533; }
-    table{ width:100%; margin:0; color:#fff; font-size:1.02rem; }
+    /* ===== Tabela (cores suaves e legíveis) ===== */
+    .table-wrap{border-radius:14px;overflow:auto;background:#0e1533;}
+    table{width:100%;margin:0;color:var(--ink-strong);font-size:1.02rem;}
     thead th{
-      position:sticky; top:0; z-index:5;
-      background:var(--thead)!important; color:#fff!important;
-      font-family:Orbitron, sans-serif; letter-spacing:.9px; text-align:center;
-      padding:14px 10px; white-space:nowrap;
-      border-bottom:2px solid var(--line)!important;
+      position:sticky;top:0;z-index:5;
+      background:linear-gradient(180deg,var(--thead),var(--thead2))!important;
+      color:#fff!important;
+      font-family:Orbitron, sans-serif;letter-spacing:.9px;text-align:center;
+      padding:14px 10px;white-space:nowrap;border-bottom:2px solid var(--line)!important;
       box-shadow:0 2px 0 rgba(0,0,0,.35);
     }
     tbody td{
       border-top:1px solid var(--line);
-      padding:12px 10px; vertical-align:middle;
-      color:#fff;
+      padding:12px 10px;vertical-align:middle;color:#f3f6ff!important; /* texto mais claro */
     }
     .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd)!important;}
     .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven)!important;}
-    .table-hover tbody tr:hover>*{ background-color:#1b2f66!important; }
-    td.valor{ font-weight:900; color:var(--gold); white-space:nowrap; font-size:1.05rem; }
-
-    .aviso-expirado{ color:#cfd7f5; font-weight:700; }
+    .table-hover tbody tr:hover>*{background-color:#1c3975!important;}
+    td.valor{font-weight:900;color:var(--gold)!important;white-space:nowrap;font-size:1.05rem;}
+    .aviso-expirado{color:#d9e0ff;font-weight:700;}
 
     /* Alertas */
     .alert{
-      background:var(--gold); color:#101320; font-weight:900; border:none; border-radius:12px;
-      text-align:center; box-shadow:0 10px 22px rgba(255,215,0,.18);
+      background:var(--gold);color:#101320;font-weight:900;border:none;border-radius:12px;
+      text-align:center;box-shadow:0 10px 22px rgba(255,215,0,.18);
     }
 
     /* Responsivo */
-    @media (max-width:1200px){ .kpis{ grid-template-columns: repeat(3,minmax(0,1fr)); } }
     @media (max-width:900px){
       .sidebar{display:none;}
       .main-content{margin-left:0;padding:14px;}
-      .kpis{ grid-template-columns: 1fr; }
-      table{ font-size:1rem; }
-      thead th{ font-size:.98rem; }
+      table{font-size:1rem;}
+      thead th{font-size:.98rem;}
     }
   </style>
 </head>
@@ -196,8 +160,6 @@
 
   <!-- Main -->
   <div class="main-content">
-
-    <!-- Topbar com relógio de Brasília -->
     <div class="topbar mb-4">
       <div class="who">Bem-vindo, {{ est.nome }}</div>
       <div class="d-flex align-items-center gap-3">
@@ -214,44 +176,13 @@
       {% endif %}
     {% endwith %}
 
-    <!-- KPIs (derivados da tabela) -->
-    <div class="kpis" id="kpis">
-      <div class="kpi">
-        <div class="label"><i class="bi bi-list-check"></i> Lançamentos</div>
-        <div class="value" id="k-count">0</div>
-        <div class="sub">Total</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-cash-stack"></i> Valor Total</div>
-        <div class="value" id="k-sum">R$ 0,00</div>
-        <div class="sub">Soma geral</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-graph-up-arrow"></i> Maior Lançamento</div>
-        <div class="value" id="k-max">R$ 0,00</div>
-        <div class="sub">Valor único máximo</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-person-fill-check"></i> Top Cooperado</div>
-        <div class="value" id="k-top">—</div>
-        <div class="sub" id="k-top-sub">Maior soma</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-clock-history"></i> Último Lançamento</div>
-        <div class="value" id="k-last">—</div>
-        <div class="sub">Horário de Brasília</div>
-      </div>
-    </div>
-
-    <!-- Card de Lançamento -->
+    <!-- Card: Lançar -->
     <div class="dashboard-card mb-4">
       <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
       <form method="post" action="{{ url_for('painel_estabelecimento') }}">
         <div class="row g-3 align-items-center mb-1">
           <div class="col-md-4">
-            <label class="form-label" for="cooperado_id">
-              <i class="bi bi-person-lines-fill"></i> Cooperado
-            </label>
+            <label class="form-label" for="cooperado_id"><i class="bi bi-person-lines-fill"></i> Cooperado</label>
             <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
               <option value="">Selecione...</option>
               {% for c in cooperados %}
@@ -263,10 +194,9 @@
               >{{ c.nome }}</option>
               {% endfor %}
             </select>
-
             <div id="foto-cooperado-preview" class="mt-2" style="text-align:center;"></div>
-            <div id="saldo-cooperado" class="mt-2" style="color:var(--gold); font-weight:900; font-size:1.06rem;"></div>
-            <div id="erro-lancar" class="mt-1" style="color:#ffdede; font-weight:800;"></div>
+            <div id="saldo-cooperado" class="mt-2" style="color:var(--gold);font-weight:900;font-size:1.06rem;"></div>
+            <div id="erro-lancar" class="mt-1" style="color:#ffdede;font-weight:800;"></div>
           </div>
 
           <div class="col-md-2">
@@ -291,7 +221,7 @@
       </form>
     </div>
 
-    <!-- Lista de Lançamentos -->
+    <!-- Card: Lista -->
     <div class="dashboard-card">
       <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
       <div class="table-wrap">
@@ -338,7 +268,7 @@
               </td>
             </tr>
             {% else %}
-            <tr><td colspan="6">Nenhum lançamento realizado.</td></tr>
+            <tr><td colspan="6" class="text-center">Nenhum lançamento realizado.</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -382,179 +312,90 @@
          src="{{ url_for('statics_files', filename='venda.mp3') }}"></audio>
 
   <script>
-    /* ===== Relógio (Brasília) ===== */
+    /* Relógio Brasília */
     function tickClock(){
       const el = document.getElementById('clock-br');
       if(!el) return;
-      const s = new Date().toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
+      const s = new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',hour12:false});
       el.textContent = 'Brasília — ' + s;
     }
-    setInterval(tickClock, 1000); tickClock();
+    setInterval(tickClock,1000); tickClock();
 
-    /* ===== Info do cooperado ===== */
+    /* Info cooperado */
     function mostrarInfoCooperado(){
-      const select = document.getElementById("cooperado_id");
-      const saldoDiv = document.getElementById("saldo-cooperado");
-      const fotoDiv  = document.getElementById("foto-cooperado-preview");
-      const option   = select.options[select.selectedIndex];
-      const saldo    = option ? option.getAttribute("data-saldo") : null;
-      const foto     = option ? option.getAttribute("data-foto") : null;
+      const sel=document.getElementById("cooperado_id");
+      const saldoDiv=document.getElementById("saldo-cooperado");
+      const fotoDiv=document.getElementById("foto-cooperado-preview");
+      const opt=sel.options[sel.selectedIndex];
+      const saldo=opt?opt.getAttribute("data-saldo"):null;
+      const foto=opt?opt.getAttribute("data-foto"):null;
 
-      saldoDiv.textContent = (saldo && select.value) ? `Saldo atual: R$ ${saldo}` : '';
-      if (foto && select.value){
-        fotoDiv.innerHTML = `<img src="${foto}" alt="Foto do Cooperado"
-          style="max-width:96px;max-height:96px;border-radius:50%;
-                 border:3px solid var(--gold);box-shadow:0 0 8px #00339955;">`;
-      } else {
-        fotoDiv.innerHTML = '';
-      }
+      saldoDiv.textContent=(saldo&&sel.value)?`Saldo atual: R$ ${saldo}`:'';
+      fotoDiv.innerHTML=(foto&&sel.value)
+        ? `<img src="${foto}" alt="Foto do Cooperado" style="max-width:96px;max-height:96px;border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 8px #00339955;">`
+        : '';
       checarCreditoSuficiente();
     }
-
     function checarCreditoSuficiente(){
-      const select = document.getElementById("cooperado_id");
-      const valorInput = document.getElementById("valor");
-      const erroDiv = document.getElementById("erro-lancar");
-      const btn = document.getElementById("btn-lancar");
+      const sel=document.getElementById("cooperado_id");
+      const valI=document.getElementById("valor");
+      const err=document.getElementById("erro-lancar");
+      const btn=document.getElementById("btn-lancar");
+      const opt=sel.options[sel.selectedIndex];
+      const saldo=opt?parseFloat(opt.getAttribute("data-saldo-raw")):null;
+      const v=valI.value?parseFloat(valI.value):null;
 
-      const option = select.options[select.selectedIndex];
-      const saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
-      const valor = valorInput.value ? parseFloat(valorInput.value) : null;
-
-      if (!select.value){ erroDiv.textContent=""; btn.disabled=true; return; }
-      if (saldo == null || isNaN(saldo) || saldo <= 0){
-        erroDiv.textContent="Este cooperado está sem crédito disponível!";
-        btn.disabled=true; return;
-      }
-      if (valor && valor > saldo){
-        erroDiv.textContent="O valor excede o saldo disponível!";
-        btn.disabled=true;
-      } else {
-        erroDiv.textContent="";
-        btn.disabled=false;
-      }
+      if(!sel.value){err.textContent="";btn.disabled=true;return;}
+      if(saldo==null||isNaN(saldo)||saldo<=0){err.textContent="Este cooperado está sem crédito disponível!";btn.disabled=true;return;}
+      if(v&&v>saldo){err.textContent="O valor excede o saldo disponível!";btn.disabled=true;}
+      else{err.textContent="";btn.disabled=false;}
     }
 
-    /* ===== Indicadores a partir da tabela ===== */
-    function formatBR(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-    function atualizarIndicadores(){
-      const rows = [...document.querySelectorAll('#tbody-lanc tr')];
-      let count=0, sum=0, max=0, lastTs=0;
-      const porCoop = Object.create(null);
-
-      rows.forEach(tr=>{
-        const valTd = tr.querySelector('.valor');
-        if(!valTd) return;
-        const v = parseFloat(valTd.dataset.valor || '0');
-        if(isNaN(v)) return;
-        count++;
-        sum += v;
-        if (v>max) max=v;
-
-        const created = Date.parse(tr.getAttribute('data-created') || '') || 0;
-        if (created>lastTs) lastTs = created;
-
-        const nome = (tr.querySelector('.coop')?.textContent || '').trim();
-        if (nome){ porCoop[nome] = (porCoop[nome]||0) + v; }
-      });
-
-      let topNome='—', topVal=0;
-      for (const k in porCoop){ if (porCoop[k]>topVal){ topVal=porCoop[k]; topNome=k; } }
-
-      document.getElementById('k-count').textContent = count;
-      document.getElementById('k-sum').textContent   = 'R$ ' + formatBR(sum);
-      document.getElementById('k-max').textContent   = 'R$ ' + formatBR(max);
-      document.getElementById('k-top').textContent   = topNome!=='—' ? topNome : '—';
-      document.getElementById('k-top-sub').textContent = topNome!=='—' ? ('Soma: R$ ' + formatBR(topVal)) : 'Maior soma';
-
-      if (lastTs){
-        const br = new Date(lastTs).toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
-        document.getElementById('k-last').textContent = br;
-      } else {
-        document.getElementById('k-last').textContent = '—';
-      }
-    }
-
-    /* ===== Modal Editar + restrição de 1h ===== */
+    /* Modal + restrição 1h */
     let editarModal;
     document.addEventListener('DOMContentLoaded', function(){
       mostrarInfoCooperado();
       document.getElementById("cooperado_id")?.addEventListener("change", mostrarInfoCooperado);
       document.getElementById("valor")?.addEventListener("input", checarCreditoSuficiente);
+      editarModal=new bootstrap.Modal(document.getElementById('modalEditarLanc'));
+      aplicarRestricaoUmaHora(); setInterval(aplicarRestricaoUmaHora,60*1000);
 
-      editarModal = new bootstrap.Modal(document.getElementById('modalEditarLanc'));
-
-      aplicarRestricaoUmaHora();
-      setInterval(aplicarRestricaoUmaHora, 60*1000);
-
-      atualizarIndicadores();
-      setInterval(atualizarIndicadores, 15000);
-
-      if (document.querySelector('.alert.alert-success')){
-        const a=document.getElementById('snd-venda');
-        a && a.play().catch(()=>{});
+      if(document.querySelector('.alert.alert-success')){
+        const a=document.getElementById('snd-venda'); a&&a.play().catch(()=>{});
       }
     });
 
-    document.addEventListener('click', function(ev){
-      const tgt = ev.target.closest('#btn-lancar');
-      if (!tgt || tgt.disabled) return;
-      const a=document.getElementById('snd-venda');
-      a && a.play().catch(()=>{});
+    document.addEventListener('click',function(ev){
+      const tgt=ev.target.closest('#btn-lancar'); if(!tgt||tgt.disabled) return;
+      const a=document.getElementById('snd-venda'); a&&a.play().catch(()=>{});
     });
 
     function abrirModalEditar(btn){
-      const tr = btn.closest('tr');
-      if (estaExpirado(tr.getAttribute('data-created'))) return;
-
-      const id    = btn.getAttribute('data-id');
-      const os    = btn.getAttribute('data-os') || '';
-      const valor = btn.getAttribute('data-valor') || '';
-      const desc  = btn.getAttribute('data-desc') || '';
-
-      document.getElementById('edit-os').value = os;
-      document.getElementById('edit-valor').value = valor.replace(',', '.');
-      document.getElementById('edit-desc').value = desc;
-
-      const form = document.getElementById('form-editar-modal');
-      form.action = "{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0', '/' + id);
-
+      const tr=btn.closest('tr'); if(estaExpirado(tr.getAttribute('data-created'))) return;
+      const id=btn.getAttribute('data-id');
+      document.getElementById('edit-os').value=btn.getAttribute('data-os')||'';
+      document.getElementById('edit-valor').value=(btn.getAttribute('data-valor')||'').replace(',','.');
+      document.getElementById('edit-desc').value=btn.getAttribute('data-desc')||'';
+      const form=document.getElementById('form-editar-modal');
+      form.action="{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0','/'+id);
       editarModal.show();
     }
-
     function confirmarExcluir(formEl){
-      const tr = formEl.closest('tr');
-      if (estaExpirado(tr.getAttribute('data-created'))) return false;
+      const tr=formEl.closest('tr'); if(estaExpirado(tr.getAttribute('data-created'))) return false;
       return confirm('Confirma excluir este lançamento? O crédito será devolvido ao cooperado.');
     }
-
     function aplicarRestricaoUmaHora(){
       document.querySelectorAll('table tbody tr[data-created]').forEach(tr=>{
-        const createdIso = tr.getAttribute('data-created');
-        const expirado = estaExpirado(createdIso);
-
-        const btnEditar = tr.querySelector('.btn-editar');
-        const btnExcluir = tr.querySelector('.btn-excluir');
-        const aviso = tr.querySelector('.aviso-expirado');
-
-        if (expirado){
-          if (btnEditar){ btnEditar.disabled=true; btnEditar.classList.add('disabled'); }
-          if (btnExcluir){ btnExcluir.disabled=true; btnExcluir.classList.add('disabled'); }
-          if (aviso) aviso.style.display='block';
-        } else {
-          if (btnEditar){ btnEditar.disabled=false; btnEditar.classList.remove('disabled'); }
-          if (btnExcluir){ btnExcluir.disabled=false; btnExcluir.classList.remove('disabled'); }
-          if (aviso) aviso.style.display='none';
-        }
+        const exp=estaExpirado(tr.getAttribute('data-created'));
+        const bE=tr.querySelector('.btn-editar'); const bX=tr.querySelector('.btn-excluir'); const aviso=tr.querySelector('.aviso-expirado');
+        if(exp){ if(bE){bE.disabled=true;bE.classList.add('disabled');} if(bX){bX.disabled=true;bX.classList.add('disabled');} if(aviso) aviso.style.display='block';}
+        else{ if(bE){bE.disabled=false;bE.classList.remove('disabled');} if(bX){bX.disabled=false;bX.classList.remove('disabled');} if(aviso) aviso.style.display='none';}
       });
     }
-
     function estaExpirado(createdIso){
-      if (!createdIso) return false;
-      const criado = new Date(createdIso);  // UTC
-      const agora  = new Date();
-      const diffMs = agora - criado;
-      return diffMs > (60*60*1000); // 1 hora
+      if(!createdIso) return false;
+      const criado=new Date(createdIso); const agora=new Date();
+      return (agora-criado)>(60*60*1000);
     }
   </script>
 
