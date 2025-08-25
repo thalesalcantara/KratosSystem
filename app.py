@@ -226,7 +226,7 @@ def add_perf_headers(resp: Response):
 # ========= LOGIN/LOGOUT =========
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
+    if request.method == 'POST']:
         tipo = request.form.get('tipo', '').strip()
         username = request.form.get('username', '').strip()
         senha = request.form.get('senha', '')
@@ -266,7 +266,7 @@ def dashboard():
         return redirect(url_for('login'))
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
-    estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
+    estabelecimentos = Estabelecimento.query_order = Estabelecimento.query.order_by(Estabelecimento.nome).all()
 
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
@@ -433,7 +433,7 @@ def editar_cooperado(id):
     if not is_admin():
         return redirect(url_for('login'))
     cooperado = Cooperado.query.get_or_404(id)
-    if request.method == 'POST':
+    if request.method == 'POST']:
         cooperado.nome = request.form['nome']
 
         # Se veio crédito e mudou, registra timestamp de ajuste
@@ -726,6 +726,31 @@ def exportar_lancamentos():
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     return _response_with_cache(resp, 0, etag_base=f"xlsx_{len(rows)}")
+
+# ====== NOVA ROTA: EXCLUSÃO DE LANÇAMENTO (ADMIN, SEM LIMITE) ======
+@app.post('/lancamentos/<int:id>/excluir')
+def excluir_lancamento(id):
+    if not is_admin():
+        return redirect(url_for('login'))
+
+    l = Lancamento.query.get_or_404(id)
+
+    # Devolve o crédito ao cooperado (espelha a lógica do painel do Estabelecimento)
+    cooperado = Cooperado.query.get(l.cooperado_id)
+    if cooperado:
+        cooperado.credito += float(l.valor or 0)
+
+    try:
+        db.session.delete(l)
+        db.session.commit()
+        _invalidate_last_lanc_cache()
+        flash('Lançamento excluído e crédito devolvido ao cooperado.', 'success')
+    except Exception:
+        db.session.rollback()
+        flash('Não foi possível excluir o lançamento.', 'danger')
+
+    next_url = request.form.get('next') or url_for('listar_lancamentos')
+    return redirect(next_url)
 
 # ========= PAINEL ESTABELECIMENTO =========
 @app.route('/painel_estabelecimento', methods=['GET', 'POST'])
