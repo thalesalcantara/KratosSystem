@@ -100,6 +100,7 @@
     .btn-primary:hover{filter:brightness(1.06);}
     .btn-success{font-weight:700;border-radius:14px;}
     .btn-outline-light{border-radius:14px;}
+    .btn-danger{font-weight:700;border-radius:14px;}
 
     /* Chips dos filtros ativos */
     .active-filters{
@@ -259,6 +260,8 @@
               <th><i class="bi bi-shop"></i> Estabelecimento</th>
               <th><i class="bi bi-currency-dollar"></i> Valor (R$)</th>
               <th><i class="bi bi-justify-left"></i> Descrição</th>
+              <!-- NOVO: coluna Ações -->
+              <th><i class="bi bi-trash"></i> Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -274,15 +277,28 @@
                     {{ "{:,.2f}".format(l.valor) }}
                   </td>
                   <td class="desc">{{ l.descricao or '' }}</td>
+
+                  <!-- NOVO: ações -->
+                  <td class="text-center">
+                    <form method="post"
+                          action="{{ url_for('excluir_lancamento', id=l.id) }}"
+                          onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');">
+                      <input type="hidden" name="next" value="{{ request.full_path }}">
+                      {# Se usar CSRF, descomente: {{ csrf_token() }} #}
+                      <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="bi bi-trash"></i> Excluir
+                      </button>
+                    </form>
+                  </td>
                 </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="6">Nenhum lançamento encontrado.</td></tr>
+              <tr><td colspan="7">Nenhum lançamento encontrado.</td></tr>
             {% endif %}
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="4" class="text-end">Totais (visíveis):</td>
+              <td colspan="5" class="text-end">Totais (visíveis):</td>
               <td id="tf-total" class="valor">—</td>
               <td id="tf-qtd" class="text-start">— itens</td>
             </tr>
