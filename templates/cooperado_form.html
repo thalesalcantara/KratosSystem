@@ -1,182 +1,409 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>{% if editar %}Editar{% else %}Novo{% endif %} Cooperado - Coopex</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-    <style>
-        body {
-            background: #191c20;
-            font-family: 'Roboto', Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-        .form-card {
-            background: linear-gradient(130deg, #101218 80%, #003399 100%);
-            color: #ffd700;
-            padding: 38px 30px 26px 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px #000a, 0 2px 8px #00339955;
-            width: 100%;
-            max-width: 420px;
-        }
-        h2 {
-            font-family: 'Orbitron', sans-serif;
-            text-align: center;
-            letter-spacing: 2px;
-            color: #ffd700;
-            margin-bottom: 18px;
-        }
-        .form-label { color: #fff; font-weight: 600; }
-        .form-control {
-            background: #23262b;
-            border: 1px solid #22263d;
-            color: #ffd700;
-            font-weight: 500;
-            border-radius: 9px;
-        }
-        .form-control:focus {
-            border-color: #ffd700;
-            box-shadow: 0 0 0 1.5px #ffd70044;
-            background: #191c20;
-            color: #ffd700;
-        }
-        .btn-primary {
-            background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
-            color: #191c20;
-            font-weight: bold;
-            border: none;
-            border-radius: 17px;
-            font-size: 1.1rem;
-            margin-top: 15px;
-            width: 100%;
-            transition: background .17s;
-        }
-        .btn-primary:hover {
-            background: #ffe670;
-            color: #003399;
-        }
-        .btn-secondary {
-            width: 100%;
-            margin-top: 10px;
-            border-radius: 17px;
-            font-weight: 600;
-        }
-        .alert {
-            background: #ffd700;
-            color: #222;
-            font-weight: 600;
-            border-radius: 9px;
-            margin-top: 15px;
-            margin-bottom: 0;
-            text-align: center;
-        }
-        .profile-pic {
-            display: block;
-            margin: 0 auto 15px auto;
-            max-width: 120px;
-            max-height: 120px;
-            border-radius: 50%;
-            border: 3px solid #ffd700;
-            box-shadow: 0 0 8px #00339955;
-            background: #fff;
-        }
-        .foto-preview-new {
-            margin: 0 auto 15px auto;
-            text-align: center;
-        }
-        .foto-preview-new img {
-            max-width: 120px;
-            max-height: 120px;
-            border-radius: 50%;
-            border: 3px solid #ffd700;
-            box-shadow: 0 0 8px #00339955;
-            margin-bottom: 5px;
-            background: #fff;
-        }
-        @media (max-width: 500px) {
-            .form-card { padding: 18px 12px; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>{% if editar %}Editar{% else %}Novo{% endif %} Cooperado - Coopex</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonts + Bootstrap + Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+  <style>
+    :root{
+      --bg:#0b0f16;
+      --ink:#ffffff;
+      --muted:#c8d2ee;
+      --gold:#ffd700;
+      --accent:#4b82ff;
+      --panel:#10131e;
+      --panel2:#0d49cc;
+      --field:#0f172a;
+      --fieldBorder:#2a3552;
+      --line:#223157;
+      --glass:rgba(255,255,255,.06);
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0; background:
+        radial-gradient(1200px 480px at 90% -40%, rgba(13,73,204,.25), transparent 70%),
+        linear-gradient(180deg, var(--bg), var(--bg));
+      color:var(--ink);
+      font-family:Roboto, Arial, sans-serif;
+      display:flex; align-items:center; justify-content:center;
+      padding:20px;
+    }
+
+    .form-shell{
+      width:100%; max-width: 820px;
+      display:grid; grid-template-columns: 1fr;
+      gap:14px;
+    }
+
+    /* Header card */
+    .head-card{
+      display:flex; align-items:center; gap:12px;
+      background:linear-gradient(120deg, rgba(26,33,49,.95), rgba(13,73,204,.55));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:18px; padding:14px 14px;
+      box-shadow:0 10px 28px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    .head-card .brand{display:flex; align-items:center; gap:10px;}
+    .head-card .brand img{height:38px; width:auto; filter: drop-shadow(0 0 8px #0d49cc77);}
+    .head-card .title{
+      margin:0; font:700 1.1rem/1 Orbitron, sans-serif; letter-spacing:1.2px; color:var(--gold);
+      text-shadow:0 1px 1px rgba(0,0,0,.6);
+    }
+    .head-right{margin-left:auto; display:flex; gap:8px; align-items:center;}
+    .chip{
+      display:inline-flex; gap:6px; align-items:center; padding:7px 12px; border-radius:999px;
+      border:1px solid #3254a8; background:#162a56; color:#fff; font-weight:800; font-size:.9rem;
+    }
+
+    /* Form card */
+    .form-card{
+      background: linear-gradient(130deg, #0e1220 65%, #093aaf 120%);
+      color: var(--ink);
+      padding: 22px 16px 16px 16px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px #000a, 0 2px 8px #00339955;
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    h2{
+      font-family:Orbitron, sans-serif;
+      color:var(--gold);
+      letter-spacing:1.4px;
+      font-size:1.15rem;
+      margin:0 0 10px 0;
+      display:flex; align-items:center; gap:8px;
+      text-shadow:0 1px 1px rgba(0,0,0,.7);
+    }
+
+    .grid{
+      display:grid; gap:14px;
+      grid-template-columns: 380px 1fr;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    /* Left: Photo panel */
+    .photo-card{
+      background:linear-gradient(180deg, #0d1223, #0b0f19);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px; padding:14px;
+      box-shadow:0 8px 26px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    .profile-pic{
+      display:block; margin:0 auto 12px auto;
+      width:132px; height:132px; object-fit:cover;
+      border-radius:50%; border:3px solid var(--gold); background:#fff;
+      box-shadow:0 0 10px #0d49cc77;
+    }
+
+    .dropzone{
+      position:relative; border:2px dashed #3357aa; border-radius:14px;
+      background:rgba(255,255,255,.03);
+      padding:14px; text-align:center; color:var(--muted);
+      transition: all .15s ease;
+    }
+    .dropzone:hover{ border-color:var(--accent); box-shadow:0 0 0 .2rem rgba(75,130,255,.18); }
+    .dropzone.dragover{ border-color:var(--gold); box-shadow:0 0 0 .25rem rgba(255,215,0,.2); background:rgba(255,255,255,.05); }
+    .dz-actions{ display:flex; gap:8px; justify-content:center; margin-top:10px; }
+
+    /* Right: Fields */
+    .form-label{ color:#eaefff; font-weight:700; }
+    .form-control, .form-select{
+      background:var(--field); border:1px solid var(--fieldBorder); color:#fff;
+      border-radius:10px; font-weight:600;
+    }
+    .form-control:focus{
+      border-color:var(--accent); box-shadow:0 0 0 .2rem rgba(75,130,255,.2);
+      background:#0b142d; color:#fff;
+    }
+
+    /* Currency input UX */
+    .money-wrap{ position:relative; }
+    .money-prefix{
+      position:absolute; left:12px; top:50%; transform:translateY(-50%);
+      color:var(--gold); font-weight:900;
+    }
+    .money-display{
+      padding-left:44px;
+      letter-spacing:.3px;
+    }
+
+    /* Buttons */
+    .btn-gold{
+      background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
+      color:#1b1e2a; font-weight:900; border:none; border-radius:14px; padding:.75rem 1rem;
+      box-shadow:0 6px 18px rgba(255,215,0,.22); width:100%;
+    }
+    .btn-gold:hover{ filter:brightness(1.06); }
+    .btn-ghost{
+      border-radius:14px; width:100%; font-weight:700;
+      border:1px solid #2b3a61; color:#eaf2ff;
+    }
+    .btn-ghost:hover{ background:#1b294d; color:#fff; }
+
+    .hr{
+      height:1px; background:linear-gradient(90deg, transparent, #2a3a66, transparent);
+      margin:10px 0 8px 0;
+    }
+
+    .alert{
+      background:var(--gold); color:#101320; font-weight:900; border:none; border-radius:12px;
+      text-align:center; box-shadow:0 8px 22px rgba(255,215,0,.18);
+    }
+
+    /* Tiny helpers */
+    .help{ color:var(--muted); font-size:.92rem; }
+    .meta{ color:#a9b9e9; font-size:.93rem; display:flex; gap:14px; flex-wrap:wrap; }
+    .meta b{ color:#fff; }
+
+    /* Focus ring for links */
+    a:focus-visible, button:focus-visible, input:focus-visible{ outline: 2px solid var(--accent); outline-offset:2px; border-radius:10px; }
+  </style>
 </head>
 <body>
-    <div class="form-card">
-        <!-- Botão de voltar ao Dashboard -->
-        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light w-100 mb-3">
-            <i class="bi bi-arrow-left-circle"></i> Voltar ao Dashboard
-        </a>
 
-        <h2>
-            <i class="bi bi-person"></i>
-            {% if editar %}Editar Cooperado{% else %}Novo Cooperado{% endif %}
-        </h2>
-        <form method="post" enctype="multipart/form-data" autocomplete="off">
-            {# exibe a foto vinda do BANCO via rota foto_cooperado (com fallback no servidor) #}
-            {% if cooperado %}
-                <img src="{{ url_for('foto_cooperado', id=cooperado.id) }}"
-                     alt="Foto do Cooperado" class="profile-pic" id="foto-preview-existente">
-            {% endif %}
-            <div class="mb-3">
-                <label class="form-label" for="foto"><i class="bi bi-camera"></i> Foto</label>
-                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" {% if not editar %}required{% endif %} onchange="previewFoto(event)" />
-                <div class="foto-preview-new" id="foto-preview-novo"></div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="nome"><i class="bi bi-person-badge"></i> Nome</label>
-                <input type="text" class="form-control" id="nome" name="nome"
-                       value="{{ cooperado.nome if cooperado else '' }}" required autocomplete="off" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="username"><i class="bi bi-person-vcard"></i> Usuário</label>
-                <input type="text" class="form-control" id="username" name="username"
-                       value="{{ cooperado.username if cooperado else '' }}" required autocomplete="off" {% if editar %}readonly{% endif %} />
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="credito"><i class="bi bi-currency-dollar"></i> Crédito (R$)</label>
-                <input type="number" class="form-control" id="credito" name="credito"
-                       min="0" step="0.01"
-                       value="{{ cooperado.credito if cooperado else 0 }}" required autocomplete="off" />
-            </div>
-            <button type="submit" class="btn btn-primary">
-                {% if editar %}Salvar Alterações{% else %}Cadastrar{% endif %}
-            </button>
-            <a href="{{ url_for('listar_cooperados') }}" class="btn btn-secondary">Voltar</a>
-        </form>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+  <div class="form-shell">
+    <!-- Header / back -->
+    <div class="head-card">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light">
+        <i class="bi bi-arrow-left-circle"></i> Voltar
+      </a>
+      <div class="brand">
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" />
+        <h1 class="title">{% if editar %}Editar Cooperado{% else %}Novo Cooperado{% endif %}</h1>
+      </div>
+      <div class="head-right">
+        {% if cooperado %}
+          <span class="chip" title="Usuário">@{{ cooperado.username }}</span>
+        {% endif %}
+      </div>
     </div>
-    <script>
-      // Preview da foto ao selecionar arquivo novo (não afeta foto já cadastrada)
-      function previewFoto(event) {
-        var input = event.target;
-        var previewDiv = document.getElementById('foto-preview-novo');
-        var previewExistente = document.getElementById('foto-preview-existente');
-        previewDiv.innerHTML = '';
-        if (input.files && input.files[0]) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            previewDiv.innerHTML = '<img src="' + e.target.result + '" alt="Preview Foto">';
-            if (previewExistente) previewExistente.style.display = 'none';
+
+    <!-- Info quick (opcional) -->
+    {% if cooperado %}
+    <div class="head-card" style="padding:10px 14px">
+      <div class="meta">
+        <span><i class="bi bi-person-badge"></i> <b>{{ cooperado.nome }}</b></span>
+        <span><i class="bi bi-cash-coin"></i> Crédito atual: <b>R$ {{ '{:,.2f}'.format(cooperado.credito).replace(',', 'X').replace('.', ',').replace('X','.') }}</b></span>
+        {% if cooperado.credito_atualizado_em %}
+          <span><i class="bi bi-clock-history"></i> Último ajuste: <b>{{ cooperado.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</b></span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Form -->
+    <div class="form-card">
+      <form method="post" enctype="multipart/form-data" autocomplete="off" class="needs-validation" novalidate>
+        <div class="grid">
+          <!-- LEFT: Foto -->
+          <section class="photo-card">
+            {% if cooperado %}
+              <img src="{{ url_for('foto_cooperado', id=cooperado.id) }}"
+                   alt="Foto do Cooperado" class="profile-pic" id="foto-preview-existente">
+            {% else %}
+              <img src="{{ url_for('static', filename='avatar_placeholder.png') }}"
+                   alt="Foto do Cooperado" class="profile-pic" id="foto-preview-existente" style="opacity:.75;">
+            {% endif %}
+
+            <div class="dropzone" id="dropzone">
+              <div>
+                <i class="bi bi-cloud-arrow-up" style="font-size:1.2rem; color:var(--gold)"></i>
+                <div><b>Arraste uma foto</b> ou clique para selecionar</div>
+                <div class="help">Formatos comuns (JPG/PNG). {% if not editar %}Obrigatória para cadastro.{% else %}Opcional.{% endif %}</div>
+              </div>
+              <input type="file" class="form-control" id="foto" name="foto" accept="image/*"
+                     {% if not editar %}required{% endif %}
+                     style="opacity:0; position:absolute; inset:0; cursor:pointer;">
+            </div>
+            <div class="dz-actions">
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-remover-foto">
+                <i class="bi bi-trash"></i> Remover
+              </button>
+              <a class="btn btn-ghost btn-sm" href="{{ url_for('listar_cooperados') }}">
+                <i class="bi bi-people"></i> Lista
+              </a>
+            </div>
+
+            <div id="foto-preview-novo" class="text-center mt-2"></div>
+          </section>
+
+          <!-- RIGHT: Campos -->
+          <section>
+            <div class="mb-2">
+              <label class="form-label" for="nome"><i class="bi bi-person-badge"></i> Nome</label>
+              <input type="text" class="form-control" id="nome" name="nome"
+                     value="{{ cooperado.nome if cooperado else '' }}" required autocomplete="off" />
+              <div class="invalid-feedback">Informe o nome do cooperado.</div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label" for="username"><i class="bi bi-person-vcard"></i> Usuário</label>
+              <input type="text" class="form-control" id="username" name="username"
+                     value="{{ cooperado.username if cooperado else '' }}" required autocomplete="off" {% if editar %}readonly{% endif %} />
+              <div class="help">Use apenas letras, números e/ou ponto/underline.</div>
+              <div class="invalid-feedback">Informe um usuário válido.</div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label" for="credito"><i class="bi bi-currency-dollar"></i> Crédito (R$)</label>
+
+              <!-- Campo visual formatado + campo numérico real que será enviado -->
+              <div class="money-wrap">
+                <span class="money-prefix">R$</span>
+                <input type="text" class="form-control money-display" id="credito_fmt"
+                       inputmode="decimal" autocomplete="off"
+                       value="{{ '{:,.2f}'.format(cooperado.credito).replace(',', 'X').replace('.', ',').replace('X','.') if cooperado else '0,00' }}">
+              </div>
+              <input type="number" class="form-control d-none" id="credito" name="credito"
+                     min="0" step="0.01"
+                     value="{{ cooperado.credito if cooperado else 0 }}" required />
+              <div class="invalid-feedback">Informe um valor de crédito válido.</div>
+              <div class="help">Você pode digitar com vírgula ou ponto; nós formatamos automaticamente.</div>
+            </div>
+
+            <div class="hr"></div>
+
+            <div class="row g-2 mt-1">
+              <div class="col-12 col-md-6">
+                <button type="submit" class="btn btn-gold">
+                  {% if editar %}<i class="bi bi-check2-circle"></i> Salvar Alterações{% else %}<i class="bi bi-person-plus"></i> Cadastrar{% endif %}
+                </button>
+              </div>
+              <div class="col-12 col-md-6">
+                <a href="{{ url_for('listar_cooperados') }}" class="btn btn-ghost w-100">
+                  <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+              </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="mt-3">
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} mb-2">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+          </section>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== Helper: normaliza número pt-BR (ex: "1.234,56" -> 1234.56)
+    function brToFloat(s){
+      if(!s) return 0;
+      s = (s+'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');
+      const v = parseFloat(s);
+      return isNaN(v) ? 0 : v;
+    }
+    function floatToBr(v){
+      return (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+
+    // ===== Máscara de dinheiro: sincroniza credito_fmt (visível) -> credito (real)
+    const creditoFmt = document.getElementById('credito_fmt');
+    const creditoReal = document.getElementById('credito');
+
+    function syncFmtToReal(){
+      const v = brToFloat(creditoFmt.value);
+      creditoReal.value = v.toFixed(2);
+      // re-render bonito
+      creditoFmt.value = floatToBr(v);
+    }
+    ['input','change','blur'].forEach(evt => {
+      creditoFmt.addEventListener(evt, () => {
+        // permite digitação livre, só formata no blur/change
+        if(evt==='blur' || evt==='change') syncFmtToReal();
+      });
+    });
+    // formata na carga
+    document.addEventListener('DOMContentLoaded', () => { syncFmtToReal(); });
+
+    // ===== Validação bootstrap
+    (function(){
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.from(forms).forEach(form=>{
+        form.addEventListener('submit',function(e){
+          syncFmtToReal();
+          if(!form.checkValidity()){
+            e.preventDefault(); e.stopPropagation();
           }
-          reader.readAsDataURL(input.files[0]);
-        } else {
-          if (previewExistente) previewExistente.style.display = '';
-        }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
+
+    // ===== Dropzone de foto (arrastar/soltar) + preview
+    const dz = document.getElementById('dropzone');
+    const fileInput = document.getElementById('foto');
+    const previewNovo = document.getElementById('foto-preview-novo');
+    const previewExistente = document.getElementById('foto-preview-existente');
+    const btnRemoverFoto = document.getElementById('btn-remover-foto');
+
+    function showPreview(file){
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e){
+        previewNovo.innerHTML = '<img src="'+e.target.result+'" alt="Preview Foto" '+
+          'style="width:132px;height:132px;object-fit:cover;border-radius:50%;border:3px solid var(--gold);background:#fff;box-shadow:0 0 10px #0d49cc77;">' +
+          '<div class="help mt-1">'+(file.name||"")+' • '+Math.ceil(file.size/1024)+' KB</div>';
+        if(previewExistente) previewExistente.style.display = 'none';
       }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      reader.readAsDataURL(file);
+    }
+
+    fileInput.addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(f) showPreview(f);
+      else if(previewExistente) previewExistente.style.display = '';
+    });
+
+    ;['dragenter','dragover'].forEach(evt=>{
+      dz.addEventListener(evt, (e)=>{ e.preventDefault(); e.stopPropagation(); dz.classList.add('dragover'); });
+    });
+    ;['dragleave','drop'].forEach(evt=>{
+      dz.addEventListener(evt, (e)=>{ e.preventDefault(); e.stopPropagation(); dz.classList.remove('dragover'); });
+    });
+    dz.addEventListener('drop', (e)=>{
+      const files = e.dataTransfer.files;
+      if(files && files[0]){
+        fileInput.files = files; // injeta no input
+        showPreview(files[0]);
+      }
+    });
+
+    // Botão remover foto selecionada (apenas limpa seleção visual)
+    btnRemoverFoto.addEventListener('click', ()=>{
+      fileInput.value = '';
+      previewNovo.innerHTML = '';
+      if(previewExistente) previewExistente.style.display = '';
+    });
+
+    // ===== Acessibilidade: Enter no dropzone abre seletor
+    dz.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault(); fileInput.click();
+      }
+    });
+    dz.setAttribute('tabindex','0');
+    dz.setAttribute('role','button');
+    dz.setAttribute('aria-label','Selecionar foto do cooperado');
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
