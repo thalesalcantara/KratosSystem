@@ -1,404 +1,217 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Painel Estabelecimento - Coopex</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    /* Paleta com contraste reforçado */
+    --bg:#0b0f16;
+    --ink:#ffffff;
+    --muted:#c8d2ee;
+    --gold:#ffd700;
+    --line:#2c375a;
 
-  <!-- Google Fonts, Bootstrap e Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    --card1:#182033;
+    --card2:#0d49cc;
 
-  <style>
-    :root{
-      /* Paleta (padrão Coopex) */
-      --bg:#0b0f16;
-      --ink:#eaf2ff;
-      --ink-strong:#ffffff;
-      --muted:#c8d2ee;
-      --gold:#ffd700;
+    /* Tabela mais visível */
+    --thead:#0f1a3a;
+    --rowOdd:#12244e;
+    --rowEven:#0c1b3b;
 
-      --card1:#182033;
-      --card2:#0d49cc;
+    --kpi:#0e1533;
+    --kpiLine:#2a3a60;
+    --field:#0f172a;
+    --fieldBorder:#3d528b;
+    --fieldFocus:#4b82ff;
 
-      /* Tabela com maior visibilidade */
-      --thead:#1a2f63;     /* cabeçalho mais claro */
-      --thead2:#0f204e;
-      --rowOdd:#162a56;    /* listras ímpares */
-      --rowEven:#102348;   /* listras pares */
-      --line:#2a3c6a;
+    /* Modal edição */
+    --modalGrad1:#122148;
+    --modalGrad2:#0d49cc;
+    --modalEdge:#2f4a94;
+  }
 
-      --field:#0f172a;
-      --fieldBorder:#3d528b;
-      --fieldFocus:#4b82ff;
-    }
+  html,body{height:100%}
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:
+      radial-gradient(1400px 500px at 80% -40%, rgba(13,73,204,.28), transparent 70%),
+      linear-gradient(180deg, var(--bg), var(--bg));
+    color:var(--ink);
+    font-family:Roboto, Arial, sans-serif;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-shadow:none;
+  }
 
-    html,body{height:100%}
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      background:
-        radial-gradient(1400px 520px at 80% -40%, rgba(13,73,204,.28), transparent 70%),
-        linear-gradient(180deg, var(--bg), var(--bg));
-      color:var(--ink);
-      font-family:Roboto, Arial, sans-serif;
-      -webkit-font-smoothing:antialiased;
-      text-shadow:none;
-    }
+  /* Acessibilidade: foco visível */
+  :focus-visible{ outline:3px solid var(--gold); outline-offset:2px; border-radius:8px; }
 
-    /* ===== Sidebar ===== */
-    .sidebar{
-      width:210px;height:100vh;position:fixed;top:0;left:0;
-      background:linear-gradient(160deg,#101218 70%,#003399 100%);
-      color:#fff;box-shadow:3px 0 12px #00339944;z-index:10;
-      display:flex;flex-direction:column;align-items:center;
-    }
-    .sidebar .logo{width:176px;max-width:95%;margin:28px auto 10px;display:block;filter: drop-shadow(0 0 12px #003399aa);}
-    .sidebar h3{
-      font-family:Orbitron, sans-serif;color:var(--gold);text-align:center;
-      letter-spacing:1px;margin-bottom:22px;font-size:1.05rem;font-weight:700;
-      background:rgba(0,0,0,.2);border-radius:8px;padding:5px 0;width:100%;
-    }
-    .sidebar .nav-link{
-      color:#eef3ff;font-size:1.08rem;border-radius:10px;margin:4px 8px;
-      padding:12px 16px;display:flex;align-items:center;gap:10px;text-decoration:none;
-      transition:background .18s,color .18s;
-    }
-    .sidebar .nav-link i{font-size:1.25rem;}
-    .sidebar .nav-link.active,.sidebar .nav-link:hover{background:#ffd70033;color:var(--gold)!important;}
+  /* Sidebar */
+  .sidebar{
+    width:210px; height:100vh; position:fixed; top:0; left:0;
+    background:linear-gradient(160deg,#101218 70%,#003399 100%);
+    color:#fff; box-shadow:3px 0 12px #00339944; z-index:10;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .sidebar .logo{ width:176px; max-width:95%; margin:28px auto 10px; display:block; filter: drop-shadow(0 0 12px #003399aa); }
+  .sidebar h3{
+    font-family:Orbitron, sans-serif; color:var(--gold); text-align:center;
+    letter-spacing:1px; margin-bottom:22px; font-size:1.05rem; font-weight:700;
+    background:rgba(0,0,0,.2); border-radius:8px; padding:5px 0; width:100%;
+  }
+  .sidebar .nav-link{
+    color:#eef3ff; font-size:1.08rem; border-radius:10px; margin:4px 8px;
+    padding:12px 16px; display:flex; align-items:center; gap:10px; text-decoration:none;
+    transition:background .18s ease, color .18s ease;
+  }
+  .sidebar .nav-link i{font-size:1.25rem;}
+  .sidebar .nav-link.active, .sidebar .nav-link:hover{ background:#ffd70033; color:var(--gold)!important; }
 
-    /* ===== Main/Topbar ===== */
-    .main-content{margin-left:230px;padding:32px 28px 24px;}
-    .topbar{
-      height:68px;display:flex;align-items:center;justify-content:space-between;
-      background:rgba(16,18,24,.95);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:14px;padding:0 16px;
-      box-shadow:0 12px 26px rgba(0,0,0,.35);
-      position:sticky;top:0;z-index:20;
-    }
-    .who{color:var(--gold);font-weight:800;font-size:1.06rem;}
-    .clock{color:#ffeaa6;font-weight:900;letter-spacing:.3px;font-size:1.02rem;}
+  /* Main / Topbar */
+  .main-content{ margin-left:230px; padding:32px 28px 24px; }
+  .topbar{
+    height:68px; display:flex; align-items:center; justify-content:space-between;
+    background:rgba(16,18,24,.95);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    padding:0 16px;
+    box-shadow:0 12px 26px rgba(0,0,0,.35);
+    position:sticky; top:0; z-index:20;
+  }
+  .who{ color:var(--gold); font-weight:800; font-size:1.06rem; letter-spacing:.2px; }
+  .clock{ color:#ffeaa6; font-weight:900; letter-spacing:.4px; font-size:1.02rem; }
 
-    /* ===== Cards ===== */
-    .dashboard-card{
-      background:linear-gradient(120deg,var(--card1) 88%, var(--card2) 100%);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:18px; box-shadow:0 10px 36px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
-      padding:24px 20px 20px; color:var(--ink);
-    }
-    .dashboard-card h4{
-      margin:0 0 12px; font-family:Orbitron, sans-serif; font-weight:800; letter-spacing:1.1px; color:var(--gold);
-      text-shadow:0 1px 1px rgba(0,0,0,.6);
-    }
+  /* Cards */
+  .dashboard-card{
+    background:linear-gradient(120deg,var(--card1) 88%, var(--card2) 100%);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;
+    box-shadow:0 10px 36px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+    padding:24px 20px 20px;
+    color:var(--ink);
+  }
+  .dashboard-card h4{
+    margin:0 0 12px;
+    font-family:Orbitron, sans-serif; font-weight:800; letter-spacing:1.1px; color:var(--gold);
+    text-shadow:0 1px 1px rgba(0,0,0,.6);
+  }
 
-    /* ===== Form ===== */
-    label{font-weight:800;color:var(--ink-strong);}
-    .form-control,.form-select{
-      background:var(--field);color:#fff;border:2px solid var(--fieldBorder);
-      border-radius:12px;height:46px;font-size:1rem;padding:10px 12px;
-    }
-    .form-control::placeholder{color:#afbdde;}
-    .form-control:focus,.form-select:focus{border-color:var(--fieldFocus);box-shadow:0 0 0 .2rem rgba(75,130,255,.22);}
+  /* KPIs */
+  .kpis{ display:grid; gap:12px; grid-template-columns: repeat(5, minmax(0,1fr)); margin-bottom:14px; }
+  .kpi{
+    background:var(--kpi); border:1px solid var(--kpiLine); border-radius:14px; padding:14px 16px;
+    display:flex; flex-direction:column; gap:6px; min-height:92px;
+    box-shadow:0 8px 24px rgba(0,0,0,.28);
+  }
+  .kpi .label{ color:#e7edff; font-weight:900; display:flex; align-items:center; gap:8px; }
+  .kpi .value{ font:900 1.35rem/1 Orbitron, sans-serif; color:var(--gold); letter-spacing:.5px; }
+  .kpi .sub{ color:var(--muted); font-size:.94rem; }
 
-    /* ===== Botões ===== */
-    .btn-primary{
-      background:linear-gradient(90deg,var(--gold) 60%, #ffe670 100%);
-      color:#111827;font-weight:900;border:none;border-radius:14px;padding:10px 18px;
-    }
-    .btn-primary:hover{filter:brightness(1.06);}
-    .btn-outline-primary{color:#cfe1ff;border-color:#4b82ff;font-weight:800;}
-    .btn-outline-primary:hover{background:#4b82ff;color:#0b142d;}
-    .btn-outline-danger{color:#ffd3d8;border-color:#ff6b7a;font-weight:800;}
-    .btn-outline-danger:hover{background:#ff6b7a;color:#0b142d;}
+  /* Card ranking */
+  .ranking{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+  .rank-card{
+    background:var(--kpi); border:1px solid var(--kpiLine); border-radius:14px; padding:14px 16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.28);
+  }
+  .rank-card h5{ margin:0 0 8px; font-family:Orbitron, sans-serif; color:var(--gold); }
+  .rank-list{ margin:0; padding-left:18px; }
+  .rank-list li{ margin:4px 0; font-weight:800; color:#fff; }
+  .rank-list small{ color:#cfe3ff; }
 
-    /* ===== Tabela (cores suaves e legíveis) ===== */
-    .table-wrap{border-radius:14px;overflow:auto;background:#0e1533;}
-    table{width:100%;margin:0;color:var(--ink-strong);font-size:1.02rem;}
-    thead th{
-      position:sticky;top:0;z-index:5;
-      background:linear-gradient(180deg,var(--thead),var(--thead2))!important;
-      color:#fff!important;
-      font-family:Orbitron, sans-serif;letter-spacing:.9px;text-align:center;
-      padding:14px 10px;white-space:nowrap;border-bottom:2px solid var(--line)!important;
-      box-shadow:0 2px 0 rgba(0,0,0,.35);
-    }
-    tbody td{
-      border-top:1px solid var(--line);
-      padding:12px 10px;vertical-align:middle;color:#f3f6ff!important; /* texto mais claro */
-    }
-    .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd)!important;}
-    .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven)!important;}
-    .table-hover tbody tr:hover>*{background-color:#1c3975!important;}
-    td.valor{font-weight:900;color:var(--gold)!important;white-space:nowrap;font-size:1.05rem;}
-    .aviso-expirado{color:#d9e0ff;font-weight:700;}
+  /* Form */
+  label{font-weight:800;color:#f7f9ff;letter-spacing:.25px;}
+  .form-control,.form-select{
+    background:var(--field); color:#fff; border:2px solid var(--fieldBorder);
+    border-radius:12px; height:46px; font-size:1rem; padding:10px 12px;
+  }
+  .form-control::placeholder{color:#afbdde;}
+  .form-control:focus,.form-select:focus{ border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(75,130,255,.22); }
 
-    /* Alertas */
-    .alert{
-      background:var(--gold);color:#101320;font-weight:900;border:none;border-radius:12px;
-      text-align:center;box-shadow:0 10px 22px rgba(255,215,0,.18);
-    }
+  /* Botões */
+  .btn-primary{
+    background:linear-gradient(90deg,var(--gold) 60%, #ffe670 100%);
+    color:#111827; font-weight:900; border:none; border-radius:14px; padding:10px 18px;
+    transition:filter .15s ease, transform .02s;
+  }
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-primary:active{transform:translateY(1px);}
+  .btn-outline-primary{ color:#cfe1ff; border-color:#4b82ff; font-weight:800; }
+  .btn-outline-primary:hover{ background:#4b82ff; color:#0b142d; }
+  .btn-outline-danger{ color:#ffd3d8; border-color:#ff6b7a; font-weight:800; }
+  .btn-outline-danger:hover{ background:#ff6b7a; color:#0b142d; }
 
-    /* Responsivo */
-    @media (max-width:900px){
-      .sidebar{display:none;}
-      .main-content{margin-left:0;padding:14px;}
-      table{font-size:1rem;}
-      thead th{font-size:.98rem;}
-    }
-  </style>
-</head>
-<body>
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
-    <h3>Parceiro<br>Coopex</h3>
-    <a class="nav-link active" href="#"><i class="bi bi-currency-dollar"></i>Lançar Crédito</a>
-    <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
-  </div>
+  /* ===== VISIBILIDADE DAS TABELAS (força letras brancas) ===== */
+  .table.table-striped tbody tr > *,
+  .table-hover tbody tr > *,
+  #tbody-lanc td, #tbody-lanc th{
+    color:#ffffff !important;
+  }
+  thead th{ color:#ffffff !important; }                 /* cabeçalho */
+  td.valor{ color:var(--gold) !important; font-weight:900; } /* mantém dourado do valor */
 
-  <!-- Main -->
-  <div class="main-content">
-    <div class="topbar mb-4">
-      <div class="who">Bem-vindo, {{ est.nome }}</div>
-      <div class="d-flex align-items-center gap-3">
-        <div class="clock" id="clock-br">Brasília — --/--/---- --:--:--</div>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm fw-bold">Sair <i class="bi bi-power"></i></a>
-      </div>
-    </div>
+  /* Tabela (cores de fundo, bordas, hover) */
+  .table-wrap{ border-radius:14px; overflow:auto; background:#0e1533; }
+  table{ width:100%; margin:0; color:#fff; font-size:1.02rem; }
+  thead th{
+    position:sticky; top:0; z-index:5;
+    background:var(--thead)!important;
+    font-family:Orbitron, sans-serif; letter-spacing:.9px; text-align:center;
+    padding:14px 10px; white-space:nowrap;
+    border-bottom:2px solid var(--line)!important;
+    box-shadow:0 2px 0 rgba(0,0,0,.35);
+  }
+  tbody td{
+    border-top:1px solid var(--line);
+    padding:12px 10px; vertical-align:middle;
+  }
+  .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd)!important;}
+  .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven)!important;}
+  .table-hover tbody tr:hover>*{ background-color:#1b2f66!important; }
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} text-center">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+  .aviso-expirado{ color:#cfd7f5; font-weight:700; }
 
-    <!-- Card: Lançar -->
-    <div class="dashboard-card mb-4">
-      <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
-      <form method="post" action="{{ url_for('painel_estabelecimento') }}">
-        <div class="row g-3 align-items-center mb-1">
-          <div class="col-md-4">
-            <label class="form-label" for="cooperado_id"><i class="bi bi-person-lines-fill"></i> Cooperado</label>
-            <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
-              <option value="">Selecione...</option>
-              {% for c in cooperados %}
-              <option
-                value="{{ c.id }}"
-                data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
-                data-saldo-raw="{{ c.credito }}"
-                data-foto="{{ url_for('foto_cooperado', id=c.id) if (c.foto_data or c.foto) else '' }}"
-              >{{ c.nome }}</option>
-              {% endfor %}
-            </select>
-            <div id="foto-cooperado-preview" class="mt-2" style="text-align:center;"></div>
-            <div id="saldo-cooperado" class="mt-2" style="color:var(--gold);font-weight:900;font-size:1.06rem;"></div>
-            <div id="erro-lancar" class="mt-1" style="color:#ffdede;font-weight:800;"></div>
-          </div>
+  /* Modal Edição — design */
+  .modal-content{
+    background:linear-gradient(135deg, var(--modalGrad1), var(--modalGrad2));
+    border:1px solid var(--modalEdge);
+    border-radius:18px;
+    color:#fff;
+    box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  .modal-header{
+    border-bottom:1px solid rgba(255,255,255,.12);
+    background:linear-gradient(180deg, rgba(255,255,255,.08), transparent);
+    border-top-left-radius:18px; border-top-right-radius:18px;
+  }
+  .modal-title{
+    font-family:Orbitron, sans-serif; color:var(--gold); letter-spacing:1px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .modal .form-control{ background:rgba(7,12,26,.65); border:2px solid rgba(255,255,255,.18); color:#fff; }
+  .modal .form-control:focus{ border-color:#a5c4ff; box-shadow:0 0 0 .2rem rgba(165,196,255,.18); }
+  .input-group-text{
+    background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.18); color:#fff; font-weight:800;
+  }
+  .pill{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid rgba(255,255,255,.2);
+    border-radius:999px; background:rgba(0,0,0,.25); font-weight:800; color:#e7efff;
+  }
+  .time-left{ color:#ffeaa6; font-weight:900; }
 
-          <div class="col-md-2">
-            <label class="form-label" for="valor"><i class="bi bi-cash-stack"></i> Valor (R$)</label>
-            <input type="number" step="0.01" min="0.01" class="form-control" id="valor" name="valor" required oninput="checarCreditoSuficiente()">
-          </div>
+  /* Alertas */
+  .alert{
+    background:var(--gold); color:#101320; font-weight:900; border:none; border-radius:12px;
+    text-align:center; box-shadow:0 10px 22px rgba(255,215,0,.18);
+  }
 
-          <div class="col-md-3">
-            <label class="form-label" for="os_numero"><i class="bi bi-file-earmark-text"></i> Nº OS</label>
-            <input type="text" class="form-control" id="os_numero" name="os_numero" required placeholder="Ex: 12345">
-          </div>
-
-          <div class="col-md-3">
-            <label class="form-label" for="descricao"><i class="bi bi-justify-left"></i> Descrição</label>
-            <input type="text" class="form-control" id="descricao" name="descricao" placeholder="(opcional)">
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-2" id="btn-lancar">
-          <i class="bi bi-plus-circle"></i> Lançar Valor
-        </button>
-      </form>
-    </div>
-
-    <!-- Card: Lista -->
-    <div class="dashboard-card">
-      <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
-      <div class="table-wrap">
-        <table class="table table-striped table-hover text-center align-middle">
-          <thead>
-            <tr>
-              <th>Data (Brasília)</th>
-              <th>Nº OS</th>
-              <th>Cooperado</th>
-              <th>Valor (R$)</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-lanc">
-            {% for l in lancamentos %}
-            <tr data-created="{{ l.data.isoformat() }}Z" data-id="{{ l.id }}">
-              <td class="dt">{{ l.data_brasilia }}</td>
-              <td class="os">{{ l.os_numero }}</td>
-              <td class="coop">{{ l.cooperado.nome }}</td>
-              <td class="valor" data-valor="{{ '%.2f'|format(l.valor) }}">{{ "{:,.2f}".format(l.valor) }}</td>
-              <td class="desc">{{ l.descricao or '' }}</td>
-              <td class="acoes">
-                <button type="button"
-                        class="btn btn-outline-primary btn-sm btn-editar fw-bold"
-                        data-id="{{ l.id }}"
-                        data-os="{{ l.os_numero }}"
-                        data-valor="{{ '%.2f'|format(l.valor) }}"
-                        data-desc="{{ l.descricao or '' }}"
-                        onclick="abrirModalEditar(this)">
-                  <i class="bi bi-pencil-square"></i> Editar
-                </button>
-
-                <form method="post"
-                      action="{{ url_for('estab_excluir_lancamento', id=l.id) }}"
-                      style="display:inline-block;"
-                      onsubmit="return confirmarExcluir(this);">
-                  <button type="submit" class="btn btn-outline-danger btn-sm btn-excluir fw-bold">
-                    <i class="bi bi-trash"></i> Excluir
-                  </button>
-                </form>
-
-                <div class="aviso-expirado small mt-1" style="display:none;">Bloqueado (1h)</div>
-              </td>
-            </tr>
-            {% else %}
-            <tr><td colspan="6" class="text-center">Nenhum lançamento realizado.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL EDITAR -->
-  <div class="modal fade" id="modalEditarLanc" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <form class="modal-content" method="post" id="form-editar-modal">
-        <div class="modal-header">
-          <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Lançamento</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Nº OS</label>
-            <input type="text" class="form-control" id="edit-os" name="os_numero" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Valor (R$)</label>
-            <input type="number" step="0.01" min="0.01" class="form-control" id="edit-valor" name="valor" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Descrição</label>
-            <input type="text" class="form-control" id="edit-desc" name="descricao">
-          </div>
-          <div class="form-text text-warning fw-bold">* Edição permitida até 1 hora após a criação.</div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary fw-bold" type="button" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary fw-bold" type="submit">Salvar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ÁUDIO: VENDA -->
-  <audio id="snd-venda" preload="auto" playsinline
-         src="{{ url_for('statics_files', filename='venda.mp3') }}"></audio>
-
-  <script>
-    /* Relógio Brasília */
-    function tickClock(){
-      const el = document.getElementById('clock-br');
-      if(!el) return;
-      const s = new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',hour12:false});
-      el.textContent = 'Brasília — ' + s;
-    }
-    setInterval(tickClock,1000); tickClock();
-
-    /* Info cooperado */
-    function mostrarInfoCooperado(){
-      const sel=document.getElementById("cooperado_id");
-      const saldoDiv=document.getElementById("saldo-cooperado");
-      const fotoDiv=document.getElementById("foto-cooperado-preview");
-      const opt=sel.options[sel.selectedIndex];
-      const saldo=opt?opt.getAttribute("data-saldo"):null;
-      const foto=opt?opt.getAttribute("data-foto"):null;
-
-      saldoDiv.textContent=(saldo&&sel.value)?`Saldo atual: R$ ${saldo}`:'';
-      fotoDiv.innerHTML=(foto&&sel.value)
-        ? `<img src="${foto}" alt="Foto do Cooperado" style="max-width:96px;max-height:96px;border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 8px #00339955;">`
-        : '';
-      checarCreditoSuficiente();
-    }
-    function checarCreditoSuficiente(){
-      const sel=document.getElementById("cooperado_id");
-      const valI=document.getElementById("valor");
-      const err=document.getElementById("erro-lancar");
-      const btn=document.getElementById("btn-lancar");
-      const opt=sel.options[sel.selectedIndex];
-      const saldo=opt?parseFloat(opt.getAttribute("data-saldo-raw")):null;
-      const v=valI.value?parseFloat(valI.value):null;
-
-      if(!sel.value){err.textContent="";btn.disabled=true;return;}
-      if(saldo==null||isNaN(saldo)||saldo<=0){err.textContent="Este cooperado está sem crédito disponível!";btn.disabled=true;return;}
-      if(v&&v>saldo){err.textContent="O valor excede o saldo disponível!";btn.disabled=true;}
-      else{err.textContent="";btn.disabled=false;}
-    }
-
-    /* Modal + restrição 1h */
-    let editarModal;
-    document.addEventListener('DOMContentLoaded', function(){
-      mostrarInfoCooperado();
-      document.getElementById("cooperado_id")?.addEventListener("change", mostrarInfoCooperado);
-      document.getElementById("valor")?.addEventListener("input", checarCreditoSuficiente);
-      editarModal=new bootstrap.Modal(document.getElementById('modalEditarLanc'));
-      aplicarRestricaoUmaHora(); setInterval(aplicarRestricaoUmaHora,60*1000);
-
-      if(document.querySelector('.alert.alert-success')){
-        const a=document.getElementById('snd-venda'); a&&a.play().catch(()=>{});
-      }
-    });
-
-    document.addEventListener('click',function(ev){
-      const tgt=ev.target.closest('#btn-lancar'); if(!tgt||tgt.disabled) return;
-      const a=document.getElementById('snd-venda'); a&&a.play().catch(()=>{});
-    });
-
-    function abrirModalEditar(btn){
-      const tr=btn.closest('tr'); if(estaExpirado(tr.getAttribute('data-created'))) return;
-      const id=btn.getAttribute('data-id');
-      document.getElementById('edit-os').value=btn.getAttribute('data-os')||'';
-      document.getElementById('edit-valor').value=(btn.getAttribute('data-valor')||'').replace(',','.');
-      document.getElementById('edit-desc').value=btn.getAttribute('data-desc')||'';
-      const form=document.getElementById('form-editar-modal');
-      form.action="{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0','/'+id);
-      editarModal.show();
-    }
-    function confirmarExcluir(formEl){
-      const tr=formEl.closest('tr'); if(estaExpirado(tr.getAttribute('data-created'))) return false;
-      return confirm('Confirma excluir este lançamento? O crédito será devolvido ao cooperado.');
-    }
-    function aplicarRestricaoUmaHora(){
-      document.querySelectorAll('table tbody tr[data-created]').forEach(tr=>{
-        const exp=estaExpirado(tr.getAttribute('data-created'));
-        const bE=tr.querySelector('.btn-editar'); const bX=tr.querySelector('.btn-excluir'); const aviso=tr.querySelector('.aviso-expirado');
-        if(exp){ if(bE){bE.disabled=true;bE.classList.add('disabled');} if(bX){bX.disabled=true;bX.classList.add('disabled');} if(aviso) aviso.style.display='block';}
-        else{ if(bE){bE.disabled=false;bE.classList.remove('disabled');} if(bX){bX.disabled=false;bX.classList.remove('disabled');} if(aviso) aviso.style.display='none';}
-      });
-    }
-    function estaExpirado(createdIso){
-      if(!createdIso) return false;
-      const criado=new Date(createdIso); const agora=new Date();
-      return (agora-criado)>(60*60*1000);
-    }
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  /* Responsivo */
+  @media (max-width:1200px){
+    .kpis{ grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .ranking{ grid-template-columns:1fr; }
+  }
+  @media (max-width:900px){
+    .sidebar{display:none;}
+    .main-content{margin-left:0;padding:14px;}
+    .kpis{ grid-template-columns: 1fr; }
+    table{ font-size:1rem; }
+    thead th{ font-size:.98rem; }
+  }
+</style>
