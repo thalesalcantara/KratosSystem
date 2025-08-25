@@ -44,7 +44,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'max_overflow': 10,
     'pool_timeout': 30,
     'pool_recycle': 1800,  # 30 min
-    # REMOVIDO: connect_args com "statement_cache_size" (incompatível com psycopg3)
 }
 
 # Estáticos mais rápidos (cache padrão de 1 dia)
@@ -73,10 +72,8 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     credito = db.Column(db.Float, default=0)
-
     # NOVO: quando o crédito foi ajustado manualmente
     credito_atualizado_em = db.Column(db.DateTime, index=True)
-
     # legado (arquivo no disco)
     foto = db.Column(db.String(120), nullable=True)
     # novos campos (foto no banco)
@@ -134,7 +131,6 @@ def ensure_schema():
             alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
         if 'foto_filename' not in cols:
             alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
-        # NOVO: coluna para último ajuste de crédito
         if 'credito_atualizado_em' not in cols:
             alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
         if alter_stmts:
@@ -266,7 +262,7 @@ def dashboard():
         return redirect(url_for('login'))
     admin = Admin.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
-    estabelecimentos = Estabelecimento.query_order = Estabelecimento.query.order_by(Estabelecimento.nome).all()
+    estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
 
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
@@ -433,7 +429,7 @@ def editar_cooperado(id):
     if not is_admin():
         return redirect(url_for('login'))
     cooperado = Cooperado.query.get_or_404(id)
-    if request.method == 'POST']:
+    if request.method == 'POST':
         cooperado.nome = request.form['nome']
 
         # Se veio crédito e mudou, registra timestamp de ajuste
