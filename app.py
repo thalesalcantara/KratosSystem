@@ -226,7 +226,7 @@ def add_perf_headers(resp: Response):
 # ========= LOGIN/LOGOUT =========
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST']:
+    if request.method == 'POST':
         tipo = request.form.get('tipo', '').strip()
         username = request.form.get('username', '').strip()
         senha = request.form.get('senha', '')
