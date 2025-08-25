@@ -4,6 +4,7 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+    # noqa: E402
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -73,6 +74,11 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     credito = db.Column(db.Float, default=0)
+
+    # Quando o crédito foi AJUSTADO (manualmente via telas de ajuste/edição).
+    # Usado para exibir "Último ajuste" na lista de cooperados.
+    credito_atualizado_em = db.Column(db.DateTime, nullable=True, index=True)
+
     # legado (arquivo no disco)
     foto = db.Column(db.String(120), nullable=True)
     # novos campos (foto no banco)
@@ -118,19 +124,26 @@ Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estab
 
 # ========= SCHEMA (adaptação leve) =========
 def ensure_schema():
-    """Cria colunas de foto no banco se ainda não existirem (sem Alembic)."""
+    """Cria colunas ausentes na base (sem Alembic)."""
     with app.app_context():
         cols = {r[0] for r in db.session.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
         )).fetchall()}
         alter_stmts = []
+        # Campos de foto (já existentes no seu app)
         if 'foto_data' not in cols:
             alter_stmts.append("ADD COLUMN foto_data BYTEA")
         if 'foto_mimetype' not in cols:
             alter_stmts.append("ADD COLUMN foto_mimetype VARCHAR(50)")
         if 'foto_filename' not in cols:
             alter_stmts.append("ADD COLUMN foto_filename VARCHAR(120)")
+        # Novo: timestamp do último AJUSTE de crédito
+        if 'credito_atualizado_em' not in cols:
+            # TIMESTAMP WITH TIME ZONE funciona bem no Postgres; SQLAlchemy lida normalmente
+            alter_stmts.append("ADD COLUMN credito_atualizado_em TIMESTAMPTZ NULL")
+            alter_stmts.append("ADD INDEX IF NOT EXISTS ix_cooperado_credito_atualizado_em (credito_atualizado_em)")
         if alter_stmts:
+            # Executa em um único ALTER TABLE
             db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
             db.session.commit()
 
@@ -412,6 +425,7 @@ def novo_cooperado():
 
         cooperado = Cooperado(
             nome=nome, username=username, credito=credito,
+            credito_atualizado_em=datetime.utcnow(),  # cria com timestamp inicial
             foto=foto_filename, foto_data=foto_data,
             foto_mimetype=foto_mimetype, foto_filename=foto_filename
         )
@@ -428,7 +442,17 @@ def editar_cooperado(id):
     cooperado = Cooperado.query.get_or_404(id)
     if request.method == 'POST':
         cooperado.nome = request.form['nome']
-        cooperado.credito = float(request.form.get('credito', cooperado.credito) or cooperado.credito)
+        # Se o campo de crédito vier e for diferente, atualiza timestamp de ajuste
+        novo_credito_str = request.form.get('credito', '').strip()
+        if novo_credito_str != '':
+            try:
+                novo_credito = float(novo_credito_str)
+                if novo_credito != cooperado.credito:
+                    cooperado.credito = novo_credito
+                    cooperado.credito_atualizado_em = datetime.utcnow()
+            except Exception:
+                flash('Crédito inválido.', 'danger')
+                return redirect(url_for('editar_cooperado', id=id))
 
         foto_file = request.files.get('foto')
         if foto_file and foto_file.filename:
@@ -505,7 +529,15 @@ def ajustar_credito():
         if cooperado_id and novo_credito is not None:
             c = Cooperado.query.get(int(cooperado_id))
             if c:
-                c.credito = float(novo_credito)
+                try:
+                    c.credito = float(novo_credito)
+                except Exception:
+                    flash('Crédito inválido.', 'danger')
+                    return redirect(url_for('ajustar_credito'))
+
+                # carimba "último ajuste" (MANUAL)
+                c.credito_atualizado_em = datetime.utcnow()
+
                 db.session.commit()
                 flash('Crédito ajustado!', 'success')
                 return redirect(url_for('ajustar_credito'))
@@ -523,7 +555,15 @@ def ajustar_credito_individual(id):
     if request.method == 'POST':
         novo_credito = request.form.get('credito')
         if novo_credito is not None:
-            cooperado.credito = float(novo_credito)
+            try:
+                cooperado.credito = float(novo_credito)
+            except Exception:
+                flash('Crédito inválido.', 'danger')
+                return redirect(url_for('ajustar_credito_individual', id=id))
+
+            # carimba "último ajuste" (MANUAL)
+            cooperado.credito_atualizado_em = datetime.utcnow()
+
             db.session.commit()
             flash('Crédito ajustado!', 'success')
             return redirect(url_for('listar_cooperados'))
@@ -732,6 +772,8 @@ def painel_estabelecimento():
                     )
                     db.session.add(l)
                     c.credito = novo_credito
+                    # Importante: NÃO atualizamos credito_atualizado_em aqui,
+                    # pois isso não é "ajuste manual", é débito operacional.
                     db.session.commit()
                     _update_last_lanc_cache_with_value(l.id)
                     flash('Lançamento realizado com sucesso!', 'success')
@@ -805,6 +847,7 @@ def estab_editar_lancamento(id):
     l.descricao = descricao if descricao else None
 
     cooperado.credito -= delta
+    # Importante: não mexemos no credito_atualizado_em aqui.
     db.session.commit()
     _invalidate_last_lanc_cache()
     flash('Lançamento editado com sucesso!', 'success')
