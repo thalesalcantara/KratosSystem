@@ -80,6 +80,16 @@ class Cooperado(db.Model):
     foto_data = db.Column(db.LargeBinary, nullable=True)      # BYTEA
     foto_mimetype = db.Column(db.String(50), nullable=True)
     foto_filename = db.Column(db.String(120), nullable=True)
+    # NOVO: senha do cooperado
+    senha_hash = db.Column(db.String(128), nullable=True)
+
+    # Métodos de senha
+    def set_senha(self, senha: str):
+        self.senha_hash = generate_password_hash(senha)
+
+    def checar_senha(self, senha: str) -> bool:
+        return bool(self.senha_hash) and check_password_hash(self.senha_hash, senha)
+
 
 class Estabelecimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,7 +129,7 @@ Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estab
 
 # ========= SCHEMA (adaptação leve) =========
 def ensure_schema():
-    """Cria colunas (foto/ajuste) no banco se ainda não existirem (sem Alembic)."""
+    """Cria colunas no banco se ainda não existirem (sem Alembic)."""
     with app.app_context():
         cols = {r[0] for r in db.session.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
@@ -133,6 +143,8 @@ def ensure_schema():
             alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
         if 'credito_atualizado_em' not in cols:
             alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
+        if 'senha_hash' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128) NULL")
         if alter_stmts:
             db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
             db.session.commit()
@@ -155,6 +167,9 @@ def is_admin():
 
 def is_estabelecimento():
     return session.get('user_tipo') == 'estabelecimento'
+
+def is_cooperado():
+    return session.get('user_tipo') == 'cooperado'
 
 def parse_date(s):
     if not s:
@@ -234,12 +249,21 @@ def login():
                 session['user_id'] = user.id
                 session['user_tipo'] = 'admin'
                 return redirect(url_for('dashboard'))
+
         elif tipo == 'estabelecimento':
             est = Estabelecimento.query.filter_by(username=username).first()
             if est and est.checar_senha(senha):
                 session['user_id'] = est.id
                 session['user_tipo'] = 'estabelecimento'
                 return redirect(url_for('painel_estabelecimento'))
+
+        elif tipo == 'cooperado':
+            coop = Cooperado.query.filter_by(username=username).first()
+            if coop and coop.checar_senha(senha):
+                session['user_id'] = coop.id
+                session['user_tipo'] = 'cooperado'
+                return redirect(url_for('painel_cooperado'))
+
         else:
             flash('Selecione o tipo de usuário.', 'danger')
             return render_template('login.html'), 400
@@ -390,6 +414,7 @@ def novo_cooperado():
     if request.method == 'POST':
         nome = request.form['nome']
         username = request.form['username']
+        senha = request.form.get('senha')  # NOVO
         credito = float(request.form.get('credito', 0) or 0)
         foto_file = request.files.get('foto')
 
@@ -418,6 +443,8 @@ def novo_cooperado():
             foto=foto_filename, foto_data=foto_data,
             foto_mimetype=foto_mimetype, foto_filename=foto_filename
         )
+        if senha:
+            cooperado.set_senha(senha)  # grava senha quando fornecida
         db.session.add(cooperado)
         db.session.commit()
         flash('Cooperado cadastrado!', 'success')
@@ -442,6 +469,11 @@ def editar_cooperado(id):
             except Exception:
                 flash('Crédito inválido.', 'danger')
                 return redirect(url_for('editar_cooperado', id=id))
+
+        # NOVO: atualizar senha se enviada
+        nova_senha = request.form.get('senha')
+        if nova_senha:
+            cooperado.set_senha(nova_senha)
 
         foto_file = request.files.get('foto')
         if foto_file and foto_file.filename:
@@ -792,7 +824,7 @@ def painel_estabelecimento():
 
     lancamentos = Lancamento.query.filter_by(estabelecimento_id=est.id).order_by(Lancamento.data.desc()).all()
 
-    # Timezone conversion (import uma vez só aqui)
+    # Timezone conversion
     try:
         from pytz import timezone, utc
         tz_sp = timezone('America/Sao_Paulo')
@@ -887,6 +919,53 @@ def estab_excluir_lancamento(id):
     _invalidate_last_lanc_cache()
     flash('Lançamento excluído e crédito devolvido ao cooperado.', 'success')
     return redirect(url_for('painel_estabelecimento'))
+
+# ========= PAINEL COOPERADO (NOVO) =========
+@app.route('/painel_cooperado')
+def painel_cooperado():
+    if not is_cooperado():
+        return redirect(url_for('login'))
+
+    coop = Cooperado.query.get(session['user_id'])
+    if not coop:
+        session.clear()
+        return redirect(url_for('login'))
+
+    # Filtros (opcionais)
+    di = parse_date(request.args.get('data_inicio'))
+    df = parse_date(request.args.get('data_fim'))
+
+    q = Lancamento.query.filter(Lancamento.cooperado_id == coop.id)
+    if di:
+        q = q.filter(Lancamento.data >= di)
+    if df:
+        q = q.filter(Lancamento.data <= df)
+    lancamentos = q.order_by(Lancamento.data.desc()).all()
+
+    # Totais
+    total_gasto = float(sum((l.valor or 0.0) for l in lancamentos))
+    total_lanc = len(lancamentos)
+
+    # Timezone conversion
+    try:
+        from pytz import timezone, utc
+        tz_sp = timezone('America/Sao_Paulo')
+        for l in lancamentos:
+            hora_brasilia = l.data.replace(tzinfo=utc).astimezone(tz_sp)
+            l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
+    except Exception:
+        for l in lancamentos:
+            l.data_brasilia = l.data.strftime('%d/%m/%Y %H:%M')
+
+    return render_template(
+        'painel_cooperado.html',
+        coop=coop,
+        lancamentos=lancamentos,
+        total_gasto=total_gasto,
+        total_lanc=total_lanc,
+        data_inicio=di.strftime('%Y-%m-%d') if di else '',
+        data_fim=df.strftime('%Y-%m-%d') if df else ''
+    )
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
