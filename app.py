@@ -15,7 +15,7 @@ import hashlib
 
 # ========= APP / CONFIG =========
 app = Flask(__name__)
-app.secret_key = 'coopex-secreto'
+app.secret_key = os.environ.get("SECRET_KEY", "coopex-secreto")
 
 # Corrige scheme/host atrás do proxy para cookies seguros e redirects corretos
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
@@ -26,24 +26,42 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SECURE=True,   # Render usa HTTPS
-    TEMPLATES_AUTO_RELOAD=False,  # evita rebuild de template em prod
+    TEMPLATES_AUTO_RELOAD=False,
     JSONIFY_PRETTYPRINT_REGULAR=False,
     JSON_SORT_KEYS=False,
 )
 
-# SQLAlchemy (PostgreSQL no Render)
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'postgresql+psycopg://'
-    'banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH'
-    '@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
-)
+def _build_db_uri() -> str:
+    """
+    Usa DATABASE_URL se existir; senão, mantém um fallback local.
+    Converte postgres:// -> postgresql+psycopg:// e aplica sslmode=require.
+    """
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        # Fallback local/postgres; ajuste se quiser
+        return (
+            'postgresql+psycopg://'
+            'banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH'
+            '@dpg-d28sr2juibrs73du5n80-a.oregon-postgres.render.com/banco_dados_9ooo'
+            '?sslmode=require'
+        )
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif url.startswith("postgresql://") and "+psycopg" not in url:
+        url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+    if url.startswith("postgresql+psycopg://") and "sslmode=" not in url:
+        url += ("&" if "?" in url else "?") + "sslmode=require"
+    return url
+
+# SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = _build_db_uri()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
     'pool_size': 5,
     'max_overflow': 10,
     'pool_timeout': 30,
-    'pool_recycle': 1800,  # 30 min
+    'pool_recycle': 1800,
 }
 
 # Estáticos mais rápidos (cache padrão de 1 dia)
@@ -70,31 +88,30 @@ db = SQLAlchemy(app)
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     credito = db.Column(db.Float, default=0)
-    # NOVO: quando o crédito foi ajustado manualmente
+    # último ajuste manual do crédito
     credito_atualizado_em = db.Column(db.DateTime, index=True)
     # legado (arquivo no disco)
     foto = db.Column(db.String(120), nullable=True)
-    # novos campos (foto no banco)
+    # foto no banco
     foto_data = db.Column(db.LargeBinary, nullable=True)      # BYTEA
     foto_mimetype = db.Column(db.String(50), nullable=True)
     foto_filename = db.Column(db.String(120), nullable=True)
-    # NOVO: senha do cooperado
+    # NOVO: senha do cooperado (hash)
     senha_hash = db.Column(db.String(128), nullable=True)
 
-    # Métodos de senha
+    # helpers de senha
     def set_senha(self, senha: str):
         self.senha_hash = generate_password_hash(senha)
 
     def checar_senha(self, senha: str) -> bool:
         return bool(self.senha_hash) and check_password_hash(self.senha_hash, senha)
 
-
 class Estabelecimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     senha_hash = db.Column(db.String(128), nullable=False)
     logo = db.Column(db.String(120), nullable=True)
     def set_senha(self, senha):
@@ -105,7 +122,7 @@ class Estabelecimento(db.Model):
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     senha_hash = db.Column(db.String(128), nullable=False)
     def set_senha(self, senha):
         self.senha_hash = generate_password_hash(senha)
@@ -124,7 +141,7 @@ class Lancamento(db.Model):
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
 
-# Índices adicionais úteis em filtros/orden.
+# Índice útil para filtros/orden.
 Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
 
 # ========= SCHEMA (adaptação leve) =========
@@ -144,7 +161,7 @@ def ensure_schema():
         if 'credito_atualizado_em' not in cols:
             alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
         if 'senha_hash' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128) NULL")
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
         if alter_stmts:
             db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
             db.session.commit()
@@ -175,7 +192,10 @@ def parse_date(s):
     if not s:
         return None
     try:
-        return datetime.strptime(s, '%Y-%m-%d')
+        # aceita 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:MM'
+        if len(s.strip()) <= 10:
+            return datetime.strptime(s, '%Y-%m-%d')
+        return datetime.strptime(s, '%Y-%m-%d %H:%M')
     except Exception:
         return None
 
@@ -220,17 +240,13 @@ def _update_last_lanc_cache_with_value(v: int):
 # ========= ESTÁTICOS =========
 @app.route('/statics/<path:filename>')
 def statics_files(filename):
-    # Em Flask 3/Werkzeug 3, send_from_directory usa get_send_file_max_age por padrão.
     resp = send_from_directory(app.config['STATICS_FOLDER'], filename)
-    # Reforça cache explícito (e corrige erro de cache_timeout removido)
     return _response_with_cache(resp, etag_base=f"statics/{filename}")
 
 # ========= HEADERS GERAIS DE PERFORMANCE =========
 @app.after_request
 def add_perf_headers(resp: Response):
-    # Mantém conexões TCP ativas e dá dica de timing
     resp.headers.setdefault("Connection", "keep-alive")
-    # Pequena dica de timing (não mede tudo, mas ajuda a depurar)
     resp.headers.setdefault("Server-Timing", "app;desc=\"Coopex-API\"")
     return resp
 
@@ -299,7 +315,6 @@ def dashboard():
     di = parse_date(filtros['data_inicio'])
     df = parse_date(filtros['data_fim'])
 
-    # Base query com filtros
     base_q = db.session.query(Lancamento)
     if coop_id_i is not None:
         base_q = base_q.filter(Lancamento.cooperado_id == coop_id_i)
@@ -310,7 +325,6 @@ def dashboard():
     if df:
         base_q = base_q.filter(Lancamento.data <= df)
 
-    # Totais
     total_pedidos = base_q.count()
     sum_q = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
     if coop_id_i is not None:
@@ -323,7 +337,6 @@ def dashboard():
         sum_q = sum_q.filter(Lancamento.data <= df)
     total_valor = (sum_q.scalar() or 0.0)
 
-    # Gráfico por cooperado com OUTER JOIN + GROUP BY (mantido)
     sum_per_coop = db.session.query(
         Cooperado.id,
         Cooperado.nome,
@@ -346,7 +359,6 @@ def dashboard():
     cooperado_nomes = [row.nome for row in sum_per_coop] or ["Nenhum cooperado"]
     cooperado_valores = [float(row.total) for row in sum_per_coop] or [0.0]
 
-    # ID global do último lançamento
     try:
         ultimo_lancamento_id, _ = _get_cached_last_lanc_id()
     except Exception:
@@ -374,10 +386,8 @@ def painel_admin():
 # ========= APIs para o Dashboard detectar novos lançamentos =========
 @app.get('/api/ultimo_lancamento')
 def api_ultimo_lancamento():
-    """Retorna o maior ID de lançamento na base (com cache leve para reduzir carga)."""
     last_id, cached = _get_cached_last_lanc_id()
     resp = jsonify({"last_id": int(last_id)})
-    # Ajuda navegador/proxy a reusar por 2s
     resp.headers['Cache-Control'] = 'public, max-age=2'
     if cached:
         resp.headers['X-Cache-Hit'] = '1'
@@ -385,7 +395,6 @@ def api_ultimo_lancamento():
 
 @app.get('/api/lancamento_info')
 def api_lancamento_info():
-    """Retorna dados básicos do lançamento para balão/tooltip no dashboard."""
     lanc_id = request.args.get('id', type=int)
     if not lanc_id:
         return jsonify({"error": "id requerido"}), 400
@@ -413,11 +422,18 @@ def novo_cooperado():
         return redirect(url_for('login'))
     if request.method == 'POST':
         nome = request.form['nome']
-        username = request.form['username']
-        senha = request.form.get('senha')  # NOVO
+        username = request.form['username'].strip()
         credito = float(request.form.get('credito', 0) or 0)
-        foto_file = request.files.get('foto')
 
+        # senha (obrigatória no cadastro)
+        senha = (request.form.get('senha') or '').strip()
+        senha2 = (request.form.get('senha2') or '').strip()
+        if not senha or senha != senha2:
+            flash('Defina a senha e confirme corretamente.', 'danger')
+            return redirect(url_for('novo_cooperado'))
+
+        # foto
+        foto_file = request.files.get('foto')
         foto_filename = None
         foto_data = None
         foto_mimetype = None
@@ -427,7 +443,6 @@ def novo_cooperado():
             raw = foto_file.read()
             foto_data = raw
             foto_mimetype = foto_file.mimetype
-            # opcional: salva também no disco (fallback)
             try:
                 with open(os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], foto_filename), 'wb') as f:
                     f.write(raw)
@@ -443,8 +458,8 @@ def novo_cooperado():
             foto=foto_filename, foto_data=foto_data,
             foto_mimetype=foto_mimetype, foto_filename=foto_filename
         )
-        if senha:
-            cooperado.set_senha(senha)  # grava senha quando fornecida
+        cooperado.set_senha(senha)
+
         db.session.add(cooperado)
         db.session.commit()
         flash('Cooperado cadastrado!', 'success')
@@ -459,7 +474,15 @@ def editar_cooperado(id):
     if request.method == 'POST':
         cooperado.nome = request.form['nome']
 
-        # Se veio crédito e mudou, registra timestamp de ajuste
+        # atualizar username se mudou (checando unicidade)
+        new_username = request.form.get('username', cooperado.username).strip()
+        if new_username != cooperado.username:
+            if Cooperado.query.filter(Cooperado.username == new_username, Cooperado.id != cooperado.id).first():
+                flash('Este usuário já está em uso.', 'danger')
+                return redirect(url_for('editar_cooperado', id=id))
+            cooperado.username = new_username
+
+        # crédito
         if 'credito' in request.form:
             try:
                 novo_credito = float(request.form.get('credito', cooperado.credito) or cooperado.credito)
@@ -470,11 +493,7 @@ def editar_cooperado(id):
                 flash('Crédito inválido.', 'danger')
                 return redirect(url_for('editar_cooperado', id=id))
 
-        # NOVO: atualizar senha se enviada
-        nova_senha = request.form.get('senha')
-        if nova_senha:
-            cooperado.set_senha(nova_senha)
-
+        # foto
         foto_file = request.files.get('foto')
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{cooperado.username}_{foto_file.filename}")
@@ -489,6 +508,15 @@ def editar_cooperado(id):
                     f.write(raw)
             except Exception:
                 pass
+
+        # trocar senha se informado
+        senha = (request.form.get('senha') or '').strip()
+        senha2 = (request.form.get('senha2') or '').strip()
+        if senha or senha2:
+            if senha != senha2:
+                flash('As senhas não conferem.', 'danger')
+                return redirect(url_for('editar_cooperado', id=id))
+            cooperado.set_senha(senha)
 
         db.session.commit()
         flash('Cooperado alterado!', 'success')
@@ -530,7 +558,6 @@ def foto_cooperado(id):
                 size = 0
             return _response_with_cache(resp, cache_sec, etag_base=f"cooperado_fs_{id}_{size}")
 
-    # vazio
     resp = send_file(BytesIO(b''), mimetype='image/jpeg')
     return _response_with_cache(resp, cache_sec, etag_base=f"cooperado_empty_{id}")
 
@@ -555,7 +582,6 @@ def ajustar_credito():
                 except Exception:
                     flash('Crédito inválido.', 'danger')
                     return redirect(url_for('ajustar_credito'))
-                # carimba último ajuste manual
                 c.credito_atualizado_em = datetime.utcnow()
                 db.session.commit()
                 flash('Crédito ajustado!', 'success')
@@ -579,7 +605,6 @@ def ajustar_credito_individual(id):
             except Exception:
                 flash('Crédito inválido.', 'danger')
                 return redirect(url_for('ajustar_credito_individual', id=id))
-            # carimba último ajuste manual
             cooperado.credito_atualizado_em = datetime.utcnow()
             db.session.commit()
             flash('Crédito ajustado!', 'success')
@@ -601,7 +626,7 @@ def novo_estabelecimento():
         return redirect(url_for('login'))
     if request.method == 'POST':
         nome = request.form['nome']
-        username = request.form['username']
+        username = request.form['username'].strip()
         senha = request.form['senha']
         logo_file = request.files.get('logo')
         filename = None
@@ -755,7 +780,7 @@ def exportar_lancamentos():
     )
     return _response_with_cache(resp, 0, etag_base=f"xlsx_{len(rows)}")
 
-# ====== NOVA ROTA: EXCLUSÃO DE LANÇAMENTO (ADMIN, SEM LIMITE) ======
+# ====== EXCLUSÃO DE LANÇAMENTO (ADMIN, SEM LIMITE) ======
 @app.post('/lancamentos/<int:id>/excluir')
 def excluir_lancamento(id):
     if not is_admin():
@@ -763,7 +788,7 @@ def excluir_lancamento(id):
 
     l = Lancamento.query.get_or_404(id)
 
-    # Devolve o crédito ao cooperado (espelha a lógica do painel do Estabelecimento)
+    # Devolve o crédito ao cooperado (espelha lógica do painel do Estabelecimento)
     cooperado = Cooperado.query.get(l.cooperado_id)
     if cooperado:
         cooperado.credito += float(l.valor or 0)
@@ -845,7 +870,6 @@ def estab_editar_lancamento(id):
 
     l = Lancamento.query.get_or_404(id)
 
-    # segurança: só o estabelecimento que criou pode editar
     if l.estabelecimento_id != session.get('user_id'):
         flash('Você não tem permissão para editar este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
@@ -920,7 +944,7 @@ def estab_excluir_lancamento(id):
     flash('Lançamento excluído e crédito devolvido ao cooperado.', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
-# ========= PAINEL COOPERADO (NOVO) =========
+# ========= PAINEL COOPERADO =========
 @app.route('/painel_cooperado')
 def painel_cooperado():
     if not is_cooperado():
@@ -928,12 +952,14 @@ def painel_cooperado():
 
     coop = Cooperado.query.get(session['user_id'])
     if not coop:
-        session.clear()
+        flash('Cooperado não encontrado.', 'danger')
         return redirect(url_for('login'))
 
-    # Filtros (opcionais)
-    di = parse_date(request.args.get('data_inicio'))
-    df = parse_date(request.args.get('data_fim'))
+    # filtros de período (opcionais)
+    di_s = request.args.get('data_inicio')
+    df_s = request.args.get('data_fim')
+    di = parse_date(di_s)
+    df = parse_date(df_s)
 
     q = Lancamento.query.filter(Lancamento.cooperado_id == coop.id)
     if di:
@@ -942,30 +968,52 @@ def painel_cooperado():
         q = q.filter(Lancamento.data <= df)
     lancamentos = q.order_by(Lancamento.data.desc()).all()
 
-    # Totais
-    total_gasto = float(sum((l.valor or 0.0) for l in lancamentos))
-    total_lanc = len(lancamentos)
+    total_gasto = sum(float(l.valor or 0) for l in lancamentos)
 
-    # Timezone conversion
-    try:
-        from pytz import timezone, utc
-        tz_sp = timezone('America/Sao_Paulo')
-        for l in lancamentos:
-            hora_brasilia = l.data.replace(tzinfo=utc).astimezone(tz_sp)
-            l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
-    except Exception:
-        for l in lancamentos:
-            l.data_brasilia = l.data.strftime('%d/%m/%Y %H:%M')
+    # Se existir template dedicado, usa. Senão, fallback HTML simples.
+    tpl_path = os.path.join('templates', 'painel_cooperado.html')
+    if os.path.exists(tpl_path):
+        return render_template('painel_cooperado.html',
+                               cooperado=coop,
+                               lancamentos=lancamentos,
+                               total_gasto=total_gasto,
+                               data_inicio=di_s, data_fim=df_s)
 
-    return render_template(
-        'painel_cooperado.html',
-        coop=coop,
-        lancamentos=lancamentos,
-        total_gasto=total_gasto,
-        total_lanc=total_lanc,
-        data_inicio=di.strftime('%Y-%m-%d') if di else '',
-        data_fim=df.strftime('%Y-%m-%d') if df else ''
-    )
+    # Fallback minimalista
+    rows_html = "".join(f"""
+      <tr>
+        <td>{l.data.strftime('%d/%m/%Y %H:%M')}</td>
+        <td>{l.os_numero}</td>
+        <td>{(l.estabelecimento.nome if l.estabelecimento else '')}</td>
+        <td>R$ {float(l.valor):,.2f}</td>
+        <td>{l.descricao or ''}</td>
+      </tr>""" for l in lancamentos)
+
+    return f"""
+    <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Meu Painel</title>
+      <style>
+        body{{font-family:Arial; margin:20px;}}
+        .top{{display:flex; gap:8px; align-items:center; justify-content:space-between}}
+        table{{width:100%; border-collapse:collapse; margin-top:10px}}
+        th,td{{border:1px solid #ddd; padding:8px; font-size:14px}}
+        th{{background:#f5f7fb; text-align:left}}
+      </style>
+    </head><body>
+      <div class="top">
+        <h2>Olá, {coop.nome}</h2>
+        <div>Crédito atual: <b>R$ {coop.credito:,.2f}</b></div>
+      </div>
+      <div>Total gasto no período: <b>R$ {total_gasto:,.2f}</b></div>
+      <table>
+        <thead><tr>
+          <th>Data</th><th>Nº OS</th><th>Estabelecimento</th><th>Valor</th><th>Descrição</th>
+        </tr></thead>
+        <tbody>{rows_html or '<tr><td colspan="5">Sem lançamentos.</td></tr>'}</tbody>
+      </table>
+      <p><a href="{url_for('logout')}">Sair</a></p>
+    </body></html>
+    """
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
@@ -982,5 +1030,5 @@ def criar_banco_e_admin():
 # ========= MAIN =========
 if __name__ == '__main__':
     criar_banco_e_admin()
-    # Em produção (Render) você usa gunicorn. Aqui é dev/standalone:
-    app.run(debug=False, host="0.0.0.0")
+    # Em produção (Render) use gunicorn. Aqui é dev/standalone:
+    app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
