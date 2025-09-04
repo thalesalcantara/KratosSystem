@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Painel do Cooperado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root { --bg:#0b1a3b; --card:#ffffff; --muted:#6b7280; --accent:#14366c; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#f5f7fb; }
+    header { background:var(--bg); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:12px; }
+    header img { width:42px; height:42px; border-radius:50%; object-fit:cover; background:#fff2; }
+    header .info h1 { font-size:18px; margin:0 0 2px 0; }
+    header .info small { color:#dbeafe; }
+    .wrap { max-width:1100px; margin:20px auto; padding:0 16px; }
+    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap:16px; }
+    .card { background:var(--card); border-radius:14px; box-shadow:0 6px 16px rgba(0,0,0,.06); padding:16px; }
+    .card h3 { margin:0 0 10px 0; font-size:16px; }
+    .metric { font-size:28px; font-weight:700; }
+    .muted { color:var(--muted); }
+    .badge { background:#e5f0ff; color:#1f4dbf; font-weight:600; padding:4px 10px; border-radius:999px; font-size:12px; }
+    .filters { display:flex; gap:8px; flex-wrap:wrap; align-items:end; }
+    .filters label { font-size:12px; color:#374151; display:block; margin-bottom:4px; }
+    .filters input[type="date"] { padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px; }
+    .filters button { padding:10px 14px; border-radius:10px; border:0; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { text-align:left; padding:12px 10px; border-bottom:1px solid #eef2f7; font-size:14px; }
+    th { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:#6b7280; }
+    tr:hover td { background:#f8fbff; }
+    .right { text-align:right; }
+    .footer { color:#6b7280; font-size:13px; margin-top:8px; }
+    .logout { margin-left:auto; color:#fff; text-decoration:none; border:1px solid #ffffff33; padding:6px 10px; border-radius:10px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="{{ url_for('foto_cooperado', id=coop.id) }}" alt="foto">
+  <div class="info">
+    <h1>Olá, {{ coop.nome }}</h1>
+    <small class="muted">Usuário: {{ coop.username }}</small>
+  </div>
+  <a class="logout" href="{{ url_for('logout') }}">Sair</a>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card" style="grid-column: span 4;">
+      <h3>Crédito disponível</h3>
+      <div class="metric">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
+      {% if coop.credito_atualizado_em %}
+        <div class="footer">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
+      {% else %}
+        <div class="footer muted">Sem ajustes manuais registrados</div>
+      {% endif %}
+    </div>
+
+    <div class="card" style="grid-column: span 4;">
+      <h3>Total de lançamentos (período)</h3>
+      <div class="metric">{{ total_lanc }}</div>
+      <div class="footer">Itens exibidos abaixo</div>
+    </div>
+
+    <div class="card" style="grid-column: span 4;">
+      <h3>Gasto no período</h3>
+      <div class="metric">R$ {{ '%.2f'|format(total_gasto or 0) }}</div>
+      <div class="footer">Soma de todos os lançamentos filtrados</div>
+    </div>
+
+    <div class="card" style="grid-column: span 12;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <h3 style="margin:0;">Meus lançamentos</h3>
+        <span class="badge">Atualizado agora</span>
+      </div>
+
+      <form class="filters" method="get" action="{{ url_for('painel_cooperado') }}" style="margin:12px 0 8px;">
+        <div>
+          <label>Data início</label>
+          <input type="date" name="data_inicio" value="{{ data_inicio }}">
+        </div>
+        <div>
+          <label>Data fim</label>
+          <input type="date" name="data_fim" value="{{ data_fim }}">
+        </div>
+        <div>
+          <button type="submit">Aplicar filtros</button>
+        </div>
+      </form>
+
+      <div style="overflow:auto; border:1px solid #eef2f7; border-radius:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Nº OS</th>
+              <th>Estabelecimento</th>
+              <th class="right">Valor (R$)</th>
+              <th>Descrição</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% if lancamentos %}
+            {% for l in lancamentos %}
+              <tr>
+                <td>{{ l.data_brasilia or l.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ l.os_numero }}</td>
+                <td>{{ l.estabelecimento.nome if l.estabelecimento else '-' }}</td>
+                <td class="right">{{ '%.2f'|format(l.valor or 0) }}</td>
+                <td>{{ l.descricao or '' }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="5" class="muted" style="padding:20px;">Nenhum lançamento neste período.</td></tr>
+          {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer">* Os horários são mostrados em Brasília (GMT-3).</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
