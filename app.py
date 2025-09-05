@@ -26,19 +26,18 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SECURE=True,   # Render usa HTTPS
-    TEMPLATES_AUTO_RELOAD=False,
+    TEMPLATES_AUTO_RELOAD=True,   # útil no dev
     JSONIFY_PRETTYPRINT_REGULAR=False,
     JSON_SORT_KEYS=False,
 )
 
 def _build_db_uri() -> str:
     """
-    Usa DATABASE_URL se existir; senão, mantém um fallback local.
+    Usa DATABASE_URL se existir; senão, mantém um fallback.
     Converte postgres:// -> postgresql+psycopg:// e aplica sslmode=require.
     """
     url = os.environ.get("DATABASE_URL")
     if not url:
-        # Fallback local/postgres; ajuste se quiser
         return (
             'postgresql+psycopg://'
             'banco_dados_9ooo_user:4eebYkKJwygTnOzrU1PAMFphnIli4iCH'
@@ -64,7 +63,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_recycle': 1800,
 }
 
-# Estáticos mais rápidos (cache padrão de 1 dia)
+# Estáticos (cache padrão de 1 dia)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 24 * 60 * 60
 
 # Pastas
@@ -90,18 +89,15 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     credito = db.Column(db.Float, default=0)
-    # último ajuste manual do crédito
     credito_atualizado_em = db.Column(db.DateTime, index=True)
-    # legado (arquivo no disco)
+    # foto (banco e legado no disco)
     foto = db.Column(db.String(120), nullable=True)
-    # foto no banco
     foto_data = db.Column(db.LargeBinary, nullable=True)      # BYTEA
     foto_mimetype = db.Column(db.String(50), nullable=True)
     foto_filename = db.Column(db.String(120), nullable=True)
-    # NOVO: senha do cooperado (hash)
+    # senha do cooperado
     senha_hash = db.Column(db.String(128), nullable=True)
 
-    # helpers de senha
     def set_senha(self, senha: str):
         self.senha_hash = generate_password_hash(senha)
 
@@ -141,7 +137,6 @@ class Lancamento(db.Model):
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
 
-# Índice útil para filtros/orden.
 Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
 
 # ========= SCHEMA (adaptação leve) =========
@@ -169,7 +164,6 @@ def ensure_schema():
 _SCHEMA_BOOTED = False
 @app.before_request
 def _run_schema_once():
-    # Uma só vez por worker, rápido.
     global _SCHEMA_BOOTED
     if not _SCHEMA_BOOTED:
         try:
@@ -192,14 +186,13 @@ def parse_date(s):
     if not s:
         return None
     try:
-        # aceita 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:MM'
         if len(s.strip()) <= 10:
             return datetime.strptime(s, '%Y-%m-%d')
         return datetime.strptime(s, '%Y-%m-%d %H:%M')
     except Exception:
         return None
 
-def _cache_headers(seconds=None, etag_base: str | None = None):
+def _cache_headers(seconds=None, etag_base=None):
     """Gera cabeçalhos Cache-Control e ETag simples."""
     if seconds is None:
         seconds = int(app.config.get('SEND_FILE_MAX_AGE_DEFAULT', 3600))
@@ -788,7 +781,7 @@ def excluir_lancamento(id):
 
     l = Lancamento.query.get_or_404(id)
 
-    # Devolve o crédito ao cooperado (espelha lógica do painel do Estabelecimento)
+    # Devolve o crédito ao cooperado
     cooperado = Cooperado.query.get(l.cooperado_id)
     if cooperado:
         cooperado.credito += float(l.valor or 0)
@@ -823,8 +816,6 @@ def painel_estabelecimento():
             c = Cooperado.query.get(int(cooperado_id))
             if c:
                 valor_f = float(valor)
-
-                # DEBITO: lançamento diminui o crédito do cooperado
                 novo_credito = c.credito - valor_f
                 if novo_credito < 0:
                     flash('Crédito insuficiente para este lançamento.', 'danger')
@@ -950,14 +941,11 @@ def painel_cooperado():
     if not is_cooperado():
         return redirect(url_for('login'))
 
-    coop = Cooperado.query.get(session['user_id'])
-    if not coop:
-        flash('Cooperado não encontrado.', 'danger')
-        return redirect(url_for('login'))
+    coop = Cooperado.query.get_or_404(session['user_id'])
 
     # filtros de período (opcionais)
-    di_s = request.args.get('data_inicio')
-    df_s = request.args.get('data_fim')
+    di_s = request.args.get('data_inicio') or ''
+    df_s = request.args.get('data_fim') or ''
     di = parse_date(di_s)
     df = parse_date(df_s)
 
@@ -968,52 +956,29 @@ def painel_cooperado():
         q = q.filter(Lancamento.data <= df)
     lancamentos = q.order_by(Lancamento.data.desc()).all()
 
+    # Horário em Brasília
+    try:
+        from pytz import timezone, utc
+        tz_sp = timezone('America/Sao_Paulo')
+        for l in lancamentos:
+            l.data_brasilia = l.data.replace(tzinfo=utc).astimezone(tz_sp).strftime('%d/%m/%Y %H:%M')
+    except Exception:
+        for l in lancamentos:
+            l.data_brasilia = l.data.strftime('%d/%m/%Y %H:%M')
+
     total_gasto = sum(float(l.valor or 0) for l in lancamentos)
+    total_lanc = len(lancamentos)
 
-    # Se existir template dedicado, usa. Senão, fallback HTML simples.
-    tpl_path = os.path.join('templates', 'painel_cooperado.html')
-    if os.path.exists(tpl_path):
-        return render_template('painel_cooperado.html',
-                               cooperado=coop,
-                               lancamentos=lancamentos,
-                               total_gasto=total_gasto,
-                               data_inicio=di_s, data_fim=df_s)
-
-    # Fallback minimalista
-    rows_html = "".join(f"""
-      <tr>
-        <td>{l.data.strftime('%d/%m/%Y %H:%M')}</td>
-        <td>{l.os_numero}</td>
-        <td>{(l.estabelecimento.nome if l.estabelecimento else '')}</td>
-        <td>R$ {float(l.valor):,.2f}</td>
-        <td>{l.descricao or ''}</td>
-      </tr>""" for l in lancamentos)
-
-    return f"""
-    <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Meu Painel</title>
-      <style>
-        body{{font-family:Arial; margin:20px;}}
-        .top{{display:flex; gap:8px; align-items:center; justify-content:space-between}}
-        table{{width:100%; border-collapse:collapse; margin-top:10px}}
-        th,td{{border:1px solid #ddd; padding:8px; font-size:14px}}
-        th{{background:#f5f7fb; text-align:left}}
-      </style>
-    </head><body>
-      <div class="top">
-        <h2>Olá, {coop.nome}</h2>
-        <div>Crédito atual: <b>R$ {coop.credito:,.2f}</b></div>
-      </div>
-      <div>Total gasto no período: <b>R$ {total_gasto:,.2f}</b></div>
-      <table>
-        <thead><tr>
-          <th>Data</th><th>Nº OS</th><th>Estabelecimento</th><th>Valor</th><th>Descrição</th>
-        </tr></thead>
-        <tbody>{rows_html or '<tr><td colspan="5">Sem lançamentos.</td></tr>'}</tbody>
-      </table>
-      <p><a href="{url_for('logout')}">Sair</a></p>
-    </body></html>
-    """
+    # Renderiza o template dedicado
+    return render_template(
+        'painel_cooperado.html',
+        coop=coop,
+        lancamentos=lancamentos,
+        total_gasto=total_gasto,
+        total_lanc=total_lanc,
+        data_inicio=di_s,
+        data_fim=df_s
+    )
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
@@ -1030,5 +995,4 @@ def criar_banco_e_admin():
 # ========= MAIN =========
 if __name__ == '__main__':
     criar_banco_e_admin()
-    # Em produção (Render) use gunicorn. Aqui é dev/standalone:
     app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
