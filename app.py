@@ -1,6 +1,7 @@
 # app.py
 from __future__ import annotations
 import os
+import mimetypes
 from io import BytesIO
 from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
@@ -22,10 +23,12 @@ from sqlalchemy.orm import relationship
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "troque_esta_chave")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL", "sqlite:///coopex.db"
-)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///coopex.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# pasta padrão para fotos dos cooperados quando só temos o nome do arquivo
+# (ex.: maria.jpg em static/uploads/maria.jpg)
+app.config.setdefault("UPLOAD_FOLDER_COOPS", os.path.join("static", "uploads"))
 
 db = SQLAlchemy(app)
 
@@ -60,7 +63,7 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(160), nullable=False)
     username = db.Column(db.String(120), unique=True, nullable=False)
     credito = db.Column(db.Numeric(12, 2), default=0)
-    foto = db.Column(db.String(255))      # caminho arquivo (opcional)
+    foto = db.Column(db.String(255))      # caminho/arquivo (opcional)
     foto_data = db.Column(db.LargeBinary) # binário (opcional)
     atualizado_em = db.Column(db.DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
@@ -107,18 +110,14 @@ def load_user(user_id):
 # ============================ HELPERS DE DATA ============================
 
 def br_day_bounds_utc(d: date):
-    """
-    Início/fim do dia (BRT) convertidos para UTC.
-    """
+    """Início/fim do dia (BRT) convertidos para UTC."""
     start_brt = datetime.combine(d, time.min).replace(tzinfo=BRT)
     end_brt = datetime.combine(d, time.max).replace(tzinfo=BRT)
     return start_brt.astimezone(UTC), end_brt.astimezone(UTC)
 
 
 def br_month_bounds_utc(dt_brt: datetime | None = None):
-    """
-    Início/fim do mês atual no fuso de Brasília, retornando UTC.
-    """
+    """Início/fim do mês atual no fuso de Brasília, retornando UTC."""
     now_brt = (dt_brt or datetime.now(BRT)).astimezone(BRT)
     first_brt = now_brt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     if first_brt.month == 12:
@@ -139,19 +138,58 @@ def to_brt_iso(dt_aware: datetime) -> str:
     return dt_brt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-# ============================ ROTAS: LOGIN / LOGOUT ============================
+# ============================ LOGIN (auto-detecta perfil) ============================
+
+def _find_user_by_login(login_text: str) -> User | None:
+    """
+    Aceita email OU username (de cooperado/estabelecimento).
+    - Se for email => busca direta.
+    - Se for username de estabelecimento => encontra o User(tipo='estabelecimento', vinculo_id=est.id)
+    - Se for username de cooperado => idem.
+    """
+    if not login_text:
+        return None
+    login_lc = login_text.strip().lower()
+
+    # 1) Tenta email exato
+    u = User.query.filter(func.lower(User.email) == login_lc).first()
+    if u:
+        return u
+
+    # 2) Username de estabelecimento
+    est = Estabelecimento.query.filter(func.lower(Estabelecimento.username) == login_lc).first()
+    if est:
+        u = User.query.filter_by(tipo="estabelecimento", vinculo_id=est.id).first()
+        if u:
+            return u
+
+    # 3) Username de cooperado
+    coop = Cooperado.query.filter(func.lower(Cooperado.username) == login_lc).first()
+    if coop:
+        u = User.query.filter_by(tipo="cooperado", vinculo_id=coop.id).first()
+        if u:
+            return u
+
+    return None
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = (request.form.get("email") or "").strip().lower()
+        # aceita qualquer nome do campo: email / username / login
+        login_text = (request.form.get("email")
+                      or request.form.get("username")
+                      or request.form.get("login")
+                      or "").strip()
         senha = request.form.get("senha") or ""
-        user = User.query.filter_by(email=email).first()
+
+        user = _find_user_by_login(login_text)
         if not user or not user.check_password(senha):
             flash("Credenciais inválidas", "danger")
             return render_template("login.html")
 
-        login_user(user)
+        remember = True if request.form.get("lembrar") else False
+        login_user(user, remember=remember)
 
         # Redireciona automaticamente pelo perfil
         if user.tipo == "admin":
@@ -160,8 +198,7 @@ def login():
             return redirect(url_for("painel_estabelecimento"))
         elif user.tipo == "cooperado":
             return redirect(url_for("painel_cooperado"))
-        else:
-            return redirect(url_for("dashboard"))
+        return redirect(url_for("dashboard"))
 
     return render_template("login.html")
 
@@ -196,7 +233,7 @@ def dashboard():
     total_cooperados = Cooperado.query.count()
     total_estabelecimentos = Estabelecimento.query.count()
 
-    # Top cooperados por soma (últimos 90 dias como exemplo)
+    # Top cooperados no mês atual
     start_utc, end_utc = br_month_bounds_utc()
     rows = (
         db.session.query(Cooperado.nome, func.coalesce(func.sum(Lancamento.valor), 0).label("soma"))
@@ -255,15 +292,15 @@ def painel_estabelecimento():
         .all()
     )
 
-    # Prepara p/ template do parceiro (aquele que você me mandou)
+    # Prepara p/ template
     lancamentos_view = [{
         "id": l.id,
         "os_numero": l.os_numero,
         "valor": float(l.valor),
         "descricao": l.descricao or "",
         "cooperado": l.cooperado,
-        "data_brasilia": to_brt_str(l.data),
-        "data": l.data.astimezone(BRT)  # se o template usar .isoformat() no Jinja
+        "data_brasilia": to_brt_str(l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)),
+        "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT)
     } for l in lancs]
 
     return render_template(
@@ -301,8 +338,8 @@ def painel_cooperado():
         "valor": float(l.valor),
         "descricao": l.descricao or "",
         "estabelecimento": l.estabelecimento,
-        "data_brasilia": to_brt_str(l.data),
-        "data": l.data.astimezone(BRT)
+        "data_brasilia": to_brt_str(l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)),
+        "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT)
     } for l in lancs]
 
     return render_template(
@@ -466,7 +503,12 @@ def exportar_lancamentos():
 
     output.seek(0)
     fname = f"lancamentos_{datetime.now(BRT).strftime('%Y%m%d_%H%M')}.xlsx"
-    return send_file(output, as_attachment=True, download_name=fname, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=fname,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 # ============================ APIs auxiliares (dashboard/admin) ============================
@@ -499,19 +541,52 @@ def api_lancamento_info():
     })
 
 
-# ============================ UTIL: foto de cooperado / arquivos estáticos extras ============================
+# ============================ FOTOS / ARQUIVOS ============================
 
 @app.route("/foto-cooperado/<int:id>")
 @login_required
 def foto_cooperado(id: int):
+    """
+    Prioridades:
+    1) foto_data (binário) do banco
+    2) caminho absoluto salvo em c.foto
+    3) caminho relativo dentro da app (ex.: 'static/uploads/arquivo.jpg')
+    4) apenas nome do arquivo -> procura em static/uploads/<nome>
+    """
     c = Cooperado.query.get(id)
     if not c:
         return ("", 404)
-    # prioridade: binário; depois caminho; senão 404
+
+    # 1) Binário no banco
     if c.foto_data:
         return send_file(BytesIO(c.foto_data), mimetype="image/jpeg")
-    if c.foto and os.path.exists(c.foto):
-        return send_file(c.foto)
+
+    # 2..4) Arquivo em disco
+    candidates: list[str] = []
+    if c.foto:
+        f = c.foto.strip()
+        # absoluto?
+        if os.path.isabs(f):
+            candidates.append(f)
+        # relativo ao app.root_path
+        candidates.append(os.path.join(app.root_path, f.lstrip("/\\")))
+        # relativo a static/
+        candidates.append(os.path.join(app.root_path, "static", f.lstrip("/\\")))
+        # UPLOAD_FOLDER_COOPS + nome (mais comum quando só armazenamos o nome)
+        uploads_base = os.path.join(app.root_path, app.config["UPLOAD_FOLDER_COOPS"])
+        candidates.append(os.path.join(uploads_base, os.path.basename(f)))
+
+    # fallback final: tenta só pelo id com jpg/png comuns (opcional)
+    uploads_base = os.path.join(app.root_path, app.config["UPLOAD_FOLDER_COOPS"])
+    for ext in (".jpg", ".jpeg", ".png", ".webp"):
+        candidates.append(os.path.join(uploads_base, f"{id}{ext}"))
+
+    # percorre candidatos
+    for path in candidates:
+        if os.path.isfile(path):
+            mime = mimetypes.guess_type(path)[0] or "image/jpeg"
+            return send_file(path, mimetype=mime)
+
     return ("", 404)
 
 
