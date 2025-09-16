@@ -124,7 +124,6 @@ def br_day_bounds(d: date):
     """Início/fim do dia em BRT (timezone-aware) + versões naive (BRT)."""
     start_brt_aw = datetime.combine(d, time.min).replace(tzinfo=BRT)
     end_brt_aw = datetime.combine(d, time.max).replace(tzinfo=BRT)
-    # também forma naive no mesmo clock local (para lidar com registros antigos sem tz)
     start_brt_naive = start_brt_aw.replace(tzinfo=None)
     end_brt_naive = end_brt_aw.replace(tzinfo=None)
     return start_brt_aw, end_brt_aw, start_brt_naive, end_brt_naive
@@ -158,7 +157,6 @@ def br_month_bounds_dual_utc_and_naive(dt_brt: datetime | None = None):
 
 def to_brt_str(dt_aware: datetime) -> str:
     if dt_aware.tzinfo is None:
-        # melhor interpretar registros antigos como UTC
         dt_aware = dt_aware.replace(tzinfo=UTC)
     dt_brt = dt_aware.astimezone(BRT)
     return dt_brt.strftime("%d/%m/%Y %H:%M")
@@ -169,6 +167,22 @@ def to_brt_iso(dt_aware: datetime) -> str:
         dt_aware = dt_aware.replace(tzinfo=UTC)
     dt_brt = dt_aware.astimezone(BRT)
     return dt_brt.strftime("%Y-%m-%dT%H:%M:%S")
+
+
+# ============================ BOOTSTRAP DB EM PRODUÇÃO ============================
+
+def _bootstrap_db_on_import():
+    """Cria tabelas e garante admin padrão mesmo sob gunicorn."""
+    with app.app_context():
+        db.create_all()
+        # Admin padrão
+        if not User.query.filter_by(email="admin@coopex").first():
+            admin = User(email="admin@coopex", tipo="admin")
+            admin.set_password(os.getenv("ADMIN_PASSWORD", "123"))
+            db.session.add(admin)
+            db.session.commit()
+
+_bootstrap_db_on_import()
 
 
 # ============================ ROTAS: LOGIN / LOGOUT ============================
@@ -228,7 +242,7 @@ def dashboard():
     total_cooperados = Cooperado.query.count()
     total_estabelecimentos = Estabelecimento.query.count()
 
-    # Top cooperados por soma no mês atual (BRT)
+    # Top cooperados por soma no mês atual (BRT) cobrindo aware e naive
     start_utc, end_utc, start_brt_naive, end_brt_naive = br_month_bounds_dual_utc_and_naive()
     rows = (
         db.session.query(Cooperado.nome, func.coalesce(func.sum(Lancamento.valor), 0).label("soma"))
@@ -301,7 +315,7 @@ def painel_estabelecimento():
         "valor": float(l.valor),
         "descricao": l.descricao or "",
         "cooperado": l.cooperado,
-        "data_brasilia": to_brt_str(l.data),
+        "data_brasilia": to_brt_str(l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)),
         "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT),
     } for l in lancs]
 
@@ -345,7 +359,7 @@ def painel_cooperado():
         "valor": float(l.valor),
         "descricao": l.descricao or "",
         "estabelecimento": l.estabelecimento,
-        "data_brasilia": to_brt_str(l.data),
+        "data_brasilia": to_brt_str(l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)),
         "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT),
     } for l in lancs]
 
@@ -399,12 +413,8 @@ def listar_lancamentos():
         try:
             di = date.fromisoformat(data_inicio)
             df = date.fromisoformat(data_fim)
-            di_utc, df_utc, di_brt_naive, df_brt_naive = (
-                br_day_bounds_dual_utc_and_naive(di)[0],
-                br_day_bounds_dual_utc_and_naive(df)[1],
-                br_day_bounds_dual_utc_and_naive(di)[2],
-                br_day_bounds_dual_utc_and_naive(df)[3],
-            )
+            di_utc, _, di_brt_naive, _ = br_day_bounds_dual_utc_and_naive(di)
+            _, df_utc, _, df_brt_naive = br_day_bounds_dual_utc_and_naive(df)
             q = q.filter(
                 or_(
                     and_(Lancamento.data >= di_utc, Lancamento.data <= df_utc),
@@ -429,9 +439,7 @@ def listar_lancamentos():
     # Converte p/ BRT para exibição
     lancamentos_view = []
     for l in lancamentos:
-        dt = l.data
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=UTC)  # interpreta como UTC para exibição consistente
+        dt = l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)
         lancamentos_view.append({
             "id": l.id,
             "os_numero": l.os_numero,
@@ -488,12 +496,8 @@ def exportar_lancamentos():
         try:
             di = date.fromisoformat(data_inicio)
             df = date.fromisoformat(data_fim)
-            di_utc, df_utc, di_brt_naive, df_brt_naive = (
-                br_day_bounds_dual_utc_and_naive(di)[0],
-                br_day_bounds_dual_utc_and_naive(df)[1],
-                br_day_bounds_dual_utc_and_naive(di)[2],
-                br_day_bounds_dual_utc_and_naive(df)[3],
-            )
+            di_utc, _, di_brt_naive, _ = br_day_bounds_dual_utc_and_naive(di)
+            _, df_utc, _, df_brt_naive = br_day_bounds_dual_utc_and_naive(df)
             q = q.filter(
                 or_(
                     and_(Lancamento.data >= di_utc, Lancamento.data <= df_utc),
@@ -608,7 +612,6 @@ def foto_cooperado(id: int):
         return send_file(BytesIO(c.foto_data), mimetype=mime)
     # fallback antigo (se existir caminho)
     if c.foto and os.path.exists(c.foto):
-        # tenta inferir mimetype simples pelo sufixo
         lower = c.foto.lower()
         if lower.endswith(".png"): mt = "image/png"
         elif lower.endswith(".gif"): mt = "image/gif"
@@ -637,7 +640,7 @@ def initdb():
 
     if not User.query.filter_by(email="admin@coopex").first():
         admin = User(email="admin@coopex", tipo="admin")
-        admin.set_password("123")
+        admin.set_password(os.getenv("ADMIN_PASSWORD", "123"))
         db.session.add(admin)
 
     if not Estabelecimento.query.first():
