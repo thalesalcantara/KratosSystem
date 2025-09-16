@@ -1,7 +1,6 @@
 # app.py
 from __future__ import annotations
 import os
-import mimetypes
 from io import BytesIO
 from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
@@ -16,19 +15,17 @@ from flask_login import (
     login_required, logout_user
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy import and_, func, desc, ForeignKey
+from sqlalchemy import and_, or_, func, desc, ForeignKey
 from sqlalchemy.orm import relationship
 
 # ============================ APP / DB / LOGIN ============================
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "troque_esta_chave")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///coopex.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+    "DATABASE_URL", "sqlite:///coopex.db"
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# pasta padrão para fotos dos cooperados quando só temos o nome do arquivo
-# (ex.: maria.jpg em static/uploads/maria.jpg)
-app.config.setdefault("UPLOAD_FOLDER_COOPS", os.path.join("static", "uploads"))
 
 db = SQLAlchemy(app)
 
@@ -42,6 +39,18 @@ UTC = ZoneInfo("UTC")
 
 def utcnow():
     return datetime.now(UTC)
+
+
+# ===== Jinja: globais para evitar erro de template (callable/now) =====
+@app.context_processor
+def inject_template_globals():
+    return {
+        "year": datetime.now(BRT).year,
+    }
+
+# Função now() e builtin callable disponíveis no Jinja
+app.jinja_env.globals["now"] = lambda: datetime.now(BRT)
+app.jinja_env.globals["callable"] = callable
 
 
 # ============================ MODELOS ============================
@@ -63,8 +72,9 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(160), nullable=False)
     username = db.Column(db.String(120), unique=True, nullable=False)
     credito = db.Column(db.Numeric(12, 2), default=0)
-    foto = db.Column(db.String(255))      # caminho/arquivo (opcional)
-    foto_data = db.Column(db.LargeBinary) # binário (opcional)
+    # Armazenamento de foto no banco:
+    foto = db.Column(db.String(255))      # opcional (caminho antigo, se existir)
+    foto_data = db.Column(db.LargeBinary) # binário da imagem (recomendado)
     atualizado_em = db.Column(db.DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     lancamentos = relationship("Lancamento", back_populates="cooperado")
@@ -73,7 +83,8 @@ class Cooperado(db.Model):
 class Lancamento(db.Model):
     __tablename__ = "lancamentos"
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)  # UTC
+    # Guarde sempre em UTC. Registros antigos podem estar "naive".
+    data = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
     os_numero = db.Column(db.String(80), nullable=False)
     valor = db.Column(db.Numeric(12, 2), nullable=False)
     descricao = db.Column(db.String(255))
@@ -109,87 +120,70 @@ def load_user(user_id):
 
 # ============================ HELPERS DE DATA ============================
 
-def br_day_bounds_utc(d: date):
-    """Início/fim do dia (BRT) convertidos para UTC."""
-    start_brt = datetime.combine(d, time.min).replace(tzinfo=BRT)
-    end_brt = datetime.combine(d, time.max).replace(tzinfo=BRT)
-    return start_brt.astimezone(UTC), end_brt.astimezone(UTC)
+def br_day_bounds(d: date):
+    """Início/fim do dia em BRT (timezone-aware) + versões naive (BRT)."""
+    start_brt_aw = datetime.combine(d, time.min).replace(tzinfo=BRT)
+    end_brt_aw = datetime.combine(d, time.max).replace(tzinfo=BRT)
+    # também forma naive no mesmo clock local (para lidar com registros antigos sem tz)
+    start_brt_naive = start_brt_aw.replace(tzinfo=None)
+    end_brt_naive = end_brt_aw.replace(tzinfo=None)
+    return start_brt_aw, end_brt_aw, start_brt_naive, end_brt_naive
 
 
-def br_month_bounds_utc(dt_brt: datetime | None = None):
-    """Início/fim do mês atual no fuso de Brasília, retornando UTC."""
+def br_day_bounds_dual_utc_and_naive(d: date):
+    """Retorna (start_utc, end_utc, start_brt_naive, end_brt_naive)."""
+    start_brt_aw, end_brt_aw, start_brt_naive, end_brt_naive = br_day_bounds(d)
+    return start_brt_aw.astimezone(UTC), end_brt_aw.astimezone(UTC), start_brt_naive, end_brt_naive
+
+
+def br_month_bounds(dt_brt: datetime | None = None):
+    """Início/fim do mês atual em BRT (aware) + naive."""
     now_brt = (dt_brt or datetime.now(BRT)).astimezone(BRT)
-    first_brt = now_brt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    if first_brt.month == 12:
-        next_first_brt = first_brt.replace(year=first_brt.year + 1, month=1)
+    first_brt_aw = now_brt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if first_brt_aw.month == 12:
+        next_first_brt_aw = first_brt_aw.replace(year=first_brt_aw.year + 1, month=1)
     else:
-        next_first_brt = first_brt.replace(month=first_brt.month + 1)
-    last_brt = next_first_brt - timedelta(microseconds=1)
-    return first_brt.astimezone(UTC), last_brt.astimezone(UTC)
+        next_first_brt_aw = first_brt_aw.replace(month=first_brt_aw.month + 1)
+    last_brt_aw = next_first_brt_aw - timedelta(microseconds=1)
+    first_brt_naive = first_brt_aw.replace(tzinfo=None)
+    last_brt_naive = last_brt_aw.replace(tzinfo=None)
+    return first_brt_aw, last_brt_aw, first_brt_naive, last_brt_naive
+
+
+def br_month_bounds_dual_utc_and_naive(dt_brt: datetime | None = None):
+    """Retorna (start_utc, end_utc, start_brt_naive, end_brt_naive)."""
+    first_brt_aw, last_brt_aw, first_brt_naive, last_brt_naive = br_month_bounds(dt_brt)
+    return first_brt_aw.astimezone(UTC), last_brt_aw.astimezone(UTC), first_brt_naive, last_brt_naive
 
 
 def to_brt_str(dt_aware: datetime) -> str:
+    if dt_aware.tzinfo is None:
+        # melhor interpretar registros antigos como UTC
+        dt_aware = dt_aware.replace(tzinfo=UTC)
     dt_brt = dt_aware.astimezone(BRT)
     return dt_brt.strftime("%d/%m/%Y %H:%M")
 
 
 def to_brt_iso(dt_aware: datetime) -> str:
+    if dt_aware.tzinfo is None:
+        dt_aware = dt_aware.replace(tzinfo=UTC)
     dt_brt = dt_aware.astimezone(BRT)
     return dt_brt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-# ============================ LOGIN (auto-detecta perfil) ============================
-
-def _find_user_by_login(login_text: str) -> User | None:
-    """
-    Aceita email OU username (de cooperado/estabelecimento).
-    - Se for email => busca direta.
-    - Se for username de estabelecimento => encontra o User(tipo='estabelecimento', vinculo_id=est.id)
-    - Se for username de cooperado => idem.
-    """
-    if not login_text:
-        return None
-    login_lc = login_text.strip().lower()
-
-    # 1) Tenta email exato
-    u = User.query.filter(func.lower(User.email) == login_lc).first()
-    if u:
-        return u
-
-    # 2) Username de estabelecimento
-    est = Estabelecimento.query.filter(func.lower(Estabelecimento.username) == login_lc).first()
-    if est:
-        u = User.query.filter_by(tipo="estabelecimento", vinculo_id=est.id).first()
-        if u:
-            return u
-
-    # 3) Username de cooperado
-    coop = Cooperado.query.filter(func.lower(Cooperado.username) == login_lc).first()
-    if coop:
-        u = User.query.filter_by(tipo="cooperado", vinculo_id=coop.id).first()
-        if u:
-            return u
-
-    return None
-
+# ============================ ROTAS: LOGIN / LOGOUT ============================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        # aceita qualquer nome do campo: email / username / login
-        login_text = (request.form.get("email")
-                      or request.form.get("username")
-                      or request.form.get("login")
-                      or "").strip()
+        email = (request.form.get("email") or "").strip().lower()
         senha = request.form.get("senha") or ""
-
-        user = _find_user_by_login(login_text)
+        user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(senha):
             flash("Credenciais inválidas", "danger")
             return render_template("login.html")
 
-        remember = True if request.form.get("lembrar") else False
-        login_user(user, remember=remember)
+        login_user(user)
 
         # Redireciona automaticamente pelo perfil
         if user.tipo == "admin":
@@ -198,7 +192,8 @@ def login():
             return redirect(url_for("painel_estabelecimento"))
         elif user.tipo == "cooperado":
             return redirect(url_for("painel_cooperado"))
-        return redirect(url_for("dashboard"))
+        else:
+            return redirect(url_for("dashboard"))
 
     return render_template("login.html")
 
@@ -233,12 +228,17 @@ def dashboard():
     total_cooperados = Cooperado.query.count()
     total_estabelecimentos = Estabelecimento.query.count()
 
-    # Top cooperados no mês atual
-    start_utc, end_utc = br_month_bounds_utc()
+    # Top cooperados por soma no mês atual (BRT)
+    start_utc, end_utc, start_brt_naive, end_brt_naive = br_month_bounds_dual_utc_and_naive()
     rows = (
         db.session.query(Cooperado.nome, func.coalesce(func.sum(Lancamento.valor), 0).label("soma"))
         .join(Lancamento, Lancamento.cooperado_id == Cooperado.id)
-        .filter(Lancamento.data >= start_utc, Lancamento.data <= end_utc)
+        .filter(
+            or_(
+                and_(Lancamento.data >= start_utc, Lancamento.data <= end_utc),
+                and_(Lancamento.data >= start_brt_naive, Lancamento.data <= end_brt_naive),
+            )
+        )
         .group_by(Cooperado.id)
         .order_by(desc("soma"))
         .limit(10)
@@ -279,28 +279,30 @@ def painel_estabelecimento():
     # Cooperados e seus créditos (para lançar)
     cooperados = Cooperado.query.order_by(Cooperado.nome.asc()).all()
 
-    # Lançamentos desse estabelecimento (mês atual por padrão)
-    start_utc, end_utc = br_month_bounds_utc()
+    # Lançamentos desse estabelecimento (mês atual por padrão, robusto p/ naive)
+    start_utc, end_utc, start_brt_naive, end_brt_naive = br_month_bounds_dual_utc_and_naive()
     lancs = (
         Lancamento.query
         .filter(
             Lancamento.estabelecimento_id == est.id,
-            Lancamento.data >= start_utc,
-            Lancamento.data <= end_utc
+            or_(
+                and_(Lancamento.data >= start_utc, Lancamento.data <= end_utc),
+                and_(Lancamento.data >= start_brt_naive, Lancamento.data <= end_brt_naive),
+            )
         )
         .order_by(Lancamento.data.desc())
         .all()
     )
 
-    # Prepara p/ template
+    # Prepara p/ template do parceiro
     lancamentos_view = [{
         "id": l.id,
         "os_numero": l.os_numero,
         "valor": float(l.valor),
         "descricao": l.descricao or "",
         "cooperado": l.cooperado,
-        "data_brasilia": to_brt_str(l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)),
-        "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT)
+        "data_brasilia": to_brt_str(l.data),
+        "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT),
     } for l in lancs]
 
     return render_template(
@@ -322,12 +324,17 @@ def painel_cooperado():
         flash("Cooperado não localizado.", "danger")
         return redirect(url_for("dashboard"))
 
-    # Seus próprios lançamentos (mês atual)
-    start_utc, end_utc = br_month_bounds_utc()
+    # Seus lançamentos (mês atual, robusto p/ naive)
+    start_utc, end_utc, start_brt_naive, end_brt_naive = br_month_bounds_dual_utc_and_naive()
     lancs = (
         Lancamento.query
-        .filter(Lancamento.cooperado_id == coop.id,
-                Lancamento.data >= start_utc, Lancamento.data <= end_utc)
+        .filter(
+            Lancamento.cooperado_id == coop.id,
+            or_(
+                and_(Lancamento.data >= start_utc, Lancamento.data <= end_utc),
+                and_(Lancamento.data >= start_brt_naive, Lancamento.data <= end_brt_naive),
+            )
+        )
         .order_by(Lancamento.data.desc())
         .all()
     )
@@ -338,8 +345,8 @@ def painel_cooperado():
         "valor": float(l.valor),
         "descricao": l.descricao or "",
         "estabelecimento": l.estabelecimento,
-        "data_brasilia": to_brt_str(l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)),
-        "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT)
+        "data_brasilia": to_brt_str(l.data),
+        "data": (l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)).astimezone(BRT),
     } for l in lancs]
 
     return render_template(
@@ -387,20 +394,34 @@ def listar_lancamentos():
     if estabelecimento_id and not (current_user.tipo == "estabelecimento"):
         q = q.filter(Lancamento.estabelecimento_id == int(estabelecimento_id))
 
-    # Filtro de datas — sempre interpretando as datas em BRT
+    # Filtro de datas (BRT) — robusto para registros antigos sem tz
     if data_inicio and data_fim:
         try:
             di = date.fromisoformat(data_inicio)
             df = date.fromisoformat(data_fim)
-            di_utc, _ = br_day_bounds_utc(di)
-            _, df_utc = br_day_bounds_utc(df)
-            q = q.filter(and_(Lancamento.data >= di_utc, Lancamento.data <= df_utc))
+            di_utc, df_utc, di_brt_naive, df_brt_naive = (
+                br_day_bounds_dual_utc_and_naive(di)[0],
+                br_day_bounds_dual_utc_and_naive(df)[1],
+                br_day_bounds_dual_utc_and_naive(di)[2],
+                br_day_bounds_dual_utc_and_naive(df)[3],
+            )
+            q = q.filter(
+                or_(
+                    and_(Lancamento.data >= di_utc, Lancamento.data <= df_utc),
+                    and_(Lancamento.data >= di_brt_naive, Lancamento.data <= df_brt_naive),
+                )
+            )
         except Exception:
             pass
     else:
-        # padrão: mês atual (BRT)
-        month_start_utc, month_end_utc = br_month_bounds_utc()
-        q = q.filter(and_(Lancamento.data >= month_start_utc, Lancamento.data <= month_end_utc))
+        # padrão: mês atual (BRT), cobrindo aware UTC e naive BRT
+        month_start_utc, month_end_utc, month_start_naive, month_end_naive = br_month_bounds_dual_utc_and_naive()
+        q = q.filter(
+            or_(
+                and_(Lancamento.data >= month_start_utc, Lancamento.data <= month_end_utc),
+                and_(Lancamento.data >= month_start_naive, Lancamento.data <= month_end_naive),
+            )
+        )
 
     q = q.order_by(Lancamento.data.desc())
     lancamentos = q.all()
@@ -408,7 +429,9 @@ def listar_lancamentos():
     # Converte p/ BRT para exibição
     lancamentos_view = []
     for l in lancamentos:
-        dt_aware = l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)
+        dt = l.data
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=UTC)  # interpreta como UTC para exibição consistente
         lancamentos_view.append({
             "id": l.id,
             "os_numero": l.os_numero,
@@ -416,8 +439,8 @@ def listar_lancamentos():
             "descricao": l.descricao or "",
             "cooperado": l.cooperado,
             "estabelecimento": l.estabelecimento,
-            "data_fmt": to_brt_str(dt_aware),
-            "data_iso": to_brt_iso(dt_aware)
+            "data_fmt": to_brt_str(dt),
+            "data_iso": to_brt_iso(dt),
         })
 
     cooperados = Cooperado.query.order_by(Cooperado.nome.asc()).all()
@@ -465,14 +488,28 @@ def exportar_lancamentos():
         try:
             di = date.fromisoformat(data_inicio)
             df = date.fromisoformat(data_fim)
-            di_utc, _ = br_day_bounds_utc(di)
-            _, df_utc = br_day_bounds_utc(df)
-            q = q.filter(and_(Lancamento.data >= di_utc, Lancamento.data <= df_utc))
+            di_utc, df_utc, di_brt_naive, df_brt_naive = (
+                br_day_bounds_dual_utc_and_naive(di)[0],
+                br_day_bounds_dual_utc_and_naive(df)[1],
+                br_day_bounds_dual_utc_and_naive(di)[2],
+                br_day_bounds_dual_utc_and_naive(df)[3],
+            )
+            q = q.filter(
+                or_(
+                    and_(Lancamento.data >= di_utc, Lancamento.data <= df_utc),
+                    and_(Lancamento.data >= di_brt_naive, Lancamento.data <= df_brt_naive),
+                )
+            )
         except Exception:
             pass
     else:
-        month_start_utc, month_end_utc = br_month_bounds_utc()
-        q = q.filter(and_(Lancamento.data >= month_start_utc, Lancamento.data <= month_end_utc))
+        month_start_utc, month_end_utc, month_start_naive, month_end_naive = br_month_bounds_dual_utc_and_naive()
+        q = q.filter(
+            or_(
+                and_(Lancamento.data >= month_start_utc, Lancamento.data <= month_end_utc),
+                and_(Lancamento.data >= month_start_naive, Lancamento.data <= month_end_naive),
+            )
+        )
 
     q = q.order_by(Lancamento.data.desc())
     rows = q.all()
@@ -503,12 +540,7 @@ def exportar_lancamentos():
 
     output.seek(0)
     fname = f"lancamentos_{datetime.now(BRT).strftime('%Y%m%d_%H%M')}.xlsx"
-    return send_file(
-        output,
-        as_attachment=True,
-        download_name=fname,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    return send_file(output, as_attachment=True, download_name=fname, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 # ============================ APIs auxiliares (dashboard/admin) ============================
@@ -518,6 +550,12 @@ def exportar_lancamentos():
 def api_ultimo_lancamento():
     last = db.session.query(func.max(Lancamento.id)).scalar() or 0
     return jsonify({"last_id": int(last)})
+
+# Alias (underscore) para templates antigos ou hardcoded
+@app.route("/api/ultimo_lancamento")
+@login_required
+def api_ultimo_lancamento_alias():
+    return api_ultimo_lancamento()
 
 
 @app.route("/api/lancamento-info")
@@ -530,6 +568,7 @@ def api_lancamento_info():
     l = Lancamento.query.get(lid)
     if not l:
         return jsonify({"ok": False}), 404
+    dt = l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC)
     return jsonify({
         "ok": True,
         "id": l.id,
@@ -537,56 +576,45 @@ def api_lancamento_info():
         "cooperado_nome": l.cooperado.nome if l.cooperado else "",
         "estabelecimento": l.estabelecimento.nome if l.estabelecimento else "",
         "valor": float(l.valor),
-        "data": to_brt_str(l.data if l.data.tzinfo else l.data.replace(tzinfo=UTC))
+        "data": to_brt_str(dt),
     })
 
 
-# ============================ FOTOS / ARQUIVOS ============================
+# ============================ UTIL: foto de cooperado / arquivos estáticos extras ============================
+
+def _detect_image_mimetype(blob: bytes) -> str:
+    if not blob:
+        return "application/octet-stream"
+    if blob.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if blob.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if blob[:6] in (b"GIF87a", b"GIF89a"):
+        return "image/gif"
+    if len(blob) >= 12 and blob[:4] == b"RIFF" and blob[8:12] == b"WEBP":
+        return "image/webp"
+    return "application/octet-stream"
+
 
 @app.route("/foto-cooperado/<int:id>")
 @login_required
 def foto_cooperado(id: int):
-    """
-    Prioridades:
-    1) foto_data (binário) do banco
-    2) caminho absoluto salvo em c.foto
-    3) caminho relativo dentro da app (ex.: 'static/uploads/arquivo.jpg')
-    4) apenas nome do arquivo -> procura em static/uploads/<nome>
-    """
     c = Cooperado.query.get(id)
     if not c:
         return ("", 404)
-
-    # 1) Binário no banco
+    # prioridade: binário no banco
     if c.foto_data:
-        return send_file(BytesIO(c.foto_data), mimetype="image/jpeg")
-
-    # 2..4) Arquivo em disco
-    candidates: list[str] = []
-    if c.foto:
-        f = c.foto.strip()
-        # absoluto?
-        if os.path.isabs(f):
-            candidates.append(f)
-        # relativo ao app.root_path
-        candidates.append(os.path.join(app.root_path, f.lstrip("/\\")))
-        # relativo a static/
-        candidates.append(os.path.join(app.root_path, "static", f.lstrip("/\\")))
-        # UPLOAD_FOLDER_COOPS + nome (mais comum quando só armazenamos o nome)
-        uploads_base = os.path.join(app.root_path, app.config["UPLOAD_FOLDER_COOPS"])
-        candidates.append(os.path.join(uploads_base, os.path.basename(f)))
-
-    # fallback final: tenta só pelo id com jpg/png comuns (opcional)
-    uploads_base = os.path.join(app.root_path, app.config["UPLOAD_FOLDER_COOPS"])
-    for ext in (".jpg", ".jpeg", ".png", ".webp"):
-        candidates.append(os.path.join(uploads_base, f"{id}{ext}"))
-
-    # percorre candidatos
-    for path in candidates:
-        if os.path.isfile(path):
-            mime = mimetypes.guess_type(path)[0] or "image/jpeg"
-            return send_file(path, mimetype=mime)
-
+        mime = _detect_image_mimetype(c.foto_data)
+        return send_file(BytesIO(c.foto_data), mimetype=mime)
+    # fallback antigo (se existir caminho)
+    if c.foto and os.path.exists(c.foto):
+        # tenta inferir mimetype simples pelo sufixo
+        lower = c.foto.lower()
+        if lower.endswith(".png"): mt = "image/png"
+        elif lower.endswith(".gif"): mt = "image/gif"
+        elif lower.endswith(".webp"): mt = "image/webp"
+        else: mt = "image/jpeg"
+        return send_file(c.foto, mimetype=mt)
     return ("", 404)
 
 
