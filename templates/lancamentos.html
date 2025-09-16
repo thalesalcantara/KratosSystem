@@ -361,6 +361,14 @@
     const parseNum = s => parseFloat(String(s).replace(/\./g,'').replace(',', '.'));
     const tz = 'America/Sao_Paulo';
 
+    // Gera YYYY-MM-DD no fuso local (sem UTC)
+    function localISODate(d=new Date()){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+
     // Marca valores negativos
     function pintarNegativos(){
       document.querySelectorAll('#t-lanc .valor').forEach(td=>{
@@ -420,16 +428,15 @@
         const now = new Date();
         const first = new Date(now.getFullYear(), now.getMonth(), 1);
         const url = new URL(window.location.href);
-        url.searchParams.set('data_inicio', first.toISOString().slice(0,10));
-        url.searchParams.set('data_fim', now.toISOString().slice(0,10));
+        url.searchParams.set('data_inicio', localISODate(first));
+        url.searchParams.set('data_fim', localISODate(now));
         window.location.replace(url.toString());
       }
     })();
 
     // ===== Botão Hoje (preenche hoje e envia)
     document.getElementById('btn-hoje')?.addEventListener('click', ()=>{
-      const today = new Date();
-      const d = today.toISOString().slice(0,10);
+      const d = localISODate(new Date());
       document.getElementById('data_inicio').value = d;
       document.getElementById('data_fim').value    = d;
       document.getElementById('form-filtros').submit();
@@ -538,15 +545,9 @@
   </script>
 
   <!--
-    NOTA sobre "Hoje mostra ontem":
-    Se o back-end estiver filtrando usando datas sem hora em UTC, ajuste para usar
-    America/Sao_Paulo e considerar data_fim até 23:59:59. Exemplo (SQLAlchemy):
-
-      di = datetime.combine(data_inicio, time.min, tzinfo=tz)
-      df = datetime.combine(data_fim, time.max, tzinfo=tz)
-      query = query.filter(Modelo.data.between(di, df))
-
-    Assim, “hoje” inclui todo o dia.
+    NOTA sobre fuso e “Hoje”:
+    1) Este HTML usa data LOCAL (sem toISOString/UTC) para hoje e mês vigente.
+    2) No back-end, compare até o FIM do dia com: df = df + timedelta(days=1) e usar < df.
   -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
