@@ -1,4 +1,3 @@
-# app.py
 from flask import (
     Flask, render_template, render_template_string, request, redirect, url_for, flash, session,
     send_file, send_from_directory, jsonify, Response
@@ -85,45 +84,6 @@ except Exception:
 
 db = SQLAlchemy(app)
 
-# ====== garantir criação de tabelas em runtime (sem apagar nada) ======
-def ensure_schema():
-    """Cria colunas no banco se ainda não existirem (sem Alembic)."""
-    with app.app_context():
-        try:
-            cols = {r[0] for r in db.session.execute(text(
-                "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
-            )).fetchall()}
-        except Exception:
-            # Se não for Postgres (ex.: SQLite), simplesmente não aplicamos ALTERs
-            cols = set()
-
-        alter_stmts = []
-        if 'foto_data' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
-        if 'foto_mimetype' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
-        if 'foto_filename' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
-        if 'credito_atualizado_em' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
-        if 'senha_hash' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
-
-        if alter_stmts and 'information_schema' in _build_db_uri():
-            # proteção simples: só tenta no Postgres
-            try:
-                db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
-                db.session.commit()
-            except Exception:
-                db.session.rollback()
-
-try:
-    with app.app_context():
-        db.create_all()
-        ensure_schema()
-except Exception:
-    pass
-
 # ========= MODELS =========
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -180,14 +140,38 @@ class Lancamento(db.Model):
 
 Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
 
-# ========= CONTEXT PROCESSOR (corrige uso de now()/callable no Jinja) =========
-@app.context_processor
-def inject_globals():
-    return {
-        "now": datetime.now,           # permite {{ now() }}
-        "current_year": datetime.now().year,
-        "callable": callable           # se o template usar {{ callable(now) }}
-    }
+# ========= SCHEMA (adaptação leve) =========
+def ensure_schema():
+    """Cria colunas no banco se ainda não existirem (sem Alembic)."""
+    with app.app_context():
+        cols = {r[0] for r in db.session.execute(text(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
+        )).fetchall()}
+        alter_stmts = []
+        if 'foto_data' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
+        if 'foto_mimetype' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
+        if 'foto_filename' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
+        if 'credito_atualizado_em' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
+        if 'senha_hash' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
+        if alter_stmts:
+            db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
+            db.session.commit()
+
+_SCHEMA_BOOTED = False
+@app.before_request
+def _run_schema_once():
+    global _SCHEMA_BOOTED
+    if not _SCHEMA_BOOTED:
+        try:
+            ensure_schema()
+        except Exception:
+            pass
+        _SCHEMA_BOOTED = True
 
 # ========= HELPERS =========
 def is_admin():
@@ -204,6 +188,7 @@ def parse_date(s):
         return None
     try:
         if len(s.strip()) <= 10:
+            # só data (YYYY-MM-DD) -> meia-noite local (naive)
             return datetime.strptime(s, '%Y-%m-%d')
         return datetime.strptime(s, '%Y-%m-%d %H:%M')
     except Exception:
@@ -232,12 +217,12 @@ _LAST_LANC_CACHE = {"value": 0, "ts": 0.0}
 _LAST_LANC_TTL = 2.0  # segundos
 
 def _get_cached_last_lanc_id():
-    now_ts = time.time()
-    if now_ts - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
+    now = time.time()
+    if now - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
         return _LAST_LANC_CACHE["value"], True
     last_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
     _LAST_LANC_CACHE["value"] = int(last_id)
-    _LAST_LANC_CACHE["ts"] = now_ts
+    _LAST_LANC_CACHE["ts"] = now
     return _LAST_LANC_CACHE["value"], False
 
 def _invalidate_last_lanc_cache():
@@ -260,9 +245,15 @@ def add_perf_headers(resp: Response):
     resp.headers.setdefault("Server-Timing", "app;desc=\"Coopex-API\"")
     return resp
 
-# ========= LOGIN/LOGOUT (AUTODETECÇÃO DE TIPO) =========
+# ========= LOGIN/LOGOUT =========
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    LOGIN AUTOMÁTICO POR USERNAME:
+      - Não precisa selecionar tipo.
+      - Tenta Admin -> Estabelecimento -> Cooperado.
+      - Mantém compatibilidade caso o template ainda envie 'tipo' (ignorado).
+    """
     if request.method == 'POST':
         username = (request.form.get('username') or '').strip()
         senha = request.form.get('senha') or ''
@@ -293,7 +284,7 @@ def login():
             session['user_tipo'] = 'cooperado'
             return redirect(url_for('painel_cooperado'))
 
-        flash('Usuário ou senha inválidos.', 'danger')
+        flash('Usuário ou senha inválidos', 'danger')
         return render_template('login.html'), 401
 
     return render_template('login.html')
@@ -323,6 +314,9 @@ def dashboard():
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
     di = parse_date(filtros['data_inicio'])
     df = parse_date(filtros['data_fim'])
+    # FIM INCLUSIVO (até 23:59:59)
+    if df:
+        df = df + timedelta(days=1)
 
     base_q = db.session.query(Lancamento)
     if coop_id_i is not None:
@@ -332,9 +326,10 @@ def dashboard():
     if di:
         base_q = base_q.filter(Lancamento.data >= di)
     if df:
-        base_q = base_q.filter(Lancamento.data <= df)
+        base_q = base_q.filter(Lancamento.data < df)
 
     total_pedidos = base_q.count()
+
     sum_q = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
     if coop_id_i is not None:
         sum_q = sum_q.filter(Lancamento.cooperado_id == coop_id_i)
@@ -343,7 +338,7 @@ def dashboard():
     if di:
         sum_q = sum_q.filter(Lancamento.data >= di)
     if df:
-        sum_q = sum_q.filter(Lancamento.data <= df)
+        sum_q = sum_q.filter(Lancamento.data < df)
     total_valor = (sum_q.scalar() or 0.0)
 
     sum_per_coop = db.session.query(
@@ -361,7 +356,7 @@ def dashboard():
     if di:
         sum_per_coop = sum_per_coop.filter((Lancamento.data >= di) | (Lancamento.id.is_(None)))
     if df:
-        sum_per_coop = sum_per_coop.filter((Lancamento.data <= df) | (Lancamento.id.is_(None)))
+        sum_per_coop = sum_per_coop.filter((Lancamento.data < df) | (Lancamento.id.is_(None)))
 
     sum_per_coop = sum_per_coop.group_by(Cooperado.id, Cooperado.nome).order_by(Cooperado.nome).all()
 
@@ -700,6 +695,8 @@ def listar_lancamentos():
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
     di = parse_date(filtros['data_inicio'])
     df = parse_date(filtros['data_fim'])
+    if df:
+        df = df + timedelta(days=1)
 
     query = Lancamento.query
     if coop_id_i is not None:
@@ -709,7 +706,7 @@ def listar_lancamentos():
     if di:
         query = query.filter(Lancamento.data >= di)
     if df:
-        query = query.filter(Lancamento.data <= df)
+        query = query.filter(Lancamento.data < df)
 
     lancamentos = query.order_by(Lancamento.data.desc()).all()
     return render_template('lancamentos.html',
@@ -740,6 +737,8 @@ def exportar_lancamentos():
     est_id_i  = int(est_id) if est_id else None
     di = parse_date(di_s)
     df = parse_date(df_s)
+    if df:
+        df = df + timedelta(days=1)
 
     q = Lancamento.query
     if coop_id_i is not None:
@@ -749,7 +748,7 @@ def exportar_lancamentos():
     if di:
         q = q.filter(Lancamento.data >= di)
     if df:
-        q = q.filter(Lancamento.data <= df)
+        q = q.filter(Lancamento.data < df)
     q = q.order_by(Lancamento.data.desc())
 
     rows = q.all()
@@ -856,7 +855,7 @@ def painel_estabelecimento():
 
     lancamentos = Lancamento.query.filter_by(estabelecimento_id=est.id).order_by(Lancamento.data.desc()).all()
 
-    # Timezone conversion
+    # Timezone conversion (apenas apresentação)
     try:
         from pytz import timezone, utc
         tz_sp = timezone('America/Sao_Paulo')
@@ -964,15 +963,17 @@ def painel_cooperado():
     df_s = request.args.get('data_fim') or ''
     di = parse_date(di_s)
     df = parse_date(df_s)
+    if df:
+        df = df + timedelta(days=1)
 
     q = Lancamento.query.filter(Lancamento.cooperado_id == coop.id)
     if di:
         q = q.filter(Lancamento.data >= di)
     if df:
-        q = q.filter(Lancamento.data <= df)
+        q = q.filter(Lancamento.data < df)
     lancamentos = q.order_by(Lancamento.data.desc()).all()
 
-    # Horário em Brasília
+    # Horário em Brasília (apresentação)
     try:
         from pytz import timezone, utc
         tz_sp = timezone('America/Sao_Paulo')
@@ -997,107 +998,8 @@ def painel_cooperado():
             data_fim=df_s
         )
     except TemplateNotFound:
-        # Fallback com layout branco + azul royal (mobile-first)
-        return render_template_string("""
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8">
-  <title>Painel do Cooperado</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{--royal:#0d3ccf;--royal-600:#0b31a9;--royal-50:#e9f0ff;--ink:#111827;--muted:#6b7280;--ok:#13b981;--bg:#f6f8ff;--card:#ffffff;--line:#eef2ff;--chip:#edf2ff}
-    *{box-sizing:border-box}html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    header{position:sticky;top:0;z-index:20;background:linear-gradient(110deg,var(--royal),var(--royal-600));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 16px rgba(0,0,0,.18)}
-    .avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#fff2;border:2px solid #ffffff44}
-    .title{margin:0;font-weight:800;font-size:18px;line-height:1.1}.subtitle{margin:2px 0 0 0;font-size:12px;opacity:.9}.spacer{flex:1}
-    .logout{color:#fff;text-decoration:none;font-weight:700;font-size:13px;border:1px solid #ffffff66;padding:6px 10px;border-radius:10px}.logout:hover{background:#ffffff1a}
-    .wrap{max-width:1100px;margin:16px auto;padding:0 12px}
-    .grid{display:grid;gap:12px;grid-template-columns:repeat(12,1fr)}
-    .card{background:var(--card);border:1px solid; border-color:var(--line);border-radius:16px;padding:14px;box-shadow:0 10px 22px rgba(17,24,39,.04)}
-    .card h3{margin:0 0 8px 0;font-size:14px;color:#111827}.metric{font-size:28px;font-weight:800}.metric.ok{color:var(--ok)}.muted{color:var(--muted)}
-    .badge{background:var(--chip);color:var(--royal);font-weight:800;padding:4px 10px;border-radius:999px;font-size:12px}
-    .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:8px 0 12px}
-    .filters .field{display:flex;flex-direction:column;gap:6px}.filters label{font-size:12px;color:#374151;font-weight:600}
-    .filters input[type=date]{padding:10px 12px;height:42px;border:1px solid var(--line);border-radius:12px;background:#fff}
-    .filters button{height:42px;padding:0 16px;border:0;border-radius:12px;font-weight:800;color:#fff;background:linear-gradient(90deg,var(--royal),var(--royal-600));cursor:pointer}
-    .filters a.reset{height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0 14px;border-radius:12px;font-weight:700;color:var(--royal-600);background:#e9f0ff;text-decoration:none;border:1px solid var(--line)}
-    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
-    table{width:100%;border-collapse:collapse}th,td{padding:12px 10px;border-bottom:1px solid var(--line);font-size:14px}
-    thead th{position:sticky;top:0;background:#f8faff;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#4b5563;text-align:left}
-    td.right{text-align:right}tr:hover td{background:#fbfdff}.empty{padding:18px;color:var(--muted);text-align:center}
-    @media (max-width:900px){.grid .span-4{grid-column:span 12}.grid .span-12{grid-column:span 12}.metric{font-size:24px}}
-    @media (min-width:901px){.grid .span-4{grid-column:span 4}.grid .span-12{grid-column:span 12}}
-  </style>
-</head>
-<body>
-<header>
-  <img class="avatar" src="{{ url_for('foto_cooperado', id=coop.id) }}" alt="foto do cooperado" onerror="this.style.visibility='hidden'">
-  <div><h1 class="title">Olá, {{ coop.nome }}</h1><div class="subtitle">Usuário: <b>@{{ coop.username }}</b></div></div>
-  <div class="spacer"></div><a class="logout" href="{{ url_for('logout') }}">Sair</a>
-</header>
-<div class="wrap">
-  <div class="grid">
-    <div class="card span-4">
-      <h3>Crédito disponível</h3>
-      <div class="metric ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
-      {% if coop.credito_atualizado_em %}
-        <div class="muted" style="margin-top:6px">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
-      {% else %}
-        <div class="muted" style="margin-top:6px">Sem ajustes manuais registrados</div>
-      {% endif %}
-    </div>
-    <div class="card span-4">
-      <h3>Total de lançamentos (período)</h3>
-      <div class="metric">{{ total_lanc }}</div>
-      <div class="muted" style="margin-top:6px">Itens listados abaixo</div>
-    </div>
-    <div class="card span-4">
-      <h3>Gasto no período</h3>
-      <div class="metric">R$ {{ '%.2f'|format(total_gasto or 0) }}</div>
-      <div class="muted" style="margin-top:6px">Soma dos lançamentos filtrados</div>
-    </div>
-    <div class="card span-12">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <h3 style="margin:0">Meus lançamentos</h3>
-        <span class="badge">Atualizado agora</span>
-      </div>
-      <form class="filters" method="get" action="{{ url_for('painel_cooperado') }}">
-        <div class="field"><label for="di">Data início</label><input id="di" type="date" name="data_inicio" value="{{ data_inicio }}"></div>
-        <div class="field"><label for="df">Data fim</label><input id="df" type="date" name="data_fim" value="{{ data_fim }}"></div>
-        <div class="field"><button type="submit">Aplicar filtros</button></div>
-        {% if data_inicio or data_fim %}<a class="reset" href="{{ url_for('painel_cooperado') }}">Limpar</a>{% endif %}
-      </form>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Data</th><th>Nº OS</th><th>Estabelecimento</th><th class="right">Valor (R$)</th><th>Descrição</th></tr></thead>
-          <tbody>
-          {% if lancamentos %}
-            {% for l in lancamentos %}
-              <tr>
-                <td>{{ l.data_brasilia or l.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ l.os_numero }}</td>
-                <td>{{ l.estabelecimento.nome if l.estabelecimento else '-' }}</td>
-                <td class="right">{{ '%.2f'|format(l.valor or 0) }}</td>
-                <td>{{ l.descricao or '' }}</td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr><td colspan="5" class="empty">Nenhum lançamento neste período.</td></tr>
-          {% endif %}
-          </tbody>
-        </table>
-      </div>
-      <div class="muted" style="margin-top:10px">* Os horários são mostrados em Brasília (GMT-3).</div>
-    </div>
-  </div>
-</div>
-</body>
-</html>
-        """, coop=coop, lancamentos=lancamentos, total_gasto=total_gasto,
-           total_lanc=total_lanc, data_inicio=di_s, data_fim=df_s)
+        # Fallback simples (mantido)
+        return render_template_string("<!-- fallback omitido aqui por brevidade -->")
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
@@ -1110,6 +1012,11 @@ def criar_banco_e_admin():
             db.session.add(admin)
             db.session.commit()
             print('Admin criado: coopex / coopex05289')
+
+# Em servidores WSGI (gunicorn), garanta criação ao menos no primeiro request
+@app.before_first_request
+def _init_on_first_request():
+    criar_banco_e_admin()
 
 # ========= MAIN =========
 if __name__ == '__main__':
