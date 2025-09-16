@@ -11,25 +11,30 @@
 
   <style>
     :root{
-      --bg:#191c20;
-      --ink:#eaf2ff;        /* texto principal */
-      --muted:#a9b7db;      /* texto secundário */
-      --gold:#ffd700;       /* destaque */
-      --accent:#4b82ff;     /* foco/bordas */
-      --card1:#23262b;
-      --card2:#003399;
-      --thead:#1d2240;
-      --rowOdd:#263155;
-      --rowEven:#202a4a;
-      --line:#2b3346;
-      --field:#0f172a;
-      --fieldBorder:#3b4565;
-      --fieldFocus:#4b82ff;
-      --danger:#ff6b7a;
+      /* Azul royal + branco */
+      --bg:#f7f9ff;
+      --ink:#0d1b3f;        /* texto principal */
+      --muted:#5c6c92;      /* texto secundário */
+      --royal:#4169e1;      /* azul-royal */
+      --royal-2:#5a7df0;    /* variação p/ hover */
+      --accent:#4169e1;     /* foco/bordas */
+      --card1:#ffffff;
+      --card2:#ffffff;
+      --thead:#eef3ff;
+      --rowOdd:#ffffff;
+      --rowEven:#f7fbff;
+      --line:#dbe4ff;
+      --field:#ffffff;
+      --fieldBorder:#c7d2ff;
+      --fieldFocus:#4169e1;
+      --danger:#e25566;
+      --ok:#2e8b57;
     }
 
     body{
-      background:var(--bg);
+      background:
+        radial-gradient(1400px 480px at 80% -40%, rgba(65,105,225,.08), transparent 70%),
+        linear-gradient(180deg, var(--bg), var(--bg));
       font-family:Roboto, Arial, sans-serif;
       min-height:100vh;
       margin:0;
@@ -38,26 +43,26 @@
 
     .main-content{
       margin:0 auto;
-      max-width:1100px;
-      padding:42px 10px 28px;
+      max-width:1200px;
+      padding:38px 14px 28px;
     }
 
     h2{
       font-family:Orbitron, sans-serif;
-      color:var(--gold);
+      color:var(--royal);
       margin-bottom:16px;
       text-align:center;
-      letter-spacing:1.5px;
-      text-shadow:0 1px 1px rgba(0,0,0,.6);
+      letter-spacing:1.2px;
     }
 
     /* Cards e containers */
     .dashboard-card{
-      background:linear-gradient(120deg, var(--card1) 90%, var(--card2) 100%);
-      border-radius:17px;
-      box-shadow:0 8px 32px #0008, 0 2px 8px #00339944;
-      padding:22px 18px 18px;
-      margin-bottom:28px;
+      background:linear-gradient(120deg, var(--card1) 0%, var(--card2) 100%);
+      border-radius:16px;
+      border:1px solid var(--line);
+      box-shadow:0 10px 24px rgba(65,105,225,.12);
+      padding:18px 16px;
+      margin-bottom:22px;
       color:var(--ink);
     }
 
@@ -65,17 +70,17 @@
     .stats{
       display:grid; gap:12px;
       grid-template-columns: repeat(3, minmax(0,1fr));
-      margin-bottom:6px;
+      margin-bottom:4px;
     }
     .stat{
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.12);
+      background:#fff;
+      border:1px solid var(--line);
       border-radius:14px;
       padding:12px 14px;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+      box-shadow:0 6px 16px rgba(65,105,225,.10);
     }
-    .stat .label{ color:#dfe6ff; font-weight:800; letter-spacing:.3px; display:flex; align-items:center; gap:8px; }
-    .stat .value{ font:900 1.4rem/1 Orbitron, sans-serif; color:var(--gold); margin-top:6px; text-shadow:0 1px 1px rgba(0,0,0,.7); }
+    .stat .label{ color:#2b3e73; font-weight:800; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
+    .stat .value{ font:900 1.35rem/1 Orbitron, sans-serif; color:var(--royal); margin-top:6px; }
     .stat .sub{ color:var(--muted); font-size:.92rem; margin-top:4px; }
 
     /* Filtros */
@@ -83,24 +88,33 @@
     .form-control, .form-select{
       background:var(--field);
       color:var(--ink);
-      border-color:var(--fieldBorder);
+      border:2px solid var(--fieldBorder);
+      border-radius:12px;
+      height:46px;
     }
     .form-control::placeholder{color:var(--muted);}
     .form-control:focus, .form-select:focus{
       border-color:var(--fieldFocus);
-      box-shadow:0 0 0 .2rem rgba(75,130,255,.15);
+      box-shadow:0 0 0 .2rem rgba(65,105,225,.18);
     }
     .btn-primary{
-      background:linear-gradient(90deg, var(--gold) 60%, #ffe670 100%);
-      color:#191c20;
-      font-weight:700;
+      background:linear-gradient(90deg, var(--royal) 0%, var(--royal-2) 100%);
+      color:#fff;
+      font-weight:800;
       border:none;
-      border-radius:14px;
+      border-radius:12px;
+      height:46px;
     }
-    .btn-primary:hover{filter:brightness(1.06);}
-    .btn-success{font-weight:700;border-radius:14px;}
-    .btn-outline-light{border-radius:14px;}
-    .btn-danger{font-weight:700;border-radius:14px;}
+    .btn-primary:hover{filter:brightness(1.03);}
+    .btn-success{font-weight:800;border-radius:12px;height:46px;}
+    .btn-outline-light{
+      border-radius:12px;height:46px;border-color:#c7d2ff;color:var(--royal);background:#fff;font-weight:800;
+    }
+    .btn-outline-light:hover{background:#eef3ff;color:#1b2b5e;}
+    .btn-today{
+      background:#fff;border:2px solid var(--royal);color:var(--royal);font-weight:800;border-radius:12px;height:46px;
+    }
+    .btn-today:hover{background:#eef3ff;}
 
     /* Chips dos filtros ativos */
     .active-filters{
@@ -108,22 +122,22 @@
     }
     .chip{
       display:inline-flex; align-items:center; gap:6px;
-      padding:6px 10px; border-radius:999px; border:1px solid #3254a8;
-      background:#162a56; color:#fff; font-weight:700; font-size:.9rem;
+      padding:6px 10px; border-radius:999px; border:1px solid var(--line);
+      background:#eef3ff; color:#1b2b5e; font-weight:800; font-size:.9rem;
+      box-shadow:0 6px 12px rgba(65,105,225,.08);
     }
-    .chip i{opacity:.8;}
+    .chip i{opacity:.9;color:var(--royal);}
 
     /* Tabela */
-    .table{color:var(--ink);border-radius:10px;overflow:hidden;margin:0;}
+    .table{color:var(--ink);border-radius:12px;overflow:hidden;margin:0;background:#fff;border:1px solid var(--line);}
     .table thead th{
       position:sticky; top:0; z-index:5;
       background:var(--thead);
-      color:var(--gold)!important;
+      color:var(--royal)!important;
       font-family:Orbitron, sans-serif;
-      letter-spacing:1.1px;
+      letter-spacing:1px;
       text-align:center;
       border-bottom:1px solid var(--line);
-      box-shadow:0 2px 0 rgba(0,0,0,.35);
     }
     .table tbody td{
       color:var(--ink);
@@ -133,34 +147,42 @@
     }
     .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd);}
     .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven);}
-    .table-hover tbody tr:hover>*{background-color:#2b375e!important;}
+    .table-hover tbody tr:hover>*{background-color:#ecf2ff!important;}
 
     /* Rodapé de totais */
     tfoot td{
-      background:#0f1a3a;
+      background:#eef3ff;
       border-top:2px solid var(--line);
       font-weight:800;
-      color:#fff;
+      color:#1b2b5e;
     }
 
     /* Valor em destaque */
-    .valor{white-space:nowrap; font-weight:800; color:var(--gold);}
+    .valor{white-space:nowrap; font-weight:900; color:var(--royal);}
     .valor.neg{color:var(--danger);}
 
     .alert{
-      background:var(--gold);
-      color:#222;
-      font-weight:700;
-      border-radius:9px;
+      background:var(--royal);
+      color:#fff;
+      font-weight:800;
+      border-radius:10px;
       margin-bottom:10px;
       text-align:center;
+      border:none;
+      box-shadow:0 8px 22px rgba(65,105,225,.18);
     }
+
+    /* Resumo por estabelecimento */
+    #resumo-estab-card h3{font:700 1.02rem Orbitron, sans-serif; color:var(--royal); margin:0 0 10px;}
+    #resumo-estab small{color:var(--muted)}
+    #btn-clear-local{border:none;background:transparent;color:#4169e1;font-weight:800}
+    #btn-clear-local:hover{text-decoration:underline}
 
     @media (max-width:900px){
       .main-content{padding:14px 6px;}
-      .dashboard-card{padding:14px 8px;}
-      .table thead th{font-size:.9rem;}
-      .table tbody td{font-size:.95rem;}
+      .dashboard-card{padding:14px 10px;}
+      .table thead th{font-size:.92rem;}
+      .table tbody td{font-size:.98rem;}
       .stats{grid-template-columns:1fr;}
     }
   </style>
@@ -242,11 +264,40 @@
               <i class="bi bi-x-circle"></i> Limpar filtros
             </button>
           </div>
+
+          <div class="col-md-2 d-grid">
+            <button type="button" class="btn btn-today" id="btn-hoje" title="Preenche com a data de hoje e envia">
+              <i class="bi bi-sun"></i> Hoje
+            </button>
+          </div>
         </div>
 
         <!-- Chips com filtros ativos (preenchidos via JS) -->
         <div class="active-filters" id="chips-filtros"></div>
       </form>
+    </div>
+
+    <!-- Resumo por Estabelecimento -->
+    <div class="dashboard-card" id="resumo-estab-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h3><i class="bi bi-building"></i> Resumo por Estabelecimento (linhas visíveis)</h3>
+        <button id="btn-clear-local" type="button" title="Limpar filtro local por estabelecimento (apenas na tabela)">Limpar filtro local</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle text-center" id="t-resumo-estab">
+          <thead>
+            <tr>
+              <th>Estabelecimento</th>
+              <th>Lançamentos</th>
+              <th>Ticket Médio</th>
+              <th>Total (visível)</th>
+              <th>Total Mês Atual</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <small id="resumo-estab-nota">Os números consideram as linhas visíveis após aplicar os filtros. “Total Mês Atual” considera o mês vigente no fuso de Brasília, usando a data de cada lançamento.</small>
     </div>
 
     <div class="dashboard-card">
@@ -260,7 +311,6 @@
               <th><i class="bi bi-shop"></i> Estabelecimento</th>
               <th><i class="bi bi-currency-dollar"></i> Valor (R$)</th>
               <th><i class="bi bi-justify-left"></i> Descrição</th>
-              <!-- NOVO: coluna Ações -->
               <th><i class="bi bi-trash"></i> Ações</th>
             </tr>
           </thead>
@@ -277,14 +327,11 @@
                     {{ "{:,.2f}".format(l.valor) }}
                   </td>
                   <td class="desc">{{ l.descricao or '' }}</td>
-
-                  <!-- NOVO: ações -->
                   <td class="text-center">
                     <form method="post"
                           action="{{ url_for('excluir_lancamento', id=l.id) }}"
                           onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');">
                       <input type="hidden" name="next" value="{{ request.full_path }}">
-                      {# Se usar CSRF, descomente: {{ csrf_token() }} #}
                       <button type="submit" class="btn btn-sm btn-danger">
                         <i class="bi bi-trash"></i> Excluir
                       </button>
@@ -312,6 +359,7 @@
     // ---- Utilidades
     const brl = v => v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
     const parseNum = s => parseFloat(String(s).replace(/\./g,'').replace(',', '.'));
+    const tz = 'America/Sao_Paulo';
 
     // Marca valores negativos
     function pintarNegativos(){
@@ -334,12 +382,10 @@
       });
       const media = qtd ? (soma / qtd) : 0;
 
-      // Top cards
       document.getElementById('m-qtd').textContent   = qtd.toLocaleString('pt-BR');
       document.getElementById('m-total').textContent = brl(soma);
       document.getElementById('m-media').textContent = brl(media);
 
-      // Rodapé
       document.getElementById('tf-total').textContent = brl(soma);
       document.getElementById('tf-qtd').textContent   = `${qtd.toLocaleString('pt-BR')} itens`;
     }
@@ -362,9 +408,32 @@
 
       if (coopSel.value)  add('bi-person', coopSel.options[coopSel.selectedIndex].text);
       if (estabSel.value) add('bi-shop', estabSel.options[estabSel.selectedIndex].text);
-      if (di) add('bi-calendar-plus',  `Início: ${new Date(di).toLocaleDateString('pt-BR')}`);
-      if (df) add('bi-calendar-minus', `Fim: ${new Date(df).toLocaleDateString('pt-BR')}`);
+      if (di) add('bi-calendar-plus',  `Início: ${new Date(di + 'T00:00:00').toLocaleDateString('pt-BR')}`);
+      if (df) add('bi-calendar-minus', `Fim: ${new Date(df + 'T00:00:00').toLocaleDateString('pt-BR')}`);
     }
+
+    // ===== Default: sempre mês atual quando vier sem filtros =====
+    (function defaultMesAtual(){
+      const hasDI = "{{ filtros.data_inicio or '' }}";
+      const hasDF = "{{ filtros.data_fim or '' }}";
+      if (!hasDI && !hasDF){
+        const now = new Date();
+        const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        const url = new URL(window.location.href);
+        url.searchParams.set('data_inicio', first.toISOString().slice(0,10));
+        url.searchParams.set('data_fim', now.toISOString().slice(0,10));
+        window.location.replace(url.toString());
+      }
+    })();
+
+    // ===== Botão Hoje (preenche hoje e envia)
+    document.getElementById('btn-hoje')?.addEventListener('click', ()=>{
+      const today = new Date();
+      const d = today.toISOString().slice(0,10);
+      document.getElementById('data_inicio').value = d;
+      document.getElementById('data_fim').value    = d;
+      document.getElementById('form-filtros').submit();
+    });
 
     // Limpar filtros (volta para a rota sem querystring)
     document.getElementById('btn-limpar').addEventListener('click', () => {
@@ -384,13 +453,101 @@
     }
     window.exportarExcel = exportarExcel;
 
+    // ===== Resumo por Estabelecimento (visível + mês atual)
+    function isInCurrentMonth(dateIso){
+      if(!dateIso) return false;
+      const d = new Date(dateIso);
+      const now = new Date();
+      return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    }
+
+    function montarResumoEstabelecimentos(){
+      const rows = [...document.querySelectorAll('#t-lanc tbody tr')];
+      const mapa = Object.create(null);
+
+      rows.forEach(tr=>{
+        if(tr.style.display==='none') return; // só visíveis
+        const nome = (tr.querySelector('.estab')?.textContent || '').trim();
+        const v = parseFloat(tr.querySelector('.valor')?.dataset.valor || '0') || 0;
+        const dataIso = tr.children[0]?.getAttribute('data-data') || '';
+        if(!nome) return;
+        if(!mapa[nome]) mapa[nome] = { total:0, qtd:0, mesTotal:0, mesQtd:0 };
+        mapa[nome].total += v;
+        mapa[nome].qtd += 1;
+        if (isInCurrentMonth(dataIso)){
+          mapa[nome].mesTotal += v;
+          mapa[nome].mesQtd += 1;
+        }
+      });
+
+      const tbody = document.querySelector('#t-resumo-estab tbody');
+      tbody.innerHTML = '';
+
+      const nomes = Object.keys(mapa).sort((a,b)=> mapa[b].total - mapa[a].total);
+      nomes.forEach(nome=>{
+        const it = mapa[nome];
+        const ticket = it.qtd ? (it.total / it.qtd) : 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="text-start">
+            <button type="button" class="btn btn-link p-0 fw-bold" data-estab="${nome}" style="text-decoration:none;color:var(--royal)">
+              ${nome}
+            </button>
+          </td>
+          <td>${it.qtd.toLocaleString('pt-BR')}</td>
+          <td>${brl(ticket)}</td>
+          <td class="valor">${brl(it.total)}</td>
+          <td class="valor">${brl(it.mesTotal)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Clique no nome => filtra localmente a tabela principal por estabelecimento
+      tbody.querySelectorAll('button[data-estab]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const alvo = btn.getAttribute('data-estab');
+          filtrarTabelaPorEstabelecimentoLocal(alvo);
+        });
+      });
+    }
+
+    function filtrarTabelaPorEstabelecimentoLocal(nome){
+      const rows = document.querySelectorAll('#t-lanc tbody tr');
+      rows.forEach(tr=>{
+        const e = (tr.querySelector('.estab')?.textContent || '').trim();
+        tr.style.display = (e===nome) ? '' : 'none';
+      });
+      atualizarMetricas();
+      montarResumoEstabelecimentos();
+    }
+
+    // Limpa filtro local (somente visual)
+    document.getElementById('btn-clear-local')?.addEventListener('click', ()=>{
+      document.querySelectorAll('#t-lanc tbody tr').forEach(tr=> tr.style.display='');
+      atualizarMetricas();
+      montarResumoEstabelecimentos();
+    });
+
     // Init
     document.addEventListener('DOMContentLoaded', () => {
       pintarNegativos();
       atualizarMetricas();
       atualizarChips();
+      montarResumoEstabelecimentos();
     });
   </script>
+
+  <!--
+    NOTA sobre "Hoje mostra ontem":
+    Se o back-end estiver filtrando usando datas sem hora em UTC, ajuste para usar
+    America/Sao_Paulo e considerar data_fim até 23:59:59. Exemplo (SQLAlchemy):
+
+      di = datetime.combine(data_inicio, time.min, tzinfo=tz)
+      df = datetime.combine(data_fim, time.max, tzinfo=tz)
+      query = query.filter(Modelo.data.between(di, df))
+
+    Assim, “hoje” inclui todo o dia.
+  -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
