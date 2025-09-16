@@ -3,196 +3,304 @@
 <head>
   <meta charset="utf-8">
   <title>Painel do Cooperado</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Fonte opcional -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --royal:#0d3ccf;
-      --royal-600:#0b31a9;
-      --royal-50:#e9f0ff;
-      --ink:#111827;
+      --royal:#4169E1;            /* Azul-royal */
+      --royal-600:#2f52c9;
+      --royal-50:#f5f7ff;
+      --ink:#0b1220;
       --muted:#6b7280;
-      --ok:#13b981;
-      --bg:#f6f8ff;
-      --card:#ffffff;
-      --line:#eef2ff;
-      --chip:#edf2ff;
+      --line:#e8edff;
+      --ok:#0fb98b;
+      --bg:#ffffff;               /* branco predominante */
+      --card: #ffffffcc;          /* vidro */
+      --blur: 14px;
+      --radius: 18px;
+      --shadow: 0 12px 38px rgba(65,105,225,.18);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;background:var(--bg);color:var(--ink);
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 110% -10%, rgba(65,105,225,.10), transparent 60%),
+        radial-gradient(1200px 600px at -10% 110%, rgba(65,105,225,.08), transparent 60%),
+        #fff;
     }
 
-    /* Topbar */
-    header{
-      position:sticky; top:0; z-index:20;
-      background:linear-gradient(110deg, var(--royal), var(--royal-600));
-      color:#fff; padding:14px 16px; display:flex; align-items:center; gap:12px;
-      box-shadow:0 6px 16px rgba(0,0,0,.18);
+    /* ===== APP BAR com onda ===== */
+    .appbar{
+      position:sticky; top:0; z-index:40; overflow:hidden;
+      background:linear-gradient(120deg, var(--royal), var(--royal-600));
+      color:#fff; padding:16px 16px 50px 16px;
+      box-shadow:0 10px 30px rgba(65,105,225,.35);
     }
-    .avatar{
-      width:44px; height:44px; border-radius:50%; object-fit:cover; background:#fff2; border:2px solid #ffffff44;
-    }
-    .title{margin:0; font-weight:800; font-size:18px; line-height:1.1}
-    .subtitle{margin:2px 0 0 0; font-size:12px; opacity:.9}
-    .spacer{flex:1}
+    .appbar .row{display:flex; align-items:center; gap:12px}
+    .avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #ffffff88;background:#ffffff22}
+    .hello{margin:0;font-weight:900;font-size:18px;line-height:1.1}
+    .sub{margin:2px 0 0 0;font-size:12px;opacity:.95}
     .logout{
-      color:#fff; text-decoration:none; font-weight:700; font-size:13px;
-      border:1px solid #ffffff66; padding:6px 10px; border-radius:10px;
+      margin-left:auto; color:#fff; text-decoration:none; font-weight:800; font-size:13px;
+      border:1px solid #ffffff66; padding:7px 12px; border-radius:12px; white-space:nowrap;
+      backdrop-filter: blur(6px);
     }
-    .logout:hover{background:#ffffff1a}
-
-    .wrap{max-width:1100px; margin:16px auto; padding:0 12px}
-
-    /* Cards métricas */
-    .grid{display:grid; gap:12px; grid-template-columns: repeat(12, 1fr)}
-    .card{
-      background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px;
-      box-shadow:0 10px 22px rgba(17,24,39,.04);
-    }
-    .card h3{margin:0 0 8px 0; font-size:14px; color:#111827}
-    .metric{font-size:28px; font-weight:800}
-    .metric.ok{color:var(--ok)}
-    .muted{color:var(--muted)}
-    .badge{background:var(--chip); color:var(--royal); font-weight:800; padding:4px 10px; border-radius:999px; font-size:12px}
-
-    /* Filtros */
-    .filters{display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin:8px 0 12px}
-    .filters .field{display:flex; flex-direction:column; gap:6px}
-    .filters label{font-size:12px; color:#374151; font-weight:600}
-    .filters input[type="date"]{
-      padding:10px 12px; height:42px; border:1px solid var(--line); border-radius:12px; background:#fff;
-    }
-    .filters button{
-      height:42px; padding:0 16px; border:0; border-radius:12px; font-weight:800; color:#fff;
-      background:linear-gradient(90deg, var(--royal), var(--royal-600)); cursor:pointer;
-    }
-    .filters a.reset{
-      height:42px; display:inline-flex; align-items:center; justify-content:center; padding:0 14px;
-      border-radius:12px; font-weight:700; color:var(--royal-600); background:#e9f0ff; text-decoration:none;
-      border:1px solid var(--line);
+    .wave{
+      position:absolute; left:0; right:0; bottom:-1px; height:50px; pointer-events:none;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="90" viewBox="0 0 1440 90" fill="none"><path d="M0 36C240 70 480 70 720 36C960 2 1200 2 1440 36V90H0V36Z" fill="white"/></svg>') center/cover no-repeat;
     }
 
-    /* Tabela */
-    .table-wrap{overflow:auto; border:1px solid var(--line); border-radius:14px}
-    table{width:100%; border-collapse:collapse}
-    th, td{padding:12px 10px; border-bottom:1px solid var(--line); font-size:14px}
-    thead th{
-      position:sticky; top:0; background:#f8faff; text-transform:uppercase; letter-spacing:.06em;
-      font-size:12px; color:#4b5563; text-align:left;
+    .wrap{max-width:1080px;margin:-36px auto 88px auto;padding:0 14px} /* sobe por cima da onda */
+
+    /* ===== Cards (glassmorphism) ===== */
+    .glass{
+      background: var(--card);
+      border:1px solid #ffffff66;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(var(--blur));
     }
-    td.right{text-align:right}
-    tr:hover td{background:#fbfdff}
+    .metric-grid{
+      display:grid; gap:12px; grid-template-columns: repeat(12, 1fr);
+    }
+    .metric-card{
+      grid-column: span 12;
+      padding:16px; position:relative; overflow:hidden;
+    }
+    @media(min-width:840px){
+      .metric-card.span-4{grid-column: span 4}
+      .metric-card.span-12{grid-column: span 12}
+    }
+    .metric-title{margin:0 0 6px 0; font-size:12px; color:#0b1220; font-weight:800; letter-spacing:.06em; text-transform:uppercase}
+    .metric-value{font-size:30px; font-weight:900}
+    .ok{color:var(--ok)}
+    .hint{color:var(--muted); font-size:12px; margin-top:6px}
+
+    /* badge superior decorativa */
+    .spark{
+      position:absolute; right:14px; top:14px; width:8px; height:8px; border-radius:50%;
+      background: conic-gradient(from 0deg, #fff 0 40%, transparent 40% 100%);
+      box-shadow:0 0 0 8px rgba(255,255,255,.55), 0 0 0 12px rgba(65,105,225,.15);
+      opacity:.7;
+    }
+
+    /* ===== Seção Lançamentos ===== */
+    .section{
+      padding:12px; margin-top:10px;
+    }
+    .section-head{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;
+    }
+    .section-title{
+      margin:0; font-size:13px; font-weight:900; letter-spacing:.08em; color:#0b1220; text-transform:uppercase;
+    }
+    .badge{
+      background:#eef2ff; color:var(--royal); font-weight:900; padding:4px 10px; border-radius:999px; font-size:12px
+    }
+
+    /* Timeline mobile-first */
+    .timeline{position:relative; padding-left:14px; display:flex; flex-direction:column; gap:10px}
+    .timeline:before{
+      content:""; position:absolute; left:6px; top:0; bottom:0; width:2px; background:linear-gradient(var(--royal-50), var(--royal));
+      border-radius:2px;
+    }
+    .tx{
+      position:relative; padding:12px 12px 12px 14px; border:1px solid var(--line); border-radius:16px; background:#fff;
+      display:grid; grid-template-columns: 1fr auto; gap:4px 10px; align-items:center;
+      box-shadow:0 10px 24px rgba(17,24,39,.05);
+    }
+    .tx:before{
+      content:""; position:absolute; left:-2px; top:16px; width:10px; height:10px; border-radius:50%;
+      background:var(--royal); box-shadow:0 0 0 3px #eef2ff;
+    }
+    .tx-estab{
+      font-weight:900; color:#0b1220; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .tx-valor{
+      font-weight:900; color:#0b1220; font-size:16px; padding:6px 10px; border-radius:10px;
+      background:var(--royal-50); border:1px solid var(--line);
+    }
+    .tx-os{font-size:12px; color:#64748b; font-weight:800}
+    .tx-quando{font-size:12px; color:#334155; font-weight:800; text-align:right}
+    .tx-desc{grid-column:1 / -1; font-size:12px; color:#475569}
+
     .empty{padding:18px; color:var(--muted); text-align:center}
 
-    /* Responsivo */
-    @media (max-width: 900px){
-      .grid .span-4{grid-column: span 12}
-      .grid .span-12{grid-column: span 12}
-      .metric{font-size:24px}
+    /* ===== FAB (Filtros) ===== */
+    .fab{
+      position:fixed; right:16px; bottom:84px; z-index:35;
+      background:linear-gradient(120deg, var(--royal), var(--royal-600));
+      color:#fff; border:0; width:56px; height:56px; border-radius:50%;
+      box-shadow:0 18px 40px rgba(65,105,225,.35); cursor:pointer; font-weight:900; font-size:20px;
     }
-    @media (min-width: 901px){
-      .grid .span-4{grid-column: span 4}
-      .grid .span-12{grid-column: span 12}
+
+    /* ===== Bottom Sheet de Filtros ===== */
+    .sheet{
+      position:fixed; left:0; right:0; bottom:-100%; z-index:45; transition:bottom .25s ease;
+      background:#fff; border-top-left-radius:20px; border-top-right-radius:20px;
+      box-shadow:0 -18px 40px rgba(17,24,39,.25); border-top:1px solid var(--line);
+    }
+    .sheet.open{ bottom:0; }
+    .sheet .drag{ width:46px; height:5px; background:#e5e7eb; border-radius:999px; margin:10px auto; }
+    .sheet h4{ margin:4px 16px 8px 16px; font-size:14px; font-weight:900; letter-spacing:.06em; color:#0b1220; text-transform:uppercase }
+    .sheet form{ padding:0 16px 16px 16px; display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    .field{ display:flex; flex-direction:column; gap:6px }
+    label{ font-size:12px; color:#334155; font-weight:800 }
+    input[type="date"]{
+      padding:12px 12px; height:44px; border:1px solid var(--line); border-radius:12px; background:#fff; min-width:0;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+    }
+    .actions{ grid-column:1 / -1; display:flex; gap:10px }
+    .btn{
+      height:44px; border-radius:12px; border:1px solid var(--line); font-weight:900; cursor:pointer; flex:1;
+    }
+    .btn.primary{
+      color:#fff; background:linear-gradient(120deg, var(--royal), var(--royal-600)); border:0;
+      box-shadow:0 10px 24px rgba(65,105,225,.25);
+    }
+    .btn.ghost{
+      color:var(--royal-600); background:#fff;
+    }
+
+    /* ===== Bottom Nav (app-like) ===== */
+    .bottom-nav{
+      position:fixed; left:0; right:0; bottom:0; z-index:42;
+      background:#fff; border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 10px;
+    }
+    .tab{ color:#6b7280; text-decoration:none; font-weight:800; font-size:12px; display:flex; gap:6px; align-items:center; padding:8px 10px; border-radius:12px }
+    .tab.active{ color:var(--royal-600); background:#eef2ff; }
+
+    /* ===== Desktop tweaks ===== */
+    @media(min-width:900px){
+      .appbar{border-bottom-left-radius:16px;border-bottom-right-radius:16px}
+      .wrap{margin-top:-44px}
+      .timeline{gap:12px}
     }
   </style>
 </head>
 <body>
 
-<header>
-  <img class="avatar" src="{{ url_for('foto_cooperado', id=coop.id) }}" alt="foto do cooperado" onerror="this.style.visibility='hidden'">
-  <div>
-    <h1 class="title">Olá, {{ coop.nome }}</h1>
-    <div class="subtitle">Usuário: <b>@{{ coop.username }}</b></div>
-  </div>
-  <div class="spacer"></div>
-  <a class="logout" href="{{ url_for('logout') }}">Sair</a>
-</header>
-
-<div class="wrap">
-  <!-- Métricas -->
-  <div class="grid">
-    <div class="card span-4">
-      <h3>Crédito disponível</h3>
-      <div class="metric ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
-      {% if coop.credito_atualizado_em %}
-        <div class="muted" style="margin-top:6px">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
-      {% else %}
-        <div class="muted" style="margin-top:6px">Sem ajustes manuais registrados</div>
-      {% endif %}
-    </div>
-
-    <div class="card span-4">
-      <h3>Total de lançamentos (período)</h3>
-      <div class="metric">{{ total_lanc }}</div>
-      <div class="muted" style="margin-top:6px">Itens listados abaixo</div>
-    </div>
-
-    <div class="card span-4">
-      <h3>Gasto no período</h3>
-      <div class="metric">R$ {{ '%.2f'|format(total_gasto or 0) }}</div>
-      <div class="muted" style="margin-top:6px">Soma dos lançamentos filtrados</div>
-    </div>
-
-    <div class="card span-12">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
-        <h3 style="margin:0">Meus lançamentos</h3>
-        <span class="badge">Atualizado agora</span>
+  <!-- APP BAR -->
+  <header class="appbar">
+    <div class="row">
+      <img class="avatar" src="{{ url_for('foto_cooperado', id=coop.id) }}" alt="foto do cooperado" onerror="this.style.visibility='hidden'">
+      <div>
+        <h1 class="hello">Olá, {{ coop.nome }}</h1>
+        <div class="sub">Usuário: <b>@{{ coop.username }}</b></div>
       </div>
+      <a class="logout" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+    <div class="wave" aria-hidden="true"></div>
+  </header>
 
-      <form class="filters" method="get" action="{{ url_for('painel_cooperado') }}">
-        <div class="field">
-          <label for="di">Data início</label>
-          <input id="di" type="date" name="data_inicio" value="{{ data_inicio }}">
-        </div>
-        <div class="field">
-          <label for="df">Data fim</label>
-          <input id="df" type="date" name="data_fim" value="{{ data_fim }}">
-        </div>
-        <div class="field">
-          <button type="submit">Aplicar filtros</button>
-        </div>
-        {% if data_inicio or data_fim %}
-        <a class="reset" href="{{ url_for('painel_cooperado') }}">Limpar</a>
+  <main class="wrap">
+    <!-- MÉTRICAS -->
+    <section class="metric-grid">
+      <article class="glass metric-card span-4">
+        <span class="spark" aria-hidden="true"></span>
+        <h3 class="metric-title">Crédito disponível</h3>
+        <div class="metric-value ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
+        {% if coop.credito_atualizado_em %}
+          <div class="hint">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
+        {% else %}
+          <div class="hint">Sem ajustes manuais registrados</div>
         {% endif %}
-      </form>
+      </article>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Nº OS</th>
-              <th>Estabelecimento</th>
-              <th class="right">Valor (R$)</th>
-              <th>Descrição</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if lancamentos %}
-              {% for l in lancamentos %}
-              <tr>
-                <td>{{ l.data_brasilia or l.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ l.os_numero }}</td>
-                <td>{{ l.estabelecimento.nome if l.estabelecimento else '-' }}</td>
-                <td class="right">{{ '%.2f'|format(l.valor or 0) }}</td>
-                <td>{{ l.descricao or '' }}</td>
-              </tr>
-              {% endfor %}
-            {% else %}
-              <tr><td colspan="5" class="empty">Nenhum lançamento neste período.</td></tr>
-            {% endif %}
-          </tbody>
-        </table>
+      <article class="glass metric-card span-4">
+        <h3 class="metric-title">Total de lançamentos (período)</h3>
+        <div class="metric-value">{{ total_lanc }}</div>
+        <div class="hint">Itens listados abaixo</div>
+      </article>
+
+      <article class="glass metric-card span-4">
+        <h3 class="metric-title">Gasto no período</h3>
+        <div class="metric-value">R$ {{ '%.2f'|format(total_gasto or 0) }}</div>
+        <div class="hint">Soma dos lançamentos filtrados</div>
+      </article>
+
+      <!-- LANÇAMENTOS -->
+      <article class="glass metric-card span-12 section">
+        <div class="section-head">
+          <h3 class="section-title">Meus lançamentos</h3>
+          <span class="badge">Atualizado agora</span>
+        </div>
+
+        <!-- TIMELINE (mobile-first) -->
+        <div class="timeline" aria-label="Lançamentos">
+          {% if lancamentos %}
+            {% for l in lancamentos %}
+            <div class="tx">
+              <div class="tx-estab">{{ l.estabelecimento.nome if l.estabelecimento else '—' }}</div>
+              <div class="tx-valor">R$ {{ '%.2f'|format(l.valor or 0) }}</div>
+              <div class="tx-os">OS: {{ l.os_numero or '—' }}</div>
+              <div class="tx-quando">{{ l.data_brasilia or l.data.strftime('%d/%m/%Y %H:%M') }}</div>
+              {% if l.descricao %}<div class="tx-desc">{{ l.descricao }}</div>{% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty">Nenhum lançamento neste período.</div>
+          {% endif %}
+        </div>
+
+        <div class="hint" style="margin-top:8px">* Horários exibidos em Brasília (GMT-3).</div>
+      </article>
+    </section>
+  </main>
+
+  <!-- FAB filtros -->
+  <button class="fab" id="openFilters" title="Filtrar">⟲</button>
+
+  <!-- BOTTOM SHEET de filtros -->
+  <div class="sheet" id="sheet">
+    <div class="drag" id="closeFilters" aria-hidden="true"></div>
+    <h4>Filtros</h4>
+    <form method="get" action="{{ url_for('painel_cooperado') }}">
+      <div class="field">
+        <label for="di">Data início</label>
+        <input id="di" type="date" name="data_inicio" value="{{ data_inicio }}">
       </div>
-
-      <div class="muted" style="margin-top:10px">* Os horários são mostrados em Brasília (GMT-3).</div>
-    </div>
+      <div class="field">
+        <label for="df">Data fim</label>
+        <input id="df" type="date" name="data_fim" value="{{ data_fim }}">
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn primary">Aplicar</button>
+        {% if data_inicio or data_fim %}
+        <a class="btn ghost" href="{{ url_for('painel_cooperado') }}">Limpar</a>
+        {% else %}
+        <button type="button" class="btn ghost" id="cancelSheet">Fechar</button>
+        {% endif %}
+      </div>
+    </form>
   </div>
-</div>
 
+  <!-- Bottom navigation (estético) -->
+  <nav class="bottom-nav" aria-label="Navegação">
+    <a class="tab active" href="#"><span>Início</span></a>
+    <a class="tab" href="#lancamentos"><span>Lançamentos</span></a>
+    <a class="tab" href="{{ url_for('logout') }}"><span>Sair</span></a>
+  </nav>
+
+  <script>
+    // Bottom-sheet open/close
+    const sheet = document.getElementById('sheet');
+    document.getElementById('openFilters').addEventListener('click', ()=> sheet.classList.add('open'));
+    document.getElementById('closeFilters').addEventListener('click', ()=> sheet.classList.remove('open'));
+    const cancelBtn = document.getElementById('cancelSheet');
+    if(cancelBtn) cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open'));
+
+    // Escape fecha sheet
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') sheet.classList.remove('open'); });
+
+    // Suave 'active' no bottom nav (visual apenas)
+    document.querySelectorAll('.bottom-nav .tab').forEach(t=>{
+      t.addEventListener('click', function(){
+        document.querySelectorAll('.bottom-nav .tab').forEach(x=>x.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
