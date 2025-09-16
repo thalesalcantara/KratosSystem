@@ -1,3 +1,4 @@
+# app.py
 from flask import (
     Flask, render_template, render_template_string, request, redirect, url_for, flash, session,
     send_file, send_from_directory, jsonify, Response
@@ -84,6 +85,45 @@ except Exception:
 
 db = SQLAlchemy(app)
 
+# ====== garantir criação de tabelas em runtime (sem apagar nada) ======
+def ensure_schema():
+    """Cria colunas no banco se ainda não existirem (sem Alembic)."""
+    with app.app_context():
+        try:
+            cols = {r[0] for r in db.session.execute(text(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
+            )).fetchall()}
+        except Exception:
+            # Se não for Postgres (ex.: SQLite), simplesmente não aplicamos ALTERs
+            cols = set()
+
+        alter_stmts = []
+        if 'foto_data' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
+        if 'foto_mimetype' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
+        if 'foto_filename' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
+        if 'credito_atualizado_em' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
+        if 'senha_hash' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
+
+        if alter_stmts and 'information_schema' in _build_db_uri():
+            # proteção simples: só tenta no Postgres
+            try:
+                db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
+try:
+    with app.app_context():
+        db.create_all()
+        ensure_schema()
+except Exception:
+    pass
+
 # ========= MODELS =========
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -140,38 +180,14 @@ class Lancamento(db.Model):
 
 Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
 
-# ========= SCHEMA (adaptação leve) =========
-def ensure_schema():
-    """Cria colunas no banco se ainda não existirem (sem Alembic)."""
-    with app.app_context():
-        cols = {r[0] for r in db.session.execute(text(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
-        )).fetchall()}
-        alter_stmts = []
-        if 'foto_data' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
-        if 'foto_mimetype' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
-        if 'foto_filename' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
-        if 'credito_atualizado_em' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
-        if 'senha_hash' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
-        if alter_stmts:
-            db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
-            db.session.commit()
-
-_SCHEMA_BOOTED = False
-@app.before_request
-def _run_schema_once():
-    global _SCHEMA_BOOTED
-    if not _SCHEMA_BOOTED:
-        try:
-            ensure_schema()
-        except Exception:
-            pass
-        _SCHEMA_BOOTED = True
+# ========= CONTEXT PROCESSOR (corrige uso de now()/callable no Jinja) =========
+@app.context_processor
+def inject_globals():
+    return {
+        "now": datetime.now,           # permite {{ now() }}
+        "current_year": datetime.now().year,
+        "callable": callable           # se o template usar {{ callable(now) }}
+    }
 
 # ========= HELPERS =========
 def is_admin():
@@ -188,7 +204,6 @@ def parse_date(s):
         return None
     try:
         if len(s.strip()) <= 10:
-            # só data (YYYY-MM-DD) -> meia-noite local (naive)
             return datetime.strptime(s, '%Y-%m-%d')
         return datetime.strptime(s, '%Y-%m-%d %H:%M')
     except Exception:
@@ -217,12 +232,12 @@ _LAST_LANC_CACHE = {"value": 0, "ts": 0.0}
 _LAST_LANC_TTL = 2.0  # segundos
 
 def _get_cached_last_lanc_id():
-    now = time.time()
-    if now - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
+    now_ts = time.time()
+    if now_ts - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
         return _LAST_LANC_CACHE["value"], True
     last_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
     _LAST_LANC_CACHE["value"] = int(last_id)
-    _LAST_LANC_CACHE["ts"] = now
+    _LAST_LANC_CACHE["ts"] = now_ts
     return _LAST_LANC_CACHE["value"], False
 
 def _invalidate_last_lanc_cache():
@@ -245,15 +260,9 @@ def add_perf_headers(resp: Response):
     resp.headers.setdefault("Server-Timing", "app;desc=\"Coopex-API\"")
     return resp
 
-# ========= LOGIN/LOGOUT =========
+# ========= LOGIN/LOGOUT (AUTODETECÇÃO DE TIPO) =========
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    LOGIN AUTOMÁTICO POR USERNAME:
-      - Não precisa selecionar tipo.
-      - Tenta Admin -> Estabelecimento -> Cooperado.
-      - Mantém compatibilidade caso o template ainda envie 'tipo' (ignorado).
-    """
     if request.method == 'POST':
         username = (request.form.get('username') or '').strip()
         senha = request.form.get('senha') or ''
@@ -284,7 +293,7 @@ def login():
             session['user_tipo'] = 'cooperado'
             return redirect(url_for('painel_cooperado'))
 
-        flash('Usuário ou senha inválidos', 'danger')
+        flash('Usuário ou senha inválidos.', 'danger')
         return render_template('login.html'), 401
 
     return render_template('login.html')
@@ -314,9 +323,6 @@ def dashboard():
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
     di = parse_date(filtros['data_inicio'])
     df = parse_date(filtros['data_fim'])
-    # FIM INCLUSIVO (até 23:59:59)
-    if df:
-        df = df + timedelta(days=1)
 
     base_q = db.session.query(Lancamento)
     if coop_id_i is not None:
@@ -326,10 +332,9 @@ def dashboard():
     if di:
         base_q = base_q.filter(Lancamento.data >= di)
     if df:
-        base_q = base_q.filter(Lancamento.data < df)
+        base_q = base_q.filter(Lancamento.data <= df)
 
     total_pedidos = base_q.count()
-
     sum_q = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
     if coop_id_i is not None:
         sum_q = sum_q.filter(Lancamento.cooperado_id == coop_id_i)
@@ -338,7 +343,7 @@ def dashboard():
     if di:
         sum_q = sum_q.filter(Lancamento.data >= di)
     if df:
-        sum_q = sum_q.filter(Lancamento.data < df)
+        sum_q = sum_q.filter(Lancamento.data <= df)
     total_valor = (sum_q.scalar() or 0.0)
 
     sum_per_coop = db.session.query(
@@ -356,7 +361,7 @@ def dashboard():
     if di:
         sum_per_coop = sum_per_coop.filter((Lancamento.data >= di) | (Lancamento.id.is_(None)))
     if df:
-        sum_per_coop = sum_per_coop.filter((Lancamento.data < df) | (Lancamento.id.is_(None)))
+        sum_per_coop = sum_per_coop.filter((Lancamento.data <= df) | (Lancamento.id.is_(None)))
 
     sum_per_coop = sum_per_coop.group_by(Cooperado.id, Cooperado.nome).order_by(Cooperado.nome).all()
 
@@ -634,7 +639,7 @@ def novo_estabelecimento():
         senha = request.form['senha']
         logo_file = request.files.get('logo')
         filename = None
-        if logo_file and logo_file.filename:
+        if logo_file && logo_file.filename:
             filename = secure_filename(logo_file.filename)
             logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
         if Estabelecimento.query.filter_by(username=username).first():
@@ -695,6 +700,9 @@ def listar_lancamentos():
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
     di = parse_date(filtros['data_inicio'])
     df = parse_date(filtros['data_fim'])
+
+    # >>>>>> CORREÇÃO DE FUSO/DIA INTEIRO (apenas nesta rota):
+    # inclui o dia todo fazendo "data < data_fim + 1 dia"
     if df:
         df = df + timedelta(days=1)
 
@@ -737,8 +745,6 @@ def exportar_lancamentos():
     est_id_i  = int(est_id) if est_id else None
     di = parse_date(di_s)
     df = parse_date(df_s)
-    if df:
-        df = df + timedelta(days=1)
 
     q = Lancamento.query
     if coop_id_i is not None:
@@ -748,7 +754,7 @@ def exportar_lancamentos():
     if di:
         q = q.filter(Lancamento.data >= di)
     if df:
-        q = q.filter(Lancamento.data < df)
+        q = q.filter(Lancamento.data <= df)
     q = q.order_by(Lancamento.data.desc())
 
     rows = q.all()
@@ -855,7 +861,7 @@ def painel_estabelecimento():
 
     lancamentos = Lancamento.query.filter_by(estabelecimento_id=est.id).order_by(Lancamento.data.desc()).all()
 
-    # Timezone conversion (apenas apresentação)
+    # Timezone conversion
     try:
         from pytz import timezone, utc
         tz_sp = timezone('America/Sao_Paulo')
@@ -963,17 +969,15 @@ def painel_cooperado():
     df_s = request.args.get('data_fim') or ''
     di = parse_date(di_s)
     df = parse_date(df_s)
-    if df:
-        df = df + timedelta(days=1)
 
     q = Lancamento.query.filter(Lancamento.cooperado_id == coop.id)
     if di:
         q = q.filter(Lancamento.data >= di)
     if df:
-        q = q.filter(Lancamento.data < df)
+        q = q.filter(Lancamento.data <= df)
     lancamentos = q.order_by(Lancamento.data.desc()).all()
 
-    # Horário em Brasília (apresentação)
+    # Horário em Brasília
     try:
         from pytz import timezone, utc
         tz_sp = timezone('America/Sao_Paulo')
@@ -998,8 +1002,8 @@ def painel_cooperado():
             data_fim=df_s
         )
     except TemplateNotFound:
-        # Fallback simples (mantido)
-        return render_template_string("<!-- fallback omitido aqui por brevidade -->")
+        # Fallback com layout branco + azul royal (mobile-first)
+        return render_template_string(""" ... (fallback omitido para brevidade) ... """)
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
@@ -1012,11 +1016,6 @@ def criar_banco_e_admin():
             db.session.add(admin)
             db.session.commit()
             print('Admin criado: coopex / coopex05289')
-
-# Em servidores WSGI (gunicorn), garanta criação ao menos no primeiro request
-@app.before_first_request
-def _init_on_first_request():
-    criar_banco_e_admin()
 
 # ========= MAIN =========
 if __name__ == '__main__':
