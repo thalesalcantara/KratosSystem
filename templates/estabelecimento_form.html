@@ -9,110 +9,128 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
+        :root{
+          --royal:#4169E1;      /* Azul-royal principal */
+          --royal-700:#2f52c9;  /* Tom mais escuro */
+          --royal-300:#6a8df5;  /* Tom mais claro  */
+          --ink:#1f2937;        /* Texto padrão    */
+          --line:#dbe5ff;       /* Borda suave     */
+        }
+
         body {
-            background: #191c20;
+            background: #ffffff;
+            color: var(--ink);
             font-family: 'Roboto', Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 18px;
         }
+
         .form-card {
-            background: linear-gradient(130deg, #101218 80%, #003399 100%);
-            color: #ffd700;
-            padding: 38px 30px 26px 30px;
+            background: #ffffff;
+            color: var(--ink);
+            padding: 32px 24px 24px 24px;
             border-radius: 20px;
-            box-shadow: 0 8px 32px #000a, 0 2px 8px #00339955;
+            border: 1px solid var(--line);
+            box-shadow: 0 8px 32px rgba(65,105,225,.12);
             width: 100%;
-            max-width: 420px;
+            max-width: 540px;
         }
+
         .form-card .logo-preview {
-            margin: 18px auto 0 auto;
+            margin: 8px auto 0 auto;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         .form-card .logo-preview img {
-            max-width: 200px; /* LOGO BEM MAIOR */
+            max-width: 200px; /* LOGO GRANDE */
             max-height: 120px;
             border-radius: 12px;
-            box-shadow: 0 2px 16px #003399aa;
-            margin-bottom: 5px;
+            box-shadow: 0 2px 16px rgba(65,105,225,.35);
+            margin-bottom: 6px;
         }
+
         .form-card .estab-nome {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;           /* NOME BEM MENOR */
-            color: #e0e0e0;
-            letter-spacing: 1.5px;
+            font-size: .95rem;  /* nome menor */
+            color: var(--royal-700);
+            letter-spacing: 1.4px;
             text-align: center;
             margin-top: 6px;
             margin-bottom: 10px;
-            opacity: 0.8;
-            font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 85%;
         }
+
         h2 {
             font-family: 'Orbitron', sans-serif;
             text-align: center;
             letter-spacing: 2px;
-            color: #ffd700;
+            color: var(--royal);
             margin-bottom: 18px;
         }
+
         .form-label {
-            color: #fff;
-            font-weight: 600;
+            color: var(--royal-700);
+            font-weight: 700;
         }
+
         .form-control {
-            background: #23262b;
-            border: 1px solid #22263d;
-            color: #ffd700;
+            background: #fff;
+            border: 1px solid #c7d3ff;
+            color: var(--ink);
             font-weight: 500;
-            border-radius: 9px;
+            border-radius: 10px;
         }
+
+        .form-control::placeholder{ color:#7f95e9; }
+
         .form-control:focus {
-            border-color: #ffd700;
-            box-shadow: 0 0 0 1.5px #ffd70044;
-            background: #191c20;
-            color: #ffd700;
+            border-color: var(--royal);
+            box-shadow: 0 0 0 .18rem rgba(65,105,225,.22);
+            background: #fff;
+            color: var(--ink);
         }
+
         .btn-primary {
-            background: linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
-            color: #191c20;
-            font-weight: bold;
+            background: linear-gradient(90deg, var(--royal) 60%, var(--royal-300) 100%);
+            color: #ffffff;
+            font-weight: 800;
             border: none;
-            border-radius: 17px;
-            font-size: 1.1rem;
-            margin-top: 15px;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            margin-top: 16px;
             width: 100%;
-            transition: background .17s;
+            transition: filter .15s, transform .05s;
+            box-shadow: 0 6px 18px rgba(65,105,225,.25);
         }
-        .btn-primary:hover {
-            background: #ffe670;
-            color: #003399;
-        }
+        .btn-primary:hover { filter: brightness(1.03); }
+        .btn-primary:active { transform: translateY(1px); }
+
         .alert {
-            background: #ffd700;
-            color: #222;
-            font-weight: 600;
-            border-radius: 9px;
-            margin-top: 10px;
+            background: var(--royal);
+            color: #fff;
+            font-weight: 700;
+            border-radius: 10px;
+            margin-top: 12px;
             margin-bottom: 0;
+            border: 0;
+            box-shadow: 0 8px 22px rgba(65,105,225,.20);
         }
+
         @media (max-width: 500px) {
-            .form-card {
-                padding: 18px 4px;
-            }
+            .form-card { padding: 22px 14px; }
             .form-card .logo-preview img {
-                max-width: 120px;
-                max-height: 70px;
+                max-width: 140px;
+                max-height: 84px;
             }
-            .form-card .estab-nome {
-                font-size: 0.85rem;
-                max-width: 95%;
-            }
+            .form-card .estab-nome { font-size: 0.85rem; max-width: 95%; }
         }
     </style>
 </head>
@@ -124,27 +142,30 @@
             <div class="estab-nome" title="{{ estabelecimento.nome }}">{{ estabelecimento.nome }}</div>
         </div>
         {% endif %}
+
         <h2>
             <i class="bi bi-shop"></i>
             {{ 'Editar' if editar else 'Novo' }} Estabelecimento
         </h2>
+
         <form method="post" enctype="multipart/form-data">
             <label class="form-label" for="nome"><i class="bi bi-shop"></i> Nome</label>
             <input type="text" class="form-control" id="nome" name="nome" value="{{ estabelecimento.nome if editar else '' }}" required>
-            
+
             <label class="form-label" for="username"><i class="bi bi-person-badge"></i> Usuário</label>
             <input type="text" class="form-control" id="username" name="username" value="{{ estabelecimento.username if editar else '' }}" required>
-            
+
             <label class="form-label" for="senha"><i class="bi bi-lock"></i> Senha {{ '(deixe em branco para não alterar)' if editar else '' }}</label>
             <input type="password" class="form-control" id="senha" name="senha" {{ '' if editar else 'required' }}>
-            
+
             <label class="form-label" for="logo"><i class="bi bi-image"></i> Logo do Estabelecimento</label>
             <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-            
+
             <button type="submit" class="btn btn-primary mt-3">
                 {{ 'Salvar Alterações' if editar else 'Cadastrar Estabelecimento' }}
             </button>
         </form>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
