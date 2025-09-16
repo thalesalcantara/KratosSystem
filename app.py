@@ -15,16 +15,23 @@ from flask_login import (
     login_required, logout_user
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy import and_, or_, func, desc, ForeignKey
+from sqlalchemy import and_, or_, func, desc, ForeignKey, inspect
 from sqlalchemy.orm import relationship
 
 # ============================ APP / DB / LOGIN ============================
 
+def _normalize_db_url(url: str) -> str:
+    # Render costuma dar postgres://; SQLAlchemy 2 prefere postgresql+psycopg://
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+psycopg://", 1)
+    return url
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "troque_esta_chave")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL", "sqlite:///coopex.db"
-)
+
+_default_sqlite = "sqlite:///coopex.db"
+db_url = _normalize_db_url(os.getenv("DATABASE_URL", _default_sqlite))
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -48,7 +55,6 @@ def inject_template_globals():
         "year": datetime.now(BRT).year,
     }
 
-# Função now() e builtin callable disponíveis no Jinja
 app.jinja_env.globals["now"] = lambda: datetime.now(BRT)
 app.jinja_env.globals["callable"] = callable
 
@@ -169,30 +175,56 @@ def to_brt_iso(dt_aware: datetime) -> str:
     return dt_brt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-# ============================ BOOTSTRAP DB EM PRODUÇÃO ============================
+# ============================ BOOTSTRAP / GUARDA DE TABELAS ============================
 
-def _bootstrap_db_on_import():
-    """Cria tabelas e garante admin padrão mesmo sob gunicorn."""
+DB_READY = False
+
+def _ensure_db():
+    """Garante que todas as tabelas existam e cria admin padrão."""
+    global DB_READY
+    if DB_READY:
+        return
     with app.app_context():
-        db.create_all()
+        try:
+            inspector = inspect(db.engine)
+            need_create = any(not inspector.has_table(t)
+                              for t in ("users", "cooperados", "estabelecimentos", "lancamentos"))
+        except Exception:
+            need_create = True
+
+        if need_create:
+            db.create_all()
         # Admin padrão
         if not User.query.filter_by(email="admin@coopex").first():
             admin = User(email="admin@coopex", tipo="admin")
             admin.set_password(os.getenv("ADMIN_PASSWORD", "123"))
             db.session.add(admin)
             db.session.commit()
+        DB_READY = True
 
-_bootstrap_db_on_import()
+# cria no import (worker do gunicorn)
+_ensure_db()
+
+# reforça em cada request até confirmar
+@app.before_request
+def _before_any_request():
+    _ensure_db()
 
 
 # ============================ ROTAS: LOGIN / LOGOUT ============================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    # reforço: se SQLite for apagado a cada deploy, isso recria as tabelas
+    _ensure_db()
+
     if request.method == "POST":
-        email = (request.form.get("email") or "").strip().lower()
+        # Aceita tanto <input name="email"> quanto <input name="username">
+        login_id = (request.form.get("email") or request.form.get("username") or "").strip().lower()
         senha = request.form.get("senha") or ""
-        user = User.query.filter_by(email=email).first()
+
+        # Autentica apenas pela tabela Users (sem selecionar tipo manualmente)
+        user = User.query.filter_by(email=login_id).first()
         if not user or not user.check_password(senha):
             flash("Credenciais inválidas", "danger")
             return render_template("login.html")
@@ -236,7 +268,6 @@ def home():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    # Métricas simples para o admin
     total_pedidos = db.session.query(func.count(Lancamento.id)).scalar() or 0
     total_valor = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0)).scalar() or 0
     total_cooperados = Cooperado.query.count()
@@ -261,7 +292,6 @@ def dashboard():
     cooperado_nomes = [r[0] for r in rows]
     lancamentos_contagem = [float(r[1]) for r in rows]
 
-    # último lançamento p/ beep
     last = db.session.query(func.max(Lancamento.id)).scalar() or 0
 
     return render_template(
@@ -290,10 +320,8 @@ def painel_estabelecimento():
         flash("Estabelecimento não localizado.", "danger")
         return redirect(url_for("dashboard"))
 
-    # Cooperados e seus créditos (para lançar)
     cooperados = Cooperado.query.order_by(Cooperado.nome.asc()).all()
 
-    # Lançamentos desse estabelecimento (mês atual por padrão, robusto p/ naive)
     start_utc, end_utc, start_brt_naive, end_brt_naive = br_month_bounds_dual_utc_and_naive()
     lancs = (
         Lancamento.query
@@ -308,7 +336,6 @@ def painel_estabelecimento():
         .all()
     )
 
-    # Prepara p/ template do parceiro
     lancamentos_view = [{
         "id": l.id,
         "os_numero": l.os_numero,
@@ -338,7 +365,6 @@ def painel_cooperado():
         flash("Cooperado não localizado.", "danger")
         return redirect(url_for("dashboard"))
 
-    # Seus lançamentos (mês atual, robusto p/ naive)
     start_utc, end_utc, start_brt_naive, end_brt_naive = br_month_bounds_dual_utc_and_naive()
     lancs = (
         Lancamento.query
@@ -477,7 +503,6 @@ def listar_lancamentos():
 def exportar_lancamentos():
     import pandas as pd
 
-    # mesma lógica de filtros da listagem
     q = Lancamento.query
     if current_user.tipo == "estabelecimento" and current_user.vinculo_id:
         q = q.filter(Lancamento.estabelecimento_id == current_user.vinculo_id)
@@ -534,13 +559,12 @@ def exportar_lancamentos():
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
         df.to_excel(writer, index=False, sheet_name="Lancamentos")
-        # formatação simples
         ws = writer.sheets["Lancamentos"]
-        ws.set_column(0, 0, 20)  # Data
-        ws.set_column(1, 1, 14)  # OS
-        ws.set_column(2, 3, 28)  # Cooperado/Estabelecimento
-        ws.set_column(4, 4, 14)  # Valor
-        ws.set_column(5, 5, 40)  # Descrição
+        ws.set_column(0, 0, 20)
+        ws.set_column(1, 1, 14)
+        ws.set_column(2, 3, 28)
+        ws.set_column(4, 4, 14)
+        ws.set_column(5, 5, 40)
 
     output.seek(0)
     fname = f"lancamentos_{datetime.now(BRT).strftime('%Y%m%d_%H%M')}.xlsx"
@@ -555,7 +579,6 @@ def api_ultimo_lancamento():
     last = db.session.query(func.max(Lancamento.id)).scalar() or 0
     return jsonify({"last_id": int(last)})
 
-# Alias (underscore) para templates antigos ou hardcoded
 @app.route("/api/ultimo_lancamento")
 @login_required
 def api_ultimo_lancamento_alias():
@@ -606,11 +629,9 @@ def foto_cooperado(id: int):
     c = Cooperado.query.get(id)
     if not c:
         return ("", 404)
-    # prioridade: binário no banco
     if c.foto_data:
         mime = _detect_image_mimetype(c.foto_data)
         return send_file(BytesIO(c.foto_data), mimetype=mime)
-    # fallback antigo (se existir caminho)
     if c.foto and os.path.exists(c.foto):
         lower = c.foto.lower()
         if lower.endswith(".png"): mt = "image/png"
@@ -623,7 +644,6 @@ def foto_cooperado(id: int):
 
 @app.route("/statics/<path:filename>")
 def statics_files(filename):
-    # ajuste este caminho para onde estão seus mp3/imagens auxiliares
     base = os.path.join(app.root_path, "statics")
     path = os.path.join(base, filename)
     if not os.path.isfile(path):
@@ -635,7 +655,7 @@ def statics_files(filename):
 
 @app.cli.command("initdb")
 def initdb():
-    """Cria as tabelas e um admin padrão (EMAIL=admin@coopex, SENHA=123)."""
+    """Cria as tabelas e um admin padrão (EMAIL=admin@coopex, SENHA=123 ou ADMIN_PASSWORD)."""
     db.create_all()
 
     if not User.query.filter_by(email="admin@coopex").first():
@@ -659,5 +679,5 @@ def initdb():
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
+        _ensure_db()
     app.run(debug=True)
