@@ -12,31 +12,40 @@
 
   <style>
     :root{
-      /* Paleta — apenas cores trocadas */
-      --bg:#0a1230;        /* fundo azul-escuro suave */
-      --ink:#ffffff;       /* texto principal branco */
-      --muted:#dbe6ff;     /* texto secundário */
-      --gold:#4169e1;      /* azul royal (mantive o nome da var para não mexer no código) */
-      --line:#24408f;
+      /* Paleta — Azul Royal + Branco (clean & leve) */
+      --bg:#f7f9ff;            /* fundo geral super claro */
+      --ink:#0d1b3f;           /* texto principal (azul bem escuro) */
+      --muted:#5c6c92;         /* texto secundário */
+      --gold:#2d4fe3;          /* AZUL ROYAL (usa var existente) */
+      --line:#e5ebff;          /* bordas suaves */
 
-      --card1:#0f1a3d;
-      --card2:#1b3fd1;
+      /* Superfícies / cartões */
+      --surface:#ffffff;
+      --surface-2:#fcfdff;
 
       /* Tabela */
-      --thead:#0e1f5b;
-      --rowOdd:#10265f;
-      --rowEven:#0c1e56;
+      --thead:#2d4fe3;         /* cabeçalho azul royal */
+      --rowOdd:#f2f5ff;        /* listras leves */
+      --rowEven:#ffffff;
 
-      --kpi:#0c1547;
-      --kpiLine:#2b47a4;
-      --field:#0c1538;
-      --fieldBorder:#2e4fb1;
-      --fieldFocus:#6da2ff;
+      /* KPIs / campos */
+      --kpi:#ffffff;
+      --kpiLine:#dbe4ff;
+      --field:#ffffff;
+      --fieldBorder:#c9d4ff;
+      --fieldFocus:#2d4fe3;
 
       /* Modal edição */
-      --modalGrad1:#0f225e;
-      --modalGrad2:#1b3fd1;
-      --modalEdge:#2f50b5;
+      --modalGrad1:#ffffff;
+      --modalGrad2:#ffffff;
+      --modalEdge:#d5ddff;
+
+      /* Efeitos */
+      --glass:rgba(255,255,255,.78);
+      --blur:10px;
+      --glow:0 12px 28px rgba(45,79,227,.12);
+      --glow-strong:0 22px 44px rgba(45,79,227,.16);
+      --hover:#edf2ff;
     }
 
     html,body{height:100%}
@@ -44,188 +53,225 @@
     body{
       margin:0;
       background:
-        radial-gradient(1400px 500px at 80% -40%, rgba(13,73,204,.28), transparent 70%),
+        radial-gradient(1200px 520px at 100% -10%, rgba(45,79,227,.12), transparent 60%),
+        radial-gradient(900px 420px at -10% 120%, rgba(45,79,227,.08), transparent 65%),
         linear-gradient(180deg, var(--bg), var(--bg));
       color:var(--ink);
       font-family:Roboto, Arial, sans-serif;
-      line-height:1.45;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
       text-shadow:none;
     }
 
-    /* Acessibilidade: foco visível */
-    :focus-visible{ outline:3px solid var(--gold); outline-offset:2px; border-radius:8px; }
+    /* Foco acessível */
+    :focus-visible{ outline:3px solid var(--gold); outline-offset:2px; border-radius:10px; }
 
-    /* Sidebar */
+    /* ===== Sidebar (glass + gradiente sutil) ===== */
     .sidebar{
       width:210px; height:100vh; position:fixed; top:0; left:0;
-      background:linear-gradient(160deg,#0b1226 70%, #1a3fd1 100%); /* era #101218 -> #003399 */
-      color:#fff; box-shadow:3px 0 12px #1a3fd144; z-index:10;
+      background:var(--glass);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      border-right:1px solid var(--line);
+      box-shadow:var(--glow);
+      color:#1a2b66; z-index:10;
       display:flex; flex-direction:column; align-items:center;
     }
-    .sidebar .logo{ width:176px; max-width:95%; margin:28px auto 10px; display:block; filter: drop-shadow(0 0 12px #1a3fd1aa); }
+    .sidebar::before{
+      content:""; position:absolute; inset:0;
+      background:
+        linear-gradient(180deg, rgba(45,79,227,.10), transparent 30%),
+        linear-gradient(0deg, rgba(45,79,227,.06), transparent 45%);
+      pointer-events:none;
+    }
+    .sidebar .logo{
+      width:176px; max-width:95%; margin:28px auto 12px; display:block;
+      filter: drop-shadow(0 6px 14px rgba(45,79,227,.25));
+    }
     .sidebar h3{
-      font-family:Orbitron, sans-serif; color:var(--gold); text-align:center;
-      letter-spacing:1px; margin-bottom:22px; font-size:1.05rem; font-weight:700;
-      background:rgba(0,0,0,.2); border-radius:8px; padding:5px 0; width:100%;
+      font-family:Orbitron, sans-serif; color:#0d1b3f; text-align:center;
+      letter-spacing:1px; margin-bottom:22px; font-size:1.05rem; font-weight:900;
+      background:#ffffff; border-radius:12px; padding:8px 0; width:88%;
+      border:1px solid var(--line); box-shadow:var(--glow);
     }
     .sidebar .nav-link{
-      color:#eef3ff; font-size:1.08rem; border-radius:10px; margin:4px 8px;
+      color:#0d1b3f; font-size:1.08rem; border-radius:12px; margin:6px 10px;
       padding:12px 16px; display:flex; align-items:center; gap:10px; text-decoration:none;
-      transition:background .18s ease, color .18s ease;
+      transition:transform .06s ease, background .18s ease, box-shadow .18s ease, color .18s ease;
+      will-change:transform;
+      background:#ffffff; border:1px solid var(--line); box-shadow:var(--glow);
+      font-weight:800;
     }
-    .sidebar .nav-link i{font-size:1.25rem;}
-    .sidebar .nav-link.active, .sidebar .nav-link:hover{ background:#4169e144; color:var(--gold)!important; }
+    .sidebar .nav-link i{font-size:1.25rem; color:var(--gold);}
+    .sidebar .nav-link.active, .sidebar .nav-link:hover{
+      background:linear-gradient(0deg, #ffffff 0%, #f6f9ff 100%);
+      color:#0d1b3f!important; transform:translateY(-1px);
+      box-shadow:var(--glow-strong); border-color:#cfd8ff;
+    }
 
-    /* Main / Topbar */
+    /* ===== Main / Topbar (faixa hero) ===== */
     .main-content{ margin-left:230px; padding:32px 28px 24px; }
     .topbar{
-      height:68px; display:flex; align-items:center; justify-content:space-between;
-      background:rgba(9,14,34,.95); /* leve azul escuro */
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:14px;
-      padding:0 16px;
-      box-shadow:0 12px 26px rgba(0,0,0,.35);
+      min-height:72px; display:flex; align-items:center; justify-content:space-between;
+      background:linear-gradient(90deg, #2d4fe3 0%, #4b6df0 100%);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:18px;
+      padding:8px 16px;
+      box-shadow:0 14px 34px rgba(45,79,227,.22);
       position:sticky; top:0; z-index:20;
     }
-    .who{ color:var(--gold); font-weight:800; font-size:1.06rem; letter-spacing:.2px; }
-    .clock{ color:#eaf0ff; font-weight:900; letter-spacing:.4px; font-size:1.02rem; }
+    .who{ color:#ffffff; font-weight:900; font-size:1.06rem; letter-spacing:.2px; }
+    .clock{ color:#e9efff; font-weight:900; letter-spacing:.4px; font-size:1.02rem; }
 
-    /* Cards */
+    /* ===== Cards ===== */
     .dashboard-card{
-      background:linear-gradient(120deg,var(--card1) 88%, var(--card2) 100%);
-      border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(120deg,var(--surface) 0%, var(--surface-2) 100%);
+      border:1px solid var(--line);
       border-radius:18px;
-      box-shadow:0 10px 36px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+      box-shadow:var(--glow);
       padding:24px 20px 20px;
       color:var(--ink);
     }
     .dashboard-card h4{
       margin:0 0 12px;
-      font-family:Orbitron, sans-serif; font-weight:800; letter-spacing:1.1px; color:var(--gold);
-      text-shadow:0 1px 1px rgba(0,0,0,.6);
+      font-family:Orbitron, sans-serif; font-weight:900; letter-spacing:1.1px; color:var(--gold);
+      text-shadow:none;
     }
 
-    /* KPIs */
-    .kpis{ display:grid; gap:12px; grid-template-columns: repeat(5, minmax(0,1fr)); margin-bottom:14px; }
-    .kpi{
-      background:var(--kpi); border:1px solid var(--kpiLine); border-radius:14px; padding:14px 16px;
-      display:flex; flex-direction:column; gap:6px; min-height:92px;
-      box-shadow:0 8px 24px rgba(0,0,0,.28);
+    /* ===== KPIs (auto-fit + novo KPI do mês) ===== */
+    .kpis{
+      display:grid; gap:12px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-bottom:14px;
     }
-    .kpi .label{ color:#e7edff; font-weight:900; display:flex; align-items:center; gap:8px; }
+    .kpi{
+      background:#ffffff; border:1px solid var(--kpiLine); border-radius:16px; padding:14px 16px;
+      display:flex; flex-direction:column; gap:6px; min-height:96px;
+      box-shadow: 8px 8px 24px rgba(13,35,97,.06), -8px -8px 24px rgba(255,255,255,.7);
+    }
+    .kpi .label{ color:#1b2b5e; font-weight:900; display:flex; align-items:center; gap:8px; }
     .kpi .value{ font:900 1.35rem/1 Orbitron, sans-serif; color:var(--gold); letter-spacing:.5px; }
     .kpi .sub{ color:var(--muted); font-size:.94rem; }
 
-    /* Card ranking */
+    /* ===== Ranking / Resumos rápidos ===== */
     .ranking{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
     .rank-card{
-      background:var(--kpi); border:1px solid var(--kpiLine); border-radius:14px; padding:14px 16px;
-      box-shadow:0 8px 24px rgba(0,0,0,.28);
+      background:#ffffff; border:1px solid var(--line); border-radius:16px; padding:14px 16px;
+      box-shadow:var(--glow);
     }
     .rank-card h5{ margin:0 0 8px; font-family:Orbitron, sans-serif; color:var(--gold); }
     .rank-list{ margin:0; padding-left:18px; }
-    .rank-list li{ margin:4px 0; font-weight:800; color:#fff; }
-    .rank-list small{ color:#cfe3ff; }
+    .rank-list li{ margin:4px 0; font-weight:800; color:var(--ink); }
+    .rank-list small{ color:var(--muted); }
 
-    /* Form */
-    label{font-weight:800;color:#f7f9ff;letter-spacing:.25px;}
+    /* ===== Pílulas/resumos ===== */
+    .pill{
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line);
+      border-radius:999px; background:#f7f9ff; font-weight:800; color:#1d2a52;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    /* ===== Form ===== */
+    label{font-weight:900;color:#16275a;letter-spacing:.25px;}
     .form-control,.form-select{
-      background:var(--field); color:#fff; border:2px solid var(--fieldBorder);
+      background:var(--field); color:var(--ink); border:2px solid var(--fieldBorder);
       border-radius:12px; height:46px; font-size:1rem; padding:10px 12px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+      transition:border-color .15s ease, box-shadow .15s ease, transform .02s ease;
     }
-    .form-control::placeholder{color:#afbdde;}
-    .form-control:focus,.form-select:focus{ border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(109,162,255,.22); }
+    .form-control::placeholder{color:#90a2d8;}
+    .form-control:focus,.form-select:focus{
+      border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(45,79,227,.18);
+      transform:translateY(-1px);
+    }
 
-    /* Botões */
+    /* ===== Botões ===== */
     .btn-primary{
-      background:linear-gradient(90deg,var(--gold) 60%, #8bb2ff 100%);
-      color:#0b142d; font-weight:900; border:none; border-radius:14px; padding:10px 18px;
-      transition:filter .15s ease, transform .02s;
+      background:linear-gradient(90deg,#2d4fe3 0%, #4169e1 100%);
+      color:#ffffff; font-weight:900; border:none; border-radius:14px; padding:10px 18px;
+      transition:filter .15s ease, transform .06s ease, box-shadow .15s ease;
+      box-shadow:0 10px 18px rgba(45,79,227,.18);
     }
-    .btn-primary:hover{filter:brightness(1.06);}
-    .btn-primary:active{transform:translateY(1px);}
-    .btn-outline-primary{ color:#d3e1ff; border-color:#6da2ff; font-weight:800; }
-    .btn-outline-primary:hover{ background:#6da2ff; color:#0b142d; }
-    .btn-outline-danger{ color:#ffd3d8; border-color:#ff6b7a; font-weight:800; }
-    .btn-outline-danger:hover{ background:#ff6b7a; color:#0b142d; }
+    .btn-primary:hover{ filter:brightness(1.05); transform:translateY(-1px); box-shadow:0 16px 26px rgba(45,79,227,.22); }
+    .btn-primary:active{ transform:translateY(0); }
+    .btn-outline-primary{ color:#2d4fe3; border-color:#2d4fe3; font-weight:800; }
+    .btn-outline-primary:hover{ background:#2d4fe3; color:#ffffff; }
+    .btn-outline-danger{ color:#b94a59; border-color:#ff7f8f; font-weight:800; }
+    .btn-outline-danger:hover{ background:#ff7f8f; color:#0b142d; }
 
-    /* ===== VISIBILIDADE DAS TABELAS (força letras brancas) ===== */
-    .table.table-striped tbody tr > *,
-    .table-hover tbody tr > *,
-    #tbody-lanc td, #tbody-lanc th{
-      color:#ffffff !important;
-    }
-    thead th{ color:#ffffff !important; }         /* cabeçalho */
-    td.valor{ color:#ffffff !important; font-weight:900; } /* valor agora branco e em negrito */
-
-    /* Tabela (cores de fundo, bordas, hover) */
-    .table-wrap{ border-radius:14px; overflow:auto; background:#0e1533; }
-    table{ width:100%; margin:0; color:#fff; font-size:1.02rem; }
+    /* ===== Tabela — clara, legível ===== */
+    .table-wrap{ border-radius:14px; overflow:auto; background:#ffffff; border:1px solid var(--line); box-shadow:var(--glow); }
+    table{ width:100%; margin:0; color:var(--ink); font-size:1.02rem; }
     thead th{
       position:sticky; top:0; z-index:5;
-      background:var(--thead)!important;
+      background:var(--thead)!important; color:#ffffff!important;
       font-family:Orbitron, sans-serif; letter-spacing:.9px; text-align:center;
       padding:14px 10px; white-space:nowrap;
       border-bottom:2px solid var(--line)!important;
-      box-shadow:0 2px 0 rgba(0,0,0,.35);
+      box-shadow:0 2px 0 rgba(45,79,227,.18);
     }
+    .table.table-striped tbody tr > *,
+    .table-hover tbody tr > *,
+    #tbody-lanc td, #tbody-lanc th{ color:var(--ink) !important; }
+    td.valor{ color:#2d4fe3 !important; font-weight:900; }
     tbody td{
       border-top:1px solid var(--line);
       padding:12px 10px; vertical-align:middle;
     }
     .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd)!important;}
     .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven)!important;}
-    .table-hover tbody tr:hover>*{ background-color:#1b2f66!important; }
+    .table-hover tbody tr:hover>*{ background-color:var(--hover)!important; }
 
-    .aviso-expirado{ color:#cfd7f5; font-weight:700; }
+    .aviso-expirado{ color:#6f80b1; font-weight:700; }
 
-    /* Modal Edição — design */
+    /* ===== Modal Edição ===== */
     .modal-content{
       background:linear-gradient(135deg, var(--modalGrad1), var(--modalGrad2));
       border:1px solid var(--modalEdge);
       border-radius:18px;
-      color:#fff;
-      box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.05);
+      color:var(--ink);
+      box-shadow:var(--glow-strong), inset 0 0 0 1px rgba(255,255,255,.6);
     }
     .modal-header{
-      border-bottom:1px solid rgba(255,255,255,.12);
-      background:linear-gradient(180deg, rgba(255,255,255,.08), transparent);
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(45,79,227,.06), transparent);
       border-top-left-radius:18px; border-top-right-radius:18px;
     }
     .modal-title{
       font-family:Orbitron, sans-serif; color:var(--gold); letter-spacing:1px;
       display:flex; align-items:center; gap:8px;
     }
-    .modal .form-control{ background:rgba(7,12,26,.65); border:2px solid rgba(255,255,255,.18); color:#fff; }
-    .modal .form-control:focus{ border-color:#a5c4ff; box-shadow:0 0 0 .2rem rgba(165,196,255,.18); }
+    .modal .form-control{ background:#f9fbff; border:2px solid #e3e9ff; color:var(--ink); }
+    .modal .form-control:focus{ border-color:#a5b8ff; box-shadow:0 0 0 .2rem rgba(165,184,255,.25); }
     .input-group-text{
-      background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.18); color:#fff; font-weight:800;
+      background:#eef2ff; border-color:#e1e7ff; color:#1d2a52; font-weight:800;
     }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid rgba(255,255,255,.2);
-      border-radius:999px; background:rgba(0,0,0,.25); font-weight:800; color:#e7efff;
-    }
-    .time-left{ color:#eaf0ff; font-weight:900; }
+    .time-left{ color:#2d4fe3; font-weight:900; }
 
-    /* Alertas (mantendo estrutura, só cor) */
+    /* ===== Alertas ===== */
     .alert{
-      background:var(--gold); color:#0b132d; font-weight:900; border:none; border-radius:12px;
-      text-align:center; box-shadow:0 10px 22px rgba(65,105,225,.18);
+      background:#eaf0ff; color:#152756; font-weight:900; border:1px solid var(--line); border-radius:12px;
+      text-align:center; box-shadow:var(--glow);
     }
 
-    /* Responsivo */
+    /* ===== Responsivo ===== */
     @media (max-width:1200px){
-      .kpis{ grid-template-columns: repeat(3,minmax(0,1fr)); }
       .ranking{ grid-template-columns:1fr; }
     }
     @media (max-width:900px){
       .sidebar{display:none;}
       .main-content{margin-left:0;padding:14px;}
-      .kpis{ grid-template-columns: 1fr; }
       table{ font-size:1rem; }
       thead th{ font-size:.98rem; }
+    }
+
+    /* Ajustes finos */
+    #erro-lancar{ color:#b4232a !important; font-weight:800; }
+    #foto-cooperado-preview img{
+      box-shadow:0 0 0 3px rgba(45,79,227,.15), 0 6px 14px rgba(45,79,227,.18);
+      border-radius:50%;
     }
   </style>
 </head>
@@ -241,12 +287,12 @@
   <!-- Main -->
   <div class="main-content">
 
-    <!-- Topbar com relógio de Brasília -->
+    <!-- Topbar com relógio -->
     <div class="topbar mb-4">
       <div class="who">Bem-vindo, {{ est.nome }}</div>
       <div class="d-flex align-items-center gap-3">
         <div class="clock" id="clock-br">Brasília — --/--/---- --:--:--</div>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm fw-bold">Sair <i class="bi bi-power"></i></a>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm fw-bold" style="border-color:#ffd66e;color:#fff">Sair <i class="bi bi-power"></i></a>
       </div>
     </div>
 
@@ -285,9 +331,15 @@
         <div class="value" id="k-last">—</div>
         <div class="sub">Horário de Brasília</div>
       </div>
+      <!-- NOVO KPI: Total do Mês -->
+      <div class="kpi">
+        <div class="label"><i class="bi bi-calendar-month"></i> Total do Mês</div>
+        <div class="value" id="k-month-sum">R$ 0,00</div>
+        <div class="sub"><span id="k-month-count">0</span> lançamentos</div>
+      </div>
     </div>
 
-    <!-- Ranking -->
+    <!-- Ranking / Resumos -->
     <div class="ranking">
       <div class="rank-card">
         <h5><i class="bi bi-trophy"></i> Top 3 Cooperados por Valor</h5>
@@ -408,7 +460,7 @@
     </div>
   </div>
 
-  <!-- MODAL EDITAR — DESIGN NOVO -->
+  <!-- MODAL EDITAR -->
   <div class="modal fade" id="modalEditarLanc" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <form class="modal-content" method="post" id="form-editar-modal">
@@ -454,13 +506,13 @@
             </div>
           </div>
 
-          <div class="form-text mt-2" style="color:#eaf0ff; font-weight:900;">
+          <div class="form-text mt-2" style="color:#2d4fe3; font-weight:900;">
             <i class="bi bi-info-circle"></i> Edição permitida até 1 hora após a criação.
           </div>
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-outline-light fw-bold" type="button" data-bs-dismiss="modal">
+          <button class="btn btn-outline-light fw-bold" type="button" data-bs-dismiss="modal" style="color:#2d4fe3;border-color:#a6b6ff;">
             <i class="bi bi-x-circle"></i> Cancelar
           </button>
           <button class="btn btn-primary fw-bold" type="submit" id="btn-save-modal">
@@ -530,17 +582,24 @@
       }
     }
 
-    /* ===== Indicadores e Ranking a partir da tabela ===== */
-    function formatBR(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    /* ===== Helpers de data no fuso de Brasília ===== */
+    function ymBR(d){
+      return new Date(d).toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,7); // YYYY-MM
+    }
     function isHojeBR(date){
       const br = new Date().toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,10);
       const d  = new Date(date).toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,10);
       return br===d;
     }
+
+    /* ===== Indicadores e Ranking a partir da tabela ===== */
+    function formatBR(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
     function atualizarIndicadores(){
       const rows = [...document.querySelectorAll('#tbody-lanc tr')];
       let count=0, sum=0, max=0, lastTs=0;
       let hCount=0, hSum=0;
+      let mCount=0, mSum=0; // NOVOS: mês
+      const monthNow = ymBR(new Date());
       const porCoop = Object.create(null);
 
       rows.forEach(tr=>{
@@ -552,15 +611,20 @@
         sum += v;
         if (v>max) max=v;
 
-        const created = Date.parse(tr.getAttribute('data-created') || '') || 0;
+        const createdStr = tr.getAttribute('data-created') || '';
+        const created = Date.parse(createdStr) || 0;
+
         if (created>lastTs) lastTs = created;
         if (created && isHojeBR(created)){ hCount++; hSum += v; }
+
+        // Totais do mês (Brasília)
+        if (created && ymBR(created) === monthNow){ mCount++; mSum += v; }
 
         const nome = (tr.querySelector('.coop')?.textContent || '').trim();
         if (nome){ porCoop[nome] = (porCoop[nome]||0) + v; }
       });
 
-      // KPIs
+      // KPIs básicos
       let topNome='—', topVal=0;
       const pares = Object.entries(porCoop).sort((a,b)=>b[1]-a[1]);
       if (pares.length){ topNome = pares[0][0]; topVal = pares[0][1]; }
@@ -579,6 +643,12 @@
       } else {
         document.getElementById('k-last').textContent = '—';
       }
+
+      // KPI do Mês
+      const kMonthSum = document.getElementById('k-month-sum');
+      const kMonthCount = document.getElementById('k-month-count');
+      if (kMonthSum)  kMonthSum.textContent  = 'R$ ' + formatBR(mSum);
+      if (kMonthCount)kMonthCount.textContent = mCount;
 
       // Ranking Top 3
       const ul = document.getElementById('rank-list');
