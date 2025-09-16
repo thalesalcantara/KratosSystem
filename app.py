@@ -450,7 +450,7 @@ def listar_cooperados():
 def novo_cooperado():
     if not is_admin():
         return redirect(url_for('login'))
-    if request.method == 'POST']:
+    if request.method == 'POST':
         nome = request.form['nome']
         username = request.form['username'].strip()
         credito = float(request.form.get('credito', 0) or 0)
@@ -654,7 +654,6 @@ def novo_estabelecimento():
         senha = request.form['senha']
         logo_file = request.files.get('logo')
         filename = None
-        # corrigido: 'and' (não usar &&)
         if logo_file and logo_file.filename:
             filename = secure_filename(logo_file.filename)
             logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
@@ -728,10 +727,10 @@ def listar_lancamentos():
 
     lancamentos = query.order_by(Lancamento.data.desc()).all()
 
-    # >>> EXIBIÇÃO EM BRASÍLIA (sobrescreve 'data' apenas para renderizar local)
+    # Exibição em Brasília
     for l in lancamentos:
         brt = to_brt(l.data)
-        l.data = brt.replace(tzinfo=None)  # assim l.data.strftime no template vira horário de Brasília
+        l.data = brt.replace(tzinfo=None)  # para o template usar strftime já em Brasília
 
     return render_template('lancamentos.html',
                            admin=admin,
@@ -1106,7 +1105,7 @@ def painel_cooperado():
           </tbody>
         </table>
       </div>
-      <div class="muted" style="margin-top:10px">* Os horários são mostrados em Brasília (GMT-3/ GMT-3 ou GMT-2 no horário de verão, se aplicável).</div>
+      <div class="muted" style="margin-top:10px">* Os horários são mostrados em Brasília (GMT-3/GMT-2 no horário de verão, se aplicável).</div>
     </div>
   </div>
 </div>
