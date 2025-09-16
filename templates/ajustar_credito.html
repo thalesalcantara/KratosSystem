@@ -10,53 +10,84 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
   <style>
+    :root{
+      --royal:#4169E1;   /* Azul-royal */
+      --royal-700:#2f52c9;
+      --royal-300:#6a8df5;
+      --white:#ffffff;
+    }
     body{
-      background:#191c20;
+      background: var(--white);
       font-family:'Roboto',Arial,sans-serif;
       min-height:100vh;
       display:flex;align-items:center;justify-content:center;
       padding:18px
     }
     .ajustar-card{
-      background:linear-gradient(120deg,#23262b 88%,#003399 100%);
-      color:#ffd700;
+      background: var(--white);
+      color: var(--royal);
       padding:36px 28px 24px;
       border-radius:16px;
-      box-shadow:0 8px 32px #000a;
+      box-shadow:0 8px 32px rgba(65,105,225,.15);
+      border:1px solid rgba(65,105,225,.2);
       width:100%;max-width:520px
     }
     .titulo{
       font-family:'Orbitron',sans-serif;
-      letter-spacing:1.3px;color:#fff;text-align:center;margin-bottom:14px
+      letter-spacing:1.3px;color:var(--royal);text-align:center;margin-bottom:14px
     }
     .foto-cooperado{
       width:90px;height:90px;object-fit:cover;border-radius:50%;
-      border:3px solid #ffd700;margin:10px auto;background:#fff;display:block;
-      box-shadow:0 0 8px #00339955
+      border:3px solid var(--royal);margin:10px auto;background:#fff;display:block;
+      box-shadow:0 0 8px rgba(65,105,225,.35)
     }
-    .nome{color:#fff;text-align:center;margin-bottom:8px;font-weight:600}
-    label{color:#fff;font-weight:700}
+    .nome{color:var(--royal);text-align:center;margin-bottom:8px;font-weight:600}
+    label{color:var(--royal);font-weight:700}
     .form-control{
-      background:#23262b;border:1px solid #22263d;color:#ffd700;font-weight:600;border-radius:10px
+      background:var(--white);
+      border:1px solid rgba(65,105,225,.35);
+      color:var(--royal);
+      font-weight:600;border-radius:10px
     }
+    .form-control::placeholder{color:rgba(65,105,225,.55)}
     .form-control:focus{
-      border-color:#ffd700;box-shadow:0 0 0 1.5px #ffd70044;background:#191c20;color:#ffd700
+      border-color:var(--royal);
+      box-shadow:0 0 0 2px rgba(65,105,225,.25);
+      background:var(--white);color:var(--royal)
     }
-    .hint{color:#ffe670;font-size:.92rem;margin-top:6px}
+    .hint{color:var(--royal-300);font-size:.92rem;margin-top:6px}
     .preview{
-      margin-top:10px;font-weight:800;font-size:1.05rem
+      margin-top:10px;font-weight:800;font-size:1.05rem;
+      color:var(--royal)
     }
     .preview .novo{font-size:1.18rem}
-    .novo.up{color:#3fe28f}     /* verde */
-    .novo.down{color:#ff8f8f}   /* vermelho */
-    .novo.neutral{color:#fff}
+    .novo.up{color:var(--royal)}     /* azul para alta */
+    .novo.down{color:var(--royal)}   /* azul para baixa (mantendo paleta) */
+    .novo.neutral{color:var(--royal)}
     .btn-primary{
-      background:linear-gradient(90deg,#ffd700 60%,#ffe670 100%);
-      color:#191c20;font-weight:bold;border:none;border-radius:13px;width:100%;margin-top:12px
+      background:linear-gradient(90deg,var(--royal) 60%,var(--royal-300) 100%);
+      color:#fff;font-weight:bold;border:none;border-radius:13px;width:100%;margin-top:12px
     }
-    .btn-primary:hover{background:#ffe670;color:#003399}
-    .btn-outline-warning{border-radius:13px}
-    .alert{background:#ffd700;color:#222;font-weight:700;border-radius:9px;margin-bottom:12px;text-align:center}
+    .btn-primary:hover{background:var(--royal-700);color:#fff}
+    .btn-outline-warning{ /* reutilizado como outline azul */
+      border-radius:13px;border-color:var(--royal);color:var(--royal)
+    }
+    .btn-outline-warning:hover{background:var(--royal);color:#fff}
+    /* deixar os botões “rápidos” no tema azul */
+    .btn-outline-light{
+      border-color:var(--royal); color:var(--royal); background:#fff;
+    }
+    .btn-outline-light:hover{background:var(--royal); color:#fff;}
+    /* secundário também no tema azul/branco */
+    .btn.btn-secondary{
+      background:#fff; color:var(--royal);
+      border:1px solid var(--royal);
+    }
+    .btn.btn-secondary:hover{background:var(--royal); color:#fff;}
+    .alert{
+      background:var(--royal);
+      color:#fff;font-weight:700;border-radius:9px;margin-bottom:12px;text-align:center
+    }
     .linha-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
     .inline-buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
     .inline-buttons .btn{border-radius:10px;padding:.3rem .6rem}
@@ -89,13 +120,13 @@
         <img src="{{ url_for('foto_cooperado', id=cooperado.id) }}"
              alt="Foto de {{ cooperado.nome }}" class="foto-cooperado">
       {% else %}
-        <div class="text-center" style="font-size:2rem;color:#ffd700;">
+        <div class="text-center" style="font-size:2rem;color:var(--royal);">
           <i class="bi bi-person-circle"></i>
         </div>
       {% endif %}
 
       <div class="nome">{{ cooperado.nome }}</div>
-      <div class="text-center mb-2" style="color:#ffe670;">
+      <div class="text-center mb-2" style="color:var(--royal-300);">
         Crédito atual: <strong id="saldo-atual" data-saldo="{{ '%.2f'|format(cooperado.credito) }}">R$ {{ '%.2f'|format(cooperado.credito) }}</strong>
       </div>
 
@@ -108,7 +139,7 @@
         <!-- Prévia do cálculo -->
         <div class="preview">
           Novo crédito: <span class="novo neutral" id="novo-valor">R$ {{ '%.2f'|format(cooperado.credito) }}</span>
-          <div id="erro" class="text-danger fw-bold mt-1" style="display:none;"></div>
+          <div id="erro" class="fw-bold mt-1" style="display:none;color:var(--royal);"></div>
         </div>
 
         <!-- Campo oculto enviado ao backend (sem mudar app.py) -->
@@ -148,7 +179,7 @@
           </select>
         </div>
 
-        <div class="mb-1" id="saldo-wrap" style="display:none;color:#ffe670;">
+        <div class="mb-1" id="saldo-wrap" style="display:none;color:var(--royal-300);">
           Crédito atual: <strong id="saldo-atual-global">R$ 0,00</strong>
         </div>
 
@@ -160,7 +191,7 @@
 
         <div class="preview" id="preview-global" style="display:none;">
           Novo crédito: <span class="novo neutral" id="novo-valor-global">R$ 0,00</span>
-          <div id="erro-global" class="text-danger fw-bold mt-1" style="display:none;"></div>
+          <div id="erro-global" class="fw-bold mt-1" style="display:none;color:var(--royal);"></div>
         </div>
 
         <!-- Campo oculto que o backend espera -->
