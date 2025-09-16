@@ -1,3 +1,4 @@
+# app.py
 from flask import (
     Flask, render_template, render_template_string, request, redirect, url_for, flash, session,
     send_file, send_from_directory, jsonify, Response
@@ -84,6 +85,45 @@ except Exception:
 
 db = SQLAlchemy(app)
 
+# ====== garantir criação de tabelas em runtime (sem apagar nada) ======
+def ensure_schema():
+    """Cria colunas no banco se ainda não existirem (sem Alembic)."""
+    with app.app_context():
+        try:
+            cols = {r[0] for r in db.session.execute(text(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
+            )).fetchall()}
+        except Exception:
+            # Se não for Postgres (ex.: SQLite), simplesmente não aplicamos ALTERs
+            cols = set()
+
+        alter_stmts = []
+        if 'foto_data' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
+        if 'foto_mimetype' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
+        if 'foto_filename' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
+        if 'credito_atualizado_em' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
+        if 'senha_hash' not in cols:
+            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
+
+        if alter_stmts and 'information_schema' in _build_db_uri():
+            # proteção simples: só tenta no Postgres
+            try:
+                db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
+try:
+    with app.app_context():
+        db.create_all()
+        ensure_schema()
+except Exception:
+    pass
+
 # ========= MODELS =========
 class Cooperado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -140,38 +180,14 @@ class Lancamento(db.Model):
 
 Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
 
-# ========= SCHEMA (adaptação leve) =========
-def ensure_schema():
-    """Cria colunas no banco se ainda não existirem (sem Alembic)."""
-    with app.app_context():
-        cols = {r[0] for r in db.session.execute(text(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
-        )).fetchall()}
-        alter_stmts = []
-        if 'foto_data' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
-        if 'foto_mimetype' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
-        if 'foto_filename' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
-        if 'credito_atualizado_em' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
-        if 'senha_hash' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
-        if alter_stmts:
-            db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
-            db.session.commit()
-
-_SCHEMA_BOOTED = False
-@app.before_request
-def _run_schema_once():
-    global _SCHEMA_BOOTED
-    if not _SCHEMA_BOOTED:
-        try:
-            ensure_schema()
-        except Exception:
-            pass
-        _SCHEMA_BOOTED = True
+# ========= CONTEXT PROCESSOR (corrige uso de now()/callable no Jinja) =========
+@app.context_processor
+def inject_globals():
+    return {
+        "now": datetime.now,           # permite {{ now() }}
+        "current_year": datetime.now().year,
+        "callable": callable           # se o template usar {{ callable(now) }}
+    }
 
 # ========= HELPERS =========
 def is_admin():
@@ -216,12 +232,12 @@ _LAST_LANC_CACHE = {"value": 0, "ts": 0.0}
 _LAST_LANC_TTL = 2.0  # segundos
 
 def _get_cached_last_lanc_id():
-    now = time.time()
-    if now - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
+    now_ts = time.time()
+    if now_ts - _LAST_LANC_CACHE["ts"] <= _LAST_LANC_TTL and _LAST_LANC_CACHE["ts"] > 0:
         return _LAST_LANC_CACHE["value"], True
     last_id = db.session.query(func.max(Lancamento.id)).scalar() or 0
     _LAST_LANC_CACHE["value"] = int(last_id)
-    _LAST_LANC_CACHE["ts"] = now
+    _LAST_LANC_CACHE["ts"] = now_ts
     return _LAST_LANC_CACHE["value"], False
 
 def _invalidate_last_lanc_cache():
@@ -756,7 +772,6 @@ def exportar_lancamentos():
         data_fmt = l.data.strftime('%d/%m/%Y %H:%M')
         ws.append([data_fmt, l.os_numero, coop_nome, est_nome, float(l.valor), l.descricao or ""])
 
-    from openpyxl.utils import get_column_letter
     widths = [20, 16, 32, 32, 16, 60]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
