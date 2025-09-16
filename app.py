@@ -6,14 +6,54 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from sqlalchemy import text, func, Index
 from werkzeug.middleware.proxy_fix import ProxyFix
 from jinja2 import TemplateNotFound
+from zoneinfo import ZoneInfo
 import os
 import time
 import hashlib
+
+# ========= FUSO-HORÁRIO =========
+BR_TZ = ZoneInfo("America/Sao_Paulo")
+UTC = timezone.utc
+
+def to_brt(dt_utc_naive: datetime) -> datetime:
+    """Converte datetime salvo em UTC (naive) para aware em Brasília."""
+    if not dt_utc_naive:
+        return dt_utc_naive
+    if dt_utc_naive.tzinfo is None:
+        dt_aware_utc = dt_utc_naive.replace(tzinfo=UTC)
+    else:
+        dt_aware_utc = dt_utc_naive.astimezone(UTC)
+    return dt_aware_utc.astimezone(BR_TZ)
+
+def local_bounds_to_utc_naive(di_str: str | None, df_str: str | None):
+    """
+    Recebe strings de <input type=date> (YYYY-MM-DD) no fuso de Brasília e
+    devolve limites em UTC naive:
+    - di_utc_naive: início do dia local (inclusive)
+    - df_utc_naive: início do dia seguinte local (exclusive)
+    """
+    def parse_date_only(s):
+        if not s:
+            return None
+        return datetime.strptime(s.strip(), "%Y-%m-%d")
+    di = parse_date_only(di_str)
+    df = parse_date_only(df_str)
+
+    di_utc_naive = None
+    df_utc_naive = None
+
+    if di:
+        di_local = datetime(di.year, di.month, di.day, 0, 0, 0, tzinfo=BR_TZ)
+        di_utc_naive = di_local.astimezone(UTC).replace(tzinfo=None)
+    if df:
+        df_local_next = datetime(df.year, df.month, df.day, 0, 0, 0, tzinfo=BR_TZ) + timedelta(days=1)
+        df_utc_naive = df_local_next.astimezone(UTC).replace(tzinfo=None)
+    return di_utc_naive, df_utc_naive
 
 # ========= APP / CONFIG =========
 app = Flask(__name__)
@@ -34,10 +74,6 @@ app.config.update(
 )
 
 def _build_db_uri() -> str:
-    """
-    Usa DATABASE_URL se existir; senão, mantém um fallback.
-    Converte postgres:// -> postgresql+psycopg:// e aplica sslmode=require.
-    """
     url = os.environ.get("DATABASE_URL")
     if not url:
         return (
@@ -94,7 +130,6 @@ def ensure_schema():
                 "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
             )).fetchall()}
         except Exception:
-            # Se não for Postgres (ex.: SQLite), simplesmente não aplicamos ALTERs
             cols = set()
 
         alter_stmts = []
@@ -109,7 +144,6 @@ def ensure_schema():
         if 'senha_hash' not in cols:
             alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
 
-        # proteção simples: só tenta no Postgres
         if alter_stmts and 'information_schema' in _build_db_uri():
             try:
                 db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
@@ -130,13 +164,11 @@ class Cooperado(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     credito = db.Column(db.Float, default=0)
-    credito_atualizado_em = db.Column(db.DateTime, index=True)
-    # foto (banco e legado no disco)
+    credito_atualizado_em = db.Column(db.DateTime, index=True)  # salvo em UTC (naive)
     foto = db.Column(db.String(120), nullable=True)
-    foto_data = db.Column(db.LargeBinary, nullable=True)      # BYTEA
+    foto_data = db.Column(db.LargeBinary, nullable=True)
     foto_mimetype = db.Column(db.String(50), nullable=True)
     foto_filename = db.Column(db.String(120), nullable=True)
-    # senha do cooperado
     senha_hash = db.Column(db.String(128), nullable=True)
 
     def set_senha(self, senha: str):
@@ -169,7 +201,7 @@ class Admin(db.Model):
 class Lancamento(db.Model):
     __tablename__ = 'lancamento'
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)  # UTC (naive)
     os_numero = db.Column(db.String(50), nullable=False)
     cooperado_id = db.Column(db.Integer, db.ForeignKey('cooperado.id'), nullable=False, index=True)
     estabelecimento_id = db.Column(db.Integer, db.ForeignKey('estabelecimento.id'), nullable=False, index=True)
@@ -184,9 +216,9 @@ Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estab
 @app.context_processor
 def inject_globals():
     return {
-        "now": datetime.now,           # permite {{ now() }}
-        "current_year": datetime.now().year,
-        "callable": callable           # se o template usar {{ callable(now) }}
+        "now": lambda: datetime.now(BR_TZ),   # now() já em Brasília
+        "current_year": datetime.now(BR_TZ).year,
+        "callable": callable
     }
 
 # ========= HELPERS =========
@@ -199,18 +231,7 @@ def is_estabelecimento():
 def is_cooperado():
     return session.get('user_tipo') == 'cooperado'
 
-def parse_date(s):
-    if not s:
-        return None
-    try:
-        if len(s.strip()) <= 10:
-            return datetime.strptime(s, '%Y-%m-%d')
-        return datetime.strptime(s, '%Y-%m-%d %H:%M')
-    except Exception:
-        return None
-
 def _cache_headers(seconds=None, etag_base=None):
-    """Gera cabeçalhos Cache-Control e ETag simples."""
     if seconds is None:
         seconds = int(app.config.get('SEND_FILE_MAX_AGE_DEFAULT', 3600))
     headers = {
@@ -321,30 +342,30 @@ def dashboard():
     }
     coop_id_i = int(filtros['cooperado_id']) if filtros['cooperado_id'] else None
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
-    di = parse_date(filtros['data_inicio'])
-    df = parse_date(filtros['data_fim'])
+    di_utc, df_utc_excl = local_bounds_to_utc_naive(filtros['data_inicio'], filtros['data_fim'])
 
     base_q = db.session.query(Lancamento)
     if coop_id_i is not None:
         base_q = base_q.filter(Lancamento.cooperado_id == coop_id_i)
     if est_id_i is not None:
         base_q = base_q.filter(Lancamento.estabelecimento_id == est_id_i)
-    if di:
-        base_q = base_q.filter(Lancamento.data >= di)
-    if df:
-        base_q = base_q.filter(Lancamento.data <= df)
+    if di_utc:
+        base_q = base_q.filter(Lancamento.data >= di_utc)
+    if df_utc_excl:
+        base_q = base_q.filter(Lancamento.data < df_utc_excl)
 
     total_pedidos = base_q.count()
+
     sum_q = db.session.query(func.coalesce(func.sum(Lancamento.valor), 0.0))
     if coop_id_i is not None:
         sum_q = sum_q.filter(Lancamento.cooperado_id == coop_id_i)
     if est_id_i is not None:
         sum_q = sum_q.filter(Lancamento.estabelecimento_id == est_id_i)
-    if di:
-        sum_q = sum_q.filter(Lancamento.data >= di)
-    if df:
-        sum_q = sum_q.filter(Lancamento.data <= df)
-    total_valor = (sum_q.scalar() or 0.0)
+    if di_utc:
+        sum_q = sum_q.filter(Lancamento.data >= di_utc)
+    if df_utc_excl:
+        sum_q = sum_q.filter(Lancamento.data < df_utc_excl)
+    total_valor = float(sum_q.scalar() or 0.0)
 
     sum_per_coop = db.session.query(
         Cooperado.id,
@@ -358,10 +379,10 @@ def dashboard():
         sum_per_coop = sum_per_coop.filter(Cooperado.id == coop_id_i)
     if est_id_i is not None:
         sum_per_coop = sum_per_coop.filter((Lancamento.estabelecimento_id == est_id_i) | (Lancamento.id.is_(None)))
-    if di:
-        sum_per_coop = sum_per_coop.filter((Lancamento.data >= di) | (Lancamento.id.is_(None)))
-    if df:
-        sum_per_coop = sum_per_coop.filter((Lancamento.data <= df) | (Lancamento.id.is_(None)))
+    if di_utc:
+        sum_per_coop = sum_per_coop.filter((Lancamento.data >= di_utc) | (Lancamento.id.is_(None)))
+    if df_utc_excl:
+        sum_per_coop = sum_per_coop.filter((Lancamento.data < df_utc_excl) | (Lancamento.id.is_(None)))
 
     sum_per_coop = sum_per_coop.group_by(Cooperado.id, Cooperado.nome).order_by(Cooperado.nome).all()
 
@@ -429,19 +450,17 @@ def listar_cooperados():
 def novo_cooperado():
     if not is_admin():
         return redirect(url_for('login'))
-    if request.method == 'POST':
+    if request.method == 'POST']:
         nome = request.form['nome']
         username = request.form['username'].strip()
         credito = float(request.form.get('credito', 0) or 0)
 
-        # senha (obrigatória no cadastro)
         senha = (request.form.get('senha') or '').strip()
         senha2 = (request.form.get('senha2') or '').strip()
         if not senha or senha != senha2:
             flash('Defina a senha e confirme corretamente.', 'danger')
             return redirect(url_for('novo_cooperado'))
 
-        # foto
         foto_file = request.files.get('foto')
         foto_filename = None
         foto_data = None
@@ -483,7 +502,6 @@ def editar_cooperado(id):
     if request.method == 'POST':
         cooperado.nome = request.form['nome']
 
-        # atualizar username se mudou (checando unicidade)
         new_username = request.form.get('username', cooperado.username).strip()
         if new_username != cooperado.username:
             if Cooperado.query.filter(Cooperado.username == new_username, Cooperado.id != cooperado.id).first():
@@ -491,18 +509,16 @@ def editar_cooperado(id):
                 return redirect(url_for('editar_cooperado', id=id))
             cooperado.username = new_username
 
-        # crédito
         if 'credito' in request.form:
             try:
                 novo_credito = float(request.form.get('credito', cooperado.credito) or cooperado.credito)
                 if novo_credito != cooperado.credito:
                     cooperado.credito = novo_credito
-                    cooperado.credito_atualizado_em = datetime.utcnow()
+                    cooperado.credito_atualizado_em = datetime.utcnow()  # salvo em UTC
             except Exception:
                 flash('Crédito inválido.', 'danger')
                 return redirect(url_for('editar_cooperado', id=id))
 
-        # foto
         foto_file = request.files.get('foto')
         if foto_file and foto_file.filename:
             foto_filename = secure_filename(f"foto_{cooperado.username}_{foto_file.filename}")
@@ -518,7 +534,6 @@ def editar_cooperado(id):
             except Exception:
                 pass
 
-        # trocar senha se informado
         senha = (request.form.get('senha') or '').strip()
         senha2 = (request.form.get('senha2') or '').strip()
         if senha or senha2:
@@ -639,7 +654,7 @@ def novo_estabelecimento():
         senha = request.form['senha']
         logo_file = request.files.get('logo')
         filename = None
-        # >>> corrigido && -> and
+        # corrigido: 'and' (não usar &&)
         if logo_file and logo_file.filename:
             filename = secure_filename(logo_file.filename)
             logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
@@ -699,24 +714,25 @@ def listar_lancamentos():
     }
     coop_id_i = int(filtros['cooperado_id']) if filtros['cooperado_id'] else None
     est_id_i  = int(filtros['estabelecimento_id']) if filtros['estabelecimento_id'] else None
-    di = parse_date(filtros['data_inicio'])
-    df = parse_date(filtros['data_fim'])
-
-    # >>> CORREÇÃO: incluir o dia inteiro (UTC->Brasília) usando df + 1 dia
-    if df:
-        df = df + timedelta(days=1)
+    di_utc, df_utc_excl = local_bounds_to_utc_naive(filtros['data_inicio'], filtros['data_fim'])
 
     query = Lancamento.query
     if coop_id_i is not None:
         query = query.filter(Lancamento.cooperado_id == coop_id_i)
     if est_id_i is not None:
         query = query.filter(Lancamento.estabelecimento_id == est_id_i)
-    if di:
-        query = query.filter(Lancamento.data >= di)
-    if df:
-        query = query.filter(Lancamento.data < df)
+    if di_utc:
+        query = query.filter(Lancamento.data >= di_utc)
+    if df_utc_excl:
+        query = query.filter(Lancamento.data < df_utc_excl)
 
     lancamentos = query.order_by(Lancamento.data.desc()).all()
+
+    # >>> EXIBIÇÃO EM BRASÍLIA (sobrescreve 'data' apenas para renderizar local)
+    for l in lancamentos:
+        brt = to_brt(l.data)
+        l.data = brt.replace(tzinfo=None)  # assim l.data.strftime no template vira horário de Brasília
+
     return render_template('lancamentos.html',
                            admin=admin,
                            cooperados=cooperados,
@@ -743,18 +759,17 @@ def exportar_lancamentos():
 
     coop_id_i = int(coop_id) if coop_id else None
     est_id_i  = int(est_id) if est_id else None
-    di = parse_date(di_s)
-    df = parse_date(df_s)
+    di_utc, df_utc_excl = local_bounds_to_utc_naive(di_s, df_s)
 
     q = Lancamento.query
     if coop_id_i is not None:
         q = q.filter(Lancamento.cooperado_id == coop_id_i)
     if est_id_i is not None:
         q = q.filter(Lancamento.estabelecimento_id == est_id_i)
-    if di:
-        q = q.filter(Lancamento.data >= di)
-    if df:
-        q = q.filter(Lancamento.data <= df)
+    if di_utc:
+        q = q.filter(Lancamento.data >= di_utc)
+    if df_utc_excl:
+        q = q.filter(Lancamento.data < df_utc_excl)
     q = q.order_by(Lancamento.data.desc())
 
     rows = q.all()
@@ -763,7 +778,7 @@ def exportar_lancamentos():
     ws = wb.active
     ws.title = "Lançamentos"
 
-    header = ["Data", "Nº OS", "Cooperado", "Estabelecimento", "Valor (R$)", "Descrição"]
+    header = ["Data (Brasília)", "Nº OS", "Cooperado", "Estabelecimento", "Valor (R$)", "Descrição"]
     ws.append(header)
     for col_idx, h in enumerate(header, start=1):
         cell = ws.cell(row=1, column=col_idx, value=h)
@@ -773,10 +788,10 @@ def exportar_lancamentos():
     for l in rows:
         coop_nome = l.cooperado.nome if l.cooperado else ""
         est_nome = l.estabelecimento.nome if l.estabelecimento else ""
-        data_fmt = l.data.strftime('%d/%m/%Y %H:%M')
-        ws.append([data_fmt, l.os_numero, coop_nome, est_nome, float(l.valor), l.descricao or ""])
+        data_brt = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
+        ws.append([data_brt, l.os_numero, coop_nome, est_nome, float(l.valor), l.descricao or ""])
 
-    widths = [20, 16, 32, 32, 16, 60]
+    widths = [22, 16, 32, 32, 16, 60]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
 
@@ -794,7 +809,7 @@ def exportar_lancamentos():
     )
     return _response_with_cache(resp, 0, etag_base=f"xlsx_{len(rows)}")
 
-# ====== EXCLUSÃO DE LANÇAMENTO (ADMIN, SEM LIMITE) ======
+# ====== EXCLUSÃO DE LANÇAMENTO (ADMIN) ======
 @app.post('/lancamentos/<int:id>/excluir')
 def excluir_lancamento(id):
     if not is_admin():
@@ -802,7 +817,6 @@ def excluir_lancamento(id):
 
     l = Lancamento.query.get_or_404(id)
 
-    # Devolve o crédito ao cooperado
     cooperado = Cooperado.query.get(l.cooperado_id)
     if cooperado:
         cooperado.credito += float(l.valor or 0)
@@ -842,7 +856,7 @@ def painel_estabelecimento():
                     flash('Crédito insuficiente para este lançamento.', 'danger')
                 else:
                     l = Lancamento(
-                        data=datetime.utcnow(),
+                        data=datetime.utcnow(),  # salvo em UTC
                         os_numero=os_numero,
                         cooperado_id=c.id,
                         estabelecimento_id=est.id,
@@ -859,18 +873,22 @@ def painel_estabelecimento():
         else:
             flash('Preencha todos os campos obrigatórios!', 'danger')
 
-    lancamentos = Lancamento.query.filter_by(estabelecimento_id=est.id).order_by(Lancamento.data.desc()).all()
+    # Filtros (opcionais) no painel do estabelecimento
+    di_s = request.args.get('data_inicio')
+    df_s = request.args.get('data_fim')
+    di_utc, df_utc_excl = local_bounds_to_utc_naive(di_s, df_s)
 
-    # Timezone conversion
-    try:
-        from pytz import timezone, utc
-        tz_sp = timezone('America/Sao_Paulo')
-        for l in lancamentos:
-            hora_brasilia = l.data.replace(tzinfo=utc).astimezone(tz_sp)
-            l.data_brasilia = hora_brasilia.strftime('%d/%m/%Y %H:%M')
-    except Exception:
-        for l in lancamentos:
-            l.data_brasilia = l.data.strftime('%d/%m/%Y %H:%M')
+    q = Lancamento.query.filter_by(estabelecimento_id=est.id)
+    if di_utc:
+        q = q.filter(Lancamento.data >= di_utc)
+    if df_utc_excl:
+        q = q.filter(Lancamento.data < df_utc_excl)
+
+    lancamentos = q.order_by(Lancamento.data.desc()).all()
+
+    # Exibição em Brasília
+    for l in lancamentos:
+        l.data_brasilia = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
 
     return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
 
@@ -967,30 +985,23 @@ def painel_cooperado():
     # filtros de período (opcionais)
     di_s = request.args.get('data_inicio') or ''
     df_s = request.args.get('data_fim') or ''
-    di = parse_date(di_s)
-    df = parse_date(df_s)
+    di_utc, df_utc_excl = local_bounds_to_utc_naive(di_s, df_s)
 
     q = Lancamento.query.filter(Lancamento.cooperado_id == coop.id)
-    if di:
-        q = q.filter(Lancamento.data >= di)
-    if df:
-        q = q.filter(Lancamento.data <= df)
+    if di_utc:
+        q = q.filter(Lancamento.data >= di_utc)
+    if df_utc_excl:
+        q = q.filter(Lancamento.data < df_utc_excl)
     lancamentos = q.order_by(Lancamento.data.desc()).all()
 
     # Horário em Brasília
-    try:
-        from pytz import timezone, utc
-        tz_sp = timezone('America/Sao_Paulo')
-        for l in lancamentos:
-            l.data_brasilia = l.data.replace(tzinfo=utc).astimezone(tz_sp).strftime('%d/%m/%Y %H:%M')
-    except Exception:
-        for l in lancamentos:
-            l.data_brasilia = l.data.strftime('%d/%m/%Y %H:%M')
+    for l in lancamentos:
+        l.data_brasilia = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
 
     total_gasto = sum(float(l.valor or 0) for l in lancamentos)
     total_lanc = len(lancamentos)
 
-    # Tenta usar o template; se não existir no deploy, usa fallback embutido
+    # Fallback embutido: também mostra horários em Brasília e último ajuste em Brasília
     try:
         return render_template(
             'painel_cooperado.html',
@@ -1002,7 +1013,7 @@ def painel_cooperado():
             data_fim=df_s
         )
     except TemplateNotFound:
-        # Fallback com layout branco + azul royal (mobile-first)
+        credito_ajuste = to_brt(coop.credito_atualizado_em).strftime('%d/%m/%Y %H:%M') if coop.credito_atualizado_em else None
         return render_template_string("""
 <!doctype html>
 <html lang="pt-br">
@@ -1048,8 +1059,8 @@ def painel_cooperado():
     <div class="card span-4">
       <h3>Crédito disponível</h3>
       <div class="metric ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
-      {% if coop.credito_atualizado_em %}
-        <div class="muted" style="margin-top:6px">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
+      {% if credito_ajuste %}
+        <div class="muted" style="margin-top:6px">Último ajuste: {{ credito_ajuste }} (Brasília)</div>
       {% else %}
         <div class="muted" style="margin-top:6px">Sem ajustes manuais registrados</div>
       {% endif %}
@@ -1067,7 +1078,7 @@ def painel_cooperado():
     <div class="card span-12">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <h3 style="margin:0">Meus lançamentos</h3>
-        <span class="badge">Atualizado agora</span>
+        <span class="badge">Horário de Brasília</span>
       </div>
       <form class="filters" method="get" action="{{ url_for('painel_cooperado') }}">
         <div class="field"><label for="di">Data início</label><input id="di" type="date" name="data_inicio" value="{{ data_inicio }}"></div>
@@ -1082,7 +1093,7 @@ def painel_cooperado():
           {% if lancamentos %}
             {% for l in lancamentos %}
               <tr>
-                <td>{{ l.data_brasilia or l.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ l.data_brasilia }}</td>
                 <td>{{ l.os_numero }}</td>
                 <td>{{ l.estabelecimento.nome if l.estabelecimento else '-' }}</td>
                 <td class="right">{{ '%.2f'|format(l.valor or 0) }}</td>
@@ -1095,7 +1106,7 @@ def painel_cooperado():
           </tbody>
         </table>
       </div>
-      <div class="muted" style="margin-top:10px">* Os horários são mostrados em Brasília (GMT-3).</div>
+      <div class="muted" style="margin-top:10px">* Os horários são mostrados em Brasília (GMT-3/ GMT-3 ou GMT-2 no horário de verão, se aplicável).</div>
     </div>
   </div>
 </div>
@@ -1103,7 +1114,7 @@ def painel_cooperado():
 </html>
         """,
         coop=coop, lancamentos=lancamentos, total_gasto=total_gasto,
-        total_lanc=total_lanc, data_inicio=di_s, data_fim=df_s)
+        total_lanc=total_lanc, data_inicio=di_s, data_fim=df_s, credito_ajuste=credito_ajuste)
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
