@@ -9,23 +9,27 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+      /* ===== TEMA AZUL-ROYAL + BRANCO (apenas cores) ===== */
       body {
-        background: #191c20;
+        background: #f7f9ff; /* claro */
         font-family: "Roboto", Arial, sans-serif;
         min-height: 100vh;
         margin: 0;
         padding: 0;
-        color: #ffd700;
+        color: #0d1b3f; /* texto principal escuro */
       }
+
+      /* Sidebar clara com azul-royal */
       .sidebar {
         width: 210px;
         height: 100vh;
         position: fixed;
         top: 0;
         left: 0;
-        background: linear-gradient(160deg, #101218 70%, #003399 100%);
-        color: #fff;
-        box-shadow: 3px 0 12px #00339944;
+        background: #ffffff;
+        color: #0d1b3f;
+        box-shadow: 3px 0 16px rgba(65,105,225,.12);
+        border-right: 1px solid #e5ebff;
         z-index: 10;
         display: flex;
         flex-direction: column;
@@ -33,18 +37,18 @@
         padding-bottom: 30px;
       }
       .sidebar .logo {
-        width: 210px !important; /* 3x maior */
+        width: 210px !important; /* mantém seu 3x maior */
         height: auto !important;
         margin: 34px auto 4px auto;
         display: block;
-        filter: drop-shadow(0 0 13px #ffd700cc);
+        filter: drop-shadow(0 0 12px rgba(65,105,225,.35));
         transition: width .2s;
       }
       .sidebar-funcao {
         font-family: 'Orbitron', sans-serif;
-        color: #ffd700;
+        color: #4169e1; /* royal */
         font-size: 0.91rem;
-        font-weight: 600;
+        font-weight: 700;
         text-align: center;
         margin: 0 0 14px 0;
         padding: 0 3px;
@@ -58,7 +62,7 @@
         background: none;
       }
       .sidebar .nav-link {
-        color: #fff;
+        color: #0d1b3f;
         font-size: 1.08rem;
         border-radius: 8px;
         margin: 3px 0;
@@ -69,47 +73,55 @@
         transition: background 0.22s, color 0.22s;
         width: 100%;
         box-sizing: border-box;
+        background: #ffffff;
       }
       .sidebar .nav-link.active,
       .sidebar .nav-link:hover {
-        background: #ffd70033;
-        color: #ffd700 !important;
+        background: #eef3ff; /* hover claro */
+        color: #4169e1 !important;
       }
       .sidebar .nav-link i {
         font-size: 1.2rem;
         margin-right: 10px;
+        color: #4169e1;
       }
+
+      /* Main / Topbar azul-royal em gradiente */
       .main-content {
         margin-left: 230px;
         padding: 38px 32px 20px 32px;
       }
       .topbar {
-        background: #101218;
+        background: linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
         height: 62px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1.5px solid #23262b;
-        box-shadow: 0 2px 16px #0004;
+        border-bottom: 1.5px solid rgba(255,255,255,.25);
+        box-shadow: 0 8px 24px rgba(65,105,225,.25);
         position: sticky;
         top: 0;
         z-index: 20;
+        border-radius: 14px;
+        padding: 0 8px;
+        color: #fff;
       }
       .topbar .btn-voltar {
         font-weight: 700;
         border-radius: 20px;
-        background: #003399;
-        color: #ffd700;
-        border: none;
+        background: #ffffff;
+        color: #4169e1;
+        border: 1px solid #ffffff;
         margin-right: 16px;
-        transition: background 0.2s;
+        transition: background 0.2s, color 0.2s;
       }
       .topbar .btn-voltar:hover {
-        background: #ffd700;
-        color: #003399;
+        background: #2b50d9;
+        color: #ffffff;
+        border-color: #2b50d9;
       }
       .topbar span {
-        color: #ffd700;
+        color: #ffffff;
         font-weight: 700;
         font-size: 1.07rem;
         max-width: 220px;
@@ -117,26 +129,37 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .topbar .btn-logout {
-        font-weight: 700;
-        border-radius: 20px;
+      .topbar .btn-logout,
+      #btn-ativar-som-servico {
+        border-color: #ffffff !important;
+        color: #ffffff !important;
       }
+      .topbar .btn-logout:hover,
+      #btn-ativar-som-servico:hover {
+        background: #ffffff !important;
+        color: #4169e1 !important;
+      }
+
+      /* Título */
       h2 {
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        color: #ffd700;
+        color: #4169e1;
         letter-spacing: 2px;
         margin-bottom: 30px;
         text-align: center;
       }
+
+      /* Cards claros */
       .card-link {
         text-decoration: none !important;
       }
       .card-link .card {
-        background: linear-gradient(120deg, #23262b 90%, #003399 100%);
+        background: #ffffff;
         border-radius: 17px;
-        box-shadow: 0 8px 32px #0008, 0 2px 8px #00339944;
-        color: #ffd700;
+        box-shadow: 0 8px 28px rgba(65,105,225,.14), 0 2px 8px rgba(65,105,225,.10);
+        border: 1px solid #e5ebff;
+        color: #0d1b3f;
         padding: 24px;
         margin-bottom: 30px;
         text-align: center;
@@ -144,56 +167,76 @@
         font-weight: 700;
         font-size: 1.3rem;
         user-select: none;
-        transition: background 0.3s, box-shadow 0.3s, transform 0.15s;
+        transition: background 0.3s, box-shadow 0.3s, transform 0.15s, color .2s;
         cursor: pointer;
       }
       .card-link .card:hover {
-        background: #0044cc;
-        color: #ffd700 !important;
-        box-shadow: 0 6px 22px #00339966, 0 2px 12px #00339933;
-        transform: translateY(-4px) scale(1.04);
+        background: #f5f8ff;
+        color: #2b50d9 !important;
+        box-shadow: 0 8px 28px rgba(65,105,225,.22), 0 2px 12px rgba(65,105,225,.18);
+        transform: translateY(-4px) scale(1.02);
       }
       .card-link .card i {
         font-size: 2.3rem;
         margin-bottom: 10px;
         display: block;
-        color: #ffe670;
+        color: #4169e1;
         transition: color 0.2s;
       }
       .card-link .card:hover i {
-        color: #fffbe7;
+        color: #2b50d9;
       }
+
+      /* Formulários claros */
       form .form-control,
       form .form-select {
-        background: #222;
-        border: 1px solid #555;
-        color: #ffd700;
+        background: #ffffff;
+        border: 1.5px solid #c9d4ff;
+        color: #0d1b3f;
       }
       form label {
-        font-weight: 600;
-        color: #ffd700cc;
+        font-weight: 700;
+        color: #2b3e73;
+      }
+      form .form-control:focus,
+      form .form-select:focus {
+        border-color: #4169e1;
+        box-shadow: 0 0 0 .2rem rgba(65,105,225,.18);
       }
       form .btn-primary {
-        background: linear-gradient(90deg, #ffd700 60%, #ffe670 100%);
-        color: #191c20;
+        background: linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
+        color: #ffffff;
         font-weight: bold;
         border: none;
         border-radius: 17px;
         padding: 8px 20px;
         margin-top: 10px;
+        box-shadow: 0 10px 18px rgba(65,105,225,.18);
       }
       form .btn-primary:hover {
-        background: #ffe670;
-        color: #003399;
+        background: #2b50d9;
+        color: #ffffff;
       }
+
+      /* Gráfico – cores azuis */
       #graficoCooperados {
         max-height: 340px;
+        background: #ffffff;
+        border: 1px solid #e5ebff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(65,105,225,.10);
+        padding: 8px;
       }
+
+      /* Tabela (se usar .tabela-cooperados) */
       .tabela-cooperados,
       .tabela-cooperados th,
       .tabela-cooperados td {
-        color: #fff !important;
+        color: #0d1b3f !important;
+        background-color: #ffffff !important;
+        border-color: #e5ebff !important;
       }
+
       @media (max-width: 900px) {
         .sidebar {
           display: none;
@@ -334,7 +377,8 @@
       var option = select.options[select.selectedIndex];
       var foto = option ? option.getAttribute("data-foto") : null;
       if (foto && select.value) {
-        fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #ffd700;box-shadow:0 0 8px #00339955;">';
+        /* só cores alteradas: borda azul-royal e sombra azul suave */
+        fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #4169e1;box-shadow:0 0 8px rgba(65,105,225,.33);">';
       } else {
         fotoDiv.innerHTML = '';
       }
@@ -351,8 +395,8 @@
         {
           label: "Valor Real Gasto (R$)",
           data: {{ cooperado_valores|tojson }},
-          backgroundColor: "rgba(255, 215, 0, 0.80)",
-          borderColor: "rgba(255, 215, 0, 1)",
+          backgroundColor: "rgba(65, 105, 225, 0.85)", /* azul-royal */
+          borderColor: "rgba(65, 105, 225, 1)",
           borderWidth: 2,
           barThickness: 16,
           maxBarThickness: 18
@@ -366,15 +410,15 @@
         x: {
           beginAtZero: true,
           ticks: {
-            color: "#ffd700",
+            color: "#0d1b3f", /* texto escuro */
             font: { size: 13 },
             callback: function(value) { return "R$ " + value; }
           },
-          grid: { color: "#00339955" }
+          grid: { color: "rgba(65,105,225,.25)" }
         },
         y: {
-          ticks: { color: "#ffd700", font: { size: 15 } },
-          grid: { color: "#00339955" }
+          ticks: { color: "#0d1b3f", font: { size: 15 } },
+          grid: { color: "rgba(65,105,225,.18)" }
         }
       },
       plugins: {
@@ -397,7 +441,7 @@
             chart.getDatasetMeta(i).data.forEach(function(bar, index) {
               const value = dataset.data[index];
               ctx.font = "bold 13px Roboto";
-              ctx.fillStyle = "#fff";
+              ctx.fillStyle = "#0d1b3f"; /* número ao lado da barra em azul-escuro */
               ctx.textAlign = "left";
               ctx.textBaseline = "middle";
               let x = bar.x + 8;
