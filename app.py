@@ -260,41 +260,40 @@ def add_perf_headers(resp: Response):
     resp.headers.setdefault("Server-Timing", "app;desc=\"Coopex-API\"")
     return resp
 
-# ========= LOGIN/LOGOUT =========
+# ========= LOGIN/LOGOUT (AUTODETECÇÃO DE TIPO) =========
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        tipo = request.form.get('tipo', '').strip()
-        username = request.form.get('username', '').strip()
-        senha = request.form.get('senha', '')
+        username = (request.form.get('username') or '').strip()
+        senha = request.form.get('senha') or ''
         session.permanent = True
 
-        if tipo == 'admin':
-            user = Admin.query.filter_by(username=username).first()
-            if user and user.checar_senha(senha):
-                session['user_id'] = user.id
-                session['user_tipo'] = 'admin'
-                return redirect(url_for('dashboard'))
-
-        elif tipo == 'estabelecimento':
-            est = Estabelecimento.query.filter_by(username=username).first()
-            if est and est.checar_senha(senha):
-                session['user_id'] = est.id
-                session['user_tipo'] = 'estabelecimento'
-                return redirect(url_for('painel_estabelecimento'))
-
-        elif tipo == 'cooperado':
-            coop = Cooperado.query.filter_by(username=username).first()
-            if coop and coop.checar_senha(senha):
-                session['user_id'] = coop.id
-                session['user_tipo'] = 'cooperado'
-                return redirect(url_for('painel_cooperado'))
-
-        else:
-            flash('Selecione o tipo de usuário.', 'danger')
+        if not username or not senha:
+            flash('Informe usuário e senha.', 'danger')
             return render_template('login.html'), 400
 
-        flash('Usuário ou senha inválidos', 'danger')
+        # 1) Admin
+        user = Admin.query.filter_by(username=username).first()
+        if user and user.checar_senha(senha):
+            session['user_id'] = user.id
+            session['user_tipo'] = 'admin'
+            return redirect(url_for('dashboard'))
+
+        # 2) Estabelecimento
+        est = Estabelecimento.query.filter_by(username=username).first()
+        if est and est.checar_senha(senha):
+            session['user_id'] = est.id
+            session['user_tipo'] = 'estabelecimento'
+            return redirect(url_for('painel_estabelecimento'))
+
+        # 3) Cooperado
+        coop = Cooperado.query.filter_by(username=username).first()
+        if coop and coop.checar_senha(senha):
+            session['user_id'] = coop.id
+            session['user_tipo'] = 'cooperado'
+            return redirect(url_for('painel_cooperado'))
+
+        flash('Usuário ou senha inválidos.', 'danger')
         return render_template('login.html'), 401
 
     return render_template('login.html')
