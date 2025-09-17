@@ -221,7 +221,7 @@
       </article>
 
       <!-- LANÇAMENTOS -->
-      <article class="glass metric-card span-12 section">
+      <article id="lancamentos" class="glass metric-card span-12 section">
         <div class="section-head">
           <h3 class="section-title">Meus lançamentos</h3>
           <span class="badge">Atualizado agora</span>
@@ -296,7 +296,9 @@
 
     // Suave 'active' no bottom nav (visual apenas)
     document.querySelectorAll('.bottom-nav .tab').forEach(t=>{
-      t.addEventListener('click', function(){
+      t.addEventListener('click', function(e){
+        // se for âncora, deixa navegar normalmente
+        if(this.getAttribute('href')?.startsWith('#') === false) e.preventDefault();
         document.querySelectorAll('.bottom-nav .tab').forEach(x=>x.classList.remove('active'));
         this.classList.add('active');
       });
@@ -304,4 +306,3 @@
   </script>
 </body>
 </html>
-
