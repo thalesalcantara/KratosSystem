@@ -1,261 +1,329 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8">
-  <title>Entrar · COOPEX</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Login — COOPEX Parcerias</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Fonts + Bootstrap + Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
   <style>
-    :root {
+    :root{
       --royal: #2747d9;
       --royal-2: #3b61e3;
-      --bg: #f4f7ff;
-      --glass: rgba(255,255,255,0.32);
+      --bg: #f5f8fe;
+      --glass: rgba(255,255,255,0.89);
       --glass-border: rgba(70,90,255,0.13);
-      --shadow: 0 6px 36px 0 rgba(39,71,217,0.13);
+      --shadow: 0 12px 48px 0 rgba(39,71,217,0.13);
+      --card: #ffffffee;
+      --card-border: #f2f4fc;
+      --ink: #13284c;
+      --muted: #7b8ab7;
+      --focus: #2747d966;
     }
-    body {
-      min-height: 100vh;
-      background: linear-gradient(120deg, #f2f6ff 0%, #d2e1ff 100%);
-      font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    html,body { height:100%; }
+    body{
+      min-height:100vh;
+      background: linear-gradient(115deg, #edf3ff 0%, #d2e1ff 100%);
+      font-family:'Roboto', Arial, sans-serif;
+      margin:0;
+      color:var(--ink);
+      display: grid;
+      place-items:center;
     }
-    .login-wrap {
-      width: 100vw;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
+    .shell{
+      width:100%;
+      max-width:1120px;
+      min-height:72vh;
+      display: grid;
+      grid-template-columns:1.1fr 1fr;
+      gap:30px;
+      align-items:center;
+      padding:32px 12px;
     }
-    .glass-card {
-      max-width: 410px;
-      width: 98vw;
-      border-radius: 24px;
-      background: var(--glass);
-      backdrop-filter: blur(22px) saturate(130%);
-      -webkit-backdrop-filter: blur(22px) saturate(130%);
-      border: 1.8px solid var(--glass-border);
+    @media (max-width:990px){
+      .shell { grid-template-columns:1fr; gap:22px; min-height:90vh;}
+    }
+    .hero{
+      background: linear-gradient(120deg, var(--royal), var(--royal-2) 88%);
+      border-radius:28px;
       box-shadow: var(--shadow);
-      overflow: hidden;
-      padding: 0;
-      position: relative;
-      margin-bottom: 0;
+      color:#fff;
+      min-height:340px;
       display: flex;
       flex-direction: column;
-      justify-content: stretch;
-    }
-    .card-top {
-      background: linear-gradient(135deg, var(--royal), var(--royal-2));
-      color: #fff;
-      text-align: center;
-      padding: 38px 24px 30px 24px;
-      border-bottom-left-radius: 50% 26px;
-      border-bottom-right-radius: 50% 26px;
+      justify-content: space-between;
+      padding: 38px 40px 30px 40px;
       position: relative;
-      box-shadow: 0 8px 22px 0 #2747d91b;
     }
-    .brand {
+    @media (max-width:990px){ .hero{padding:30px 18px;} }
+    .hero-logo{
+      width:88px;
+      height:88px;
+      border-radius:18px;
+      background:#fff;
+      object-fit:contain;
+      box-shadow:0 4px 32px #1931992c;
+      margin-bottom:6px;
+    }
+    .hero-title{
+      font-family:'Orbitron',sans-serif;
+      font-size:1.45rem;
+      letter-spacing:2px;
+      font-weight:700;
+      margin-bottom:4px;
+      color:#fff;
+      text-shadow:0 2px 18px #13246e30;
+    }
+    .hero h2{
+      font-size:2.2rem;
+      font-family:'Orbitron',sans-serif;
+      font-weight:800;
+      margin-bottom:8px;
+      margin-top:18px;
+      letter-spacing:1.2px;
+      color:#fff;
+    }
+    .hero-badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin:16px 0 4px 0;
+    }
+    .badge-pill{
+      background:rgba(255,255,255,0.18);
+      border:1.5px solid #fff4;
+      color:#fff;
+      border-radius:999px;
+      padding:8px 14px;
+      font-weight:700;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:1.03rem;
+      backdrop-filter: blur(1px);
+    }
+    .hero-footer{
+      margin-top:26px;
+      display:flex; gap:10px; flex-wrap:wrap;
+      color:#e6ecfa;
+      font-size:1.05rem;
+    }
+    .hero-footer .mini{
+      display:flex; gap:6px; align-items:center;
+      background:#fff1;
+      border:1px solid #fff2;
+      padding:6px 13px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:.98rem;
+    }
+    /* card login */
+    .card-login{
+      background: var(--glass);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 38px 32px 32px 32px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 0;
+      justify-content: center;
+      gap: 12px;
+      min-width:320px;
+      max-width:410px;
+      width:100%;
+      position:relative;
     }
-    .brand-logo {
-      width: 92px;
-      height: 92px;
-      border-radius: 50%;
-      object-fit: contain;
-      border: 4px solid #fff;
-      background: transparent;
-      box-shadow: 0 3px 24px 0 #2747d950;
-      transition: box-shadow 0.2s, transform 0.3s;
-      margin-bottom: 2px;
+    .card-login h3{
+      font-family: 'Orbitron',sans-serif;
+      color:var(--royal-2);
+      text-align:center;
+      font-size:1.42rem;
+      font-weight:800;
+      letter-spacing:1px;
+      margin-bottom:2px;
     }
-    .brand-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.23rem;
-      letter-spacing: 2px;
-      font-weight: 600;
-      text-shadow: 0 2px 18px #13246e30;
-      margin-bottom: 0px;
+    .sub{ text-align:center; color:var(--muted); font-size:1.01rem;}
+    .input-group-text{ background:var(--bg); border:1px solid var(--card-border); color:var(--royal-2); font-weight:800;}
+    .form-label{ font-weight:700; color:var(--royal-2); }
+    .form-control{
+      background:var(--bg);
+      border:1.5px solid var(--card-border);
+      color:var(--ink);
+      border-radius:10px;
+      height:46px;
+      font-size:1.08rem;
     }
-    .small-note {
-      font-size: .96rem;
-      color: #e6ecfa;
-      opacity: .91;
-      margin-top: 4px;
+    .form-control::placeholder{ color:#b0bddb; }
+    .form-control:focus{
+      border-color:var(--royal-2);
+      box-shadow:0 0 0 2px var(--focus);
+      background:#fff;
     }
-    .card-body {
-      padding: 30px 28px 22px 28px;
-      background: transparent;
-      position: relative;
-      z-index: 2;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
+    .btn-royal{
+      background:linear-gradient(90deg, var(--royal-2), var(--royal));
+      color:#fff; font-weight:900; border:none; border-radius:12px; height:48px;
+      letter-spacing:.3px; display:flex; align-items:center; justify-content:center; gap:10px;
+      font-size:1.11rem;
+      margin-top:10px;
     }
-    .form-label {
-      font-weight: 600;
-      color: #334;
-      letter-spacing: .01em;
+    .btn-royal:hover{ filter:brightness(1.08);}
+    .btn-plain{
+      background:#fff; color:var(--royal-2); border:1px solid var(--card-border); border-radius:10px; height:40px; font-weight:700; font-size:.97rem;
+      transition:background .15s, color .15s;
     }
-    .btn-royal {
-      background: var(--royal);
-      color: #fff;
-      font-weight: 600;
-      border-radius: 10px;
-      box-shadow: 0 3px 16px #3b61e313;
-      transition: background 0.2s, box-shadow 0.2s;
+    .btn-plain:hover{background:var(--royal-2);color:#fff;}
+    .meta{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px;
     }
-    .btn-royal:hover {
-      background: var(--royal-2);
-      color: #fff;
-      box-shadow: 0 6px 22px #3b61e337;
+    .form-check-input:focus{ box-shadow:0 0 0 .2rem var(--focus); border-color:var(--royal-2);}
+    .form-check-input:checked{ background-color:var(--royal-2); border-color:var(--royal-2);}
+    .alert{background:#edf1fd; border:1px solid #c5d6ff; color:var(--royal-2); font-weight:700; border-radius:10px; text-align:center; padding:10px 12px; margin:0;}
+    .footnote{
+      text-align:center;
+      color:#b1bddf;
+      font-weight:600;
+      margin-top:12px;
+      font-size:1.01rem;
     }
-    .form-control:focus {
-      border-color: var(--royal-2);
-      box-shadow: 0 0 0 2px #3b61e344;
-    }
-    .input-group-lg>.form-control, .input-group-lg>.btn {
-      font-size: 1.14rem;
-      border-radius: 10px;
-    }
-    .alert {
-      border-radius: 10px;
-      margin-bottom: 18px;
-    }
-    .form-check-input:checked {
-      background-color: var(--royal-2);
-      border-color: var(--royal-2);
-    }
-    .form-check-label {
-      font-size: .98rem;
-      color: #446;
-      margin-left: 6px;
-      user-select: none;
-    }
-    .marca-sistema {
-      color: #1a1a1a;
-      text-align: center;
-      margin: 16px auto 8px auto;
-      font-size: 1.04rem;
-      letter-spacing: 0.01em;
-      font-weight: 500;
-      opacity: 0.96;
-      user-select: none;
-      width: 100%;
-    }
-    @media (max-width: 550px) {
-      .glass-card { max-width: 99vw; }
-      .brand-logo { width: 70px; height: 70px; }
-      .marca-sistema { font-size: 0.97rem; }
+    .toggle-pass{ cursor:pointer; user-select:none; }
+    @media (max-width:650px){
+      .card-login{max-width:98vw;min-width:0;padding:22px 4vw;}
+      .hero{padding:18px 4vw;}
+      .shell{padding:2px;}
     }
   </style>
 </head>
 <body>
-  <div class="login-wrap">
-    <div class="glass-card">
-      <div class="card-top">
-        <div class="brand">
-          <img src="{{ url_for('static', filename='logo_coopex.png') }}" class="brand-logo" alt="Logo Coopex">
-          <div class="brand-title">COOPEX</div>
-        </div>
-        <div class="small-note"><b>Bem-vindo ao Painel COOPEX</b></div>
+  <div class="shell">
+    <!-- HERO AZUL -->
+    <section class="hero">
+      <div>
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" class="hero-logo">
+        <div class="hero-title">COOPEX Parcerias</div>
       </div>
-      <div class="card-body">
-        {% with msgs = get_flashed_messages() %}
-          {% if msgs %}
-          <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-1"></i> {{ msgs[0] }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+      <div>
+        <h2>Bem-vindo!</h2>
+        <div class="hero-badges">
+          <span class="badge-pill"><i class="bi bi-speedometer2"></i> Rápido</span>
+          <span class="badge-pill"><i class="bi bi-shield-check"></i> Seguro</span>
+          <span class="badge-pill"><i class="bi bi-emoji-smile"></i> Suporte Humano</span>
+        </div>
+      </div>
+      <div class="hero-footer">
+        <div class="mini"><i class="bi bi-lock"></i> Criptografia TLS</div>
+        <div class="mini"><i class="bi bi-check2-circle"></i> Autenticação Central</div>
+      </div>
+    </section>
+    <!-- CARTÃO DE LOGIN -->
+    <section class="card-login">
+      <h3>Acesse sua conta</h3>
+      <div class="sub">Informe seu usuário e senha para entrar</div>
+      <form method="post" autocomplete="on" id="loginForm">
+        <label for="usuario" class="form-label mt-2">Usuário</label>
+        <div class="input-group mb-2">
+          <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+          <input
+            type="text"
+            class="form-control"
+            id="usuario"
+            name="usuario"
+            placeholder="ex.: coopex"
+            value="{{ request.form.get('usuario','') }}"
+            required
+            autocomplete="username"
+            autofocus
+          >
+        </div>
+        <label for="senha" class="form-label mt-2">Senha</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+          <input
+            type="password"
+            class="form-control"
+            id="senha"
+            name="senha"
+            placeholder="Sua senha"
+            required
+            autocomplete="current-password"
+          >
+          <span class="input-group-text toggle-pass" id="toggleSenha" title="Mostrar/ocultar senha">
+            <i class="bi bi-eye" id="eyeIcon"></i>
+          </span>
+        </div>
+        <div class="meta mt-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="lembrar" name="lembrar" value="1">
+            <label class="form-check-label" for="lembrar">Lembrar de mim</label>
           </div>
-          {% endif %}
-        {% endwith %}
-        <form method="POST" action="{{ url_for('login') }}" class="needs-validation" novalidate autocomplete="on" id="loginForm">
-          <div class="mb-3">
-            <label class="form-label" for="usuario">Usuário</label>
-            <input class="form-control form-control-lg" id="usuario" name="usuario" required autocomplete="username" placeholder="Digite seu usuário">
-            <div class="invalid-feedback">Informe seu usuário.</div>
-          </div>
-          <div class="mb-2">
-            <label class="form-label" for="senha">Senha</label>
-            <div class="input-group input-group-lg">
-              <input type="password" class="form-control" id="senha" name="senha" required autocomplete="current-password" placeholder="••••••••">
-              <button class="btn btn-outline-secondary" type="button" id="togglePass" title="Mostrar/ocultar senha">
-                <i class="bi bi-eye"></i>
-              </button>
-              <div class="invalid-feedback">Informe sua senha.</div>
+          <a class="btn btn-plain btn-sm px-3" href="#" onclick="document.getElementById('usuario').focus();return false;">
+            <i class="bi bi-question-circle"></i> Esqueci a senha
+          </a>
+        </div>
+        <button type="submit" class="btn-royal w-100 mt-3" id="btnEntrar">
+          <span class="spinner-border spinner-border-sm me-1 d-none" role="status" aria-hidden="true" id="spin"></span>
+          Entrar
+        </button>
+      </form>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} text-center mt-3">
+              {{ message }}
             </div>
-          </div>
-          <div class="form-check mb-3 mt-3">
-            <input class="form-check-input" type="checkbox" id="saveCreds">
-            <label class="form-check-label" for="saveCreds">
-              Salvar login para próximos acessos
-            </label>
-          </div>
-          <button class="btn btn-royal w-100 btn-lg mt-4">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
-          </button>
-        </form>
-        <div class="marca-sistema">
-          © {{ now().year }} COOPEX. Sistema desenvolvido por Cratos System.
-        </div>
-      </div>
-    </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </section>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <div class="footnote">
+    © {{ now().year if callable(now) else '' }} COOPEX. Sistema desenvolvido por Cratos System.
+  </div>
+
   <script>
-    // Validação bootstrap
-    (() => {
-      const forms = document.querySelectorAll('.needs-validation');
-      Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-          if (!form.checkValidity()) {
-            event.preventDefault(); event.stopPropagation();
-          }
-          form.classList.add('was-validated');
-        }, false);
-      });
-    })();
-
     // Mostrar/ocultar senha
-    const toggle = document.getElementById('togglePass');
-    const input = document.getElementById('senha');
-    toggle?.addEventListener('click', () => {
-      const isPwd = input.type === 'password';
-      input.type = isPwd ? 'text' : 'password';
-      toggle.innerHTML = isPwd ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
-      input.focus();
-    });
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.target.form?.requestSubmit();
-      }
-    });
+    const senha = document.getElementById('senha');
+    const toggle = document.getElementById('toggleSenha');
+    const eye = document.getElementById('eyeIcon');
+    if (toggle){
+      toggle.addEventListener('click', ()=>{
+        const isPwd = senha.type === 'password';
+        senha.type = isPwd ? 'text' : 'password';
+        eye.className = isPwd ? 'bi bi-eye-slash' : 'bi bi-eye';
+        senha.focus();
+      });
+    }
 
-    // Salvar/Preencher credenciais (localStorage)
+    // Spinner no submit
+    const form = document.getElementById('loginForm');
+    const btn = document.getElementById('btnEntrar');
+    const spin = document.getElementById('spin');
+    if (form){
+      form.addEventListener('submit', ()=>{
+        if (btn && spin){
+          btn.disabled = true;
+          spin.classList.remove('d-none');
+        }
+      });
+    }
+    // Preencher lembrar de mim (salvar credenciais no localStorage)
     const usuarioInput = document.getElementById('usuario');
     const senhaInput = document.getElementById('senha');
-    const saveCreds = document.getElementById('saveCreds');
-    const loginForm = document.getElementById('loginForm');
+    const lembrar = document.getElementById('lembrar');
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('coopex_user');
       const savedPwd  = localStorage.getItem('coopex_pwd');
       if(savedUser && savedPwd){
         usuarioInput.value = savedUser;
         senhaInput.value = savedPwd;
-        saveCreds.checked = true;
+        lembrar.checked = true;
       }
     });
-    loginForm.addEventListener('submit', function() {
-      if(saveCreds.checked){
+    form.addEventListener('submit', function() {
+      if(lembrar.checked){
         localStorage.setItem('coopex_user', usuarioInput.value);
         localStorage.setItem('coopex_pwd', senhaInput.value);
       } else {
@@ -264,5 +332,6 @@
       }
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
