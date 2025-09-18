@@ -1,351 +1,281 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-br" data-bs-theme="light">
 <head>
-    <meta charset="UTF-8" />
-    <title>Login — Coopex Parcerias</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <!-- Fonts + Bootstrap + Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-    <style>
-        :root {
-            /* Azul royal + branco */
-            --royal: #003399;
-            --royal-700: #022b80;
-            --royal-500: #0d49cc;
-            --royal-300: #7aa2ff;
-            --white: #ffffff;
-            --ink: #0b1a2f;
-            --muted: #6b7aa6;
-            --card: #ffffffee;
-            --card-border: #ffffffcc;
-            --field: #f7f9ff;
-            --field-border: #d7e0ff;
-            --focus: #0d49cc33;
-            --shadow: 0 14px 40px rgba(0,0,0,.25);
-        }
-        * { box-sizing: border-box }
-        html, body { height: 100% }
-        body {
-            margin: 0;
-            color: var(--ink);
-            font-family: Roboto, Arial, sans-serif;
-            background: 
-                radial-gradient(1200px 600px at 85% -10%, #0d49cc33 10%, transparent 60%),
-                radial-gradient(900px 520px at 10% 110%, #7aa2ff33 10%, transparent 60%),
-                linear-gradient(180deg, var(--royal-700), var(--royal));
-            display: grid;
-            place-items: center;
-            overflow-x: hidden;
-        }
-        /* layout */
-        .shell {
-            width: 100%;
-            max-width: 1100px;
-            padding: 22px;
-            display: grid;
-            grid-template-columns: 1.15fr 1fr;
-            gap: 22px;
-            align-items: stretch;
-        }
-        @media (max-width: 980px) {
-            .shell {
-                grid-template-columns: 1fr;
-                gap: 16px;
-                padding: 14px;
-            }
-        }
-        /* hero (lado esquerdo) */
-        .hero {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            background: 
-                radial-gradient(1600px 600px at 0% 100%, #7aa2ff33, transparent 60%),
-                linear-gradient(135deg, #002a7a 0%, #003ea6 60%, #0d49cc 100%);
-            box-shadow: var(--shadow);
-            color: #eef3ff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .hero-top {
-            padding: 28px 26px 0 26px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .hero-logo {
-            height: 56px;
-            width: auto;
-            filter: drop-shadow(0 0 14px #ffffff80);
-        }
-        .hero-title {
-            margin: 0;
-            font: 700 1.15rem Orbitron, sans-serif;
-            letter-spacing: 1.2px;
-            color: #fff;
-        }
-        .hero-main {
-            padding: 8px 26px 26px 26px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .hero h2 {
-            margin: 6px 0 0 0;
-            font: 800 2.1rem/1.1 Orbitron, sans-serif;
-            color: #fff;
-            letter-spacing: 1.8px;
-        }
-        .hero p {
-            margin: 6px 0 0 0;
-            color: #e6edff;
-            font-size: 1.02rem;
-        }
-        .hero-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        .badge-pill {
-            display: inline-flex;
-            gap: 8px;
-            align-items: center;
-            background: #ffffff22;
-            border: 1px solid #ffffff44;
-            color: #fff;
-            border-radius: 999px;
-            padding: 8px 12px;
-            font-weight: 700;
-        }
-        .hero-footer {
-            background: linear-gradient(180deg, #ffffff10, transparent);
-            padding: 10px 16px 16px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: flex-end;
-            color: #e6edff;
-        }
-        .hero-footer .mini {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            background: #ffffff1a;
-            border: 1px solid #ffffff30;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-weight: 700;
-        }
-        /* card de login (lado direito) */
-        .card-login {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 22px;
-            padding: 28px 24px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .card-login h3 {
-            margin: 0;
-            text-align: center;
-            font: 800 1.4rem Orbitron, sans-serif;
-            color: var(--royal-700);
-            letter-spacing: 1px;
-        }
-        .sub {
-            text-align: center;
-            color: var(--muted);
-            margin-top: -4px;
-        }
-        .form-label {
-            font-weight: 700;
-            color: var(--royal-700);
-        }
-        .input-group-text {
-            background: var(--field);
-            border: 1px solid var(--field-border);
-            color: #6881c2;
-            font-weight: 800;
-        }
-        .form-control {
-            background: var(--field);
-            border: 1px solid var(--field-border);
-            color: var(--ink);
-            border-radius: 12px;
-            height: 46px;
-        }
-        .form-control::placeholder {
-            color: #9cb0df;
-        }
-        .form-control:focus {
-            border-color: #0d49cc;
-            box-shadow: 0 0 0 .2rem var(--focus);
-            background: #fff;
-        }
-        .btn-royal {
-            background: linear-gradient(90deg, #003ea6, #1a54ff);
-            color: #fff;
-            font-weight: 900;
-            border: none;
-            border-radius: 14px;
-            height: 48px;
-            letter-spacing: .3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn-royal:hover { filter: brightness(1.05); }
-        .btn-plain {
-            background: #fff;
-            color: #003399;
-            border: 1px solid #d7e0ff;
-            border-radius: 12px;
-            height: 44px;
-            font-weight: 800;
-        }
-        .meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 2px;
-        }
-        .form-check-input:focus {
-            box-shadow: 0 0 0 .2rem var(--focus);
-            border-color: #0d49cc;
-        }
-        .form-check-input:checked {
-            background-color: #0d49cc;
-            border-color: #0d49cc;
-        }
-        .alert {
-            background: #e8f0ff;
-            border: 1px solid #b9ccff;
-            color: #0b1a2f;
-            font-weight: 700;
-            border-radius: 10px;
-            text-align: center;
-            padding: 10px 12px;
-            margin: 0;
-        }
-        /* link inferior */
-        .footnote {
-            text-align: center;
-            color: #dfe7ff;
-            font-weight: 600;
-            margin-top: 8px;
-        }
-        .footnote a {
-            color: #fff;
-            text-decoration: underline;
-        }
-        /* botão olho */
-        .toggle-pass {
-            cursor: pointer;
-            user-select: none;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Entrar · COOPEX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --royal: #2747d9;
+      --royal-2: #3b61e3;
+      --bg: #f4f7ff;
+      --glass: rgba(255,255,255,0.32);
+      --glass-border: rgba(70,90,255,0.13);
+      --shadow: 0 6px 36px 0 rgba(39,71,217,0.13);
+      --green: #23bb75;
+    }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(120deg, #f2f6ff 0%, #d2e1ff 100%);
+      font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-wrap {
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+    }
+    .glass-card {
+      max-width: 410px;
+      width: 98vw;
+      border-radius: 24px;
+      background: var(--glass);
+      backdrop-filter: blur(22px) saturate(130%);
+      -webkit-backdrop-filter: blur(22px) saturate(130%);
+      border: 1.8px solid var(--glass-border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 0;
+      position: relative;
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: stretch;
+    }
+    .card-top {
+      background: linear-gradient(135deg, var(--royal), var(--royal-2));
+      color: #fff;
+      text-align: center;
+      padding: 38px 24px 30px 24px;
+      border-bottom-left-radius: 50% 26px;
+      border-bottom-right-radius: 50% 26px;
+      position: relative;
+      box-shadow: 0 8px 22px 0 #2747d91b;
+    }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0;
+    }
+    .brand-logo {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      object-fit: contain;
+      border: 4px solid #fff;
+      background: transparent;
+      box-shadow: 0 3px 24px 0 #2747d950;
+      transition: box-shadow 0.2s, transform 0.3s;
+      margin-bottom: 2px;
+    }
+    .brand-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.23rem;
+      letter-spacing: 2px;
+      font-weight: 600;
+      text-shadow: 0 2px 18px #13246e30;
+      margin-bottom: 0px;
+    }
+    .small-note {
+      font-size: .96rem;
+      color: #e6ecfa;
+      opacity: .91;
+      margin-top: 4px;
+    }
+    .card-body {
+      padding: 30px 28px 22px 28px;
+      background: transparent;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .form-label {
+      font-weight: 600;
+      color: #334;
+      letter-spacing: .01em;
+    }
+    .btn-royal {
+      background: var(--royal);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 3px 16px #3b61e313;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-royal:hover {
+      background: var(--royal-2);
+      color: #fff;
+      box-shadow: 0 6px 22px #3b61e337;
+    }
+    .form-control:focus {
+      border-color: var(--royal-2);
+      box-shadow: 0 0 0 2px #3b61e344;
+    }
+    .input-group-lg>.form-control, .input-group-lg>.btn {
+      font-size: 1.14rem;
+      border-radius: 10px;
+    }
+    .alert {
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+    .form-check-input:checked {
+      background-color: var(--royal-2);
+      border-color: var(--royal-2);
+    }
+    .form-check-label {
+      font-size: .98rem;
+      color: #446;
+      margin-left: 6px;
+      user-select: none;
+    }
+    .marca-sistema {
+      color: #1a1a1a;
+      text-align: center;
+      margin: 16px auto 8px auto;
+      font-size: 1.04rem;
+      letter-spacing: 0.01em;
+      font-weight: 500;
+      opacity: 0.96;
+      user-select: none;
+      width: 100%;
+    }
+    .toggle-pass-btn {
+      border: none;
+      background: none;
+      color: #2747d9;
+      font-size: 1.22rem;
+      padding: 0 10px;
+      cursor: pointer;
+      transition: color .2s;
+    }
+    .toggle-pass-btn:focus {
+      outline: 2px solid var(--royal-2);
+    }
+    .spinner-border {
+      width: 1.2rem;
+      height: 1.2rem;
+      vertical-align: middle;
+      margin-right: 6px;
+      display: none;
+    }
+    .btn-royal.loading .spinner-border {
+      display: inline-block !important;
+    }
+    @media (max-width: 550px) {
+      .glass-card { max-width: 99vw; }
+      .brand-logo { width: 70px; height: 70px; }
+      .marca-sistema { font-size: 0.97rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="shell">
-        <!-- HERO -->
-        <section class="hero">
-            <div class="hero-top">
-                <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" class="hero-logo">
-                <h1 class="hero-title">Coopex Parcerias</h1>
+  <div class="login-wrap">
+    <div class="glass-card">
+      <div class="card-top">
+        <div class="brand">
+          <img src="{{ url_for('static', filename='logo_coopex.png') }}" class="brand-logo" alt="Logo Coopex">
+          <div class="brand-title">COOPEX Parcerias</div>
+        </div>
+        <div class="small-note"><b>Bem-vindo ao Painel COOPEX</b></div>
+      </div>
+      <div class="card-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              <i class="bi bi-exclamation-triangle me-1"></i> {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
             </div>
-            <div class="hero-main">
-                <h2>Bem Vindos ♥</h2>
-                <div class="hero-badges">
-                    <span class="badge-pill"><i class="bi bi-speedometer2"></i> Rápido</span>
-                    <span class="badge-pill"><i class="bi bi-shield-check"></i> Seguro</span>
-                </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <form method="post" autocomplete="on" id="loginForm" class="needs-validation" novalidate>
+          {# Se usar CSRF: {{ csrf_token() }} #}
+          <div class="mb-3">
+            <label class="form-label" for="username"><i class="bi bi-person"></i> Usuário</label>
+            <input type="text" class="form-control form-control-lg" id="username" name="username" placeholder="ex.: joao.silva" value="{{ request.form.get('username','') }}" required autocomplete="username" autofocus>
+            <div class="invalid-feedback">Informe seu usuário.</div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="senha"><i class="bi bi-lock"></i> Senha</label>
+            <div class="input-group input-group-lg">
+              <input type="password" class="form-control" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password">
+              <button class="toggle-pass-btn" type="button" id="toggleSenha" title="Mostrar/ocultar senha">
+                <i class="bi bi-eye" id="eyeIcon"></i>
+              </button>
+              <div class="invalid-feedback">Informe sua senha.</div>
             </div>
-            <div class="hero-footer">
-                <div class="mini"><i class="bi bi-lock"></i> Criptografia TLS</div>
-                <div class="mini"><i class="bi bi-check2-circle"></i> Autenticação central</div>
-            </div>
-        </section>
-        <!-- CARD LOGIN -->
-        <section class="card-login">
-            <h3>Acesse sua conta</h3>
-            <div class="sub">Informe seu usuário e senha</div>
-            <form method="post" autocomplete="on" id="loginForm">
-                {# Se usar CSRF: {{ csrf_token() }} #}
-                <label for="username" class="form-label"><i class="bi bi-person"></i> Usuário</label>
-                <div class="input-group mb-2">
-                    <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="ex.: joao.silva" value="{{ request.form.get('username','') }}" required autocomplete="username" autofocus >
-                </div>
-                <label for="senha" class="form-label mt-2"><i class="bi bi-lock"></i> Senha</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                    <input type="password" class="form-control" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password" >
-                    <span class="input-group-text toggle-pass" id="toggleSenha" title="Mostrar/ocultar senha">
-                        <i class="bi bi-eye" id="eyeIcon"></i>
-                    </span>
-                </div>
-                <div class="meta mt-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="lembrar" name="lembrar" value="1">
-                        <label class="form-check-label" for="lembrar">Lembrar de mim</label>
-                    </div>
-                    <a class="btn btn-plain btn-sm px-3" href="#" onclick="document.getElementById('username').focus();return false;">
-                        <i class="bi bi-question-circle"></i> Esqueci a senha
-                    </a>
-                </div>
-                <button type="submit" class="btn-royal mt-3" id="btnEntrar">
-                    <span class="spinner-border spinner-border-sm me-1 d-none" role="status" aria-hidden="true" id="spin"></span>
-                    Entrar
-                </button>
-            </form>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} text-center mt-3">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </section>
+          </div>
+          <div class="form-check mb-3 mt-3">
+            <input class="form-check-input" type="checkbox" id="lembrar" name="lembrar" value="1">
+            <label class="form-check-label" for="lembrar">Lembrar de mim</label>
+          </div>
+          <button type="submit" class="btn btn-royal w-100 btn-lg mt-4" id="btnEntrar">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spin"></span>
+            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+          </button>
+        </form>
+        <div class="marca-sistema">
+          © {{ now().year if callable(now) else '' }} COOPEX. Sistema desenvolvido por Cratos System.
+        </div>
+      </div>
     </div>
-    <div class="footnote">
-        © {{ now().year if callable(now) else '' }} <b>Criado por<b> — Cratos System
-    </div>
-    <script>
-        // Mostrar/ocultar senha
-        const senha = document.getElementById('senha');
-        const toggle = document.getElementById('toggleSenha');
-        const eye = document.getElementById('eyeIcon');
-        if (toggle) {
-            toggle.addEventListener('click', () => {
-                const isPwd = senha.type === 'password';
-                senha.type = isPwd ? 'text' : 'password';
-                eye.className = isPwd ? 'bi bi-eye-slash' : 'bi bi-eye';
-                senha.focus();
-            });
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Validação Bootstrap
+    (() => {
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
+
+    // Mostrar/ocultar senha
+    const senha = document.getElementById('senha');
+    const toggle = document.getElementById('toggleSenha');
+    const eye = document.getElementById('eyeIcon');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        const isPwd = senha.type === 'password';
+        senha.type = isPwd ? 'text' : 'password';
+        eye.className = isPwd ? 'bi bi-eye-slash' : 'bi bi-eye';
+        senha.focus();
+      });
+    }
+    // UX: spinner durante o submit
+    const form = document.getElementById('loginForm');
+    const btn = document.getElementById('btnEntrar');
+    const spin = document.getElementById('spin');
+    if (form) {
+      form.addEventListener('submit', () => {
+        if (btn && spin) {
+          btn.classList.add('loading');
+          btn.disabled = true;
+          spin.style.display = 'inline-block';
         }
-        // UX: spinner durante o submit
-        const form = document.getElementById('loginForm');
-        const btn = document.getElementById('btnEntrar');
-        const spin = document.getElementById('spin');
-        if (form) {
-            form.addEventListener('submit', () => {
-                if (btn && spin) {
-                    btn.disabled = true;
-                    spin.classList.remove('d-none');
-                }
-            });
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      });
+    }
+  </script>
 </body>
 </html>
