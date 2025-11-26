@@ -1182,6 +1182,69 @@ def estab_catalogo_upload():
 
     return redirect(url_for('painel_estabelecimento'))
 
+# ========= ESTAB: CRIAR ITEM INDIVIDUAL DO CATÁLOGO =========
+@app.route('/estab/catalogo/item', methods=['POST'])
+def estab_catalogo_criar_item():
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+
+    est = Estabelecimento.query.get_or_404(session['user_id'])
+
+    # Tenta vários nomes de campo para ser compatível com o HTML
+    nome = (
+        (request.form.get('nome') or request.form.get('item_nome') or '')
+        .strip()
+    )
+    marca = (
+        (request.form.get('marca') or request.form.get('item_marca') or '')
+        .strip() or None
+    )
+    categoria = (
+        (request.form.get('categoria') or request.form.get('item_categoria') or '')
+        .strip() or None
+    )
+
+    valor_raw = (
+        request.form.get('valor')
+        or request.form.get('item_valor')
+        or ''
+    ).strip()
+    valor = None
+    if valor_raw:
+        s = (
+            valor_raw.replace('R$', '')
+                     .replace(' ', '')
+                     .replace('.', '')
+                     .replace(',', '.')
+        )
+        try:
+            valor = float(s)
+        except Exception:
+            valor = None
+
+    observacao = (
+        (request.form.get('observacao') or request.form.get('item_obs') or '')
+        .strip() or None
+    )
+
+    if not nome:
+        flash('Informe pelo menos o nome do item.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    item = CatalogoItem(
+        estabelecimento_id=est.id,
+        nome=nome,
+        marca=marca,
+        categoria=categoria,
+        valor=valor,
+        observacao=observacao
+    )
+
+    db.session.add(item)
+    db.session.commit()
+    flash('Item adicionado ao catálogo com sucesso!', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
 
 # ========= ESTAB: NOVO STORY (imagem/vídeo) =========
 @app.route('/estab/story/novo', methods=['POST'])
