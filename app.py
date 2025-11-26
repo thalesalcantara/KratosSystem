@@ -350,6 +350,7 @@ class StoryView(db.Model):
 
 with app.app_context():
     db.create_all()
+    ensure_schema()
 
 # ========= CONTEXT PROCESSOR =========
 @app.context_processor
@@ -1616,7 +1617,7 @@ def estab_story_desativar(story_id):
 
 
 # ====== ESTAB: excluir story ======
-@app.route('/estab/story/<int:story_id>/excluir')
+@app.route('/estab/story/<int:story_id>/excluir', methods=['GET', 'POST'])
 def estab_story_excluir(story_id):
     if not is_estabelecimento():
         return redirect(url_for('login'))
@@ -1643,6 +1644,7 @@ def estab_story_excluir(story_id):
     db.session.commit()
     flash('Story removido com sucesso.', 'success')
     return redirect(url_for('painel_estabelecimento'))
+
 
 # ====== ESTAB: EDITAR STORY (título / legenda / renovar dias) ======
 @app.route('/estab/story/<int:story_id>/editar', methods=['GET', 'POST'])
