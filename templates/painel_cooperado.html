@@ -14,6 +14,7 @@
       --muted:#6b7280;
       --line:#e8edff;
       --ok:#0fb98b;
+      --danger:#ef4444;
       --bg:#ffffff;               /* branco predominante */
       --card: #ffffffcc;          /* vidro */
       --blur: 14px;
@@ -85,7 +86,7 @@
       opacity:.7;
     }
 
-    /* ===== Seção Lançamentos ===== */
+    /* ===== Seção genérica ===== */
     .section{
       padding:12px; margin-top:10px;
     }
@@ -98,8 +99,147 @@
     .badge{
       background:#eef2ff; color:var(--royal); font-weight:900; padding:4px 10px; border-radius:999px; font-size:12px
     }
+    .empty{padding:18px; color:var(--muted); text-align:center; font-size:13px}
 
-    /* Timeline mobile-first */
+    /* ===== STORIES estilo Instagram ===== */
+    .stories-card{
+      padding:14px;
+    }
+    .stories-row{
+      display:flex;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      gap:10px;
+      padding:4px 2px 4px 2px;
+      scrollbar-width:thin;
+    }
+    .stories-row::-webkit-scrollbar{height:5px}
+    .stories-row::-webkit-scrollbar-thumb{background:rgba(15,23,42,.25);border-radius:999px}
+
+    .story-chip{
+      border:0;
+      background:transparent;
+      color:inherit;
+      padding:0;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      min-width:68px;
+    }
+    .story-ring{
+      width:60px;
+      height:60px;
+      border-radius:50%;
+      padding:2px;
+      background:conic-gradient(from 180deg,#f97316,#ec4899,#6366f1,#22c55e,#f97316);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .story-inner{
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:22px;
+      color:#1f2933;
+    }
+    .story-name{
+      font-size:11px;
+      font-weight:800;
+      color:#111827;
+      max-width:72px;
+      text-overflow:ellipsis;
+      overflow:hidden;
+      white-space:nowrap;
+      text-align:center;
+    }
+    .story-pill{
+      font-size:10px;
+      font-weight:800;
+      color:#64748b;
+    }
+
+    /* Modal de story */
+    .story-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.80);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:60;
+    }
+    .story-modal.open{display:flex;}
+    .story-frame{
+      width:100%;
+      max-width:420px;
+      background:#020617;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid #1e293b;
+      box-shadow:0 24px 80px rgba(15,23,42,.85);
+      display:flex;
+      flex-direction:column;
+    }
+    .story-header{
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#e5e7eb;
+      border-bottom:1px solid #1f2937;
+      font-size:13px;
+    }
+    .story-dot{
+      width:24px;height:24px;border-radius:999px;
+      background:linear-gradient(120deg,var(--royal),var(--royal-600));
+      display:flex;align-items:center;justify-content:center;
+      font-size:12px;font-weight:900;color:#fff;
+    }
+    .story-header h5{
+      margin:0;font-size:13px;font-weight:800;
+    }
+    .story-header span{font-size:11px;color:#9ca3af}
+    .story-close{
+      margin-left:auto;
+      border:0;
+      background:transparent;
+      color:#e5e7eb;
+      font-size:18px;
+      cursor:pointer;
+      padding:2px 4px;
+    }
+    .story-body{
+      position:relative;
+      background:#000;
+      max-height:70vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .story-body img,
+    .story-body video{
+      max-width:100%;
+      max-height:70vh;
+      display:block;
+    }
+    .story-caption{
+      padding:10px 12px;
+      font-size:12px;
+      color:#e5e7eb;
+      border-top:1px solid #1f2937;
+      min-height:32px;
+      white-space:pre-line;
+    }
+
+    /* ===== Timeline de Lançamentos ===== */
     .timeline{position:relative; padding-left:14px; display:flex; flex-direction:column; gap:10px}
     .timeline:before{
       content:""; position:absolute; left:6px; top:0; bottom:0; width:2px; background:linear-gradient(var(--royal-50), var(--royal));
@@ -124,8 +264,6 @@
     .tx-os{font-size:12px; color:#64748b; font-weight:800}
     .tx-quando{font-size:12px; color:#334155; font-weight:800; text-align:right}
     .tx-desc{grid-column:1 / -1; font-size:12px; color:#475569}
-
-    .empty{padding:18px; color:var(--muted); text-align:center}
 
     /* ===== FAB (Filtros) ===== */
     .fab{
@@ -169,7 +307,91 @@
       background:#fff; border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 10px;
     }
     .tab{ color:#6b7280; text-decoration:none; font-weight:800; font-size:12px; display:flex; gap:6px; align-items:center; padding:8px 10px; border-radius:12px }
+    .tab span.icon{font-size:16px;}
     .tab.active{ color:var(--royal-600); background:#eef2ff; }
+
+    /* ===== Páginas (Início / Catálogos) ===== */
+    .page{display:block;}
+    .page-hidden{display:none;}
+
+    /* ===== Catálogos por estabelecimento ===== */
+    .catalog-grid{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .catalog-card{
+      padding:14px;
+    }
+    .catalog-head{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:6px;
+      border-bottom:1px solid var(--line);
+      padding-bottom:6px;
+      margin-bottom:6px;
+    }
+    .catalog-estab{
+      font-weight:900;
+      font-size:14px;
+      color:#0b1220;
+    }
+    .catalog-pill{
+      font-size:11px;
+      font-weight:800;
+      color:#4b5563;
+      background:#f3f4ff;
+      padding:3px 8px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .catalog-items{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:6px;
+    }
+    @media(min-width:720px){
+      .catalog-items{grid-template-columns:1fr 1fr;}
+    }
+    .catalog-item{
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:8px 10px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:2px 8px;
+      font-size:12px;
+    }
+    .catalog-name{
+      font-weight:800;
+      color:#0f172a;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+    .catalog-price{
+      font-weight:900;
+      color:var(--royal-600);
+      font-size:13px;
+      text-align:right;
+    }
+    .catalog-meta{
+      font-size:11px;
+      color:#6b7280;
+    }
+    .catalog-note{
+      grid-column:1 / -1;
+      font-size:11px;
+      color:#4b5563;
+    }
+    .catalog-empty-global{
+      padding:18px;
+      text-align:center;
+      font-size:13px;
+      color:var(--muted);
+    }
 
     /* ===== Desktop tweaks ===== */
     @media(min-width:900px){
@@ -195,67 +417,162 @@
   </header>
 
   <main class="wrap">
-    <!-- MÉTRICAS -->
-    <section class="metric-grid">
-      <article class="glass metric-card span-4">
-        <span class="spark" aria-hidden="true"></span>
-        <h3 class="metric-title">Crédito disponível</h3>
-        <div class="metric-value ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
-        {% if coop.credito_atualizado_em %}
-          <div class="hint">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
-        {% else %}
-          <div class="hint">Sem ajustes manuais registrados</div>
-        {% endif %}
-      </article>
-
-      <article class="glass metric-card span-4">
-        <h3 class="metric-title">Total de lançamentos (período)</h3>
-        <div class="metric-value">{{ total_lanc }}</div>
-        <div class="hint">Itens listados abaixo</div>
-      </article>
-
-      <article class="glass metric-card span-4">
-        <h3 class="metric-title">Gasto no período</h3>
-        <div class="metric-value">R$ {{ '%.2f'|format(total_gasto or 0) }}</div>
-        <div class="hint">Soma dos lançamentos filtrados</div>
-      </article>
-
-      <!-- LANÇAMENTOS -->
-      <article id="lancamentos" class="glass metric-card span-12 section">
-        <div class="section-head">
-          <h3 class="section-title">Meus lançamentos</h3>
-          <span class="badge">Atualizado agora</span>
-        </div>
-
-        <!-- TIMELINE (mobile-first) -->
-        <div class="timeline" aria-label="Lançamentos">
-          {% if lancamentos %}
-            {% for l in lancamentos %}
-            <div class="tx">
-              <div class="tx-estab">{{ l.estabelecimento.nome if l.estabelecimento else '—' }}</div>
-              <div class="tx-valor">R$ {{ '%.2f'|format(l.valor or 0) }}</div>
-              <div class="tx-os">OS: {{ l.os_numero or '—' }}</div>
-              <div class="tx-quando">{{ l.data_brasilia or l.data.strftime('%d/%m/%Y %H:%M') }}</div>
-              {% if l.descricao %}<div class="tx-desc">{{ l.descricao }}</div>{% endif %}
-            </div>
-            {% endfor %}
+    <!-- ===== PÁGINA INÍCIO ===== -->
+    <section id="home-section" class="page">
+      <!-- MÉTRICAS -->
+      <section class="metric-grid">
+        <article class="glass metric-card span-4">
+          <span class="spark" aria-hidden="true"></span>
+          <h3 class="metric-title">Crédito disponível</h3>
+          <div class="metric-value ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
+          {% if coop.credito_atualizado_em %}
+            <div class="hint">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
           {% else %}
-            <div class="empty">Nenhum lançamento neste período.</div>
+            <div class="hint">Sem ajustes manuais registrados</div>
           {% endif %}
+        </article>
+
+        <article class="glass metric-card span-4">
+          <h3 class="metric-title">Total de lançamentos (período)</h3>
+          <div class="metric-value">{{ total_lanc }}</div>
+          <div class="hint">Itens listados abaixo</div>
+        </article>
+
+        <article class="glass metric-card span-4">
+          <h3 class="metric-title">Gasto no período</h3>
+          <div class="metric-value">R$ {{ '%.2f'|format(total_gasto or 0) }}</div>
+          <div class="hint">Soma dos lançamentos filtrados</div>
+        </article>
+
+        <!-- STORIES -->
+        <article class="glass metric-card span-12 section stories-card" id="stories">
+          <div class="section-head">
+            <h3 class="section-title">Stories dos estabelecimentos</h3>
+            <span class="badge">Promoções & avisos</span>
+          </div>
+
+          {% if stories_ativos_coop and estab_por_id %}
+            <div class="stories-row" aria-label="Stories de estabelecimentos">
+              {% for est_id, est in estab_por_id.items() %}
+                {% set est_stories = stories_ativos_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
+                {% if est_stories %}
+                  {% set story = est_stories[0] %}
+                  <button
+                    type="button"
+                    class="story-chip"
+                    data-story-src="{{ url_for('story_midia', story_id=story.id) }}"
+                    data-story-type="{{ story.tipo }}"
+                    data-story-title="{{ est.nome }}"
+                    data-story-sub="{{ story.titulo }}"
+                    data-story-caption="{{ (story.legenda or '')|e }}"
+                  >
+                    <div class="story-ring">
+                      <div class="story-inner">
+                        {{ est.nome[:2].upper() }}
+                      </div>
+                    </div>
+                    <div class="story-name" title="{{ est.nome }}">{{ est.nome }}</div>
+                    <div class="story-pill">
+                      {{ est_stories|length }} story{{ 'ies' if est_stories|length>1 else '' }}
+                    </div>
+                  </button>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty">Ainda não há stories ativos dos estabelecimentos que você utiliza.</div>
+          {% endif %}
+        </article>
+
+        <!-- LANÇAMENTOS -->
+        <article id="lancamentos" class="glass metric-card span-12 section">
+          <div class="section-head">
+            <h3 class="section-title">Meus lançamentos</h3>
+            <span class="badge">Horário de Brasília</span>
+          </div>
+
+          <!-- TIMELINE (mobile-first) -->
+          <div class="timeline" aria-label="Lançamentos">
+            {% if lancamentos %}
+              {% for l in lancamentos %}
+              <div class="tx">
+                <div class="tx-estab">{{ l.estabelecimento.nome if l.estabelecimento else '—' }}</div>
+                <div class="tx-valor">R$ {{ '%.2f'|format(l.valor or 0) }}</div>
+                <div class="tx-os">OS: {{ l.os_numero or '—' }}</div>
+                <div class="tx-quando">
+                  {% if l.data_brasilia %}
+                    {{ l.data_brasilia }}
+                  {% else %}
+                    {{ l.data.strftime('%d/%m/%Y %H:%M') }}
+                  {% endif %}
+                </div>
+                {% if l.descricao %}<div class="tx-desc">{{ l.descricao }}</div>{% endif %}
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty">Nenhum lançamento neste período.</div>
+            {% endif %}
+          </div>
+
+          <div class="hint" style="margin-top:8px">* Horários exibidos em Brasília (GMT-3).</div>
+        </article>
+      </section>
+    </section>
+
+    <!-- ===== PÁGINA CATÁLOGOS ===== -->
+    <section id="catalogos-section" class="page page-hidden">
+      <section class="glass metric-card span-12 section">
+        <div class="section-head">
+          <h3 class="section-title">Catálogos dos estabelecimentos</h3>
+          <span class="badge">Visão por parceiro</span>
         </div>
 
-        <div class="hint" style="margin-top:8px">* Horários exibidos em Brasília (GMT-3).</div>
-      </article>
+        {% if catalogo_itens_coop and estab_por_id %}
+          <div class="catalog-grid">
+            {% for est_id, est in estab_por_id.items() %}
+              {% set itens_est = catalogo_itens_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
+              {% if itens_est %}
+                <article class="glass catalog-card">
+                  <div class="catalog-head">
+                    <div class="catalog-estab">{{ est.nome }}</div>
+                    <div class="catalog-pill">{{ itens_est|length }} item{{ 's' if itens_est|length>1 else '' }}</div>
+                  </div>
+                  <div class="catalog-items">
+                    {% for item in itens_est %}
+                      <div class="catalog-item">
+                        <div class="catalog-name" title="{{ item.nome }}">{{ item.nome }}</div>
+                        <div class="catalog-price">R$ {{ '%.2f'|format(item.valor or 0) }}</div>
+                        <div class="catalog-meta">
+                          {% if item.marca %}Marca: {{ item.marca }}{% endif %}
+                          {% if item.categoria %}{{ ' • ' if item.marca }}Categoria: {{ item.categoria }}{% endif %}
+                          {% if not item.marca and not item.categoria %}&nbsp;{% endif %}
+                        </div>
+                        {% if item.observacao %}
+                          <div class="catalog-note">{{ item.observacao }}</div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </article>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="catalog-empty-global">
+            Nenhum catálogo disponível ainda para os estabelecimentos que lançam em seu nome.
+          </div>
+        {% endif %}
+      </section>
     </section>
   </main>
 
   <!-- FAB filtros -->
-  <button class="fab" id="openFilters" title="Filtrar">⟲</button>
+  <button class="fab" id="openFilters" title="Filtrar lançamentos">⟲</button>
 
   <!-- BOTTOM SHEET de filtros -->
   <div class="sheet" id="sheet">
     <div class="drag" id="closeFilters" aria-hidden="true"></div>
-    <h4>Filtros</h4>
+    <h4>Filtros dos lançamentos</h4>
     <form method="get" action="{{ url_for('painel_cooperado') }}">
       <div class="field">
         <label for="di">Data início</label>
@@ -276,32 +593,145 @@
     </form>
   </div>
 
+  <!-- MODAL DE STORY -->
+  <div class="story-modal" id="storyModal">
+    <div class="story-frame">
+      <div class="story-header">
+        <div class="story-dot" id="storyInitial">E</div>
+        <div>
+          <h5 id="storyTitle">Estabelecimento</h5>
+          <span id="storySub">Story</span>
+        </div>
+        <button class="story-close" id="closeStory" aria-label="Fechar story">×</button>
+      </div>
+      <div class="story-body">
+        <img id="storyImg" src="" alt="story" style="display:none;">
+        <video id="storyVideo" controls playsinline style="display:none;"></video>
+      </div>
+      <div class="story-caption" id="storyCaption"></div>
+    </div>
+  </div>
+
   <!-- Bottom navigation (estético) -->
   <nav class="bottom-nav" aria-label="Navegação">
-    <a class="tab active" href="#"><span>Início</span></a>
-    <a class="tab" href="#lancamentos"><span>Lançamentos</span></a>
-    <a class="tab" href="{{ url_for('logout') }}"><span>Sair</span></a>
+    <button class="tab active" type="button" data-target="home-section">
+      <span class="icon">🏠</span><span>Início</span>
+    </button>
+    <button class="tab" type="button" data-target="catalogos-section">
+      <span class="icon">📚</span><span>Catálogos</span>
+    </button>
+    <a class="tab" href="{{ url_for('logout') }}">
+      <span class="icon">🚪</span><span>Sair</span>
+    </a>
   </nav>
 
   <script>
-    // Bottom-sheet open/close
+    // ===== Bottom-sheet filtros =====
     const sheet = document.getElementById('sheet');
-    document.getElementById('openFilters').addEventListener('click', ()=> sheet.classList.add('open'));
-    document.getElementById('closeFilters').addEventListener('click', ()=> sheet.classList.remove('open'));
+    const openFilters = document.getElementById('openFilters');
+    const closeFilters = document.getElementById('closeFilters');
     const cancelBtn = document.getElementById('cancelSheet');
-    if(cancelBtn) cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open'));
 
-    // Escape fecha sheet
+    if(openFilters){
+      openFilters.addEventListener('click', ()=> sheet.classList.add('open'));
+    }
+    if(closeFilters){
+      closeFilters.addEventListener('click', ()=> sheet.classList.remove('open'));
+    }
+    if(cancelBtn){
+      cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open'));
+    }
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') sheet.classList.remove('open'); });
 
-    // Suave 'active' no bottom nav (visual apenas)
-    document.querySelectorAll('.bottom-nav .tab').forEach(t=>{
-      t.addEventListener('click', function(e){
-        // se for âncora, deixa navegar normalmente
-        if(this.getAttribute('href')?.startsWith('#') === false) e.preventDefault();
-        document.querySelectorAll('.bottom-nav .tab').forEach(x=>x.classList.remove('active'));
-        this.classList.add('active');
+    // ===== Navegação entre Início e Catálogos =====
+    const tabs = document.querySelectorAll('.bottom-nav .tab[data-target]');
+    const pages = {
+      home: document.getElementById('home-section'),
+      catalogos: document.getElementById('catalogos-section')
+    };
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-target');
+        if(!target) return;
+        // ativa aba
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // mostra página
+        if(pages.home) pages.home.classList.add('page-hidden');
+        if(pages.catalogos) pages.catalogos.classList.add('page-hidden');
+        if(target === 'home-section' && pages.home) pages.home.classList.remove('page-hidden');
+        if(target === 'catalogos-section' && pages.catalogos) pages.catalogos.classList.remove('page-hidden');
       });
+    });
+
+    // ===== Modal de Stories =====
+    const storyModal = document.getElementById('storyModal');
+    const storyImg = document.getElementById('storyImg');
+    const storyVideo = document.getElementById('storyVideo');
+    const storyTitle = document.getElementById('storyTitle');
+    const storySub = document.getElementById('storySub');
+    const storyCaption = document.getElementById('storyCaption');
+    const storyInitial = document.getElementById('storyInitial');
+    const closeStory = document.getElementById('closeStory');
+
+    function openStoryModal(el){
+      if(!storyModal) return;
+      const src = el.getAttribute('data-story-src');
+      const type = el.getAttribute('data-story-type') || 'imagem';
+      const title = el.getAttribute('data-story-title') || '';
+      const sub = el.getAttribute('data-story-sub') || '';
+      const caption = el.getAttribute('data-story-caption') || '';
+
+      storyTitle.textContent = title;
+      storySub.textContent = sub || 'Story';
+      storyCaption.textContent = caption;
+      storyInitial.textContent = (title || 'E').slice(0,2).toUpperCase();
+
+      storyImg.style.display = 'none';
+      storyVideo.style.display = 'none';
+      storyVideo.pause();
+      storyVideo.removeAttribute('src');
+
+      if(type === 'video'){
+        storyVideo.style.display = 'block';
+        storyVideo.src = src;
+        storyVideo.load();
+        storyVideo.play().catch(()=>{});
+      } else {
+        storyImg.style.display = 'block';
+        storyImg.src = src;
+      }
+
+      storyModal.classList.add('open');
+    }
+
+    function closeStoryModal(){
+      if(!storyModal) return;
+      storyModal.classList.remove('open');
+      if(storyVideo){
+        storyVideo.pause();
+      }
+    }
+
+    document.querySelectorAll('.story-chip').forEach(chip => {
+      chip.addEventListener('click', () => openStoryModal(chip));
+    });
+
+    if(closeStory){
+      closeStory.addEventListener('click', closeStoryModal);
+    }
+    if(storyModal){
+      storyModal.addEventListener('click', (e)=>{
+        if(e.target === storyModal){
+          closeStoryModal();
+        }
+      });
+    }
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        closeStoryModal();
+      }
     });
   </script>
 </body>
