@@ -138,39 +138,61 @@ db = SQLAlchemy(app)
 def ensure_schema():
     """Cria colunas no banco se ainda não existirem (sem Alembic)."""
     with app.app_context():
+        # ===== cooperado =====
         try:
-            cols = {r[0] for r in db.session.execute(text(
-                "SELECT column_name FROM information_schema.columns WHERE table_name = 'cooperado'"
-            )).fetchall()}
+            cols_coop = {
+                r[0] for r in db.session.execute(text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'cooperado'"
+                )).fetchall()
+            }
         except Exception:
-            cols = set()
+            cols_coop = set()
 
-        alter_stmts = []
-        if 'foto_data' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
-        if 'foto_mimetype' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
-        if 'foto_filename' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
-        if 'credito_atualizado_em' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
-        if 'senha_hash' not in cols:
-            alter_stmts.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
+        alter_coop = []
+        if 'foto_data' not in cols_coop:
+            alter_coop.append("ADD COLUMN IF NOT EXISTS foto_data BYTEA")
+        if 'foto_mimetype' not in cols_coop:
+            alter_coop.append("ADD COLUMN IF NOT EXISTS foto_mimetype VARCHAR(50)")
+        if 'foto_filename' not in cols_coop:
+            alter_coop.append("ADD COLUMN IF NOT EXISTS foto_filename VARCHAR(120)")
+        if 'credito_atualizado_em' not in cols_coop:
+            alter_coop.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
+        if 'senha_hash' not in cols_coop:
+            alter_coop.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
 
-        if alter_stmts and 'information_schema' in _build_db_uri():
+        if alter_coop:
             try:
-                db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_stmts)))
+                db.session.execute(text("ALTER TABLE cooperado " + ", ".join(alter_coop)))
                 db.session.commit()
             except Exception:
                 db.session.rollback()
 
+        # ===== estabelecimento =====
+        try:
+            cols_est = {
+                r[0] for r in db.session.execute(text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'estabelecimento'"
+                )).fetchall()
+            }
+        except Exception:
+            cols_est = set()
 
-try:
-    with app.app_context():
-        db.create_all()
-        ensure_schema()
-except Exception:
-    pass
+        alter_est = []
+        if 'logo_data' not in cols_est:
+            alter_est.append("ADD COLUMN IF NOT EXISTS logo_data BYTEA")
+        if 'logo_mimetype' not in cols_est:
+            alter_est.append("ADD COLUMN IF NOT EXISTS logo_mimetype VARCHAR(50)")
+        if 'logo_filename' not in cols_est:
+            alter_est.append("ADD COLUMN IF NOT EXISTS logo_filename VARCHAR(120)")
+
+        if alter_est:
+            try:
+                db.session.execute(text("ALTER TABLE estabelecimento " + ", ".join(alter_est)))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
 
 
 # ========= MODELS =========
@@ -198,14 +220,21 @@ class Estabelecimento(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     senha_hash = db.Column(db.String(128), nullable=False)
+
+    # ainda deixamos o campo antigo de nome da logo
     logo = db.Column(db.String(120), nullable=True)
+
+    # NOVO: logo binária salva no banco (igual foto do cooperado)
+    logo_data = db.Column(db.LargeBinary, nullable=True)
+    logo_mimetype = db.Column(db.String(50), nullable=True)
+    logo_filename = db.Column(db.String(120), nullable=True)
 
     def set_senha(self, senha):
         self.senha_hash = generate_password_hash(senha)
 
     def checar_senha(self, senha):
         return check_password_hash(self.senha_hash, senha)
-
+        
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -1537,6 +1566,45 @@ def estab_story_excluir(story_id):
     flash('Story removido com sucesso.', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
+# ====== ESTAB: EDITAR STORY (título / legenda / renovar dias) ======
+@app.route('/estab/story/<int:story_id>/editar', methods=['GET', 'POST'])
+def estab_story_editar(story_id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+
+    est_id = session.get('user_id')
+    s = StoryEstabelecimento.query.get_or_404(story_id)
+
+    # garante que o story é do estabelecimento logado
+    if s.estabelecimento_id != est_id:
+        flash('Você não tem permissão para editar este story.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    if request.method == 'POST':
+        # campos enviados pelo formulário (se você quiser fazer um form depois)
+        titulo = (request.form.get('titulo') or '').strip()
+        legenda = (request.form.get('legenda') or '').strip()
+        dias_str = (request.form.get('dias') or '').strip()
+
+        s.titulo = titulo or None
+        s.legenda = legenda or None
+
+        # se o usuário informar dias, recalcula a expiração a partir de agora
+        if dias_str:
+            try:
+                dias = int(dias_str)
+                if dias > 0:
+                    s.expira_em = datetime.utcnow() + timedelta(days=dias)
+            except Exception:
+                pass
+
+        db.session.commit()
+        flash('Story atualizado com sucesso.', 'success')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # GET: por enquanto só volta pro painel (pra não quebrar o link do template)
+    flash('Edição de story ainda não tem tela própria. Use os botões do painel.', 'info')
+    return redirect(url_for('painel_estabelecimento'))
 
 # ========= ESTAB: EDITAR / EXCLUIR LANÇAMENTO =========
 @app.route('/estab/lancamento/editar/<int:id>', methods=['POST'])
