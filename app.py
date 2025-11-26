@@ -107,9 +107,13 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 24 * 60 * 60
 # Pastas
 app.config['UPLOAD_FOLDER_COOPERADOS'] = 'static/uploads'
 app.config['UPLOAD_FOLDER_LOGOS'] = 'static/logos'
+app.config['UPLOAD_FOLDER_CATALOGO_ARQS'] = 'static/catalogo_arquivos'
+app.config['UPLOAD_FOLDER_STORIES'] = 'static/stories'
 app.config['STATICS_FOLDER'] = 'statics'
 os.makedirs(app.config['UPLOAD_FOLDER_COOPERADOS'], exist_ok=True)
 os.makedirs(app.config['UPLOAD_FOLDER_LOGOS'], exist_ok=True)
+os.makedirs(app.config['UPLOAD_FOLDER_CATALOGO_ARQS'], exist_ok=True)
+os.makedirs(app.config['UPLOAD_FOLDER_STORIES'], exist_ok=True)
 os.makedirs(app.config['STATICS_FOLDER'], exist_ok=True)
 
 # Compressão Gzip (opcional)
@@ -211,6 +215,73 @@ class Lancamento(db.Model):
     estabelecimento = db.relationship('Estabelecimento')
 
 Index('ix_lancamento_coop_estab_data', Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
+
+# ======= NOVOS MODELS: CATÁLOGO E STORIES =======
+class CatalogoArquivo(db.Model):
+    __tablename__ = 'catalogo_arquivo'
+    id = db.Column(db.Integer, primary_key=True)
+    estabelecimento_id = db.Column(db.Integer, db.ForeignKey('estabelecimento.id'), nullable=False, index=True)
+    nome_original = db.Column(db.String(255))
+    caminho_arquivo = db.Column(db.String(255))
+    data_envio = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    estabelecimento = db.relationship('Estabelecimento', backref='catalogo_arquivos')
+
+    @property
+    def data_envio_brasilia(self):
+        if not self.data_envio:
+            return ""
+        return to_brt(self.data_envio).strftime('%d/%m/%Y %H:%M')
+
+class CatalogoItem(db.Model):
+    __tablename__ = 'catalogo_item'
+    id = db.Column(db.Integer, primary_key=True)
+    estabelecimento_id = db.Column(db.Integer, db.ForeignKey('estabelecimento.id'), nullable=False, index=True)
+    nome = db.Column(db.String(200), nullable=False)
+    marca = db.Column(db.String(120))
+    categoria = db.Column(db.String(120))
+    valor = db.Column(db.Float, default=0)
+    observacao = db.Column(db.String(255))
+    ativo = db.Column(db.Boolean, default=True, index=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, index=True)
+
+    estabelecimento = db.relationship('Estabelecimento', backref='catalogo_itens')
+
+class Story(db.Model):
+    __tablename__ = 'story'
+    id = db.Column(db.Integer, primary_key=True)
+    estabelecimento_id = db.Column(db.Integer, db.ForeignKey('estabelecimento.id'), nullable=False, index=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    legenda = db.Column(db.Text)
+    tipo = db.Column(db.String(10))  # 'imagem' ou 'video'
+    nome_arquivo = db.Column(db.String(255))
+    midia_mimetype = db.Column(db.String(80))
+    dias = db.Column(db.Integer, default=1)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    data_expiracao = db.Column(db.DateTime, index=True)
+    ativo = db.Column(db.Boolean, default=True, index=True)
+
+    estabelecimento = db.relationship('Estabelecimento', backref='stories')
+
+    @property
+    def data_criacao_brasilia(self):
+        if not self.data_criacao:
+            return ""
+        return to_brt(self.data_criacao).strftime('%d/%m/%Y %H:%M')
+
+    @property
+    def data_expiracao_brasilia(self):
+        if not self.data_expiracao:
+            return ""
+        return to_brt(self.data_expiracao).strftime('%d/%m/%Y %H:%M')
+
+    @property
+    def dias_restantes(self):
+        if not self.data_expiracao:
+            return 0
+        delta = self.data_expiracao - datetime.utcnow()
+        return max(delta.days, 0)
 
 # ========= CONTEXT PROCESSOR =========
 @app.context_processor
@@ -792,7 +863,8 @@ def exportar_lancamentos():
 
     widths = [22, 16, 32, 32, 16, 60]
     for i, w in enumerate(widths, start=1):
-        ws.column_dimensions[get_column_letter(i)].width = w
+        from openpyxl.utils import get_column_letter as _gcl
+        ws.column_dimensions[_gcl(i)].width = w
 
     for r in range(2, ws.max_row + 1):
         ws.cell(row=r, column=5).number_format = u'"R$" #,##0.00'
@@ -889,7 +961,37 @@ def painel_estabelecimento():
     for l in lancamentos:
         l.data_brasilia = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
 
-    return render_template('painel_estabelecimento.html', est=est, cooperados=cooperados, lancamentos=lancamentos)
+    # ====== DADOS DE CATÁLOGO E STORIES PARA O ESTABELECIMENTO ======
+    catalogo_itens = CatalogoItem.query.filter_by(
+        estabelecimento_id=est.id, ativo=True
+    ).order_by(CatalogoItem.nome.asc()).all()
+
+    catalogo_arquivos = CatalogoArquivo.query.filter_by(
+        estabelecimento_id=est.id
+    ).order_by(CatalogoArquivo.data_envio.desc()).limit(5).all()
+
+    agora = datetime.utcnow()
+    stories_ativos = Story.query.filter(
+        Story.estabelecimento_id == est.id,
+        Story.ativo == True,
+        Story.data_expiracao >= agora
+    ).order_by(Story.data_criacao.desc()).all()
+
+    stories_expirados = Story.query.filter(
+        Story.estabelecimento_id == est.id,
+        Story.data_expiracao < agora
+    ).order_by(Story.data_expiracao.desc()).limit(50).all()
+
+    return render_template(
+        'painel_estabelecimento.html',
+        est=est,
+        cooperados=cooperados,
+        lancamentos=lancamentos,
+        catalogo_itens=catalogo_itens,
+        catalogo_arquivos=catalogo_arquivos,
+        stories_ativos=stories_ativos,
+        stories_expirados=stories_expirados
+    )
 
 # ========= ESTAB: EDITAR / EXCLUIR LANÇAMENTO =========
 @app.route('/estab/lancamento/editar/<int:id>', methods=['POST'])
@@ -973,6 +1075,314 @@ def estab_excluir_lancamento(id):
     flash('Lançamento excluído e crédito devolvido ao cooperado.', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
+# ========= ROTAS CATÁLOGO (ESTABELECIMENTO) =========
+
+@app.route('/estab/catalogo/upload', methods=['POST'])
+def estab_catalogo_upload():
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+    est_id = session.get('user_id')
+    est = Estabelecimento.query.get_or_404(est_id)
+
+    file = request.files.get('arquivo')
+    modo = request.form.get('modo', 'append')
+
+    if not file or not file.filename:
+        flash('Selecione um arquivo para enviar.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    original_name = file.filename
+    ext = os.path.splitext(original_name)[1].lower()
+    safe_name = secure_filename(f"catalogo_{est.id}_{int(time.time())}{ext}")
+    path = os.path.join(app.config['UPLOAD_FOLDER_CATALOGO_ARQS'], safe_name)
+
+    try:
+        file.save(path)
+    except Exception:
+        flash('Erro ao salvar o arquivo de catálogo.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    arq = CatalogoArquivo(
+        estabelecimento_id=est.id,
+        nome_original=original_name,
+        caminho_arquivo=safe_name
+    )
+    db.session.add(arq)
+
+    # Importação automática somente para XLSX
+    if ext == '.xlsx':
+        try:
+            from openpyxl import load_workbook
+        except ImportError:
+            flash('Arquivo salvo, mas para importar itens do Excel instale openpyxl no servidor.', 'warning')
+        else:
+            try:
+                wb = load_workbook(path, data_only=True)
+                ws = wb.active
+
+                if modo == 'replace':
+                    CatalogoItem.query.filter_by(estabelecimento_id=est.id).delete()
+
+                # Esperado: col1=nome, col2=marca, col3=categoria, col4=valor, col5=observacao
+                created_count = 0
+                for idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    nome = (row[0].value or '').strip() if row[0].value else ''
+                    if not nome:
+                        continue
+                    marca = (row[1].value or '') if len(row) > 1 and row[1].value else ''
+                    categoria = (row[2].value or '') if len(row) > 2 and row[2].value else ''
+                    valor_raw = row[3].value if len(row) > 3 else None
+                    observacao = (row[4].value or '') if len(row) > 4 and row[4].value else ''
+
+                    try:
+                        valor = float(str(valor_raw).replace(',', '.')) if valor_raw is not None else 0.0
+                    except Exception:
+                        valor = 0.0
+
+                    item = CatalogoItem(
+                        estabelecimento_id=est.id,
+                        nome=nome,
+                        marca=str(marca).strip() if marca else None,
+                        categoria=str(categoria).strip() if categoria else None,
+                        valor=valor,
+                        observacao=str(observacao).strip() if observacao else None
+                    )
+                    db.session.add(item)
+                    created_count += 1
+
+                flash(f'Arquivo enviado e {created_count} itens importados para o catálogo.', 'success')
+            except Exception:
+                flash('Arquivo salvo, mas houve erro ao importar as linhas do Excel.', 'warning')
+    else:
+        # Outros formatos (PDF, Word, etc.) apenas ficam salvos como referência
+        flash('Arquivo de catálogo enviado com sucesso. Para importação automática de itens use planilha Excel (.xlsx).', 'success')
+
+    db.session.commit()
+    return redirect(url_for('painel_estabelecimento'))
+
+@app.route('/estab/catalogo/item/novo', methods=['POST'])
+def estab_catalogo_criar_item():
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+    est_id = session.get('user_id')
+
+    nome = (request.form.get('nome') or '').strip()
+    marca = (request.form.get('marca') or '').strip() or None
+    categoria = (request.form.get('categoria') or '').strip() or None
+    observacao = (request.form.get('observacao') or '').strip() or None
+    valor_str = (request.form.get('valor') or '').replace(',', '.')
+
+    if not nome:
+        flash('Informe pelo menos o nome do produto.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    try:
+        valor = float(valor_str)
+    except Exception:
+        flash('Valor inválido.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    item = CatalogoItem(
+        estabelecimento_id=est_id,
+        nome=nome,
+        marca=marca,
+        categoria=categoria,
+        valor=valor,
+        observacao=observacao
+    )
+    db.session.add(item)
+    db.session.commit()
+    flash('Item do catálogo criado com sucesso.', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
+@app.route('/estab/catalogo/item/<int:item_id>/editar', methods=['GET', 'POST'])
+def estab_catalogo_editar_item(item_id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+    est_id = session.get('user_id')
+    item = CatalogoItem.query.get_or_404(item_id)
+
+    if item.estabelecimento_id != est_id:
+        flash('Você não tem permissão para editar este item.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    if request.method == 'POST':
+        nome = (request.form.get('nome') or '').strip()
+        marca = (request.form.get('marca') or '').strip() or None
+        categoria = (request.form.get('categoria') or '').strip() or None
+        observacao = (request.form.get('observacao') or '').strip() or None
+        valor_str = (request.form.get('valor') or '').replace(',', '.')
+
+        if not nome:
+            flash('Informe pelo menos o nome do produto.', 'danger')
+            return redirect(url_for('estab_catalogo_editar_item', item_id=item_id))
+        try:
+            valor = float(valor_str)
+        except Exception:
+            flash('Valor inválido.', 'danger')
+            return redirect(url_for('estab_catalogo_editar_item', item_id=item_id))
+
+        item.nome = nome
+        item.marca = marca
+        item.categoria = categoria
+        item.observacao = observacao
+        item.valor = valor
+
+        db.session.commit()
+        flash('Item atualizado com sucesso.', 'success')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # se o template próprio ainda não existir, cai no fallback simples
+    try:
+        return render_template('catalogo_item_form.html', item=item)
+    except TemplateNotFound:
+        return render_template_string("""
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Editar Item do Catálogo</title>
+</head>
+<body>
+  <h1>Editar Item do Catálogo</h1>
+  <form method="post">
+    <label>Nome: <input type="text" name="nome" value="{{ item.nome }}" required></label><br>
+    <label>Marca: <input type="text" name="marca" value="{{ item.marca or '' }}"></label><br>
+    <label>Categoria: <input type="text" name="categoria" value="{{ item.categoria or '' }}"></label><br>
+    <label>Valor (R$): <input type="number" step="0.01" name="valor" value="{{ '%.2f'|format(item.valor or 0) }}" required></label><br>
+    <label>Observação: <input type="text" name="observacao" value="{{ item.observacao or '' }}"></label><br>
+    <button type="submit">Salvar</button>
+    <a href="{{ url_for('painel_estabelecimento') }}">Cancelar</a>
+  </form>
+</body>
+</html>
+        """, item=item)
+
+@app.route('/estab/catalogo/item/<int:item_id>/excluir', methods=['POST'])
+def estab_catalogo_excluir_item(item_id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+    est_id = session.get('user_id')
+    item = CatalogoItem.query.get_or_404(item_id)
+
+    if item.estabelecimento_id != est_id:
+        flash('Você não tem permissão para excluir este item.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    db.session.delete(item)
+    db.session.commit()
+    flash('Item removido do catálogo.', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
+# ========= ROTAS STORIES / PROMOÇÕES (ESTABELECIMENTO) =========
+
+@app.route('/estab/story/novo', methods=['POST'])
+def estab_criar_story():
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+    est_id = session.get('user_id')
+    est = Estabelecimento.query.get_or_404(est_id)
+
+    titulo = (request.form.get('titulo') or '').strip()
+    legenda = (request.form.get('legenda') or '').strip() or None
+    dias = int(request.form.get('dias') or 1)
+    if dias < 1:
+        dias = 1
+    if dias > 30:
+        dias = 30
+
+    midia = request.files.get('midia')
+    if not titulo or not midia or not midia.filename:
+        flash('Informe título e selecione um arquivo de mídia.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    ext = os.path.splitext(midia.filename)[1].lower()
+    safe_name = secure_filename(f"story_{est.id}_{int(time.time())}{ext}")
+    path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], safe_name)
+    try:
+        midia.save(path)
+    except Exception:
+        flash('Erro ao salvar a mídia do story.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    mimetype = midia.mimetype or ''
+    tipo = 'imagem' if mimetype.startswith('image') else 'video'
+
+    story = Story(
+        estabelecimento_id=est.id,
+        titulo=titulo,
+        legenda=legenda,
+        tipo=tipo,
+        nome_arquivo=safe_name,
+        midia_mimetype=mimetype,
+        dias=dias,
+        data_criacao=datetime.utcnow(),
+        data_expiracao=datetime.utcnow() + timedelta(days=dias),
+        ativo=True
+    )
+    db.session.add(story)
+    db.session.commit()
+    flash('Story publicado com sucesso.', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
+@app.route('/estab/story/<int:story_id>/desativar', methods=['POST'])
+def estab_story_desativar(story_id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+    est_id = session.get('user_id')
+    story = Story.query.get_or_404(story_id)
+
+    if story.estabelecimento_id != est_id:
+        flash('Você não tem permissão para desativar este story.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    story.ativo = False
+    db.session.commit()
+    flash('Story desativado (não será mais exibido aos cooperados).', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
+@app.route('/estab/story/<int:story_id>/excluir', methods=['POST'])
+def estab_story_excluir(story_id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+    est_id = session.get('user_id')
+    story = Story.query.get_or_404(story_id)
+
+    if story.estabelecimento_id != est_id:
+        flash('Você não tem permissão para excluir este story.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # opcionalmente remover o arquivo físico
+    if story.nome_arquivo:
+        path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], story.nome_arquivo)
+        try:
+            if os.path.exists(path):
+                os.remove(path)
+        except Exception:
+            pass
+
+    db.session.delete(story)
+    db.session.commit()
+    flash('Story excluído permanentemente.', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
+@app.route('/story/midia/<int:story_id>')
+def story_midia(story_id):
+    story = Story.query.get_or_404(story_id)
+    if not story.nome_arquivo:
+        return '', 404
+    path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], story.nome_arquivo)
+    if not os.path.exists(path):
+        return '', 404
+
+    mimetype = story.midia_mimetype or ('video/mp4' if story.tipo == 'video' else 'image/jpeg')
+    resp = send_file(path, mimetype=mimetype)
+    try:
+        size = os.path.getsize(path)
+    except Exception:
+        size = 0
+    return _response_with_cache(resp, etag_base=f"story_{story.id}_{size}")
+
 # ========= PAINEL COOPERADO =========
 @app.route('/painel_cooperado')
 def painel_cooperado():
@@ -1000,6 +1410,35 @@ def painel_cooperado():
     total_gasto = sum(float(l.valor or 0) for l in lancamentos)
     total_lanc = len(lancamentos)
 
+    # ====== Catálogo e Stories para o cooperado (por estabelecimentos que ele usa) ======
+    est_ids_rows = db.session.query(Lancamento.estabelecimento_id).filter(
+        Lancamento.cooperado_id == coop.id
+    ).distinct().all()
+    estab_ids = [r[0] for r in est_ids_rows if r[0] is not None]
+
+    if estab_ids:
+        catalogo_itens_coop = CatalogoItem.query.filter(
+            CatalogoItem.estabelecimento_id.in_(estab_ids),
+            CatalogoItem.ativo == True
+        ).order_by(CatalogoItem.estabelecimento_id.asc(), CatalogoItem.nome.asc()).all()
+
+        agora = datetime.utcnow()
+        stories_ativos_coop = Story.query.filter(
+            Story.estabelecimento_id.in_(estab_ids),
+            Story.ativo == True,
+            Story.data_expiracao >= agora
+        ).order_by(Story.data_criacao.desc()).all()
+
+        estab_por_id = {
+            e.id: e for e in Estabelecimento.query.filter(
+                Estabelecimento.id.in_(estab_ids)
+            ).all()
+        }
+    else:
+        catalogo_itens_coop = []
+        stories_ativos_coop = []
+        estab_por_id = {}
+
     # Fallback embutido: também mostra horários em Brasília e último ajuste em Brasília
     try:
         return render_template(
@@ -1009,7 +1448,10 @@ def painel_cooperado():
             total_gasto=total_gasto,
             total_lanc=total_lanc,
             data_inicio=di_s,
-            data_fim=df_s
+            data_fim=df_s,
+            catalogo_itens_coop=catalogo_itens_coop,
+            stories_ativos_coop=stories_ativos_coop,
+            estab_por_id=estab_por_id
         )
     except TemplateNotFound:
         credito_ajuste = to_brt(coop.credito_atualizado_em).strftime('%d/%m/%Y %H:%M') if coop.credito_atualizado_em else None
@@ -1113,7 +1555,12 @@ def painel_cooperado():
 </html>
         """,
         coop=coop, lancamentos=lancamentos, total_gasto=total_gasto,
-        total_lanc=total_lanc, data_inicio=di_s, data_fim=df_s, credito_ajuste=credito_ajuste)
+        total_lanc=total_lanc, data_inicio=di_s, data_fim=df_s,
+        credito_ajuste=credito_ajuste,
+        catalogo_itens_coop=catalogo_itens_coop,
+        stories_ativos_coop=stories_ativos_coop,
+        estab_por_id=estab_por_id
+    )
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
