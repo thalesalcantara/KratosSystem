@@ -13,34 +13,29 @@
   <style>
     :root{
       /* Paleta — Azul Royal + Branco (clean & leve) */
-      --bg:#f7f9ff;            /* fundo geral super claro */
-      --ink:#0d1b3f;           /* texto principal (azul bem escuro) */
-      --muted:#5c6c92;         /* texto secundário */
-      --gold:#2d4fe3;          /* AZUL ROYAL (usa var existente) */
-      --line:#e5ebff;          /* bordas suaves */
+      --bg:#f7f9ff;
+      --ink:#0d1b3f;
+      --muted:#5c6c92;
+      --gold:#2d4fe3;
+      --line:#e5ebff;
 
-      /* Superfícies / cartões */
       --surface:#ffffff;
       --surface-2:#fcfdff;
 
-      /* Tabela */
-      --thead:#2d4fe3;         /* cabeçalho azul royal */
-      --rowOdd:#f2f5ff;        /* listras leves */
+      --thead:#2d4fe3;
+      --rowOdd:#f2f5ff;
       --rowEven:#ffffff;
 
-      /* KPIs / campos */
       --kpi:#ffffff;
       --kpiLine:#dbe4ff;
       --field:#ffffff;
       --fieldBorder:#c9d4ff;
       --fieldFocus:#2d4fe3;
 
-      /* Modal edição */
       --modalGrad1:#ffffff;
       --modalGrad2:#ffffff;
       --modalEdge:#d5ddff;
 
-      /* Efeitos */
       --glass:rgba(255,255,255,.78);
       --blur:10px;
       --glow:0 12px 28px rgba(45,79,227,.12);
@@ -64,10 +59,13 @@
       text-shadow:none;
     }
 
-    /* Foco acessível */
-    :focus-visible{ outline:3px solid var(--gold); outline-offset:2px; border-radius:10px; }
+    :focus-visible{
+      outline:3px solid var(--gold);
+      outline-offset:2px;
+      border-radius:10px;
+    }
 
-    /* ===== Sidebar (glass + gradiente sutil) ===== */
+    /* ===== Sidebar ===== */
     .sidebar{
       width:210px; height:100vh; position:fixed; top:0; left:0;
       background:var(--glass);
@@ -110,7 +108,7 @@
       box-shadow:var(--glow-strong); border-color:#cfd8ff;
     }
 
-    /* ===== Main / Topbar (faixa hero) ===== */
+    /* ===== Main / Topbar ===== */
     .main-content{ margin-left:230px; padding:32px 28px 24px; }
     .topbar{
       min-height:72px; display:flex; align-items:center; justify-content:space-between;
@@ -124,6 +122,28 @@
     }
     .who{ color:#ffffff; font-weight:900; font-size:1.06rem; letter-spacing:.2px; }
     .clock{ color:#e9efff; font-weight:900; letter-spacing:.4px; font-size:1.02rem; }
+
+    /* ===== Nav Abas (Créditos / Catálogo / Stories) ===== */
+    .nav-pills.estab-tabs .nav-link{
+      font-weight:900;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:#1c2755;
+      background:#ffffff;
+      padding:8px 18px;
+      margin-right:6px;
+      box-shadow:0 6px 14px rgba(45,79,227,.08);
+    }
+    .nav-pills.estab-tabs .nav-link i{
+      margin-right:6px;
+      color:var(--gold);
+    }
+    .nav-pills.estab-tabs .nav-link.active{
+      background:linear-gradient(90deg,#2d4fe3,#4b6df0);
+      color:#ffffff;
+      border-color:#1b2fb3;
+      box-shadow:0 10px 22px rgba(45,79,227,.24);
+    }
 
     /* ===== Cards ===== */
     .dashboard-card{
@@ -140,7 +160,7 @@
       text-shadow:none;
     }
 
-    /* ===== KPIs (auto-fit + novo KPI do mês) ===== */
+    /* ===== KPIs ===== */
     .kpis{
       display:grid; gap:12px;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -155,7 +175,7 @@
     .kpi .value{ font:900 1.35rem/1 Orbitron, sans-serif; color:var(--gold); letter-spacing:.5px; }
     .kpi .sub{ color:var(--muted); font-size:.94rem; }
 
-    /* ===== Ranking / Resumos rápidos ===== */
+    /* ===== Ranking ===== */
     .ranking{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
     .rank-card{
       background:#ffffff; border:1px solid var(--line); border-radius:16px; padding:14px 16px;
@@ -166,7 +186,7 @@
     .rank-list li{ margin:4px 0; font-weight:800; color:var(--ink); }
     .rank-list small{ color:var(--muted); }
 
-    /* ===== Pílulas/resumos ===== */
+    /* ===== Pílulas ===== */
     .pill{
       display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line);
       border-radius:999px; background:#f7f9ff; font-weight:800; color:#1d2a52;
@@ -201,7 +221,7 @@
     .btn-outline-danger{ color:#b94a59; border-color:#ff7f8f; font-weight:800; }
     .btn-outline-danger:hover{ background:#ff7f8f; color:#0b142d; }
 
-    /* ===== Tabela — clara, legível ===== */
+    /* ===== Tabela ===== */
     .table-wrap{ border-radius:14px; overflow:auto; background:#ffffff; border:1px solid var(--line); box-shadow:var(--glow); }
     table{ width:100%; margin:0; color:var(--ink); font-size:1.02rem; }
     thead th{
@@ -226,7 +246,7 @@
 
     .aviso-expirado{ color:#6f80b1; font-weight:700; }
 
-    /* ===== Modal Edição ===== */
+    /* ===== Modal ===== */
     .modal-content{
       background:linear-gradient(135deg, var(--modalGrad1), var(--modalGrad2));
       border:1px solid var(--modalEdge);
@@ -280,7 +300,9 @@
   <div class="sidebar">
     <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
     <h3>Parceiro<br>Coopex</h3>
-    <a class="nav-link active" href="#"><i class="bi bi-currency-dollar"></i>Lançar Crédito</a>
+    <a class="nav-link active" href="#">
+      <i class="bi bi-currency-dollar"></i> Painel
+    </a>
     <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
   </div>
 
@@ -291,7 +313,7 @@
     <div class="topbar mb-4">
       <div class="who">Bem-vindo, {{ est.nome }}</div>
       <div class="d-flex align-items-center gap-3">
-        <div class="clock" id="clock-br">Brasília — --/--/---- --:--:--</div>
+        <div class="clock" id="clock-br">Natal - --/--/---- --:--:--</div>
         <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm fw-bold" style="border-color:#ffd66e;color:#fff">Sair <i class="bi bi-power"></i></a>
       </div>
     </div>
@@ -304,163 +326,498 @@
       {% endif %}
     {% endwith %}
 
-    <!-- KPIs (calculados no front a partir da tabela) -->
-    <div class="kpis">
-      <div class="kpi">
-        <div class="label"><i class="bi bi-list-check"></i> Lançamentos</div>
-        <div class="value" id="k-count">0</div>
-        <div class="sub">Total</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-cash-stack"></i> Valor Total</div>
-        <div class="value" id="k-sum">R$ 0,00</div>
-        <div class="sub">Soma geral</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-graph-up-arrow"></i> Maior Lançamento</div>
-        <div class="value" id="k-max">R$ 0,00</div>
-        <div class="sub">Valor único máximo</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-person-fill-check"></i> Top Cooperado</div>
-        <div class="value" id="k-top">—</div>
-        <div class="sub" id="k-top-sub">Maior soma</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-clock-history"></i> Último Lançamento</div>
-        <div class="value" id="k-last">—</div>
-        <div class="sub">Horário de Brasília</div>
-      </div>
-      <!-- NOVO KPI: Total do Mês -->
-      <div class="kpi">
-        <div class="label"><i class="bi bi-calendar-month"></i> Total do Mês</div>
-        <div class="value" id="k-month-sum">R$ 0,00</div>
-        <div class="sub"><span id="k-month-count">0</span> lançamentos</div>
-      </div>
-    </div>
+    <!-- ABAS DO PAINEL -->
+    <ul class="nav nav-pills estab-tabs mb-3" id="estabTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-creditos-tab" data-bs-toggle="pill"
+                data-bs-target="#tab-creditos" type="button" role="tab"
+                aria-controls="tab-creditos" aria-selected="true">
+          <i class="bi bi-cash-stack"></i> Créditos
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-catalogo-tab" data-bs-toggle="pill"
+                data-bs-target="#tab-catalogo" type="button" role="tab"
+                aria-controls="tab-catalogo" aria-selected="false">
+          <i class="bi bi-bag-check"></i> Catálogo
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-stories-tab" data-bs-toggle="pill"
+                data-bs-target="#tab-stories" type="button" role="tab"
+                aria-controls="tab-stories" aria-selected="false">
+          <i class="bi bi-camera-reels"></i> Stories / Promoções
+        </button>
+      </li>
+    </ul>
 
-    <!-- Ranking / Resumos -->
-    <div class="ranking">
-      <div class="rank-card">
-        <h5><i class="bi bi-trophy"></i> Top 3 Cooperados por Valor</h5>
-        <ol class="rank-list" id="rank-list">
-          <li>—</li>
-        </ol>
-      </div>
-      <div class="rank-card">
-        <h5><i class="bi bi-calendar3"></i> Hoje</h5>
-        <div><span class="pill"><i class="bi bi-list-check"></i> Lançamentos: <span id="h-count">0</span></span></div>
-        <div class="mt-2"><span class="pill"><i class="bi bi-cash"></i> Valor: <span id="h-sum">R$ 0,00</span></span></div>
-      </div>
-    </div>
+    <div class="tab-content" id="estabTabsContent">
 
-    <!-- Card de Lançamento -->
-    <div class="dashboard-card mb-4">
-      <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
-      <form method="post" action="{{ url_for('painel_estabelecimento') }}">
-        <div class="row g-3 align-items-center mb-1">
-          <div class="col-md-4">
-            <label class="form-label" for="cooperado_id">
-              <i class="bi bi-person-lines-fill"></i> Cooperado
-            </label>
-            <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
-              <option value="">Selecione...</option>
-              {% for c in cooperados %}
-              <option
-                value="{{ c.id }}"
-                data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
-                data-saldo-raw="{{ c.credito }}"
-                data-foto="{{ url_for('foto_cooperado', id=c.id) if (c.foto_data or c.foto) else '' }}"
-              >{{ c.nome }}</option>
-              {% endfor %}
-            </select>
+      <!-- =================== ABA 1: CRÉDITOS (ORIGINAL) =================== -->
+      <div class="tab-pane fade show active" id="tab-creditos" role="tabpanel" aria-labelledby="tab-creditos-tab">
 
-            <div id="foto-cooperado-preview" class="mt-2" style="text-align:center;"></div>
-            <div id="saldo-cooperado" class="mt-2" style="color:var(--gold); font-weight:900; font-size:1.06rem;"></div>
-            <div id="erro-lancar" class="mt-1" style="color:#ffdede; font-weight:800;"></div>
+        <!-- KPIs -->
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label"><i class="bi bi-list-check"></i> Lançamentos</div>
+            <div class="value" id="k-count">0</div>
+            <div class="sub">Total</div>
           </div>
-
-          <div class="col-md-2">
-            <label class="form-label" for="valor"><i class="bi bi-cash-stack"></i> Valor</label>
-            <div class="input-group">
-              <span class="input-group-text">R$</span>
-              <input type="number" step="0.01" min="0.01" class="form-control" id="valor" name="valor" required oninput="checarCreditoSuficiente()">
-            </div>
+          <div class="kpi">
+            <div class="label"><i class="bi bi-cash-stack"></i> Valor Total</div>
+            <div class="value" id="k-sum">R$ 0,00</div>
+            <div class="sub">Soma geral</div>
           </div>
-
-          <div class="col-md-3">
-            <label class="form-label" for="os_numero"><i class="bi bi-file-earmark-text"></i> Nº OS</label>
-            <input type="text" class="form-control" id="os_numero" name="os_numero" required placeholder="Ex: 12345">
+          <div class="kpi">
+            <div class="label"><i class="bi bi-graph-up-arrow"></i> Maior Lançamento</div>
+            <div class="value" id="k-max">R$ 0,00</div>
+            <div class="sub">Valor único máximo</div>
           </div>
-
-          <div class="col-md-3">
-            <label class="form-label" for="descricao"><i class="bi bi-justify-left"></i> Descrição</label>
-            <input type="text" class="form-control" id="descricao" name="descricao" placeholder="(opcional)">
+          <div class="kpi">
+            <div class="label"><i class="bi bi-person-fill-check"></i> Top Cooperado</div>
+            <div class="value" id="k-top">—</div>
+            <div class="sub" id="k-top-sub">Maior soma</div>
+          </div>
+          <div class="kpi">
+            <div class="label"><i class="bi bi-clock-history"></i> Último Lançamento</div>
+            <div class="value" id="k-last">—</div>
+            <div class="sub">Horário de Brasília</div>
+          </div>
+          <div class="kpi">
+            <div class="label"><i class="bi bi-calendar-month"></i> Total do Mês</div>
+            <div class="value" id="k-month-sum">R$ 0,00</div>
+            <div class="sub"><span id="k-month-count">0</span> lançamentos</div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary mt-2" id="btn-lancar">
-          <i class="bi bi-plus-circle"></i> Lançar Valor
-        </button>
-      </form>
-    </div>
+        <!-- Ranking / Hoje -->
+        <div class="ranking">
+          <div class="rank-card">
+            <h5><i class="bi bi-trophy"></i> Top 3 Cooperados por Valor</h5>
+            <ol class="rank-list" id="rank-list">
+              <li>—</li>
+            </ol>
+          </div>
+          <div class="rank-card">
+            <h5><i class="bi bi-calendar3"></i> Hoje</h5>
+            <div><span class="pill"><i class="bi bi-list-check"></i> Lançamentos: <span id="h-count">0</span></span></div>
+            <div class="mt-2"><span class="pill"><i class="bi bi-cash"></i> Valor: <span id="h-sum">R$ 0,00</span></span></div>
+          </div>
+        </div>
 
-    <!-- Lista de Lançamentos -->
-    <div class="dashboard-card">
-      <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
-      <div class="table-wrap">
-        <table class="table table-striped table-hover text-center align-middle">
-          <thead>
-            <tr>
-              <th>Data & Hora</th>
-              <th>Nº OS</th>
-              <th>Cooperado</th>
-              <th>Valor (R$)</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-lanc">
-            {% for l in lancamentos %}
-            <tr data-created="{{ l.data.isoformat() }}Z" data-id="{{ l.id }}">
-              <td class="dt">{{ l.data_brasilia }}</td>
-              <td class="os">{{ l.os_numero }}</td>
-              <td class="coop">{{ l.cooperado.nome }}</td>
-              <td class="valor" data-valor="{{ '%.2f'|format(l.valor) }}">{{ "{:,.2f}".format(l.valor) }}</td>
-              <td class="desc">{{ l.descricao or '' }}</td>
-              <td class="acoes">
-                <button type="button"
-                        class="btn btn-outline-primary btn-sm btn-editar fw-bold"
-                        data-id="{{ l.id }}"
-                        data-os="{{ l.os_numero }}"
-                        data-valor="{{ '%.2f'|format(l.valor) }}"
-                        data-desc="{{ l.descricao or '' }}"
-                        onclick="abrirModalEditar(this)">
-                  <i class="bi bi-pencil-square"></i> Editar
-                </button>
+        <!-- Card de Lançamento -->
+        <div class="dashboard-card mb-4">
+          <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
+          <form method="post" action="{{ url_for('painel_estabelecimento') }}">
+            <div class="row g-3 align-items-center mb-1">
+              <div class="col-md-4">
+                <label class="form-label" for="cooperado_id">
+                  <i class="bi bi-person-lines-fill"></i> Cooperado
+                </label>
+                <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
+                  <option value="">Selecione...</option>
+                  {% for c in cooperados %}
+                  <option
+                    value="{{ c.id }}"
+                    data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
+                    data-saldo-raw="{{ c.credito }}"
+                    data-foto="{{ url_for('foto_cooperado', id=c.id) if (c.foto_data or c.foto) else '' }}"
+                  >{{ c.nome }}</option>
+                  {% endfor %}
+                </select>
 
-                <form method="post"
-                      action="{{ url_for('estab_excluir_lancamento', id=l.id) }}"
-                      style="display:inline-block;"
-                      onsubmit="return confirmarExcluir(this);">
-                  <button type="submit" class="btn btn-outline-danger btn-sm btn-excluir fw-bold">
-                    <i class="bi bi-trash"></i> Excluir
-                  </button>
-                </form>
+                <div id="foto-cooperado-preview" class="mt-2" style="text-align:center;"></div>
+                <div id="saldo-cooperado" class="mt-2" style="color:var(--gold); font-weight:900; font-size:1.06rem;"></div>
+                <div id="erro-lancar" class="mt-1" style="color:#ffdede; font-weight:800;"></div>
+              </div>
 
-                <div class="aviso-expirado small mt-1" style="display:none;">Bloqueado (1h)</div>
-              </td>
-            </tr>
-            {% else %}
-            <tr><td colspan="6">Nenhum lançamento realizado.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+              <div class="col-md-2">
+                <label class="form-label" for="valor"><i class="bi bi-cash-stack"></i> Valor</label>
+                <div class="input-group">
+                  <span class="input-group-text">R$</span>
+                  <input type="number" step="0.01" min="0.01" class="form-control" id="valor" name="valor" required oninput="checarCreditoSuficiente()">
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label" for="os_numero"><i class="bi bi-file-earmark-text"></i> Nº OS</label>
+                <input type="text" class="form-control" id="os_numero" name="os_numero" required placeholder="Ex: 12345">
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label" for="descricao"><i class="bi bi-justify-left"></i> Descrição</label>
+                <input type="text" class="form-control" id="descricao" name="descricao" placeholder="(opcional)">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2" id="btn-lancar">
+              <i class="bi bi-plus-circle"></i> Lançar Valor
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de Lançamentos -->
+        <div class="dashboard-card">
+          <h4><i class="bi bi-clock-history"></i> Lançamentos realizados</h4>
+          <div class="table-wrap">
+            <table class="table table-striped table-hover text-center align-middle">
+              <thead>
+                <tr>
+                  <th>Data & Hora</th>
+                  <th>Nº OS</th>
+                  <th>Cooperado</th>
+                  <th>Valor (R$)</th>
+                  <th>Descrição</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-lanc">
+                {% for l in lancamentos %}
+                <tr data-created="{{ l.data.isoformat() }}Z" data-id="{{ l.id }}">
+                  <td class="dt">{{ l.data_brasilia }}</td>
+                  <td class="os">{{ l.os_numero }}</td>
+                  <td class="coop">{{ l.cooperado.nome }}</td>
+                  <td class="valor" data-valor="{{ '%.2f'|format(l.valor) }}">{{ "{:,.2f}".format(l.valor) }}</td>
+                  <td class="desc">{{ l.descricao or '' }}</td>
+                  <td class="acoes">
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm btn-editar fw-bold"
+                            data-id="{{ l.id }}"
+                            data-os="{{ l.os_numero }}"
+                            data-valor="{{ '%.2f'|format(l.valor) }}"
+                            data-desc="{{ l.descricao or '' }}"
+                            onclick="abrirModalEditar(this)">
+                      <i class="bi bi-pencil-square"></i> Editar
+                    </button>
+
+                    <form method="post"
+                          action="{{ url_for('estab_excluir_lancamento', id=l.id) }}"
+                          style="display:inline-block;"
+                          onsubmit="return confirmarExcluir(this);">
+                      <button type="submit" class="btn btn-outline-danger btn-sm btn-excluir fw-bold">
+                        <i class="bi bi-trash"></i> Excluir
+                      </button>
+                    </form>
+
+                    <div class="aviso-expirado small mt-1" style="display:none;">Bloqueado (1h)</div>
+                  </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6">Nenhum lançamento realizado.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
-    </div>
+
+      <!-- =================== ABA 2: CATÁLOGO =================== -->
+      <div class="tab-pane fade" id="tab-catalogo" role="tabpanel" aria-labelledby="tab-catalogo-tab">
+
+        <!-- Upload / Importação -->
+        <div class="dashboard-card mb-4">
+          <h4><i class="bi bi-upload"></i> Importar / Atualizar Catálogo</h4>
+          <p class="mb-2" style="color:var(--muted);font-weight:500;">
+            Envie um arquivo de catálogo (<strong>Word, Excel ou PDF</strong>).<br>
+            Arquivos em Excel (<code>.xlsx</code>, <code>.xls</code>) podem ser lidos linha a linha
+            (Nome do produto, marca, valor, etc.) e importados como itens editáveis.
+          </p>
+          <form method="post"
+                action="{{ url_for('estab_catalogo_upload') }}"
+                enctype="multipart/form-data"
+                class="row g-3 align-items-end">
+            <div class="col-md-6">
+              <label class="form-label" for="catalogo_file">
+                <i class="bi bi-file-earmark-arrow-up"></i> Arquivo do catálogo
+              </label>
+              <input type="file" class="form-control" id="catalogo_file" name="arquivo"
+                     accept=".pdf,.doc,.docx,.xls,.xlsx"
+                     required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="catalogo_modo">
+                <i class="bi bi-sliders"></i> Modo de importação
+              </label>
+              <select class="form-select" id="catalogo_modo" name="modo">
+                <option value="append">Adicionar aos itens existentes</option>
+                <option value="replace">Substituir itens existentes</option>
+              </select>
+            </div>
+            <div class="col-md-3 text-md-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-cloud-arrow-up"></i> Enviar catálogo
+              </button>
+            </div>
+          </form>
+
+          {% if catalogo_arquivos is defined and catalogo_arquivos %}
+          <hr>
+          <h6 class="mt-2 mb-2" style="font-weight:800;color:var(--ink);">
+            <i class="bi bi-clock-history"></i> Últimos arquivos enviados
+          </h6>
+          <ul class="mb-0">
+            {% for arq in catalogo_arquivos %}
+            <li>
+              <i class="bi bi-file-earmark-text"></i>
+              {{ arq.nome_original }} —
+              <small>enviado em {{ arq.data_envio_brasilia }}</small>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+
+        <!-- Itens do catálogo (edição linha a linha) -->
+        <div class="dashboard-card">
+          <h4><i class="bi bi-bag-check"></i> Itens do catálogo</h4>
+
+          <!-- Filtro rápido -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="filtro-catalogo" class="form-control"
+                       placeholder="Filtrar por nome, marca ou categoria..."
+                       oninput="filtrarCatalogo()">
+              </div>
+            </div>
+            <div class="col-md-3 ms-auto text-md-end">
+              <button type="button" class="btn btn-outline-primary btn-sm"
+                      onclick="document.getElementById('linha-novo-item').classList.toggle('d-none');">
+                <i class="bi bi-plus-circle"></i> Novo item manual
+              </button>
+            </div>
+          </div>
+
+          <!-- Novo item manual -->
+          <div id="linha-novo-item" class="mb-3 d-none">
+            <form method="post" action="{{ url_for('estab_catalogo_criar_item') }}" class="row g-2 align-items-end">
+              <div class="col-md-3">
+                <label class="form-label">Produto</label>
+                <input type="text" class="form-control" name="nome" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Marca</label>
+                <input type="text" class="form-control" name="marca">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Categoria</label>
+                <input type="text" class="form-control" name="categoria">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Valor (R$)</label>
+                <div class="input-group">
+                  <span class="input-group-text">R$</span>
+                  <input type="number" step="0.01" min="0.00" class="form-control" name="valor" required>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Observação</label>
+                <input type="text" class="form-control" name="observacao" placeholder="(opcional)">
+              </div>
+              <div class="col-md-12 mt-2 text-end">
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <i class="bi bi-check2-circle"></i> Salvar item
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table table-striped table-hover text-center align-middle" id="tabela-catalogo">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Marca</th>
+                  <th>Categoria</th>
+                  <th>Valor (R$)</th>
+                  <th>Obs.</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if catalogo_itens is defined and catalogo_itens %}
+                  {% for item in catalogo_itens %}
+                  <tr data-item-id="{{ item.id }}">
+                    <td class="cat-nome">{{ item.nome }}</td>
+                    <td class="cat-marca">{{ item.marca or '' }}</td>
+                    <td class="cat-categoria">{{ item.categoria or '' }}</td>
+                    <td class="cat-valor">R$ {{ '{:,.2f}'.format(item.valor) }}</td>
+                    <td class="cat-obs">{{ item.observacao or '' }}</td>
+                    <td>
+                      <a href="{{ url_for('estab_catalogo_editar_item', item_id=item.id) }}"
+                         class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil-square"></i> Editar
+                      </a>
+                      <form method="post"
+                            action="{{ url_for('estab_catalogo_excluir_item', item_id=item.id) }}"
+                            style="display:inline-block"
+                            onsubmit="return confirm('Excluir este item do catálogo?');">
+                        <button class="btn btn-outline-danger btn-sm" type="submit">
+                          <i class="bi bi-trash"></i> Excluir
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr><td colspan="6">Nenhum item de catálogo cadastrado até o momento.</td></tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =================== ABA 3: STORIES / PROMOÇÕES =================== -->
+      <div class="tab-pane fade" id="tab-stories" role="tabpanel" aria-labelledby="tab-stories-tab">
+
+        <!-- Criar novo story -->
+        <div class="dashboard-card mb-4">
+          <h4><i class="bi bi-camera-reels"></i> Novo Story / Promoção</h4>
+          <p class="mb-2" style="color:var(--muted);font-weight:500;">
+            Publique uma imagem ou vídeo com data de expiração (ex: 3 dias).<br>
+            Os cooperados verão esses stories na aba <strong>Promoções</strong> do painel deles
+            por esse período.
+          </p>
+          <form method="post"
+                action="{{ url_for('estab_criar_story') }}"
+                enctype="multipart/form-data"
+                class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label" for="story_titulo">
+                <i class="bi bi-type"></i> Título / chamada
+              </label>
+              <input type="text" class="form-control" id="story_titulo" name="titulo" required
+                     placeholder="Ex: Promoção Almoço Executivo">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="story_midia">
+                <i class="bi bi-image"></i> Imagem ou vídeo
+              </label>
+              <input type="file" class="form-control" id="story_midia" name="midia"
+                     accept="image/*,video/*" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label" for="story_dias">
+                <i class="bi bi-calendar-event"></i> Duração (dias)
+              </label>
+              <input type="number" min="1" max="30" class="form-control" id="story_dias"
+                     name="dias" value="3" required>
+            </div>
+            <div class="col-md-2 text-md-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send"></i> Publicar story
+              </button>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="story_legenda">
+                <i class="bi bi-chat-left-text"></i> Legenda / detalhes (opcional)
+              </label>
+              <textarea class="form-control" id="story_legenda" name="legenda"
+                        rows="2" placeholder="Ex: Válido de segunda a sexta, das 11h às 15h..."></textarea>
+            </div>
+          </form>
+        </div>
+
+        <!-- Stories ativos -->
+        <div class="dashboard-card mb-4">
+          <h4><i class="bi bi-eye"></i> Stories ativos</h4>
+          <p class="mb-2" style="color:var(--muted);font-weight:500;">
+            Estes stories estão sendo exibidos aos cooperados neste momento.
+          </p>
+
+          <div class="d-flex flex-row flex-nowrap gap-3 overflow-auto pb-1">
+            {% if stories_ativos is defined and stories_ativos %}
+              {% for s in stories_ativos %}
+              <div class="card" style="min-width:220px;border-radius:18px;box-shadow:var(--glow);border:1px solid var(--line);">
+                <div class="card-body p-2">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <strong style="font-size:.95rem;">{{ s.titulo }}</strong>
+                    <span class="badge bg-primary">{{ s.dias_restantes }}d</span>
+                  </div>
+                  {% if s.tipo == 'imagem' %}
+                    <img src="{{ url_for('story_midia', story_id=s.id) }}"
+                         alt="{{ s.titulo }}" class="img-fluid rounded"
+                         style="max-height:140px;object-fit:cover;width:100%;">
+                  {% elif s.tipo == 'video' %}
+                    <video class="w-100 rounded" style="max-height:140px;" muted>
+                      <source src="{{ url_for('story_midia', story_id=s.id) }}" type="video/mp4">
+                    </video>
+                  {% endif %}
+                  {% if s.legenda %}
+                  <p class="mt-2 mb-1" style="font-size:.85rem;color:var(--muted);">
+                    {{ s.legenda }}
+                  </p>
+                  {% endif %}
+                  <small class="text-muted" style="font-size:.78rem;">
+                    Publicado em {{ s.data_criacao_brasilia }}<br>
+                    Expira em {{ s.data_expiracao_brasilia }}
+                  </small>
+                </div>
+                <div class="card-footer bg-transparent border-0 d-flex justify-content-between pt-0 pb-2 px-2">
+                  <form method="post"
+                        action="{{ url_for('estab_story_desativar', story_id=s.id) }}"
+                        onsubmit="return confirm('Ocultar este story para os cooperados?');">
+                    <button type="submit" class="btn btn-outline-warning btn-sm">
+                      <i class="bi bi-eye-slash"></i> Desativar
+                    </button>
+                  </form>
+                  <form method="post"
+                        action="{{ url_for('estab_story_excluir', story_id=s.id) }}"
+                        onsubmit="return confirm('Excluir este story permanentemente?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <span class="text-muted">Nenhum story ativo no momento.</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Stories expirados (histórico simples) -->
+        <div class="dashboard-card">
+          <h4><i class="bi bi-archive"></i> Stories expirados (histórico)</h4>
+          <div class="table-wrap">
+            <table class="table table-striped table-hover text-center align-middle">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Tipo</th>
+                  <th>Publicado em</th>
+                  <th>Expirou em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if stories_expirados is defined and stories_expirados %}
+                  {% for s in stories_expirados %}
+                  <tr>
+                    <td>{{ s.titulo }}</td>
+                    <td>{{ 'Imagem' if s.tipo == 'imagem' else 'Vídeo' }}</td>
+                    <td>{{ s.data_criacao_brasilia }}</td>
+                    <td>{{ s.data_expiracao_brasilia }}</td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr><td colspan="4">Nenhum story expirado registrado.</td></tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div> <!-- /tab-content -->
   </div>
 
-  <!-- MODAL EDITAR -->
+  <!-- MODAL EDITAR (lançamentos) -->
   <div class="modal fade" id="modalEditarLanc" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <form class="modal-content" method="post" id="form-editar-modal">
@@ -529,12 +886,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    /* ===== Relógio (Brasília) ===== */
+    /* ===== Relógio (Brasília / Natal) ===== */
     function tickClock(){
       const el = document.getElementById('clock-br');
       if(!el) return;
       const s = new Date().toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
-      el.textContent = 'Natal -' + s;
+      el.textContent = 'Natal - ' + s;
     }
     setInterval(tickClock, 1000); tickClock();
 
@@ -543,9 +900,11 @@
       const select = document.getElementById("cooperado_id");
       const saldoDiv = document.getElementById("saldo-cooperado");
       const fotoDiv  = document.getElementById("foto-cooperado-preview");
-      const option   = select.options[select.selectedIndex];
+      const option   = select ? select.options[select.selectedIndex] : null;
       const saldo    = option ? option.getAttribute("data-saldo") : null;
       const foto     = option ? option.getAttribute("data-foto") : null;
+
+      if(!saldoDiv || !fotoDiv) return;
 
       saldoDiv.textContent = (saldo && select.value) ? `Saldo atual: R$ ${saldo}` : '';
       if (foto && select.value){
@@ -564,11 +923,16 @@
       const erroDiv = document.getElementById("erro-lancar");
       const btn = document.getElementById("btn-lancar");
 
+      if(!select || !valorInput || !erroDiv || !btn) return;
+
       const option = select.options[select.selectedIndex];
       const saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
       const valor = valorInput.value ? parseFloat(valorInput.value) : null;
 
-      if (!select.value){ erroDiv.textContent=""; btn.disabled=true; return; }
+      if (!select.value){
+        erroDiv.textContent="";
+        btn.disabled=true; return;
+      }
       if (saldo == null || isNaN(saldo) || saldo <= 0){
         erroDiv.textContent="Este cooperado está sem crédito disponível!";
         btn.disabled=true; return;
@@ -582,7 +946,7 @@
       }
     }
 
-    /* ===== Helpers de data no fuso de Brasília ===== */
+    /* ===== Helpers de data (Brasília) ===== */
     function ymBR(d){
       return new Date(d).toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,7); // YYYY-MM
     }
@@ -598,7 +962,7 @@
       const rows = [...document.querySelectorAll('#tbody-lanc tr')];
       let count=0, sum=0, max=0, lastTs=0;
       let hCount=0, hSum=0;
-      let mCount=0, mSum=0; // NOVOS: mês
+      let mCount=0, mSum=0;
       const monthNow = ymBR(new Date());
       const porCoop = Object.create(null);
 
@@ -617,41 +981,47 @@
         if (created>lastTs) lastTs = created;
         if (created && isHojeBR(created)){ hCount++; hSum += v; }
 
-        // Totais do mês (Brasília)
         if (created && ymBR(created) === monthNow){ mCount++; mSum += v; }
 
         const nome = (tr.querySelector('.coop')?.textContent || '').trim();
         if (nome){ porCoop[nome] = (porCoop[nome]||0) + v; }
       });
 
-      // KPIs básicos
       let topNome='—', topVal=0;
       const pares = Object.entries(porCoop).sort((a,b)=>b[1]-a[1]);
       if (pares.length){ topNome = pares[0][0]; topVal = pares[0][1]; }
 
-      document.getElementById('k-count').textContent = count;
-      document.getElementById('k-sum').textContent   = 'R$ ' + formatBR(sum);
-      document.getElementById('k-max').textContent   = 'R$ ' + formatBR(max);
-      document.getElementById('k-top').textContent   = topNome!=='—' ? topNome : '—';
-      document.getElementById('k-top-sub').textContent = topNome!=='—' ? ('Soma: R$ ' + formatBR(topVal)) : 'Maior soma';
-      document.getElementById('h-count').textContent = hCount;
-      document.getElementById('h-sum').textContent   = 'R$ ' + formatBR(hSum);
+      const elCount = document.getElementById('k-count');
+      const elSum = document.getElementById('k-sum');
+      const elMax = document.getElementById('k-max');
+      const elTop = document.getElementById('k-top');
+      const elTopSub = document.getElementById('k-top-sub');
+      const elHCount = document.getElementById('h-count');
+      const elHSum = document.getElementById('h-sum');
+      const elLast = document.getElementById('k-last');
+      const elMonthSum = document.getElementById('k-month-sum');
+      const elMonthCount = document.getElementById('k-month-count');
 
-      if (lastTs){
+      if (elCount) elCount.textContent = count;
+      if (elSum)   elSum.textContent   = 'R$ ' + formatBR(sum);
+      if (elMax)   elMax.textContent   = 'R$ ' + formatBR(max);
+      if (elTop)   elTop.textContent   = topNome!=='—' ? topNome : '—';
+      if (elTopSub) elTopSub.textContent = topNome!=='—' ? ('Soma: R$ ' + formatBR(topVal)) : 'Maior soma';
+      if (elHCount) elHCount.textContent = hCount;
+      if (elHSum)   elHSum.textContent   = 'R$ ' + formatBR(hSum);
+
+      if (lastTs && elLast){
         const br = new Date(lastTs).toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
-        document.getElementById('k-last').textContent = br;
-      } else {
-        document.getElementById('k-last').textContent = '—';
+        elLast.textContent = br;
+      } else if (elLast){
+        elLast.textContent = '—';
       }
 
-      // KPI do Mês
-      const kMonthSum = document.getElementById('k-month-sum');
-      const kMonthCount = document.getElementById('k-month-count');
-      if (kMonthSum)  kMonthSum.textContent  = 'R$ ' + formatBR(mSum);
-      if (kMonthCount)kMonthCount.textContent = mCount;
+      if (elMonthSum)   elMonthSum.textContent   = 'R$ ' + formatBR(mSum);
+      if (elMonthCount) elMonthCount.textContent = mCount;
 
-      // Ranking Top 3
       const ul = document.getElementById('rank-list');
+      if (!ul) return;
       ul.innerHTML = '';
       if (!pares.length){ ul.innerHTML = '<li>—</li>'; return; }
       pares.slice(0,3).forEach(([nome,total],i)=>{
@@ -661,14 +1031,34 @@
       });
     }
 
+    /* ===== Catálogo: filtro simples (front) ===== */
+    function filtrarCatalogo(){
+      const input = document.getElementById('filtro-catalogo');
+      const termo = input ? input.value.toLowerCase() : '';
+      const linhas = document.querySelectorAll('#tabela-catalogo tbody tr');
+
+      linhas.forEach(tr=>{
+        const nome = (tr.querySelector('.cat-nome')?.textContent || '').toLowerCase();
+        const marca = (tr.querySelector('.cat-marca')?.textContent || '').toLowerCase();
+        const cat = (tr.querySelector('.cat-categoria')?.textContent || '').toLowerCase();
+        const obs = (tr.querySelector('.cat-obs')?.textContent || '').toLowerCase();
+
+        const show = !termo || nome.includes(termo) || marca.includes(termo)
+                      || cat.includes(termo) || obs.includes(termo);
+        tr.style.display = show ? '' : 'none';
+      });
+    }
+
     /* ===== Modal Editar + restrição de 1h ===== */
     let editarModal, tRestanteTimer=null;
+
     document.addEventListener('DOMContentLoaded', function(){
       mostrarInfoCooperado();
       document.getElementById("cooperado_id")?.addEventListener("change", mostrarInfoCooperado);
       document.getElementById("valor")?.addEventListener("input", checarCreditoSuficiente);
 
-      editarModal = new bootstrap.Modal(document.getElementById('modalEditarLanc'));
+      const modalEl = document.getElementById('modalEditarLanc');
+      if (modalEl) editarModal = new bootstrap.Modal(modalEl);
 
       aplicarRestricaoUmaHora();
       setInterval(aplicarRestricaoUmaHora, 60*1000);
@@ -703,13 +1093,11 @@
       document.getElementById('edit-valor').value = valor.replace(',', '.');
       document.getElementById('edit-desc').value = desc;
 
-      // Info no cabeçalho do modal
       const criadoBR = createdIso
         ? new Date(createdIso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo', hour12:false})
         : '—';
       document.getElementById('m-criado').textContent = criadoBR;
 
-      // Timer de restante
       const restanteEl = document.getElementById('m-restante');
       const btnSave = document.getElementById('btn-save-modal');
       function updateRestante(){
@@ -733,7 +1121,7 @@
       const form = document.getElementById('form-editar-modal');
       form.action = "{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0', '/' + id);
 
-      if (!expirado) editarModal.show();
+      if (!expirado && editarModal) editarModal.show();
     }
 
     function confirmarExcluir(formEl){
