@@ -269,6 +269,32 @@ class StoryEstabelecimento(db.Model):
 
     estabelecimento = db.relationship('Estabelecimento')
 
+# ====== Visualização / Curtida de Stories ======
+class StoryView(db.Model):
+    __tablename__ = 'story_view'
+    id = db.Column(db.Integer, primary_key=True)
+    story_id = db.Column(
+        db.Integer,
+        db.ForeignKey('story_estabelecimento.id'),
+        nullable=False,
+        index=True
+    )
+    cooperado_id = db.Column(
+        db.Integer,
+        db.ForeignKey('cooperado.id'),
+        nullable=False,
+        index=True
+    )
+    viu_em = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)  # UTC (naive)
+    curtiu = db.Column(db.Boolean, default=False, nullable=False, index=True)
+
+    story = db.relationship('StoryEstabelecimento')
+    cooperado = db.relationship('Cooperado')
+
+    __table_args__ = (
+        db.UniqueConstraint('story_id', 'cooperado_id', name='uq_story_coop_view'),
+    )
+
 
 with app.app_context():
     db.create_all()
@@ -704,6 +730,55 @@ def story_midia(story_id):
     resp = send_file(path, mimetype=s.mimetype)
     return _response_with_cache(resp, seconds=3600, etag_base=f"story_{s.id}_{s.filename}")
 
+# ====== API: cooperado registra visualização / curtida de story ======
+@app.post('/story/view')
+def registrar_story_view():
+    if not is_cooperado():
+        return jsonify({"error": "Somente cooperado pode registrar view."}), 403
+
+    data = request.get_json(silent=True) or {}
+    story_id = data.get('story_id')
+    liked = data.get('liked', None)
+
+    try:
+        story_id = int(story_id)
+    except Exception:
+        return jsonify({"error": "story_id inválido"}), 400
+
+    story = StoryEstabelecimento.query.get_or_404(story_id)
+    coop_id = session.get('user_id')
+    if not coop_id:
+        return jsonify({"error": "sem sessão"}), 403
+
+    agora = datetime.utcnow()
+
+    sv = StoryView.query.filter_by(story_id=story_id, cooperado_id=coop_id).first()
+    if not sv:
+        sv = StoryView(
+            story_id=story_id,
+            cooperado_id=coop_id,
+            viu_em=agora
+        )
+        if liked is not None:
+            sv.curtiu = bool(liked)
+        db.session.add(sv)
+    else:
+        sv.viu_em = agora
+        if liked is not None:
+            sv.curtiu = bool(liked)
+
+    db.session.commit()
+
+    views = StoryView.query.filter_by(story_id=story_id).count()
+    likes = StoryView.query.filter_by(story_id=story_id, curtiu=True).count()
+
+    return jsonify({
+        "ok": True,
+        "views": views,
+        "likes": likes,
+        "liked": sv.curtiu
+    })
+
 
 # ========= AJUSTAR CRÉDITO =========
 @app.route('/ajustar_credito', methods=['GET', 'POST'])
@@ -1039,29 +1114,28 @@ def painel_estabelecimento():
         StoryEstabelecimento.expira_em > agora_utc
     ).order_by(StoryEstabelecimento.criado_em.desc()).all()
 
-    # Campos auxiliares para o template: horário em Brasília e tempo restante
+       # Calcula horários em Brasília, tempo restante e stats (views/likes)
     for s in stories_estab:
-        # quando foi postado (Brasília)
         s.criado_brasilia = to_brt(s.criado_em).strftime('%d/%m/%Y %H:%M')
-        # quando vai expirar (Brasília)
         s.expira_brasilia = to_brt(s.expira_em).strftime('%d/%m/%Y %H:%M')
 
         restante = s.expira_em - agora_utc
-        if restante.total_seconds() <= 0:
+        if restante.total_seconds() < 0:
             s.restante_label = "expirado"
         else:
-            total_seg = int(restante.total_seconds())
-            dias = total_seg // 86400
-            horas = (total_seg % 86400) // 3600
-            minutos = (total_seg % 3600) // 60
+            dias = restante.days
+            horas = restante.seconds // 3600
+            minutos = (restante.seconds % 3600) // 60
+            if dias > 0:
+                s.restante_label = f"{dias}d {horas}h"
+            elif horas > 0:
+                s.restante_label = f"{horas}h {minutos}min"
+            else:
+                s.restante_label = f"{minutos}min"
 
-            partes = []
-            if dias:
-                partes.append(f"{dias}d")
-            if horas or dias:
-                partes.append(f"{horas}h")
-            partes.append(f"{minutos}min")
-            s.restante_label = " ".join(partes)
+        s.views_total = StoryView.query.filter_by(story_id=s.id).count()
+        s.likes_total = StoryView.query.filter_by(story_id=s.id, curtiu=True).count()
+
 
     return render_template(
         'painel_estabelecimento.html',
@@ -1321,10 +1395,9 @@ def estab_story_novo():
     except Exception:
         dias = 1
 
-        ext = os.path.splitext(midia.filename)[1].lower()
+           ext = os.path.splitext(midia.filename)[1].lower()
 
-    # Normaliza mimetype por extensão para evitar tipos estranhos
-    # e só aceitar formatos que o navegador entende bem
+    # Normaliza mimetype por extensão (evita formato estranho que aparece como "?")
     if ext in ('.jpg', '.jpeg', '.jfif', '.pjpeg', '.pjp'):
         mimetype = 'image/jpeg'
         tipo = 'imagem'
@@ -1348,7 +1421,7 @@ def estab_story_novo():
         tipo = 'video'
     else:
         flash('Formato não suportado. Use JPG/PNG/WEBP para imagens ou MP4/WEBM para vídeos.', 'danger')
-        return redirect(url_for('painel_estabelecimento'))'
+        return redirect(url_for('painel_estabelecimento'))
 
     filename = secure_filename(
         f"story_{est.id}_{int(time.time())}{ext}"
@@ -1382,39 +1455,34 @@ def estab_story_novo():
 def estab_criar_story():
     return estab_story_novo()
 
-# ========= ESTAB: EXCLUIR STORY =========
+# ====== ESTAB: excluir story ======
 @app.route('/estab/story/<int:story_id>/excluir')
 def estab_story_excluir(story_id):
-    # só estabelecimento logado ou admin podem excluir
-    if not (is_estabelecimento() or is_admin()):
+    if not is_estabelecimento():
         return redirect(url_for('login'))
 
-    story = StoryEstabelecimento.query.get_or_404(story_id)
-    est_id = story.estabelecimento_id
+    est_id = session.get('user_id')
+    s = StoryEstabelecimento.query.get_or_404(story_id)
 
-    # se for estabelecimento, garante que é o dono do story
-    if is_estabelecimento() and est_id != session.get('user_id'):
-        flash('Você não tem permissão para excluir este story.', 'danger')
+    if s.estabelecimento_id != est_id:
+        flash('Você não tem permissão para remover este story.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    # tenta remover o arquivo físico (imagem/vídeo)
+    # apaga registros de views/likes
+    StoryView.query.filter_by(story_id=s.id).delete()
+
+    # tenta apagar o arquivo físico
     try:
-        path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], story.filename)
+        path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], s.filename)
         if os.path.exists(path):
             os.remove(path)
     except Exception:
         pass
 
-    db.session.delete(story)
+    db.session.delete(s)
     db.session.commit()
     flash('Story removido com sucesso.', 'success')
-
-    # se foi o estabelecimento, volta pro painel dele;
-    # se foi o admin (no futuro), poderia voltar pra tela de edição do estabelecimento
-    if is_estabelecimento():
-        return redirect(url_for('painel_estabelecimento'))
-    else:
-        return redirect(url_for('editar_estabelecimento', id=est_id))
+    return redirect(url_for('painel_estabelecimento'))
 
 
 # ========= ESTAB: EDITAR / EXCLUIR LANÇAMENTO =========
