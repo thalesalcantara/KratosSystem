@@ -12,11 +12,14 @@
 
   <style>
     :root{
-      /* Paleta — Azul Royal + Branco (clean & leve) */
+      /* Paleta padrão (claro) */
       --bg:#f7f9ff;
       --ink:#0d1b3f;
       --muted:#5c6c92;
-      --gold:#2d4fe3;
+
+      --accent:#2d4fe3;          /* cor principal (editável) */
+      --accent-soft:#edf2ff;
+
       --line:#e5ebff;
 
       --surface:#ffffff;
@@ -26,7 +29,6 @@
       --rowOdd:#f2f5ff;
       --rowEven:#ffffff;
 
-      --kpi:#ffffff;
       --kpiLine:#dbe4ff;
       --field:#ffffff;
       --fieldBorder:#c9d4ff;
@@ -43,6 +45,33 @@
       --hover:#edf2ff;
     }
 
+    /* Tema escuro */
+    :root[data-theme="dark"]{
+      --bg:#020617;
+      --ink:#e5e7eb;
+      --muted:#9ca3af;
+
+      --surface:#020617;
+      --surface-2:#020617;
+
+      --line:#111827;
+      --thead:#020617;
+      --rowOdd:#020617;
+      --rowEven:#020617;
+
+      --kpiLine:#1e293b;
+      --field:#020617;
+      --fieldBorder:#1e293b;
+      --fieldFocus:#38bdf8;
+
+      --modalGrad1:#020617;
+      --modalGrad2:#020617;
+      --modalEdge:#1e293b;
+
+      --glass:rgba(15,23,42,.88);
+      --hover:#020617;
+    }
+
     html,body{height:100%}
     *{box-sizing:border-box}
     body{
@@ -57,62 +86,239 @@
       -moz-osx-font-smoothing:grayscale;
       line-height:1.45;
       text-shadow:none;
+      transition:background .25s ease, color .25s ease;
     }
 
     :focus-visible{
-      outline:3px solid var(--gold);
+      outline:3px solid var(--accent);
       outline-offset:2px;
       border-radius:10px;
     }
 
     /* ===== Sidebar ===== */
     .sidebar{
-      width:210px; height:100vh; position:fixed; top:0; left:0;
+      width:240px;
+      height:100vh;
+      position:fixed;
+      top:0; left:0;
       background:var(--glass);
       backdrop-filter: blur(var(--blur));
       -webkit-backdrop-filter: blur(var(--blur));
       border-right:1px solid var(--line);
       box-shadow:var(--glow);
-      color:#1a2b66; z-index:10;
-      display:flex; flex-direction:column; align-items:center;
+      color:var(--ink);
+      z-index:10;
+      display:flex;
+      flex-direction:column;
+      padding:18px 14px 14px;
     }
     .sidebar::before{
       content:""; position:absolute; inset:0;
       background:
-        linear-gradient(180deg, rgba(45,79,227,.10), transparent 30%),
-        linear-gradient(0deg, rgba(45,79,227,.06), transparent 45%);
+        radial-gradient(700px 400px at 0 0, rgba(45,79,227,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.18), transparent 40%);
       pointer-events:none;
     }
+    .sidebar-inner{
+      position:relative;
+      z-index:2;
+      display:flex;
+      flex-direction:column;
+      height:100%;
+    }
+
+    .sidebar .logo-wrap{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      margin-bottom:18px;
+    }
     .sidebar .logo{
-      width:176px; max-width:95%; margin:28px auto 12px; display:block;
-      filter: drop-shadow(0 6px 14px rgba(45,79,227,.25));
+      width:150px;
+      max-width:90%;
+      display:block;
+      filter: drop-shadow(0 8px 18px rgba(45,79,227,.35));
     }
-    .sidebar h3{
-      font-family:Orbitron, sans-serif; color:#0d1b3f; text-align:center;
-      letter-spacing:1px; margin-bottom:22px; font-size:1.05rem; font-weight:900;
-      background:#ffffff; border-radius:12px; padding:8px 0; width:88%;
-      border:1px solid var(--line); box-shadow:var(--glow);
+    .sidebar .badge-role{
+      padding:8px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.9);
+      border:1px solid var(--line);
+      font-family:Orbitron, sans-serif;
+      font-size:.75rem;
+      text-align:center;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      box-shadow:0 10px 22px rgba(15,23,42,.15);
+      line-height:1.2;
     }
-    .sidebar .nav-link{
-      color:#0d1b3f; font-size:1.08rem; border-radius:12px; margin:6px 10px;
-      padding:12px 16px; display:flex; align-items:center; gap:10px; text-decoration:none;
-      transition:transform .06s ease, background .18s ease, box-shadow .18s ease, color .18s ease;
-      will-change:transform;
-      background:#ffffff; border:1px solid var(--line); box-shadow:var(--glow);
+
+    .side-nav{
+      margin-top:6px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .side-link{
+      border:0;
+      background:transparent;
+      text-align:left;
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      margin-bottom:4px;
+      border-radius:14px;
+      color:var(--ink);
       font-weight:800;
+      font-size:.98rem;
+      text-decoration:none;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      border:1px solid transparent;
+      transition:border .16s ease, box-shadow .16s ease, background .16s ease, transform .06s ease, color .16s ease;
     }
-    .sidebar .nav-link i{font-size:1.25rem; color:var(--gold);}
-    .sidebar .nav-link.active, .sidebar .nav-link:hover{
-      background:linear-gradient(0deg, #ffffff 0%, #f6f9ff 100%);
-      color:#0d1b3f!important; transform:translateY(-1px);
-      box-shadow:var(--glow-strong); border-color:#cfd8ff;
+    .side-link .icon-wrap{
+      width:30px;
+      height:30px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.9);
+      border:1px solid var(--line);
+      box-shadow:0 6px 12px rgba(15,23,42,.16);
+      font-size:1.1rem;
+      color:var(--accent);
+    }
+    .side-link span.label{
+      flex:1;
+      white-space:nowrap;
+    }
+    .side-link::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      opacity:0;
+      background:radial-gradient(circle at 0 0, rgba(255,255,255,.7), transparent 55%);
+      transition:opacity .15s ease;
+      pointer-events:none;
+    }
+    .side-link:hover{
+      background:rgba(255,255,255,.95);
+      border-color:var(--accent-soft);
+      transform:translateY(-1px);
+      box-shadow:0 14px 26px rgba(15,23,42,.18);
+    }
+    .side-link.active{
+      background:linear-gradient(135deg, var(--accent), #4b6df0);
+      color:#ffffff;
+      border-color:rgba(255,255,255,.5);
+      box-shadow:0 16px 32px rgba(37,99,235,.55);
+    }
+    .side-link.active .icon-wrap{
+      background:rgba(15,23,42,.1);
+      color:#ffffff;
+      border-color:rgba(255,255,255,.4);
+      box-shadow:none;
+    }
+    .side-link.active::after{
+      opacity:.45;
+    }
+
+    .sidebar-footer{
+      margin-top:16px;
+      padding-top:10px;
+      border-top:1px solid rgba(148,163,184,.4);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .theme-toggle{
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      padding:6px 10px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      cursor:pointer;
+      font-size:.85rem;
+      font-weight:800;
+      color:var(--ink);
+      box-shadow:0 8px 16px rgba(15,23,42,.15);
+    }
+    .theme-toggle i{
+      color:var(--accent);
+      font-size:1.1rem;
+    }
+    .theme-toggle span{
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .theme-color-picker{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:.78rem;
+      font-weight:800;
+      color:var(--muted);
+    }
+    .theme-color-picker input[type="color"]{
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      border:2px solid #ffffff;
+      padding:0;
+      background:transparent;
+      box-shadow:0 0 0 2px rgba(15,23,42,.25);
+      cursor:pointer;
+    }
+
+    .logout-link{
+      width:100%;
+      margin-top:4px;
+    }
+    .logout-link a{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:14px;
+      border:1px solid rgba(239,68,68,.18);
+      background:rgba(248,250,252,.96);
+      font-weight:800;
+      color:#b91c1c;
+      text-decoration:none;
+      font-size:.95rem;
+      box-shadow:0 8px 18px rgba(15,23,42,.12);
+      transition:background .14s ease, transform .06s ease, box-shadow .14s ease;
+    }
+    .logout-link a i{font-size:1.05rem;}
+    .logout-link a:hover{
+      background:#fee2e2;
+      transform:translateY(-1px);
+      box-shadow:0 14px 24px rgba(248,113,113,.4);
     }
 
     /* ===== Main / Topbar ===== */
-    .main-content{ margin-left:230px; padding:32px 28px 24px; }
+    .main-content{
+      margin-left:260px;
+      padding:28px 24px 24px;
+      transition:margin-left .2s ease;
+    }
     .topbar{
       min-height:72px; display:flex; align-items:center; justify-content:space-between;
-      background:linear-gradient(90deg, #2d4fe3 0%, #4b6df0 100%);
+      background:linear-gradient(90deg, var(--accent) 0%, #4b6df0 100%);
       color:#fff;
       border:1px solid rgba(255,255,255,.25);
       border-radius:18px;
@@ -120,29 +326,17 @@
       box-shadow:0 14px 34px rgba(45,79,227,.22);
       position:sticky; top:0; z-index:20;
     }
-    .who{ color:#ffffff; font-weight:900; font-size:1.06rem; letter-spacing:.2px; }
-    .clock{ color:#e9efff; font-weight:900; letter-spacing:.4px; font-size:1.02rem; }
-
-    /* ===== Nav Abas (Créditos / Catálogo / Stories) ===== */
-    .nav-pills.estab-tabs .nav-link{
-      font-weight:900;
-      border-radius:999px;
-      border:1px solid var(--line);
-      color:#1c2755;
-      background:#ffffff;
-      padding:8px 18px;
-      margin-right:6px;
-      box-shadow:0 6px 14px rgba(45,79,227,.08);
-    }
-    .nav-pills.estab-tabs .nav-link i{
-      margin-right:6px;
-      color:var(--gold);
-    }
-    .nav-pills.estab-tabs .nav-link.active{
-      background:linear-gradient(90deg,#2d4fe3,#4b6df0);
+    .who{
       color:#ffffff;
-      border-color:#1b2fb3;
-      box-shadow:0 10px 22px rgba(45,79,227,.24);
+      font-weight:900;
+      font-size:1.06rem;
+      letter-spacing:.2px;
+    }
+    .clock{
+      color:#e9efff;
+      font-weight:900;
+      letter-spacing:.4px;
+      font-size:1.02rem;
     }
 
     /* ===== Cards ===== */
@@ -153,11 +347,18 @@
       box-shadow:var(--glow);
       padding:24px 20px 20px;
       color:var(--ink);
+      margin-bottom:18px;
+      transition:background .25s ease, border-color .25s ease, box-shadow .25s ease;
     }
     .dashboard-card h4{
       margin:0 0 12px;
-      font-family:Orbitron, sans-serif; font-weight:900; letter-spacing:1.1px; color:var(--gold);
+      font-family:Orbitron, sans-serif;
+      font-weight:900;
+      letter-spacing:1.1px;
+      color:var(--accent);
       text-shadow:none;
+      text-transform:uppercase;
+      font-size:1rem;
     }
 
     /* ===== KPIs ===== */
@@ -167,84 +368,214 @@
       margin-bottom:14px;
     }
     .kpi{
-      background:#ffffff; border:1px solid var(--kpiLine); border-radius:16px; padding:14px 16px;
-      display:flex; flex-direction:column; gap:6px; min-height:96px;
+      background:#ffffff;
+      border:1px solid var(--kpiLine);
+      border-radius:16px;
+      padding:14px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-height:96px;
       box-shadow: 8px 8px 24px rgba(13,35,97,.06), -8px -8px 24px rgba(255,255,255,.7);
     }
-    .kpi .label{ color:#1b2b5e; font-weight:900; display:flex; align-items:center; gap:8px; }
-    .kpi .value{ font:900 1.35rem/1 Orbitron, sans-serif; color:var(--gold); letter-spacing:.5px; }
-    .kpi .sub{ color:var(--muted); font-size:.94rem; }
+    :root[data-theme="dark"] .kpi{
+      background:#020617;
+      box-shadow:0 12px 30px rgba(15,23,42,.7);
+    }
+    .kpi .label{
+      color:#1b2b5e;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    :root[data-theme="dark"] .kpi .label{color:#e5e7eb;}
+    .kpi .value{
+      font:900 1.35rem/1 Orbitron, sans-serif;
+      color:var(--accent);
+      letter-spacing:.5px;
+    }
+    .kpi .sub{
+      color:var(--muted);
+      font-size:.94rem;
+    }
 
     /* ===== Ranking ===== */
-    .ranking{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+    .ranking{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:14px;
+    }
     .rank-card{
-      background:#ffffff; border:1px solid var(--line); border-radius:16px; padding:14px 16px;
+      background:#ffffff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px 16px;
       box-shadow:var(--glow);
     }
-    .rank-card h5{ margin:0 0 8px; font-family:Orbitron, sans-serif; color:var(--gold); }
+    :root[data-theme="dark"] .rank-card{
+      background:#020617;
+      box-shadow:0 12px 30px rgba(15,23,42,.7);
+    }
+    .rank-card h5{
+      margin:0 0 8px;
+      font-family:Orbitron, sans-serif;
+      color:var(--accent);
+      font-size:.96rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
     .rank-list{ margin:0; padding-left:18px; }
     .rank-list li{ margin:4px 0; font-weight:800; color:var(--ink); }
     .rank-list small{ color:var(--muted); }
 
     /* ===== Pílulas ===== */
     .pill{
-      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line);
-      border-radius:999px; background:#f7f9ff; font-weight:800; color:#1d2a52;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#f7f9ff;
+      font-weight:800;
+      color:#1d2a52;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    :root[data-theme="dark"] .pill{
+      background:#020617;
+      color:#e5e7eb;
+      box-shadow:none;
     }
 
     /* ===== Form ===== */
-    label{font-weight:900;color:#16275a;letter-spacing:.25px;}
+    label{
+      font-weight:900;
+      color:#16275a;
+      letter-spacing:.25px;
+    }
+    :root[data-theme="dark"] label{color:#cbd5f5;}
     .form-control,.form-select{
-      background:var(--field); color:var(--ink); border:2px solid var(--fieldBorder);
-      border-radius:12px; height:46px; font-size:1rem; padding:10px 12px;
+      background:var(--field);
+      color:var(--ink);
+      border:2px solid var(--fieldBorder);
+      border-radius:12px;
+      height:46px;
+      font-size:1rem;
+      padding:10px 12px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
-      transition:border-color .15s ease, box-shadow .15s ease, transform .02s ease;
+      transition:border-color .15s ease, box-shadow .15s ease, transform .02s ease, background .15s ease, color .15s ease;
     }
     .form-control::placeholder{color:#90a2d8;}
+    :root[data-theme="dark"] .form-control::placeholder{color:#64748b;}
     .form-control:focus,.form-select:focus{
-      border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(45,79,227,.18);
+      border-color:var(--fieldFocus);
+      box-shadow:0 0 0 .2rem rgba(45,79,227,.18);
       transform:translateY(-1px);
     }
 
     /* ===== Botões ===== */
     .btn-primary{
-      background:linear-gradient(90deg,#2d4fe3 0%, #4169e1 100%);
-      color:#ffffff; font-weight:900; border:none; border-radius:14px; padding:10px 18px;
-      transition:filter .15s ease, transform .06s ease, box-shadow .15s ease;
+      background:linear-gradient(90deg,var(--accent) 0%, #4169e1 100%);
+      color:#ffffff;
+      font-weight:900;
+      border:none;
+      border-radius:14px;
+      padding:10px 18px;
+      transition:filter .15s ease, transform .06s ease, box-shadow .15s ease, background .15s ease;
       box-shadow:0 10px 18px rgba(45,79,227,.18);
     }
-    .btn-primary:hover{ filter:brightness(1.05); transform:translateY(-1px); box-shadow:0 16px 26px rgba(45,79,227,.22); }
+    .btn-primary:hover{
+      filter:brightness(1.05);
+      transform:translateY(-1px);
+      box-shadow:0 16px 26px rgba(45,79,227,.32);
+    }
     .btn-primary:active{ transform:translateY(0); }
-    .btn-outline-primary{ color:#2d4fe3; border-color:#2d4fe3; font-weight:800; }
-    .btn-outline-primary:hover{ background:#2d4fe3; color:#ffffff; }
-    .btn-outline-danger{ color:#b94a59; border-color:#ff7f8f; font-weight:800; }
-    .btn-outline-danger:hover{ background:#ff7f8f; color:#0b142d; }
+    .btn-outline-primary{
+      color:var(--accent);
+      border-color:var(--accent);
+      font-weight:800;
+    }
+    .btn-outline-primary:hover{
+      background:var(--accent);
+      color:#ffffff;
+    }
+    .btn-outline-danger{
+      color:#b94a59;
+      border-color:#ff7f8f;
+      font-weight:800;
+    }
+    .btn-outline-danger:hover{
+      background:#ff7f8f;
+      color:#0b142d;
+    }
 
     /* ===== Tabela ===== */
-    .table-wrap{ border-radius:14px; overflow:auto; background:#ffffff; border:1px solid var(--line); box-shadow:var(--glow); }
-    table{ width:100%; margin:0; color:var(--ink); font-size:1.02rem; }
+    .table-wrap{
+      border-radius:14px;
+      overflow:auto;
+      background:#ffffff;
+      border:1px solid var(--line);
+      box-shadow:var(--glow);
+    }
+    :root[data-theme="dark"] .table-wrap{
+      background:#020617;
+      box-shadow:0 16px 32px rgba(15,23,42,.8);
+    }
+    table{
+      width:100%;
+      margin:0;
+      color:var(--ink);
+      font-size:1.02rem;
+    }
     thead th{
-      position:sticky; top:0; z-index:5;
-      background:var(--thead)!important; color:#ffffff!important;
-      font-family:Orbitron, sans-serif; letter-spacing:.9px; text-align:center;
-      padding:14px 10px; white-space:nowrap;
+      position:sticky;
+      top:0;
+      z-index:5;
+      background:var(--thead)!important;
+      color:#ffffff!important;
+      font-family:Orbitron, sans-serif;
+      letter-spacing:.9px;
+      text-align:center;
+      padding:14px 10px;
+      white-space:nowrap;
       border-bottom:2px solid var(--line)!important;
       box-shadow:0 2px 0 rgba(45,79,227,.18);
     }
     .table.table-striped tbody tr > *,
     .table-hover tbody tr > *,
-    #tbody-lanc td, #tbody-lanc th{ color:var(--ink) !important; }
-    td.valor{ color:#2d4fe3 !important; font-weight:900; }
+    #tbody-lanc td, #tbody-lanc th{
+      color:var(--ink) !important;
+    }
+    :root[data-theme="dark"] .table.table-striped tbody tr > *,
+    :root[data-theme="dark"] .table-hover tbody tr > *,
+    :root[data-theme="dark"] #tbody-lanc td, :root[data-theme="dark"] #tbody-lanc th{
+      color:#e5e7eb !important;
+    }
+    td.valor{
+      color:var(--accent) !important;
+      font-weight:900;
+    }
     tbody td{
       border-top:1px solid var(--line);
-      padding:12px 10px; vertical-align:middle;
+      padding:12px 10px;
+      vertical-align:middle;
     }
-    .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd)!important;}
-    .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven)!important;}
-    .table-hover tbody tr:hover>*{ background-color:var(--hover)!important; }
+    .table-striped>tbody>tr:nth-of-type(odd)>*{
+      background-color:var(--rowOdd)!important;
+    }
+    .table-striped>tbody>tr:nth-of-type(even)>*{
+      background-color:var(--rowEven)!important;
+    }
+    .table-hover tbody tr:hover>*{
+      background-color:var(--hover)!important;
+    }
 
-    .aviso-expirado{ color:#6f80b1; font-weight:700; }
+    .aviso-expirado{
+      color:#6f80b1;
+      font-weight:700;
+    }
 
     /* ===== Modal ===== */
     .modal-content{
@@ -254,26 +585,66 @@
       color:var(--ink);
       box-shadow:var(--glow-strong), inset 0 0 0 1px rgba(255,255,255,.6);
     }
+    :root[data-theme="dark"] .modal-content{
+      box-shadow:0 18px 40px rgba(15,23,42,.9), inset 0 0 0 1px rgba(15,23,42,.8);
+    }
     .modal-header{
       border-bottom:1px solid var(--line);
       background:linear-gradient(180deg, rgba(45,79,227,.06), transparent);
-      border-top-left-radius:18px; border-top-right-radius:18px;
+      border-top-left-radius:18px;
+      border-top-right-radius:18px;
     }
     .modal-title{
-      font-family:Orbitron, sans-serif; color:var(--gold); letter-spacing:1px;
-      display:flex; align-items:center; gap:8px;
+      font-family:Orbitron, sans-serif;
+      color:var(--accent);
+      letter-spacing:1px;
+      display:flex;
+      align-items:center;
+      gap:8px;
     }
-    .modal .form-control{ background:#f9fbff; border:2px solid #e3e9ff; color:var(--ink); }
-    .modal .form-control:focus{ border-color:#a5b8ff; box-shadow:0 0 0 .2rem rgba(165,184,255,.25); }
+    .modal .form-control{
+      background:#f9fbff;
+      border:2px solid #e3e9ff;
+      color:var(--ink);
+    }
+    :root[data-theme="dark"] .modal .form-control{
+      background:#020617;
+      border-color:#1e293b;
+      color:#e5e7eb;
+    }
+    .modal .form-control:focus{
+      border-color:#a5b8ff;
+      box-shadow:0 0 0 .2rem rgba(165,184,255,.25);
+    }
     .input-group-text{
-      background:#eef2ff; border-color:#e1e7ff; color:#1d2a52; font-weight:800;
+      background:#eef2ff;
+      border-color:#e1e7ff;
+      color:#1d2a52;
+      font-weight:800;
     }
-    .time-left{ color:#2d4fe3; font-weight:900; }
+    :root[data-theme="dark"] .input-group-text{
+      background:#020617;
+      border-color:#1e293b;
+      color:#e5e7eb;
+    }
+    .time-left{
+      color:var(--accent);
+      font-weight:900;
+    }
 
     /* ===== Alertas ===== */
     .alert{
-      background:#eaf0ff; color:#152756; font-weight:900; border:1px solid var(--line); border-radius:12px;
-      text-align:center; box-shadow:var(--glow);
+      background:#eaf0ff;
+      color:#152756;
+      font-weight:900;
+      border:1px solid var(--line);
+      border-radius:12px;
+      text-align:center;
+      box-shadow:var(--glow);
+    }
+    :root[data-theme="dark"] .alert{
+      background:#0f172a;
+      color:#e5e7eb;
     }
 
     /* ===== Responsivo ===== */
@@ -281,14 +652,34 @@
       .ranking{ grid-template-columns:1fr; }
     }
     @media (max-width:900px){
-      .sidebar{display:none;}
-      .main-content{margin-left:0;padding:14px;}
-      table{ font-size:1rem; }
-      thead th{ font-size:.98rem; }
+      .sidebar{
+        position:fixed;
+        width:78px;
+        padding-inline:10px;
+      }
+      .sidebar .badge-role{display:none;}
+      .sidebar .logo{
+        width:56px;
+        margin-bottom:4px;
+      }
+      .side-link span.label{display:none;}
+      .sidebar-footer{
+        flex-direction:column;
+        align-items:center;
+      }
+      .theme-toggle span{display:none;}
+      .logout-link a span{display:none;}
+      .main-content{
+        margin-left:90px;
+        padding:16px;
+      }
     }
 
     /* Ajustes finos */
-    #erro-lancar{ color:#b4232a !important; font-weight:800; }
+    #erro-lancar{
+      color:#b4232a !important;
+      font-weight:800;
+    }
     #foto-cooperado-preview img{
       box-shadow:0 0 0 3px rgba(45,79,227,.15), 0 6px 14px rgba(45,79,227,.18);
       border-radius:50%;
@@ -297,14 +688,54 @@
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="sidebar">
-    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
-    <h3>Parceiro<br>Coopex</h3>
-    <a class="nav-link active" href="#">
-      <i class="bi bi-currency-dollar"></i> Painel
-    </a>
-    <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i>Sair</a>
-  </div>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="logo-wrap">
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
+        <div class="badge-role">
+          Parceiro<br>Coopex
+        </div>
+      </div>
+
+      <!-- Navegação lateral (abas) -->
+      <nav class="side-nav" aria-label="Menu principal">
+        <button class="side-link sidebar-tab active" type="button" data-tab-target="tab-creditos">
+          <div class="icon-wrap"><i class="bi bi-currency-dollar"></i></div>
+          <span class="label">Créditos</span>
+        </button>
+
+        <button class="side-link sidebar-tab" type="button" data-tab-target="tab-catalogo">
+          <div class="icon-wrap"><i class="bi bi-bag-check"></i></div>
+          <span class="label">Catálogo</span>
+        </button>
+
+        <button class="side-link sidebar-tab" type="button" data-tab-target="tab-stories">
+          <div class="icon-wrap"><i class="bi bi-camera-reels"></i></div>
+          <span class="label">Stories / Promoções</span>
+        </button>
+      </nav>
+
+      <!-- Rodapé da sidebar -->
+      <div class="sidebar-footer">
+        <button class="theme-toggle" type="button" id="themeToggle">
+          <i class="bi bi-moon-stars" id="themeIcon"></i>
+          <span id="themeLabel">Escuro</span>
+        </button>
+
+        <label class="theme-color-picker">
+          Cor
+          <input type="color" id="accentPicker" value="#2d4fe3" title="Escolher cor do tema">
+        </label>
+
+        <div class="logout-link">
+          <a href="{{ url_for('logout') }}">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Sair</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </aside>
 
   <!-- Main -->
   <div class="main-content">
@@ -314,7 +745,9 @@
       <div class="who">Bem-vindo, {{ est.nome }}</div>
       <div class="d-flex align-items-center gap-3">
         <div class="clock" id="clock-br">Natal - --/--/---- --:--:--</div>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm fw-bold" style="border-color:#ffd66e;color:#fff">Sair <i class="bi bi-power"></i></a>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm fw-bold" style="border-color:#ffd66e;color:#fff">
+          Sair <i class="bi bi-power"></i>
+        </a>
       </div>
     </div>
 
@@ -326,35 +759,11 @@
       {% endif %}
     {% endwith %}
 
-    <!-- ABAS DO PAINEL -->
-    <ul class="nav nav-pills estab-tabs mb-3" id="estabTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-creditos-tab" data-bs-toggle="pill"
-                data-bs-target="#tab-creditos" type="button" role="tab"
-                aria-controls="tab-creditos" aria-selected="true">
-          <i class="bi bi-cash-stack"></i> Créditos
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-catalogo-tab" data-bs-toggle="pill"
-                data-bs-target="#tab-catalogo" type="button" role="tab"
-                aria-controls="tab-catalogo" aria-selected="false">
-          <i class="bi bi-bag-check"></i> Catálogo
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-stories-tab" data-bs-toggle="pill"
-                data-bs-target="#tab-stories" type="button" role="tab"
-                aria-controls="tab-stories" aria-selected="false">
-          <i class="bi bi-camera-reels"></i> Stories / Promoções
-        </button>
-      </li>
-    </ul>
-
+    <!-- Conteúdo com abas (tab-content) -->
     <div class="tab-content" id="estabTabsContent">
 
-      <!-- =================== ABA 1: CRÉDITOS (ORIGINAL) =================== -->
-      <div class="tab-pane fade show active" id="tab-creditos" role="tabpanel" aria-labelledby="tab-creditos-tab">
+      <!-- =================== ABA 1: CRÉDITOS =================== -->
+      <div class="tab-pane fade show active" id="tab-creditos" role="tabpanel">
 
         <!-- KPIs -->
         <div class="kpis">
@@ -406,7 +815,7 @@
         </div>
 
         <!-- Card de Lançamento -->
-        <div class="dashboard-card mb-4">
+        <div class="dashboard-card">
           <h4><i class="bi bi-currency-dollar"></i> Lançar valor para cooperado</h4>
           <form method="post" action="{{ url_for('painel_estabelecimento') }}">
             <div class="row g-3 align-items-center mb-1">
@@ -427,8 +836,8 @@
                 </select>
 
                 <div id="foto-cooperado-preview" class="mt-2" style="text-align:center;"></div>
-                <div id="saldo-cooperado" class="mt-2" style="color:var(--gold); font-weight:900; font-size:1.06rem;"></div>
-                <div id="erro-lancar" class="mt-1" style="color:#ffdede; font-weight:800;"></div>
+                <div id="saldo-cooperado" class="mt-2" style="color:var(--accent); font-weight:900; font-size:1.06rem;"></div>
+                <div id="erro-lancar" class="mt-1"></div>
               </div>
 
               <div class="col-md-2">
@@ -513,10 +922,10 @@
       </div>
 
       <!-- =================== ABA 2: CATÁLOGO =================== -->
-      <div class="tab-pane fade" id="tab-catalogo" role="tabpanel" aria-labelledby="tab-catalogo-tab">
+      <div class="tab-pane fade" id="tab-catalogo" role="tabpanel">
 
         <!-- Upload / Importação -->
-        <div class="dashboard-card mb-4">
+        <div class="dashboard-card">
           <h4><i class="bi bi-upload"></i> Importar / Atualizar Catálogo</h4>
           <p class="mb-2" style="color:var(--muted);font-weight:500;">
             Envie um arquivo de catálogo (<strong>Word, Excel ou PDF</strong>).<br>
@@ -655,7 +1064,7 @@
                             style="display:inline-block"
                             onsubmit="return confirm('Excluir este item do catálogo?');">
                         <button class="btn btn-outline-danger btn-sm" type="submit">
-                          <i class="bi bi-trash"></i> Excluir
+                          <i class="bi bi-trash"></i>
                         </button>
                       </form>
                     </td>
@@ -672,10 +1081,10 @@
       </div>
 
       <!-- =================== ABA 3: STORIES / PROMOÇÕES =================== -->
-      <div class="tab-pane fade" id="tab-stories" role="tabpanel" aria-labelledby="tab-stories-tab">
+      <div class="tab-pane fade" id="tab-stories" role="tabpanel">
 
         <!-- Criar novo story -->
-        <div class="dashboard-card mb-4">
+        <div class="dashboard-card">
           <h4><i class="bi bi-camera-reels"></i> Novo Story / Promoção</h4>
           <p class="mb-2" style="color:var(--muted);font-weight:500;">
             Publique uma imagem ou vídeo com data de expiração (ex: 3 dias).<br>
@@ -723,7 +1132,7 @@
         </div>
 
         <!-- Stories ativos -->
-        <div class="dashboard-card mb-4">
+        <div class="dashboard-card">
           <h4><i class="bi bi-eye"></i> Stories ativos</h4>
           <p class="mb-2" style="color:var(--muted);font-weight:500;">
             Estes stories estão sendo exibidos aos cooperados neste momento.
@@ -732,7 +1141,7 @@
           <div class="d-flex flex-row flex-nowrap gap-3 overflow-auto pb-1">
             {% if stories_ativos is defined and stories_ativos %}
               {% for s in stories_ativos %}
-              <div class="card" style="min-width:220px;border-radius:18px;box-shadow:var(--glow);border:1px solid var(--line);">
+              <div class="card" style="min-width:240px;border-radius:18px;box-shadow:var(--glow);border:1px solid var(--line);">
                 <div class="card-body p-2">
                   <div class="d-flex align-items-center justify-content-between mb-1">
                     <strong style="font-size:.95rem;">{{ s.titulo }}</strong>
@@ -741,9 +1150,9 @@
                   {% if s.tipo == 'imagem' %}
                     <img src="{{ url_for('story_midia', story_id=s.id) }}"
                          alt="{{ s.titulo }}" class="img-fluid rounded"
-                         style="max-height:140px;object-fit:cover;width:100%;">
+                         style="max-height:160px;object-fit:cover;width:100%;">
                   {% elif s.tipo == 'video' %}
-                    <video class="w-100 rounded" style="max-height:140px;" muted>
+                    <video class="w-100 rounded" style="max-height:160px;" muted>
                       <source src="{{ url_for('story_midia', story_id=s.id) }}" type="video/mp4">
                     </video>
                   {% endif %}
@@ -752,19 +1161,31 @@
                     {{ s.legenda }}
                   </p>
                   {% endif %}
-                  <small class="text-muted" style="font-size:.78rem;">
+                  <small class="text-muted" style="font-size:.78rem;display:block;">
                     Publicado em {{ s.data_criacao_brasilia }}<br>
                     Expira em {{ s.data_expiracao_brasilia }}
                   </small>
+                  {% if s.views is defined or s.likes is defined %}
+                  <div class="mt-2 d-flex justify-content-between" style="font-size:.8rem;">
+                    <span><i class="bi bi-eye"></i> {{ s.views or 0 }} visualizações</span>
+                    <span><i class="bi bi-hand-thumbs-up-fill text-primary"></i> {{ s.likes or 0 }} TOP</span>
+                  </div>
+                  {% endif %}
                 </div>
-                <div class="card-footer bg-transparent border-0 d-flex justify-content-between pt-0 pb-2 px-2">
+                <div class="card-footer bg-transparent border-0 d-flex justify-content-between pt-0 pb-2 px-2 gap-1">
+                  <a href="{{ url_for('estab_story_editar', story_id=s.id) }}"
+                     class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil-square"></i> Editar
+                  </a>
+
                   <form method="post"
                         action="{{ url_for('estab_story_desativar', story_id=s.id) }}"
                         onsubmit="return confirm('Ocultar este story para os cooperados?');">
                     <button type="submit" class="btn btn-outline-warning btn-sm">
-                      <i class="bi bi-eye-slash"></i> Desativar
+                      <i class="bi bi-eye-slash"></i>
                     </button>
                   </form>
+
                   <form method="post"
                         action="{{ url_for('estab_story_excluir', story_id=s.id) }}"
                         onsubmit="return confirm('Excluir este story permanentemente?');">
@@ -863,13 +1284,13 @@
             </div>
           </div>
 
-          <div class="form-text mt-2" style="color:#2d4fe3; font-weight:900;">
+          <div class="form-text mt-2" style="color:var(--accent); font-weight:900;">
             <i class="bi bi-info-circle"></i> Edição permitida até 1 hora após a criação.
           </div>
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-outline-light fw-bold" type="button" data-bs-dismiss="modal" style="color:#2d4fe3;border-color:#a6b6ff;">
+          <button class="btn btn-outline-light fw-bold" type="button" data-bs-dismiss="modal" style="color:var(--accent);border-color:#a6b6ff;">
             <i class="bi bi-x-circle"></i> Cancelar
           </button>
           <button class="btn btn-primary fw-bold" type="submit" id="btn-save-modal">
@@ -910,7 +1331,7 @@
       if (foto && select.value){
         fotoDiv.innerHTML = `<img src="${foto}" alt="Foto do Cooperado"
           style="max-width:96px;max-height:96px;border-radius:50%;
-                 border:3px solid var(--gold);box-shadow:0 0 8px #00339955;">`;
+                 border:3px solid var(--accent);box-shadow:0 0 8px #00339955;">`;
       } else {
         fotoDiv.innerHTML = '';
       }
@@ -1070,6 +1491,9 @@
         const a=document.getElementById('snd-venda');
         a && a.play().catch(()=>{});
       }
+
+      initSidebarTabs();
+      initTheme();
     });
 
     document.addEventListener('click', function(ev){
@@ -1157,6 +1581,95 @@
       const agora  = new Date();
       const diffMs = agora - criado;
       return diffMs > (60*60*1000); // 1 hora
+    }
+
+    /* ===== Tabs pela sidebar ===== */
+    function initSidebarTabs(){
+      const TAB_KEY = 'estab_tab';
+      const buttons = document.querySelectorAll('.sidebar-tab');
+      const panes = document.querySelectorAll('.tab-pane');
+
+      function activateTab(id){
+        panes.forEach(p=>{
+          if(p.id === id){
+            p.classList.add('show','active');
+          }else{
+            p.classList.remove('show','active');
+          }
+        });
+        buttons.forEach(b=>{
+          b.classList.toggle('active', b.getAttribute('data-tab-target') === id);
+        });
+        localStorage.setItem(TAB_KEY,id);
+      }
+
+      buttons.forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const id = btn.getAttribute('data-tab-target');
+          if(!id) return;
+          activateTab(id);
+        });
+      });
+
+      const saved = localStorage.getItem(TAB_KEY);
+      if(saved && document.getElementById(saved)){
+        activateTab(saved);
+      }else{
+        activateTab('tab-creditos');
+      }
+    }
+
+    /* ===== Tema claro/escuro + cor ===== */
+    function initTheme(){
+      const root = document.documentElement;
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const themeLabel = document.getElementById('themeLabel');
+      const accentPicker = document.getElementById('accentPicker');
+
+      const THEME_KEY = 'estab_theme';
+      const COLOR_KEY = 'estab_accent';
+
+      function applyTheme(t){
+        if(t === 'dark'){
+          root.setAttribute('data-theme','dark');
+          themeIcon.classList.remove('bi-moon-stars');
+          themeIcon.classList.add('bi-sun');
+          themeLabel.textContent = 'Claro';
+        }else{
+          root.setAttribute('data-theme','light');
+          themeIcon.classList.remove('bi-sun');
+          themeIcon.classList.add('bi-moon-stars');
+          themeLabel.textContent = 'Escuro';
+        }
+        localStorage.setItem(THEME_KEY,t);
+      }
+
+      function applyAccent(color){
+        if(!color) return;
+        root.style.setProperty('--accent', color);
+        root.style.setProperty('--accent-soft', color + '22');
+        root.style.setProperty('--thead', color);
+        accentPicker.value = color;
+        localStorage.setItem(COLOR_KEY,color);
+      }
+
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+      applyTheme(savedTheme);
+
+      const savedColor = localStorage.getItem(COLOR_KEY);
+      if(savedColor){
+        applyAccent(savedColor);
+      }
+
+      themeToggle?.addEventListener('click',()=>{
+        const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+
+      accentPicker?.addEventListener('input', e=>{
+        applyAccent(e.target.value);
+      });
     }
   </script>
 </body>
