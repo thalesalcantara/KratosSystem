@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --royal:#4169E1;
+      --royal:#4169E1;            /* Azul-royal */
       --royal-600:#2f52c9;
       --royal-50:#f5f7ff;
       --ink:#0b1220;
@@ -15,8 +15,8 @@
       --line:#e8edff;
       --ok:#0fb98b;
       --danger:#ef4444;
-      --bg:#ffffff;
-      --card: #ffffffcc;
+      --bg:#ffffff;               /* branco predominante */
+      --card: #ffffffcc;          /* vidro */
       --blur: 14px;
       --radius: 18px;
       --shadow: 0 12px 38px rgba(65,105,225,.18);
@@ -31,7 +31,7 @@
         #fff;
     }
 
-    /* ===== APP BAR ===== */
+    /* ===== APP BAR com onda ===== */
     .appbar{
       position:sticky; top:0; z-index:40; overflow:hidden;
       background:linear-gradient(120deg, var(--royal), var(--royal-600));
@@ -52,9 +52,9 @@
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="90" viewBox="0 0 1440 90" fill="none"><path d="M0 36C240 70 480 70 720 36C960 2 1200 2 1440 36V90H0V36Z" fill="white"/></svg>') center/cover no-repeat;
     }
 
-    .wrap{max-width:1080px;margin:-36px auto 88px auto;padding:0 14px}
+    .wrap{max-width:1080px;margin:-36px auto 88px auto;padding:0 14px} /* sobe por cima da onda */
 
-    /* ===== Cards ===== */
+    /* ===== Cards (glassmorphism) ===== */
     .glass{
       background: var(--card);
       border:1px solid #ffffff66;
@@ -77,6 +77,8 @@
     .metric-value{font-size:30px; font-weight:900}
     .ok{color:var(--ok)}
     .hint{color:var(--muted); font-size:12px; margin-top:6px}
+
+    /* badge superior decorativa */
     .spark{
       position:absolute; right:14px; top:14px; width:8px; height:8px; border-radius:50%;
       background: conic-gradient(from 0deg, #fff 0 40%, transparent 40% 100%);
@@ -84,7 +86,10 @@
       opacity:.7;
     }
 
-    .section{padding:12px; margin-top:10px;}
+    /* ===== Seção genérica ===== */
+    .section{
+      padding:12px; margin-top:10px;
+    }
     .section-head{
       display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;
     }
@@ -96,8 +101,10 @@
     }
     .empty{padding:18px; color:var(--muted); text-align:center; font-size:13px}
 
-    /* ===== Stories ===== */
-    .stories-card{padding:14px;}
+    /* ===== STORIES estilo Instagram ===== */
+    .stories-card{
+      padding:14px;
+    }
     .stories-row{
       display:flex;
       flex-wrap:nowrap;
@@ -159,41 +166,62 @@
       color:#64748b;
     }
 
-    /* ===== Modal de story (full-screen style) ===== */
+    /* ===== MODAL DE STORY – TELA CHEIA ===== */
     .story-modal{
       position:fixed;
       inset:0;
-      background:rgba(15,23,42,.90);
+      background:rgba(0,0,0,.92);
       display:none;
       align-items:center;
       justify-content:center;
-      z-index:60;
+      z-index:999;
     }
     .story-modal.open{display:flex;}
     .story-frame{
+      position:relative;
       width:100%;
-      max-width:420px;
-      background:#020617;
-      border-radius:18px;
-      overflow:hidden;
-      border:1px solid #1e293b;
-      box-shadow:0 24px 80px rgba(15,23,42,.85);
+      height:100%;
+      max-width:100%;
+      max-height:100%;
+      background:#000;
       display:flex;
       flex-direction:column;
     }
+
+    .story-progress-bar{
+      position:absolute;
+      left:0;right:0;top:0;
+      display:flex;
+      gap:4px;
+      padding:6px 8px 0 8px;
+      z-index:3;
+    }
+    .story-progress-seg{
+      flex:1;
+      height:3px;
+      border-radius:999px;
+      background:rgba(255,255,255,.25);
+      overflow:hidden;
+    }
+    .story-progress-fill{
+      width:0%;
+      height:100%;
+      background:#ffffff;
+      transform-origin:left center;
+    }
+
     .story-header{
-      padding:10px 12px;
+      position:relative;
+      z-index:2;
+      padding:16px 12px 8px 12px;
       display:flex;
       align-items:center;
       gap:8px;
       color:#e5e7eb;
-      border-bottom:1px solid #1f2937;
       font-size:13px;
-      position:relative;
-      z-index:3;
     }
     .story-dot{
-      width:24px;height:24px;border-radius:999px;
+      width:28px;height:28px;border-radius:999px;
       background:linear-gradient(120deg,var(--royal),var(--royal-600));
       display:flex;align-items:center;justify-content:center;
       font-size:12px;font-weight:900;color:#fff;
@@ -207,14 +235,14 @@
       border:0;
       background:transparent;
       color:#e5e7eb;
-      font-size:18px;
+      font-size:22px;
       cursor:pointer;
-      padding:2px 4px;
+      padding:2px 6px;
     }
+
     .story-body{
       position:relative;
-      background:#000;
-      max-height:80vh;
+      flex:1;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -222,64 +250,32 @@
     }
     .story-body img,
     .story-body video{
-      max-width:100%;
-      max-height:80vh;
+      width:100%;
+      height:100%;
+      object-fit:contain;
       display:block;
-      z-index:2;
+      background:#000;
     }
 
-    /* Barra de progresso (contagem) */
-    .story-progress{
+    /* zonas de toque para avançar/voltar */
+    .story-touch-layer{
       position:absolute;
-      left:8px;
-      right:8px;
-      top:8px;
+      inset:0;
       display:flex;
-      gap:4px;
       z-index:4;
     }
-    .story-bar{
+    .story-touch-zone{
       flex:1;
-      height:3px;
-      border-radius:999px;
-      background:rgba(15,23,42,.55);
-      overflow:hidden;
     }
-    .story-bar-inner{
-      width:0%;
-      height:100%;
-      background:#e5e7eb;
-      transform-origin:left center;
-    }
-    .story-bar.done .story-bar-inner{
-      width:100%;
-    }
-    .story-bar.active .story-bar-inner{
-      animation: storyFill var(--story-duration, 5000ms) linear forwards;
-    }
-    @keyframes storyFill{
-      from{width:0%;}
-      to{width:100%;}
-    }
-
-    /* Zonas de toque (esquerda/direita) */
-    .story-tap-zone{
-      position:absolute;
-      top:0;
-      bottom:0;
-      z-index:3;
-    }
-    .story-tap-zone.left{left:0; right:50%;}
-    .story-tap-zone.right{left:50%; right:0;}
 
     .story-caption{
-      padding:10px 12px;
+      padding:10px 12px 18px 12px;
       font-size:12px;
       color:#e5e7eb;
       border-top:1px solid #1f2937;
       min-height:32px;
       white-space:pre-line;
-      background:#020617;
+      background:rgba(0,0,0,.75);
     }
 
     /* ===== Timeline de Lançamentos ===== */
@@ -308,7 +304,7 @@
     .tx-quando{font-size:12px; color:#334155; font-weight:800; text-align:right}
     .tx-desc{grid-column:1 / -1; font-size:12px; color:#475569}
 
-    /* ===== FAB filtros ===== */
+    /* ===== FAB (Filtros) ===== */
     .fab{
       position:fixed; right:16px; bottom:84px; z-index:35;
       background:linear-gradient(120deg, var(--royal), var(--royal-600));
@@ -316,7 +312,7 @@
       box-shadow:0 18px 40px rgba(65,105,225,.35); cursor:pointer; font-weight:900; font-size:20px;
     }
 
-    /* ===== Bottom Sheet filtros ===== */
+    /* ===== Bottom Sheet de Filtros ===== */
     .sheet{
       position:fixed; left:0; right:0; bottom:-100%; z-index:45; transition:bottom .25s ease;
       background:#fff; border-top-left-radius:20px; border-top-right-radius:20px;
@@ -344,7 +340,7 @@
       color:var(--royal-600); background:#fff;
     }
 
-    /* ===== Bottom Nav ===== */
+    /* ===== Bottom Nav (app-like) ===== */
     .bottom-nav{
       position:fixed; left:0; right:0; bottom:0; z-index:42;
       background:#fff; border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 10px;
@@ -353,10 +349,11 @@
     .tab span.icon{font-size:16px;}
     .tab.active{ color:var(--royal-600); background:#eef2ff; }
 
+    /* ===== Páginas (Início / Catálogos) ===== */
     .page{display:block;}
     .page-hidden{display:none;}
 
-    /* ===== Catálogos ===== */
+    /* ===== Catálogos por estabelecimento ===== */
     .catalog-grid{
       display:flex;
       flex-direction:column;
@@ -435,6 +432,7 @@
       color:var(--muted);
     }
 
+    /* ===== Desktop tweaks ===== */
     @media(min-width:900px){
       .appbar{border-bottom-left-radius:16px;border-bottom-right-radius:16px}
       .wrap{margin-top:-44px}
@@ -501,6 +499,7 @@
                     type="button"
                     class="story-chip"
                     data-est-id="{{ est_id }}"
+                    data-est-nome="{{ est.nome }}"
                   >
                     <div class="story-ring">
                       <div class="story-inner">
@@ -509,7 +508,7 @@
                     </div>
                     <div class="story-name" title="{{ est.nome }}">{{ est.nome }}</div>
                     <div class="story-pill">
-                      {{ est_stories|length }} story{{ 's' if est_stories|length>1 else '' }}
+                      {{ est_stories|length }} story{{ 'ies' if est_stories|length>1 else '' }}
                     </div>
                   </button>
                 {% endif %}
@@ -527,6 +526,7 @@
             <span class="badge">Horário de Brasília</span>
           </div>
 
+          <!-- TIMELINE (mobile-first) -->
           <div class="timeline" aria-label="Lançamentos">
             {% if lancamentos %}
               {% for l in lancamentos %}
@@ -628,9 +628,10 @@
     </form>
   </div>
 
-  <!-- MODAL DE STORY -->
+  <!-- MODAL DE STORY TELA CHEIA -->
   <div class="story-modal" id="storyModal">
     <div class="story-frame">
+      <div class="story-progress-bar" id="storyProgress"></div>
       <div class="story-header">
         <div class="story-dot" id="storyInitial">E</div>
         <div>
@@ -640,37 +641,18 @@
         <button class="story-close" id="closeStory" aria-label="Fechar story">×</button>
       </div>
       <div class="story-body">
-        <div class="story-progress" id="storyProgress"></div>
-        <div class="story-tap-zone left" id="storyZoneLeft"></div>
-        <div class="story-tap-zone right" id="storyZoneRight"></div>
         <img id="storyImg" src="" alt="story" style="display:none;">
-        <video id="storyVideo" controls playsinline style="display:none;"></video>
+        <video id="storyVideo" playsinline muted style="display:none;"></video>
+        <div class="story-touch-layer">
+          <div class="story-touch-zone" data-dir="prev"></div>
+          <div class="story-touch-zone" data-dir="next"></div>
+        </div>
       </div>
       <div class="story-caption" id="storyCaption"></div>
     </div>
   </div>
 
-  <!-- Dados dos stories em JSON para o JS controlar sequência -->
-  {% if stories_ativos_coop and estab_por_id %}
-  <script type="application/json" id="stories-data">
-  [
-  {% for s in stories_ativos_coop %}
-    {
-      "id": {{ s.id }},
-      "estabelecimento_id": {{ s.estabelecimento_id }},
-      "estabelecimento_nome": {{ estab_por_id[s.estabelecimento_id].nome|tojson }},
-      "tipo": {{ s.tipo|tojson }},
-      "src": {{ url_for('story_midia', story_id=s.id)|tojson }},
-      "titulo": {{ (s.titulo or '')|tojson }},
-      "legenda": {{ (s.legenda or '')|tojson }},
-      "criado_em": {{ s.criado_em.isoformat()|tojson }}
-    }{% if not loop.last %},{% endif %}
-  {% endfor %}
-  ]
-  </script>
-  {% endif %}
-
-  <!-- Bottom navigation -->
+  <!-- Bottom navigation (estético) -->
   <nav class="bottom-nav" aria-label="Navegação">
     <button class="tab active" type="button" data-target="home-section">
       <span class="icon">🏠</span><span>Início</span>
@@ -683,6 +665,22 @@
     </a>
   </nav>
 
+  <!-- ===== MAPA DE STORIES (ids / src / textos) PARA O JS ===== -->
+  <script>
+    window.COOP_STORIES = [
+      {% for s in stories_ativos_coop %}
+        {
+          id: {{ s.id }},
+          estId: {{ s.estabelecimento_id }},
+          tipo: "{{ s.tipo }}",
+          titulo: {{ (s.titulo or '')|tojson }},
+          legenda: {{ (s.legenda or '')|tojson }},
+          src: "{{ url_for('story_midia', story_id=s.id) }}"
+        }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+  </script>
+
   <script>
     // ===== Bottom-sheet filtros =====
     const sheet = document.getElementById('sheet');
@@ -690,9 +688,15 @@
     const closeFilters = document.getElementById('closeFilters');
     const cancelBtn = document.getElementById('cancelSheet');
 
-    if(openFilters){ openFilters.addEventListener('click', ()=> sheet.classList.add('open')); }
-    if(closeFilters){ closeFilters.addEventListener('click', ()=> sheet.classList.remove('open')); }
-    if(cancelBtn){ cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open')); }
+    if(openFilters){
+      openFilters.addEventListener('click', ()=> sheet.classList.add('open'));
+    }
+    if(closeFilters){
+      closeFilters.addEventListener('click', ()=> sheet.classList.remove('open'));
+    }
+    if(cancelBtn){
+      cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open'));
+    }
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') sheet.classList.remove('open'); });
 
     // ===== Navegação entre Início e Catálogos =====
@@ -706,8 +710,10 @@
       tab.addEventListener('click', () => {
         const target = tab.getAttribute('data-target');
         if(!target) return;
+        // ativa aba
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
+        // mostra página
         if(pages.home) pages.home.classList.add('page-hidden');
         if(pages.catalogos) pages.catalogos.classList.add('page-hidden');
         if(target === 'home-section' && pages.home) pages.home.classList.remove('page-hidden');
@@ -715,28 +721,7 @@
       });
     });
 
-    // ===== Stories estilo Instagram/WhatsApp =====
-    const storiesDataEl = document.getElementById('stories-data');
-    let storiesByEstab = {};
-    const STORY_DURATION = 5000; // 5s
-
-    if(storiesDataEl){
-      try{
-        const allStories = JSON.parse(storiesDataEl.textContent.trim());
-        storiesByEstab = allStories.reduce((acc, s) => {
-          const key = String(s.estabelecimento_id);
-          if(!acc[key]) acc[key] = [];
-          acc[key].push(s);
-          return acc;
-        }, {});
-        Object.values(storiesByEstab).forEach(list => {
-          list.sort((a,b)=> new Date(a.criado_em) - new Date(b.criado_em));
-        });
-      }catch(err){
-        console.error('Erro ao ler stories-data', err);
-      }
-    }
-
+    // ===== PLAYER DE STORIES (tipo Instagram) =====
     const storyModal   = document.getElementById('storyModal');
     const storyImg     = document.getElementById('storyImg');
     const storyVideo   = document.getElementById('storyVideo');
@@ -744,67 +729,57 @@
     const storySub     = document.getElementById('storySub');
     const storyCaption = document.getElementById('storyCaption');
     const storyInitial = document.getElementById('storyInitial');
-    const storyClose   = document.getElementById('closeStory');
-    const storyProgress = document.getElementById('storyProgress');
-    const zoneLeft     = document.getElementById('storyZoneLeft');
-    const zoneRight    = document.getElementById('storyZoneRight');
+    const closeStory   = document.getElementById('closeStory');
+    const progressWrap = document.getElementById('storyProgress');
 
-    let currentList = [];
+    const STORY_DURATION = 5000; // 5 segundos
+    let currentEstId = null;
+    let currentEstName = '';
+    let storyList = [];
     let currentIndex = 0;
-    let storyTimer = null;
-    let holding = false;
-    let holdTimeout = null;
+    let timer = null;
+    let isPaused = false;
+    let progressFills = [];
 
-    function isVideoStory(story){
-      if(story.tipo && String(story.tipo).toLowerCase() === 'video') return true;
-      const src = story.src || '';
-      return /\.(mp4|webm|mov|m4v|3gp|ogg|mkv)$/i.test(src);
-    }
-
-    function clearTimer(){
-      if(storyTimer){
-        clearTimeout(storyTimer);
-        storyTimer = null;
+    function buildProgressBar(count){
+      progressWrap.innerHTML = '';
+      progressFills = [];
+      for(let i=0;i<count;i++){
+        const seg = document.createElement('div');
+        seg.className = 'story-progress-seg';
+        const fill = document.createElement('div');
+        fill.className = 'story-progress-fill';
+        seg.appendChild(fill);
+        progressWrap.appendChild(seg);
+        progressFills.push(fill);
       }
     }
 
-    function buildProgress(){
-      if(!storyProgress) return;
-      storyProgress.innerHTML = '';
-      currentList.forEach((s, idx) => {
-        const bar = document.createElement('div');
-        bar.className = 'story-bar';
-        if(idx < currentIndex) bar.classList.add('done');
-        if(idx === currentIndex) bar.classList.add('active');
-        const inner = document.createElement('div');
-        inner.className = 'story-bar-inner';
-        inner.style.setProperty('--story-duration', STORY_DURATION + 'ms');
-        bar.appendChild(inner);
-        storyProgress.appendChild(bar);
+    function updateProgressBar(elapsedRatio=0){
+      progressFills.forEach((fill, idx)=>{
+        if(idx < currentIndex){
+          fill.style.width = '100%';
+        } else if(idx === currentIndex){
+          fill.style.width = (elapsedRatio*100)+'%';
+        } else {
+          fill.style.width = '0%';
+        }
       });
     }
 
-    function showStory(idx){
-      if(!storyModal || !currentList.length) return;
-      if(idx < 0) idx = 0;
-      if(idx >= currentList.length) idx = currentList.length - 1;
-      currentIndex = idx;
-      const story = currentList[currentIndex];
-
-      storyTitle.textContent = story.estabelecimento_nome || '';
-      storyInitial.textContent = (story.estabelecimento_nome || 'E').slice(0,2).toUpperCase();
+    function showStory(story){
+      if(!storyModal) return;
+      storyTitle.textContent = currentEstName;
       storySub.textContent = story.titulo || 'Story';
       storyCaption.textContent = story.legenda || '';
+      storyInitial.textContent = (currentEstName || 'E').slice(0,2).toUpperCase();
 
       storyImg.style.display = 'none';
       storyVideo.style.display = 'none';
       storyVideo.pause();
       storyVideo.removeAttribute('src');
-      storyVideo.load();
 
-      const videoMode = isVideoStory(story);
-
-      if(videoMode){
+      if(story.tipo === 'video'){
         storyVideo.style.display = 'block';
         storyVideo.src = story.src;
         storyVideo.load();
@@ -814,18 +789,46 @@
         storyImg.src = story.src;
       }
 
-      if(!storyModal.classList.contains('open')){
-        storyModal.classList.add('open');
-      }
+      updateProgressBar(0);
+    }
 
-      clearTimer();
-      buildProgress();
-      storyTimer = setTimeout(()=>{ nextStory(); }, STORY_DURATION);
+    function startTimer(){
+      clearInterval(timer);
+      let elapsed = 0;
+      const step = 50;
+      timer = setInterval(()=>{
+        if(isPaused) return;
+        elapsed += step;
+        const ratio = Math.min(1, elapsed / STORY_DURATION);
+        updateProgressBar(ratio);
+        if(elapsed >= STORY_DURATION){
+          nextStory();
+        }
+      }, step);
+    }
+
+    function openStoryForEst(estId, estName){
+      const all = window.COOP_STORIES || [];
+      const list = all.filter(s => s.estId === estId);
+      if(!list.length) return;
+
+      currentEstId = estId;
+      currentEstName = estName || '';
+      storyList = list;
+      currentIndex = 0;
+
+      buildProgressBar(storyList.length);
+      showStory(storyList[currentIndex]);
+      startTimer();
+
+      storyModal.classList.add('open');
     }
 
     function nextStory(){
-      if(currentIndex < currentList.length - 1){
-        showStory(currentIndex + 1);
+      if(currentIndex < storyList.length - 1){
+        currentIndex++;
+        showStory(storyList[currentIndex]);
+        startTimer();
       }else{
         closeStoryModal();
       }
@@ -833,93 +836,85 @@
 
     function prevStory(){
       if(currentIndex > 0){
-        showStory(currentIndex - 1);
+        currentIndex--;
+        showStory(storyList[currentIndex]);
+        startTimer();
       }else{
-        showStory(0);
+        // volta para o primeiro
+        currentIndex = 0;
+        showStory(storyList[currentIndex]);
+        startTimer();
       }
     }
 
-    function pauseStory(){
-      holding = true;
-      clearTimer();
-      if(!storyVideo.paused){
+    function closeStoryModal(){
+      if(!storyModal) return;
+      storyModal.classList.remove('open');
+      clearInterval(timer);
+      timer = null;
+      if(storyVideo){
         storyVideo.pause();
       }
     }
 
-    function resumeStory(){
-      if(!holding) return;
-      holding = false;
-      if(isVideoStory(currentList[currentIndex]) && storyVideo.paused){
-        storyVideo.play().catch(()=>{});
-      }
-      clearTimer();
-      storyTimer = setTimeout(()=>{ nextStory(); }, STORY_DURATION);
-    }
-
-    function closeStoryModal(){
-      clearTimer();
-      holding = false;
-      storyVideo.pause();
-      storyModal.classList.remove('open');
-    }
-
-    // Zonas de toque: segurar = pause, clique curto = navega
-    function attachZone(zone, direction){
-      if(!zone) return;
-      ['mousedown','touchstart'].forEach(evt=>{
-        zone.addEventListener(evt, e => {
-          e.preventDefault();
-          holdTimeout = setTimeout(()=>{ pauseStory(); }, 180);
-        }, {passive:false});
-      });
-      ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt=>{
-        zone.addEventListener(evt, e => {
-          e.preventDefault();
-          clearTimeout(holdTimeout);
-          if(holding){
-            resumeStory();
-          }else{
-            if(direction === 'right'){ nextStory(); }
-            else{ prevStory(); }
-          }
-        }, {passive:false});
-      });
-    }
-
-    attachZone(zoneLeft, 'left');
-    attachZone(zoneRight, 'right');
-
-    // Abrir stories por estabelecimento
-    document.querySelectorAll('.story-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const estId = chip.getAttribute('data-est-id');
-        if(!estId || !storiesByEstab[estId]) return;
-        currentList = storiesByEstab[estId].slice();
-        currentIndex = 0;
-        showStory(0);
+    // abrir story ao clicar no chip
+    document.querySelectorAll('.story-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const estId = Number(chip.getAttribute('data-est-id'));
+        const estName = chip.getAttribute('data-est-nome') || '';
+        openStoryForEst(estId, estName);
       });
     });
 
-    // Fechar modal
-    if(storyClose){
-      storyClose.addEventListener('click', closeStoryModal);
+    // fechar
+    if(closeStory){
+      closeStory.addEventListener('click', closeStoryModal);
     }
     if(storyModal){
-      storyModal.addEventListener('click', (e)=>{
+      storyModal.addEventListener('click',(e)=>{
         if(e.target === storyModal){
           closeStoryModal();
         }
       });
     }
-    document.addEventListener('keydown', (e)=>{
+    document.addEventListener('keydown',(e)=>{
       if(e.key === 'Escape'){
         closeStoryModal();
-      }else if(e.key === 'ArrowRight' && storyModal.classList.contains('open')){
-        nextStory();
-      }else if(e.key === 'ArrowLeft' && storyModal.classList.contains('open')){
-        prevStory();
       }
+    });
+
+    // zonas de toque (direita/esquerda) + segurar para pausar
+    document.querySelectorAll('.story-touch-zone').forEach(zone=>{
+      let holdTimeout = null;
+      let held = false;
+
+      function startHold(e){
+        held = false;
+        isPaused = false;
+        holdTimeout = setTimeout(()=>{
+          held = true;
+          isPaused = true;
+        }, 200); // depois de 200ms segurando, pausa
+      }
+      function endHold(e){
+        clearTimeout(holdTimeout);
+        if(held){
+          // estava pausado, soltar = volta a rodar
+          isPaused = false;
+          return;
+        }
+        const dir = zone.getAttribute('data-dir');
+        if(dir === 'next') nextStory();
+        else prevStory();
+      }
+
+      zone.addEventListener('mousedown', startHold);
+      zone.addEventListener('touchstart', startHold, {passive:true});
+
+      zone.addEventListener('mouseup', endHold);
+      zone.addEventListener('mouseleave', endHold);
+      zone.addEventListener('touchend', endHold);
+      zone.addEventListener('touchcancel', endHold);
     });
   </script>
 </body>
