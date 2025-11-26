@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --royal:#4169E1;            /* Azul-royal */
+      --royal:#4169E1;
       --royal-600:#2f52c9;
       --royal-50:#f5f7ff;
       --ink:#0b1220;
@@ -15,8 +15,8 @@
       --line:#e8edff;
       --ok:#0fb98b;
       --danger:#ef4444;
-      --bg:#ffffff;               /* branco predominante */
-      --card: #ffffffcc;          /* vidro */
+      --bg:#ffffff;
+      --card: #ffffffcc;
       --blur: 14px;
       --radius: 18px;
       --shadow: 0 12px 38px rgba(65,105,225,.18);
@@ -31,7 +31,7 @@
         #fff;
     }
 
-    /* ===== APP BAR com onda ===== */
+    /* APP BAR */
     .appbar{
       position:sticky; top:0; z-index:40; overflow:hidden;
       background:linear-gradient(120deg, var(--royal), var(--royal-600));
@@ -52,9 +52,9 @@
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="90" viewBox="0 0 1440 90" fill="none"><path d="M0 36C240 70 480 70 720 36C960 2 1200 2 1440 36V90H0V36Z" fill="white"/></svg>') center/cover no-repeat;
     }
 
-    .wrap{max-width:1080px;margin:-36px auto 88px auto;padding:0 14px} /* sobe por cima da onda */
+    .wrap{max-width:1080px;margin:-36px auto 88px auto;padding:0 14px}
 
-    /* ===== Cards (glassmorphism) ===== */
+    /* Cards */
     .glass{
       background: var(--card);
       border:1px solid #ffffff66;
@@ -77,8 +77,6 @@
     .metric-value{font-size:30px; font-weight:900}
     .ok{color:var(--ok)}
     .hint{color:var(--muted); font-size:12px; margin-top:6px}
-
-    /* badge superior decorativa */
     .spark{
       position:absolute; right:14px; top:14px; width:8px; height:8px; border-radius:50%;
       background: conic-gradient(from 0deg, #fff 0 40%, transparent 40% 100%);
@@ -86,7 +84,6 @@
       opacity:.7;
     }
 
-    /* ===== Seção genérica ===== */
     .section{
       padding:12px; margin-top:10px;
     }
@@ -101,10 +98,8 @@
     }
     .empty{padding:18px; color:var(--muted); text-align:center; font-size:13px}
 
-    /* ===== STORIES estilo Instagram ===== */
-    .stories-card{
-      padding:14px;
-    }
+    /* STORIES */
+    .stories-card{padding:14px;}
     .stories-row{
       display:flex;
       flex-wrap:nowrap;
@@ -166,7 +161,7 @@
       color:#64748b;
     }
 
-    /* ===== MODAL DE STORY – TELA CHEIA ===== */
+    /* MODAL STORY */
     .story-modal{
       position:fixed;
       inset:0;
@@ -187,7 +182,6 @@
       display:flex;
       flex-direction:column;
     }
-
     .story-progress-bar{
       position:absolute;
       left:0;right:0;top:0;
@@ -209,7 +203,6 @@
       background:#ffffff;
       transform-origin:left center;
     }
-
     .story-header{
       position:relative;
       z-index:2;
@@ -239,7 +232,6 @@
       cursor:pointer;
       padding:2px 6px;
     }
-
     .story-body{
       position:relative;
       flex:1;
@@ -256,29 +248,58 @@
       display:block;
       background:#000;
     }
-
-    /* zonas de toque para avançar/voltar */
     .story-touch-layer{
       position:absolute;
       inset:0;
       display:flex;
       z-index:4;
     }
-    .story-touch-zone{
-      flex:1;
-    }
+    .story-touch-zone{flex:1;}
 
     .story-caption{
       padding:10px 12px 18px 12px;
       font-size:12px;
       color:#e5e7eb;
       border-top:1px solid #1f2937;
-      min-height:32px;
-      white-space:pre-line;
       background:rgba(0,0,0,.75);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .story-caption-text{
+      flex:1;
+      white-space:pre-line;
+      min-height:24px;
+    }
+    .story-like{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+      min-width:80px;
+    }
+    .story-like-btn{
+      border-radius:999px;
+      border:1px solid #e5e7eb;
+      background:transparent;
+      color:#f9fafb;
+      font-size:11px;
+      font-weight:800;
+      padding:4px 10px;
+      cursor:pointer;
+    }
+    .story-like-btn.liked{
+      background:#f9fafb;
+      color:#111827;
+    }
+    .story-like-stats{
+      font-size:10px;
+      color:#9ca3af;
+      text-align:right;
     }
 
-    /* ===== Timeline de Lançamentos ===== */
+    /* Timeline */
     .timeline{position:relative; padding-left:14px; display:flex; flex-direction:column; gap:10px}
     .timeline:before{
       content:""; position:absolute; left:6px; top:0; bottom:0; width:2px; background:linear-gradient(var(--royal-50), var(--royal));
@@ -304,7 +325,7 @@
     .tx-quando{font-size:12px; color:#334155; font-weight:800; text-align:right}
     .tx-desc{grid-column:1 / -1; font-size:12px; color:#475569}
 
-    /* ===== FAB (Filtros) ===== */
+    /* FAB filtros */
     .fab{
       position:fixed; right:16px; bottom:84px; z-index:35;
       background:linear-gradient(120deg, var(--royal), var(--royal-600));
@@ -312,7 +333,7 @@
       box-shadow:0 18px 40px rgba(65,105,225,.35); cursor:pointer; font-weight:900; font-size:20px;
     }
 
-    /* ===== Bottom Sheet de Filtros ===== */
+    /* Bottom sheet filtros */
     .sheet{
       position:fixed; left:0; right:0; bottom:-100%; z-index:45; transition:bottom .25s ease;
       background:#fff; border-top-left-radius:20px; border-top-right-radius:20px;
@@ -340,20 +361,19 @@
       color:var(--royal-600); background:#fff;
     }
 
-    /* ===== Bottom Nav (app-like) ===== */
+    /* Bottom nav */
     .bottom-nav{
       position:fixed; left:0; right:0; bottom:0; z-index:42;
       background:#fff; border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 10px;
     }
-    .tab{ color:#6b7280; text-decoration:none; font-weight:800; font-size:12px; display:flex; gap:6px; align-items:center; padding:8px 10px; border-radius:12px }
+    .tab{ color:#6b7280; text-decoration:none; font-weight:800; font-size:12px; display:flex; gap:6px; align-items:center; padding:8px 10px; border-radius:12px; border:none; background:transparent; cursor:pointer;}
     .tab span.icon{font-size:16px;}
     .tab.active{ color:var(--royal-600); background:#eef2ff; }
 
-    /* ===== Páginas (Início / Catálogos) ===== */
     .page{display:block;}
     .page-hidden{display:none;}
 
-    /* ===== Catálogos por estabelecimento ===== */
+    /* Catálogos */
     .catalog-grid{
       display:flex;
       flex-direction:column;
@@ -412,7 +432,7 @@
     }
     .catalog-price{
       font-weight:900;
-      color:var(--royal-600);
+      color:#royal-600;
       font-size:13px;
       text-align:right;
     }
@@ -432,7 +452,6 @@
       color:var(--muted);
     }
 
-    /* ===== Desktop tweaks ===== */
     @media(min-width:900px){
       .appbar{border-bottom-left-radius:16px;border-bottom-right-radius:16px}
       .wrap{margin-top:-44px}
@@ -456,9 +475,8 @@
   </header>
 
   <main class="wrap">
-    <!-- ===== PÁGINA INÍCIO ===== -->
+    <!-- PÁGINA INÍCIO -->
     <section id="home-section" class="page">
-      <!-- MÉTRICAS -->
       <section class="metric-grid">
         <article class="glass metric-card span-4">
           <span class="spark" aria-hidden="true"></span>
@@ -526,7 +544,6 @@
             <span class="badge">Horário de Brasília</span>
           </div>
 
-          <!-- TIMELINE (mobile-first) -->
           <div class="timeline" aria-label="Lançamentos">
             {% if lancamentos %}
               {% for l in lancamentos %}
@@ -554,7 +571,7 @@
       </section>
     </section>
 
-    <!-- ===== PÁGINA CATÁLOGOS ===== -->
+    <!-- PÁGINA CATÁLOGOS -->
     <section id="catalogos-section" class="page page-hidden">
       <section class="glass metric-card span-12 section">
         <div class="section-head">
@@ -604,7 +621,7 @@
   <!-- FAB filtros -->
   <button class="fab" id="openFilters" title="Filtrar lançamentos">⟲</button>
 
-  <!-- BOTTOM SHEET de filtros -->
+  <!-- BOTTOM SHEET filtros -->
   <div class="sheet" id="sheet">
     <div class="drag" id="closeFilters" aria-hidden="true"></div>
     <h4>Filtros dos lançamentos</h4>
@@ -628,7 +645,7 @@
     </form>
   </div>
 
-  <!-- MODAL DE STORY TELA CHEIA -->
+  <!-- MODAL STORY -->
   <div class="story-modal" id="storyModal">
     <div class="story-frame">
       <div class="story-progress-bar" id="storyProgress"></div>
@@ -648,11 +665,17 @@
           <div class="story-touch-zone" data-dir="next"></div>
         </div>
       </div>
-      <div class="story-caption" id="storyCaption"></div>
+      <div class="story-caption">
+        <div class="story-caption-text" id="storyCaption"></div>
+        <div class="story-like">
+          <button id="storyLikeBtn" type="button" class="story-like-btn">👍 TOP</button>
+          <div id="storyLikeStats" class="story-like-stats"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Bottom navigation (estético) -->
+  <!-- Bottom nav -->
   <nav class="bottom-nav" aria-label="Navegação">
     <button class="tab active" type="button" data-target="home-section">
       <span class="icon">🏠</span><span>Início</span>
@@ -665,7 +688,7 @@
     </a>
   </nav>
 
-  <!-- ===== MAPA DE STORIES (ids / src / textos) PARA O JS ===== -->
+  <!-- Mapa de stories disponível para o JS -->
   <script>
     window.COOP_STORIES = [
       {% for s in stories_ativos_coop %}
@@ -682,7 +705,7 @@
   </script>
 
   <script>
-    // ===== Bottom-sheet filtros =====
+    // Bottom-sheet filtros
     const sheet = document.getElementById('sheet');
     const openFilters = document.getElementById('openFilters');
     const closeFilters = document.getElementById('closeFilters');
@@ -699,29 +722,45 @@
     }
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') sheet.classList.remove('open'); });
 
-    // ===== Navegação entre Início e Catálogos =====
+    // Navegação entre abas (Início / Catálogos) com persistência
     const tabs = document.querySelectorAll('.bottom-nav .tab[data-target]');
     const pages = {
-      home: document.getElementById('home-section'),
-      catalogos: document.getElementById('catalogos-section')
+      'home-section': document.getElementById('home-section'),
+      'catalogos-section': document.getElementById('catalogos-section')
     };
+    const LAST_TAB_KEY = 'coopex_coop_tab';
+
+    function activateTab(target){
+      tabs.forEach(t => t.classList.remove('active'));
+      const btn = document.querySelector('.bottom-nav .tab[data-target="'+target+'"]');
+      if(btn) btn.classList.add('active');
+
+      Object.keys(pages).forEach(id=>{
+        if(pages[id]){
+          if(id === target) pages[id].classList.remove('page-hidden');
+          else pages[id].classList.add('page-hidden');
+        }
+      });
+      localStorage.setItem(LAST_TAB_KEY, target);
+    }
 
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const target = tab.getAttribute('data-target');
         if(!target) return;
-        // ativa aba
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        // mostra página
-        if(pages.home) pages.home.classList.add('page-hidden');
-        if(pages.catalogos) pages.catalogos.classList.add('page-hidden');
-        if(target === 'home-section' && pages.home) pages.home.classList.remove('page-hidden');
-        if(target === 'catalogos-section' && pages.catalogos) pages.catalogos.classList.remove('page-hidden');
+        activateTab(target);
       });
     });
 
-    // ===== PLAYER DE STORIES (tipo Instagram) =====
+    // Ao carregar, manter a última aba que o cooperado usou
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const saved = localStorage.getItem(LAST_TAB_KEY);
+      if(saved && pages[saved]){
+        activateTab(saved);
+      }
+    });
+
+    // PLAYER DE STORIES
     const storyModal   = document.getElementById('storyModal');
     const storyImg     = document.getElementById('storyImg');
     const storyVideo   = document.getElementById('storyVideo');
@@ -731,8 +770,10 @@
     const storyInitial = document.getElementById('storyInitial');
     const closeStory   = document.getElementById('closeStory');
     const progressWrap = document.getElementById('storyProgress');
+    const storyLikeBtn = document.getElementById('storyLikeBtn');
+    const storyLikeStats = document.getElementById('storyLikeStats');
 
-    const STORY_DURATION = 5000; // 5 segundos
+    const STORY_DURATION = 5000;
     let currentEstId = null;
     let currentEstName = '';
     let storyList = [];
@@ -740,6 +781,7 @@
     let timer = null;
     let isPaused = false;
     let progressFills = [];
+    let currentStoryId = null;
 
     function buildProgressBar(count){
       progressWrap.innerHTML = '';
@@ -767,8 +809,37 @@
       });
     }
 
+    function updateLikeUI(liked, views, likes){
+      if(typeof liked === 'boolean' && storyLikeBtn){
+        storyLikeBtn.dataset.liked = liked ? '1' : '0';
+        storyLikeBtn.classList.toggle('liked', liked);
+      }
+      if(storyLikeStats){
+        const v = typeof views === 'number' ? views : 0;
+        const l = typeof likes === 'number' ? likes : 0;
+        storyLikeStats.textContent = v + ' visualizações • ' + l + ' TOP';
+      }
+    }
+
+    function registrarView(likedValue){
+      if(!currentStoryId) return;
+      fetch("{{ url_for('registrar_story_view') }}", {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({story_id: currentStoryId, liked: likedValue})
+      })
+      .then(r=>r.json())
+      .then(data=>{
+        if(data && data.ok){
+          updateLikeUI(data.liked, data.views, data.likes);
+        }
+      })
+      .catch(()=>{});
+    }
+
     function showStory(story){
       if(!storyModal) return;
+      currentStoryId = story.id;
       storyTitle.textContent = currentEstName;
       storySub.textContent = story.titulo || 'Story';
       storyCaption.textContent = story.legenda || '';
@@ -790,6 +861,8 @@
       }
 
       updateProgressBar(0);
+      updateLikeUI(null, 0, 0);
+      registrarView(null);
     }
 
     function startTimer(){
@@ -840,7 +913,6 @@
         showStory(storyList[currentIndex]);
         startTimer();
       }else{
-        // volta para o primeiro
         currentIndex = 0;
         showStory(storyList[currentIndex]);
         startTimer();
@@ -855,9 +927,10 @@
       if(storyVideo){
         storyVideo.pause();
       }
+      currentStoryId = null;
     }
 
-    // abrir story ao clicar no chip
+    // Abrir story ao clicar no chip
     document.querySelectorAll('.story-chip').forEach(chip=>{
       chip.addEventListener('click', ()=>{
         const estId = Number(chip.getAttribute('data-est-id'));
@@ -866,7 +939,7 @@
       });
     });
 
-    // fechar
+    // Fechar
     if(closeStory){
       closeStory.addEventListener('click', closeStoryModal);
     }
@@ -883,7 +956,7 @@
       }
     });
 
-    // zonas de toque (direita/esquerda) + segurar para pausar
+    // Zonas de toque + segurar para pausar
     document.querySelectorAll('.story-touch-zone').forEach(zone=>{
       let holdTimeout = null;
       let held = false;
@@ -894,12 +967,11 @@
         holdTimeout = setTimeout(()=>{
           held = true;
           isPaused = true;
-        }, 200); // depois de 200ms segurando, pausa
+        }, 200);
       }
       function endHold(e){
         clearTimeout(holdTimeout);
         if(held){
-          // estava pausado, soltar = volta a rodar
           isPaused = false;
           return;
         }
@@ -916,6 +988,15 @@
       zone.addEventListener('touchend', endHold);
       zone.addEventListener('touchcancel', endHold);
     });
+
+    // Botão TOP (curtida)
+    if(storyLikeBtn){
+      storyLikeBtn.addEventListener('click', ()=>{
+        if(!currentStoryId) return;
+        const likedNow = storyLikeBtn.dataset.liked === '1' ? false : true;
+        registrarView(likedNow);
+      });
+    }
   </script>
 </body>
 </html>
