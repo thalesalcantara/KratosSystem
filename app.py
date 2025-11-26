@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from sqlalchemy import text, func, Index
+from sqlalchemy import text, func, Index, case
 from werkzeug.middleware.proxy_fix import ProxyFix
 from jinja2 import TemplateNotFound
 from zoneinfo import ZoneInfo
@@ -268,6 +268,29 @@ class StoryEstabelecimento(db.Model):
     ativo = db.Column(db.Boolean, default=True, index=True)
 
     estabelecimento = db.relationship('Estabelecimento')
+
+    # ---- Helpers p/ templates (igual seu HTML espera) ----
+    @property
+    def data_criacao_brasilia(self):
+        if not self.criado_em:
+            return ""
+        return to_brt(self.criado_em).strftime('%d/%m/%Y %H:%M')
+
+    @property
+    def data_expiracao_brasilia(self):
+        if not self.expira_em:
+            return ""
+        return to_brt(self.expira_em).strftime('%d/%m/%Y %H:%M')
+
+    @property
+    def dias_restantes(self):
+        if not self.expira_em:
+            return 0
+        hoje = datetime.utcnow().date()
+        fim = self.expira_em.date()
+        d = (fim - hoje).days
+        return max(d, 0)
+
 
 # ====== Visualização / Curtida de Stories ======
 class StoryView(db.Model):
@@ -730,6 +753,7 @@ def story_midia(story_id):
     resp = send_file(path, mimetype=s.mimetype)
     return _response_with_cache(resp, seconds=3600, etag_base=f"story_{s.id}_{s.filename}")
 
+
 # ====== API: cooperado registra visualização / curtida de story ======
 @app.post('/story/view')
 def registrar_story_view():
@@ -840,6 +864,7 @@ def listar_estabelecimentos():
     admin = Admin.query.get(session['user_id'])
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
     return render_template('estabelecimentos.html', admin=admin, estabelecimentos=estabelecimentos)
+
 
 @app.route('/novo_estabelecimento', methods=['GET', 'POST'])
 def novo_estabelecimento():
@@ -1018,7 +1043,7 @@ def exportar_lancamentos():
     return _response_with_cache(resp, 0, etag_base=f"xlsx_{len(rows)}")
 
 
-# ====== EXCLUSÃO DE LANÇAMENTO (ADMIN) ======
+# ====== EXCLUSÃO DE LANÇAMENTO (ADMIN) =========
 @app.post('/lancamentos/<int:id>/excluir')
 def excluir_lancamento(id):
     if not is_admin():
@@ -1052,7 +1077,7 @@ def painel_estabelecimento():
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
 
     # Lançamento de crédito
-    if request.method == 'POST' and request.form.get('form_tipo') != 'catalogo' and request.form.get('form_tipo') != 'story':
+    if request.method == 'POST' and request.form.get('form_tipo') not in ('catalogo', 'story'):
         cooperado_id = request.form.get('cooperado_id')
         valor = request.form.get('valor')
         os_numero = request.form.get('os_numero')
@@ -1106,36 +1131,39 @@ def painel_estabelecimento():
         estabelecimento_id=est.id
     ).order_by(CatalogoItem.nome).all()
 
-       # Stories do estabelecimento (ativos e não expirados)
+    # ===== Stories (ativos e expirados) =====
     agora_utc = datetime.utcnow()
-    stories_estab = StoryEstabelecimento.query.filter(
+
+    stories_ativos = StoryEstabelecimento.query.filter(
         StoryEstabelecimento.estabelecimento_id == est.id,
-        StoryEstabelecimento.ativo == True,
+        StoryEstabelecimento.ativo.is_(True),
         StoryEstabelecimento.expira_em > agora_utc
     ).order_by(StoryEstabelecimento.criado_em.desc()).all()
 
-       # Calcula horários em Brasília, tempo restante e stats (views/likes)
-    for s in stories_estab:
-        s.criado_brasilia = to_brt(s.criado_em).strftime('%d/%m/%Y %H:%M')
-        s.expira_brasilia = to_brt(s.expira_em).strftime('%d/%m/%Y %H:%M')
+    stories_expirados = StoryEstabelecimento.query.filter(
+        StoryEstabelecimento.estabelecimento_id == est.id,
+        StoryEstabelecimento.expira_em <= agora_utc
+    ).order_by(StoryEstabelecimento.expira_em.desc()).all()
 
-        restante = s.expira_em - agora_utc
-        if restante.total_seconds() < 0:
-            s.restante_label = "expirado"
-        else:
-            dias = restante.days
-            horas = restante.seconds // 3600
-            minutos = (restante.seconds % 3600) // 60
-            if dias > 0:
-                s.restante_label = f"{dias}d {horas}h"
-            elif horas > 0:
-                s.restante_label = f"{horas}h {minutos}min"
-            else:
-                s.restante_label = f"{minutos}min"
+    # Stats agregadas (views / likes)
+    stats_rows = (
+        db.session.query(
+            StoryView.story_id,
+            func.count(StoryView.id).label('views'),
+            func.sum(
+                case((StoryView.curtiu.is_(True), 1), else_=0)
+            ).label('likes')
+        )
+        .group_by(StoryView.story_id)
+        .all()
+    )
+    stats_map = {sid: {"views": views or 0, "likes": likes or 0}
+                 for sid, views, likes in stats_rows}
 
-        s.views_total = StoryView.query.filter_by(story_id=s.id).count()
-        s.likes_total = StoryView.query.filter_by(story_id=s.id, curtiu=True).count()
-
+    for s in stories_ativos:
+        d = stats_map.get(s.id, {})
+        s.views_total = d.get("views", 0)
+        s.likes_total = d.get("likes", 0)
 
     return render_template(
         'painel_estabelecimento.html',
@@ -1143,7 +1171,8 @@ def painel_estabelecimento():
         cooperados=cooperados,
         lancamentos=lancamentos,
         catalogo_itens=catalogo_itens,
-        stories_estab=stories_estab
+        stories_ativos=stories_ativos,
+        stories_expirados=stories_expirados
     )
 
 
@@ -1280,6 +1309,7 @@ def estab_catalogo_upload():
 
     return redirect(url_for('painel_estabelecimento'))
 
+
 # ========= ESTAB: CRIAR ITEM INDIVIDUAL DO CATÁLOGO =========
 @app.route('/estab/catalogo/item', methods=['POST'])
 def estab_catalogo_criar_item():
@@ -1343,6 +1373,7 @@ def estab_catalogo_criar_item():
     flash('Item adicionado ao catálogo com sucesso!', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
+
 # ========= ESTAB: EXCLUIR ITEM INDIVIDUAL DO CATÁLOGO =========
 @app.route('/estab/catalogo/item/<int:item_id>/excluir')
 def estab_catalogo_excluir_item(item_id):
@@ -1397,7 +1428,6 @@ def estab_story_novo():
     except Exception:
         dias = 1
 
-    # >>> ESSA LINHA AGORA ESTÁ COM A INDENTAÇÃO CERTA (4 ESPAÇOS) <<<
     ext = os.path.splitext(midia.filename)[1].lower()
 
     # Normaliza mimetype por extensão (evita tipo estranho)
@@ -1452,37 +1482,31 @@ def estab_story_novo():
     flash('Story criado com sucesso!', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
-    filename = secure_filename(
-        f"story_{est.id}_{int(time.time())}{ext}"
-    )
-    path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], filename)
-    midia.save(path)
-
-    agora = datetime.utcnow()
-    expira_em = agora + timedelta(days=dias)
-
-    story = StoryEstabelecimento(
-        estabelecimento_id=est.id,
-        tipo=tipo,
-        filename=filename,
-        mimetype=mimetype,
-        titulo=titulo or None,
-        legenda=legenda or None,
-        criado_em=agora,
-        expira_em=expira_em,
-        ativo=True
-    )
-    db.session.add(story)
-    db.session.commit()
-
-    flash('Story criado com sucesso!', 'success')
-    return redirect(url_for('painel_estabelecimento'))
-
 
 # Alias para endpoint usado no template
 @app.route('/estab/story/criar', methods=['POST'])
 def estab_criar_story():
     return estab_story_novo()
+
+
+# ====== ESTAB: DESATIVAR STORY (não mostra mais para cooperado) ======
+@app.post('/estab/story/<int:story_id>/desativar')
+def estab_story_desativar(story_id):
+    if not is_estabelecimento():
+        return redirect(url_for('login'))
+
+    est_id = session.get('user_id')
+    s = StoryEstabelecimento.query.get_or_404(story_id)
+
+    if s.estabelecimento_id != est_id:
+        flash('Você não tem permissão para desativar este story.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    s.ativo = False
+    db.session.commit()
+    flash('Story desativado. Ele não será mais exibido aos cooperados.', 'success')
+    return redirect(url_for('painel_estabelecimento'))
+
 
 # ====== ESTAB: excluir story ======
 @app.route('/estab/story/<int:story_id>/excluir')
@@ -1626,13 +1650,11 @@ def painel_cooperado():
     total_gasto = sum(float(l.valor or 0) for l in lancamentos)
     total_lanc = len(lancamentos)
 
-    # ========= NOVO: TODOS OS ESTABELECIMENTOS, CATÁLOGOS E STORIES =========
-    # Lista completa de estabelecimentos (para montar catálogo por estabelecimento)
+    # ========= ESTABs / CATÁLOGOS / STORIES =========
     estab_list = Estabelecimento.query.order_by(Estabelecimento.nome).all()
     estab_por_id = {e.id: e for e in estab_list}
-    est_ids = [e.id for e in estab_list]  # usado nos filtros de catálogo
+    est_ids = [e.id for e in estab_list]
 
-    # Todos os itens de catálogo dos estabelecimentos (se existir catálogo)
     if est_ids:
         catalogo_itens_coop = CatalogoItem.query.filter(
             CatalogoItem.estabelecimento_id.in_(est_ids)
@@ -1643,7 +1665,6 @@ def painel_cooperado():
     else:
         catalogo_itens_coop = []
 
-    # Todos os stories ativos e não expirados de todos os estabelecimentos
     agora_utc = datetime.utcnow()
     stories_ativos_coop = StoryEstabelecimento.query.filter(
         StoryEstabelecimento.ativo == True,
@@ -1652,7 +1673,6 @@ def painel_cooperado():
         StoryEstabelecimento.criado_em.asc()
     ).all()
 
-    # Renderização normal com template bonito
     try:
         return render_template(
             'painel_cooperado.html',
@@ -1667,7 +1687,6 @@ def painel_cooperado():
             estab_por_id=estab_por_id
         )
     except TemplateNotFound:
-        # fallback simples, caso template não exista
         credito_ajuste = to_brt(coop.credito_atualizado_em).strftime(
             '%d/%m/%Y %H:%M'
         ) if coop.credito_atualizado_em else None
@@ -1778,6 +1797,7 @@ def painel_cooperado():
         data_fim=df_s,
         credito_ajuste=credito_ajuste
         )
+
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
