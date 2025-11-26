@@ -1411,6 +1411,7 @@ def painel_cooperado():
     df_s = request.args.get('data_fim') or ''
     di_utc, df_utc_excl = local_bounds_to_utc_naive(di_s, df_s)
 
+    # Lançamentos do cooperado (normal, como antes)
     q = Lancamento.query.filter(Lancamento.cooperado_id == coop.id)
     if di_utc:
         q = q.filter(Lancamento.data >= di_utc)
@@ -1425,39 +1426,33 @@ def painel_cooperado():
     total_gasto = sum(float(l.valor or 0) for l in lancamentos)
     total_lanc = len(lancamentos)
 
-    # Estabelecimentos que já lançaram para este cooperado
-    est_ids_rows = db.session.query(
-        Lancamento.estabelecimento_id
-    ).filter(
-        Lancamento.cooperado_id == coop.id
-    ).distinct().all()
+    # ========= NOVO: TODOS OS ESTABELECIMENTOS, CATÁLOGOS E STORIES =========
+    # Lista completa de estabelecimentos (para montar catálogo por estabelecimento)
+    estab_list = Estabelecimento.query.order_by(Estabelecimento.nome).all()
+    estab_por_id = {e.id: e for e in estab_list}
+    est_ids = [e.id for e in estab_list]  # usado nos filtros de catálogo
 
-    est_ids = [r[0] for r in est_ids_rows if r[0] is not None]
-
-    estab_por_id = {}
-    catalogo_itens_coop = []
-    stories_ativos_coop = []
-
+    # Todos os itens de catálogo dos estabelecimentos (se existir catálogo)
     if est_ids:
-        estab_list = Estabelecimento.query.filter(
-            Estabelecimento.id.in_(est_ids)
-        ).order_by(Estabelecimento.nome).all()
-        estab_por_id = {e.id: e for e in estab_list}
-
         catalogo_itens_coop = CatalogoItem.query.filter(
             CatalogoItem.estabelecimento_id.in_(est_ids)
         ).order_by(
-            CatalogoItem.estabelecimento_id, CatalogoItem.nome
+            CatalogoItem.estabelecimento_id,
+            CatalogoItem.nome
         ).all()
+    else:
+        catalogo_itens_coop = []
 
-        agora_utc = datetime.utcnow()
-        stories_ativos_coop = StoryEstabelecimento.query.filter(
-            StoryEstabelecimento.estabelecimento_id.in_(est_ids),
-            StoryEstabelecimento.ativo == True,
-            StoryEstabelecimento.expira_em > agora_utc
-        ).order_by(StoryEstabelecimento.criado_em.desc()).all()
+    # Todos os stories ativos e não expirados de todos os estabelecimentos
+    agora_utc = datetime.utcnow()
+    stories_ativos_coop = StoryEstabelecimento.query.filter(
+        StoryEstabelecimento.ativo == True,
+        StoryEstabelecimento.expira_em > agora_utc
+    ).order_by(
+        StoryEstabelecimento.criado_em.desc()
+    ).all()
 
-    # Fallback embutido: também mostra horários em Brasília e último ajuste em Brasília
+    # Renderização normal com template bonito
     try:
         return render_template(
             'painel_cooperado.html',
@@ -1472,6 +1467,7 @@ def painel_cooperado():
             estab_por_id=estab_por_id
         )
     except TemplateNotFound:
+        # fallback simples, caso template não exista
         credito_ajuste = to_brt(coop.credito_atualizado_em).strftime(
             '%d/%m/%Y %H:%M'
         ) if coop.credito_atualizado_em else None
@@ -1582,7 +1578,6 @@ def painel_cooperado():
         data_fim=df_s,
         credito_ajuste=credito_ajuste
         )
-
 
 # ========= CRIA BANCO + ADMIN MASTER =========
 def criar_banco_e_admin():
