@@ -1031,13 +1031,37 @@ def painel_estabelecimento():
         estabelecimento_id=est.id
     ).order_by(CatalogoItem.nome).all()
 
-    # Stories do estabelecimento (ativos ou não)
+       # Stories do estabelecimento (ativos e não expirados)
     agora_utc = datetime.utcnow()
     stories_estab = StoryEstabelecimento.query.filter(
         StoryEstabelecimento.estabelecimento_id == est.id,
         StoryEstabelecimento.ativo == True,
         StoryEstabelecimento.expira_em > agora_utc
     ).order_by(StoryEstabelecimento.criado_em.desc()).all()
+
+    # Campos auxiliares para o template: horário em Brasília e tempo restante
+    for s in stories_estab:
+        # quando foi postado (Brasília)
+        s.criado_brasilia = to_brt(s.criado_em).strftime('%d/%m/%Y %H:%M')
+        # quando vai expirar (Brasília)
+        s.expira_brasilia = to_brt(s.expira_em).strftime('%d/%m/%Y %H:%M')
+
+        restante = s.expira_em - agora_utc
+        if restante.total_seconds() <= 0:
+            s.restante_label = "expirado"
+        else:
+            total_seg = int(restante.total_seconds())
+            dias = total_seg // 86400
+            horas = (total_seg % 86400) // 3600
+            minutos = (total_seg % 3600) // 60
+
+            partes = []
+            if dias:
+                partes.append(f"{dias}d")
+            if horas or dias:
+                partes.append(f"{horas}h")
+            partes.append(f"{minutos}min")
+            s.restante_label = " ".join(partes)
 
     return render_template(
         'painel_estabelecimento.html',
@@ -1245,6 +1269,29 @@ def estab_catalogo_criar_item():
     flash('Item adicionado ao catálogo com sucesso!', 'success')
     return redirect(url_for('painel_estabelecimento'))
 
+# ========= ESTAB: EXCLUIR ITEM INDIVIDUAL DO CATÁLOGO =========
+@app.route('/estab/catalogo/item/<int:item_id>/excluir')
+def estab_catalogo_excluir_item(item_id):
+    if not (is_estabelecimento() or is_admin()):
+        return redirect(url_for('login'))
+
+    item = CatalogoItem.query.get_or_404(item_id)
+    est_id = item.estabelecimento_id
+
+    # se for estabelecimento, garante que é o dono
+    if is_estabelecimento() and est_id != session.get('user_id'):
+        flash('Você não tem permissão para excluir este item.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    db.session.delete(item)
+    db.session.commit()
+    flash('Item removido do catálogo.', 'success')
+
+    if is_estabelecimento():
+        return redirect(url_for('painel_estabelecimento'))
+    else:
+        return redirect(url_for('editar_estabelecimento', id=est_id))
+
 
 # ========= ESTAB: NOVO STORY (imagem/vídeo) =========
 @app.route('/estab/story/novo', methods=['POST'])
@@ -1312,6 +1359,40 @@ def estab_story_novo():
 @app.route('/estab/story/criar', methods=['POST'])
 def estab_criar_story():
     return estab_story_novo()
+
+# ========= ESTAB: EXCLUIR STORY =========
+@app.route('/estab/story/<int:story_id>/excluir')
+def estab_story_excluir(story_id):
+    # só estabelecimento logado ou admin podem excluir
+    if not (is_estabelecimento() or is_admin()):
+        return redirect(url_for('login'))
+
+    story = StoryEstabelecimento.query.get_or_404(story_id)
+    est_id = story.estabelecimento_id
+
+    # se for estabelecimento, garante que é o dono do story
+    if is_estabelecimento() and est_id != session.get('user_id'):
+        flash('Você não tem permissão para excluir este story.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    # tenta remover o arquivo físico (imagem/vídeo)
+    try:
+        path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], story.filename)
+        if os.path.exists(path):
+            os.remove(path)
+    except Exception:
+        pass
+
+    db.session.delete(story)
+    db.session.commit()
+    flash('Story removido com sucesso.', 'success')
+
+    # se foi o estabelecimento, volta pro painel dele;
+    # se foi o admin (no futuro), poderia voltar pra tela de edição do estabelecimento
+    if is_estabelecimento():
+        return redirect(url_for('painel_estabelecimento'))
+    else:
+        return redirect(url_for('editar_estabelecimento', id=est_id))
 
 
 # ========= ESTAB: EDITAR / EXCLUIR LANÇAMENTO =========
