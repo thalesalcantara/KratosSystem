@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --royal:#4169E1;            /* Azul-royal */
+      --royal:#4169E1;
       --royal-600:#2f52c9;
       --royal-50:#f5f7ff;
       --ink:#0b1220;
@@ -15,8 +15,8 @@
       --line:#e8edff;
       --ok:#0fb98b;
       --danger:#ef4444;
-      --bg:#ffffff;               /* branco predominante */
-      --card: #ffffffcc;          /* vidro */
+      --bg:#ffffff;
+      --card: #ffffffcc;
       --blur: 14px;
       --radius: 18px;
       --shadow: 0 12px 38px rgba(65,105,225,.18);
@@ -31,7 +31,7 @@
         #fff;
     }
 
-    /* ===== APP BAR com onda ===== */
+    /* ===== APP BAR ===== */
     .appbar{
       position:sticky; top:0; z-index:40; overflow:hidden;
       background:linear-gradient(120deg, var(--royal), var(--royal-600));
@@ -52,9 +52,9 @@
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="90" viewBox="0 0 1440 90" fill="none"><path d="M0 36C240 70 480 70 720 36C960 2 1200 2 1440 36V90H0V36Z" fill="white"/></svg>') center/cover no-repeat;
     }
 
-    .wrap{max-width:1080px;margin:-36px auto 88px auto;padding:0 14px} /* sobe por cima da onda */
+    .wrap{max-width:1080px;margin:-36px auto 88px auto;padding:0 14px}
 
-    /* ===== Cards (glassmorphism) ===== */
+    /* ===== Cards ===== */
     .glass{
       background: var(--card);
       border:1px solid #ffffff66;
@@ -77,8 +77,6 @@
     .metric-value{font-size:30px; font-weight:900}
     .ok{color:var(--ok)}
     .hint{color:var(--muted); font-size:12px; margin-top:6px}
-
-    /* badge superior decorativa */
     .spark{
       position:absolute; right:14px; top:14px; width:8px; height:8px; border-radius:50%;
       background: conic-gradient(from 0deg, #fff 0 40%, transparent 40% 100%);
@@ -86,10 +84,7 @@
       opacity:.7;
     }
 
-    /* ===== Seção genérica ===== */
-    .section{
-      padding:12px; margin-top:10px;
-    }
+    .section{padding:12px; margin-top:10px;}
     .section-head{
       display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;
     }
@@ -101,10 +96,8 @@
     }
     .empty{padding:18px; color:var(--muted); text-align:center; font-size:13px}
 
-    /* ===== STORIES estilo Instagram ===== */
-    .stories-card{
-      padding:14px;
-    }
+    /* ===== Stories ===== */
+    .stories-card{padding:14px;}
     .stories-row{
       display:flex;
       flex-wrap:nowrap;
@@ -166,7 +159,7 @@
       color:#64748b;
     }
 
-    /* Modal de story com barra de progresso e navegação */
+    /* ===== Modal de story (full-screen style) ===== */
     .story-modal{
       position:fixed;
       inset:0;
@@ -179,8 +172,7 @@
     .story-modal.open{display:flex;}
     .story-frame{
       width:100%;
-      max-width:480px;
-      max-height:100vh;
+      max-width:420px;
       background:#020617;
       border-radius:18px;
       overflow:hidden;
@@ -189,35 +181,16 @@
       display:flex;
       flex-direction:column;
     }
-
-    .story-progress-container{
-      display:flex;
-      gap:4px;
-      padding:6px 8px 4px 8px;
-    }
-    .story-track{
-      flex:1;
-      height:3px;
-      border-radius:999px;
-      background:rgba(148,163,184,.60);
-      overflow:hidden;
-    }
-    .story-bar{
-      width:100%;
-      height:100%;
-      transform-origin:left;
-      transform:scaleX(0);
-      background:#e5e7eb;
-    }
-
     .story-header{
-      padding:8px 12px;
+      padding:10px 12px;
       display:flex;
       align-items:center;
       gap:8px;
       color:#e5e7eb;
       border-bottom:1px solid #1f2937;
       font-size:13px;
+      position:relative;
+      z-index:3;
     }
     .story-dot{
       width:24px;height:24px;border-radius:999px;
@@ -241,27 +214,63 @@
     .story-body{
       position:relative;
       background:#000;
-      flex:1;
+      max-height:80vh;
       display:flex;
       align-items:center;
       justify-content:center;
+      overflow:hidden;
     }
     .story-body img,
     .story-body video{
       max-width:100%;
-      max-height:100%;
+      max-height:80vh;
       display:block;
+      z-index:2;
     }
 
+    /* Barra de progresso (contagem) */
+    .story-progress{
+      position:absolute;
+      left:8px;
+      right:8px;
+      top:8px;
+      display:flex;
+      gap:4px;
+      z-index:4;
+    }
+    .story-bar{
+      flex:1;
+      height:3px;
+      border-radius:999px;
+      background:rgba(15,23,42,.55);
+      overflow:hidden;
+    }
+    .story-bar-inner{
+      width:0%;
+      height:100%;
+      background:#e5e7eb;
+      transform-origin:left center;
+    }
+    .story-bar.done .story-bar-inner{
+      width:100%;
+    }
+    .story-bar.active .story-bar-inner{
+      animation: storyFill var(--story-duration, 5000ms) linear forwards;
+    }
+    @keyframes storyFill{
+      from{width:0%;}
+      to{width:100%;}
+    }
+
+    /* Zonas de toque (esquerda/direita) */
     .story-tap-zone{
       position:absolute;
       top:0;
       bottom:0;
-      width:50%;
-      cursor:pointer;
+      z-index:3;
     }
-    .story-tap-zone.left{left:0;}
-    .story-tap-zone.right{right:0;}
+    .story-tap-zone.left{left:0; right:50%;}
+    .story-tap-zone.right{left:50%; right:0;}
 
     .story-caption{
       padding:10px 12px;
@@ -270,6 +279,7 @@
       border-top:1px solid #1f2937;
       min-height:32px;
       white-space:pre-line;
+      background:#020617;
     }
 
     /* ===== Timeline de Lançamentos ===== */
@@ -298,7 +308,7 @@
     .tx-quando{font-size:12px; color:#334155; font-weight:800; text-align:right}
     .tx-desc{grid-column:1 / -1; font-size:12px; color:#475569}
 
-    /* ===== FAB (Filtros) ===== */
+    /* ===== FAB filtros ===== */
     .fab{
       position:fixed; right:16px; bottom:84px; z-index:35;
       background:linear-gradient(120deg, var(--royal), var(--royal-600));
@@ -306,7 +316,7 @@
       box-shadow:0 18px 40px rgba(65,105,225,.35); cursor:pointer; font-weight:900; font-size:20px;
     }
 
-    /* ===== Bottom Sheet de Filtros ===== */
+    /* ===== Bottom Sheet filtros ===== */
     .sheet{
       position:fixed; left:0; right:0; bottom:-100%; z-index:45; transition:bottom .25s ease;
       background:#fff; border-top-left-radius:20px; border-top-right-radius:20px;
@@ -334,7 +344,7 @@
       color:var(--royal-600); background:#fff;
     }
 
-    /* ===== Bottom Nav (app-like) ===== */
+    /* ===== Bottom Nav ===== */
     .bottom-nav{
       position:fixed; left:0; right:0; bottom:0; z-index:42;
       background:#fff; border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 10px;
@@ -343,11 +353,10 @@
     .tab span.icon{font-size:16px;}
     .tab.active{ color:var(--royal-600); background:#eef2ff; }
 
-    /* ===== Páginas (Início / Catálogos) ===== */
     .page{display:block;}
     .page-hidden{display:none;}
 
-    /* ===== Catálogos por estabelecimento ===== */
+    /* ===== Catálogos ===== */
     .catalog-grid{
       display:flex;
       flex-direction:column;
@@ -426,7 +435,6 @@
       color:var(--muted);
     }
 
-    /* ===== Desktop tweaks ===== */
     @media(min-width:900px){
       .appbar{border-bottom-left-radius:16px;border-bottom-right-radius:16px}
       .wrap{margin-top:-44px}
@@ -508,7 +516,7 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="empty">Ainda não há stories ativos dos estabelecimentos cadastrados.</div>
+            <div class="empty">Ainda não há stories ativos dos estabelecimentos que você utiliza.</div>
           {% endif %}
         </article>
 
@@ -519,7 +527,6 @@
             <span class="badge">Horário de Brasília</span>
           </div>
 
-          <!-- TIMELINE (mobile-first) -->
           <div class="timeline" aria-label="Lançamentos">
             {% if lancamentos %}
               {% for l in lancamentos %}
@@ -587,7 +594,7 @@
           </div>
         {% else %}
           <div class="catalog-empty-global">
-            Nenhum catálogo disponível ainda para os estabelecimentos cadastrados.
+            Nenhum catálogo disponível ainda para os estabelecimentos que lançam em seu nome.
           </div>
         {% endif %}
       </section>
@@ -624,7 +631,6 @@
   <!-- MODAL DE STORY -->
   <div class="story-modal" id="storyModal">
     <div class="story-frame">
-      <div class="story-progress-container" id="storyProgressContainer"></div>
       <div class="story-header">
         <div class="story-dot" id="storyInitial">E</div>
         <div>
@@ -633,18 +639,38 @@
         </div>
         <button class="story-close" id="closeStory" aria-label="Fechar story">×</button>
       </div>
-      <div class="story-body" id="storyBody">
+      <div class="story-body">
+        <div class="story-progress" id="storyProgress"></div>
+        <div class="story-tap-zone left" id="storyZoneLeft"></div>
+        <div class="story-tap-zone right" id="storyZoneRight"></div>
         <img id="storyImg" src="" alt="story" style="display:none;">
         <video id="storyVideo" controls playsinline style="display:none;"></video>
-
-        <div class="story-tap-zone left" id="storyTapLeft"></div>
-        <div class="story-tap-zone right" id="storyTapRight"></div>
       </div>
       <div class="story-caption" id="storyCaption"></div>
     </div>
   </div>
 
-  <!-- Bottom navigation (estético) -->
+  <!-- Dados dos stories em JSON para o JS controlar sequência -->
+  {% if stories_ativos_coop and estab_por_id %}
+  <script type="application/json" id="stories-data">
+  [
+  {% for s in stories_ativos_coop %}
+    {
+      "id": {{ s.id }},
+      "estabelecimento_id": {{ s.estabelecimento_id }},
+      "estabelecimento_nome": {{ estab_por_id[s.estabelecimento_id].nome|tojson }},
+      "tipo": {{ s.tipo|tojson }},
+      "src": {{ url_for('story_midia', story_id=s.id)|tojson }},
+      "titulo": {{ (s.titulo or '')|tojson }},
+      "legenda": {{ (s.legenda or '')|tojson }},
+      "criado_em": {{ s.criado_em.isoformat()|tojson }}
+    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+  </script>
+  {% endif %}
+
+  <!-- Bottom navigation -->
   <nav class="bottom-nav" aria-label="Navegação">
     <button class="tab active" type="button" data-target="home-section">
       <span class="icon">🏠</span><span>Início</span>
@@ -658,43 +684,15 @@
   </nav>
 
   <script>
-    // ===== Mapa de stories por estabelecimento (vem do backend) =====
-    window.storiesData = {};
-    {% if stories_ativos_coop and estab_por_id %}
-      {% for s in stories_ativos_coop %}
-        (function(){
-          var estId = "{{ s.estabelecimento_id }}";
-          if (!window.storiesData[estId]) {
-            window.storiesData[estId] = [];
-          }
-          window.storiesData[estId].push({
-            id: {{ s.id }},
-            tipo: "{{ s.tipo }}",
-            titulo: {{ (s.titulo or '')|tojson }},
-            legenda: {{ (s.legenda or '')|tojson }},
-            criado_em: "{{ s.criado_em.strftime('%d/%m/%Y %H:%M') }}",
-            est_nome: {{ estab_por_id[s.estabelecimento_id].nome|tojson }},
-            url: "{{ url_for('story_midia', story_id=s.id) }}"
-          });
-        })();
-      {% endfor %}
-    {% endif %}
-
     // ===== Bottom-sheet filtros =====
     const sheet = document.getElementById('sheet');
     const openFilters = document.getElementById('openFilters');
     const closeFilters = document.getElementById('closeFilters');
     const cancelBtn = document.getElementById('cancelSheet');
 
-    if(openFilters){
-      openFilters.addEventListener('click', ()=> sheet.classList.add('open'));
-    }
-    if(closeFilters){
-      closeFilters.addEventListener('click', ()=> sheet.classList.remove('open'));
-    }
-    if(cancelBtn){
-      cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open'));
-    }
+    if(openFilters){ openFilters.addEventListener('click', ()=> sheet.classList.add('open')); }
+    if(closeFilters){ closeFilters.addEventListener('click', ()=> sheet.classList.remove('open')); }
+    if(cancelBtn){ cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open')); }
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') sheet.classList.remove('open'); });
 
     // ===== Navegação entre Início e Catálogos =====
@@ -710,7 +708,6 @@
         if(!target) return;
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-
         if(pages.home) pages.home.classList.add('page-hidden');
         if(pages.catalogos) pages.catalogos.classList.add('page-hidden');
         if(target === 'home-section' && pages.home) pages.home.classList.remove('page-hidden');
@@ -718,227 +715,209 @@
       });
     });
 
-    // ===== Modal de Stories estilo Instagram/WhatsApp =====
-    const storyModal = document.getElementById('storyModal');
-    const storyImg = document.getElementById('storyImg');
-    const storyVideo = document.getElementById('storyVideo');
-    const storyTitle = document.getElementById('storyTitle');
-    const storySub = document.getElementById('storySub');
+    // ===== Stories estilo Instagram/WhatsApp =====
+    const storiesDataEl = document.getElementById('stories-data');
+    let storiesByEstab = {};
+    const STORY_DURATION = 5000; // 5s
+
+    if(storiesDataEl){
+      try{
+        const allStories = JSON.parse(storiesDataEl.textContent.trim());
+        storiesByEstab = allStories.reduce((acc, s) => {
+          const key = String(s.estabelecimento_id);
+          if(!acc[key]) acc[key] = [];
+          acc[key].push(s);
+          return acc;
+        }, {});
+        Object.values(storiesByEstab).forEach(list => {
+          list.sort((a,b)=> new Date(a.criado_em) - new Date(b.criado_em));
+        });
+      }catch(err){
+        console.error('Erro ao ler stories-data', err);
+      }
+    }
+
+    const storyModal   = document.getElementById('storyModal');
+    const storyImg     = document.getElementById('storyImg');
+    const storyVideo   = document.getElementById('storyVideo');
+    const storyTitle   = document.getElementById('storyTitle');
+    const storySub     = document.getElementById('storySub');
     const storyCaption = document.getElementById('storyCaption');
     const storyInitial = document.getElementById('storyInitial');
-    const closeStory = document.getElementById('closeStory');
-    const storyProgressContainer = document.getElementById('storyProgressContainer');
-    const storyBody = document.getElementById('storyBody');
-    const tapLeft = document.getElementById('storyTapLeft');
-    const tapRight = document.getElementById('storyTapRight');
+    const storyClose   = document.getElementById('closeStory');
+    const storyProgress = document.getElementById('storyProgress');
+    const zoneLeft     = document.getElementById('storyZoneLeft');
+    const zoneRight    = document.getElementById('storyZoneRight');
 
-    let currentEstId = null;
-    let currentStories = [];
+    let currentList = [];
     let currentIndex = 0;
-    let storyBars = [];
-    let storyIntervalId = null;
-    let storyElapsed = 0;       // ms
-    const storyDuration = 5000; // 5 segundos
-    let lastTickTime = 0;
-    let isPaused = false;
+    let storyTimer = null;
+    let holding = false;
+    let holdTimeout = null;
 
-    function buildProgressBars(count) {
-      storyProgressContainer.innerHTML = '';
-      storyBars = [];
-      for (let i = 0; i < count; i++) {
-        const track = document.createElement('div');
-        track.className = 'story-track';
+    function isVideoStory(story){
+      if(story.tipo && String(story.tipo).toLowerCase() === 'video') return true;
+      const src = story.src || '';
+      return /\.(mp4|webm|mov|m4v|3gp|ogg|mkv)$/i.test(src);
+    }
+
+    function clearTimer(){
+      if(storyTimer){
+        clearTimeout(storyTimer);
+        storyTimer = null;
+      }
+    }
+
+    function buildProgress(){
+      if(!storyProgress) return;
+      storyProgress.innerHTML = '';
+      currentList.forEach((s, idx) => {
         const bar = document.createElement('div');
         bar.className = 'story-bar';
-        track.appendChild(bar);
-        storyProgressContainer.appendChild(track);
-        storyBars.push(bar);
-      }
-    }
-
-    function clearStoryTimer() {
-      if (storyIntervalId) {
-        clearInterval(storyIntervalId);
-        storyIntervalId = null;
-      }
-    }
-
-    function startStoryTimer() {
-      clearStoryTimer();
-      storyElapsed = 0;
-      lastTickTime = Date.now();
-      isPaused = false;
-
-      storyIntervalId = setInterval(() => {
-        if (isPaused) {
-          lastTickTime = Date.now();
-          return;
-        }
-        const now = Date.now();
-        const delta = now - lastTickTime;
-        lastTickTime = now;
-        storyElapsed += delta;
-        const ratio = Math.min(1, storyElapsed / storyDuration);
-
-        const activeBar = storyBars[currentIndex];
-        if (activeBar) {
-          activeBar.style.transform = 'scaleX(' + ratio + ')';
-        }
-
-        if (ratio >= 1) {
-          clearStoryTimer();
-          nextStory();
-        }
-      }, 50);
-    }
-
-    function showStory(index) {
-      if (!currentStories.length) return;
-      if (index < 0 || index >= currentStories.length) return;
-      currentIndex = index;
-      const s = currentStories[currentIndex];
-
-      storyTitle.textContent = s.est_nome || 'Estabelecimento';
-      storySub.textContent = s.titulo || s.criado_em || 'Story';
-      storyCaption.textContent = s.legenda || '';
-      storyInitial.textContent = (s.est_nome || 'E').slice(0,2).toUpperCase();
-
-      // atualiza barras de progresso
-      storyBars.forEach((bar, i) => {
-        if (i < currentIndex) {
-          bar.style.transform = 'scaleX(1)';
-        } else if (i === currentIndex) {
-          bar.style.transform = 'scaleX(0)';
-        } else {
-          bar.style.transform = 'scaleX(0)';
-        }
+        if(idx < currentIndex) bar.classList.add('done');
+        if(idx === currentIndex) bar.classList.add('active');
+        const inner = document.createElement('div');
+        inner.className = 'story-bar-inner';
+        inner.style.setProperty('--story-duration', STORY_DURATION + 'ms');
+        bar.appendChild(inner);
+        storyProgress.appendChild(bar);
       });
+    }
 
-      // mídia
+    function showStory(idx){
+      if(!storyModal || !currentList.length) return;
+      if(idx < 0) idx = 0;
+      if(idx >= currentList.length) idx = currentList.length - 1;
+      currentIndex = idx;
+      const story = currentList[currentIndex];
+
+      storyTitle.textContent = story.estabelecimento_nome || '';
+      storyInitial.textContent = (story.estabelecimento_nome || 'E').slice(0,2).toUpperCase();
+      storySub.textContent = story.titulo || 'Story';
+      storyCaption.textContent = story.legenda || '';
+
       storyImg.style.display = 'none';
       storyVideo.style.display = 'none';
       storyVideo.pause();
       storyVideo.removeAttribute('src');
+      storyVideo.load();
 
-      if (s.tipo === 'video') {
+      const videoMode = isVideoStory(story);
+
+      if(videoMode){
         storyVideo.style.display = 'block';
-        storyVideo.src = s.url;
+        storyVideo.src = story.src;
         storyVideo.load();
         storyVideo.play().catch(()=>{});
-      } else {
+      }else{
         storyImg.style.display = 'block';
-        storyImg.src = s.url;
+        storyImg.src = story.src;
       }
 
-      // reinicia timer
-      startStoryTimer();
+      if(!storyModal.classList.contains('open')){
+        storyModal.classList.add('open');
+      }
+
+      clearTimer();
+      buildProgress();
+      storyTimer = setTimeout(()=>{ nextStory(); }, STORY_DURATION);
     }
 
-    function nextStory() {
-      if (!currentStories.length) return;
-      if (currentIndex < currentStories.length - 1) {
+    function nextStory(){
+      if(currentIndex < currentList.length - 1){
         showStory(currentIndex + 1);
-      } else {
+      }else{
         closeStoryModal();
       }
     }
 
-    function prevStory() {
-      if (!currentStories.length) return;
-      if (currentIndex > 0) {
+    function prevStory(){
+      if(currentIndex > 0){
         showStory(currentIndex - 1);
-      } else {
+      }else{
         showStory(0);
       }
     }
 
-    function openStoryModalForEst(estId) {
-      const list = window.storiesData[estId];
-      if (!list || !list.length) return;
-
-      currentEstId = estId;
-      // ordena pela ordem de criação (aprox. por id crescente)
-      currentStories = list.slice().sort((a,b) => a.id - b.id);
-
-      buildProgressBars(currentStories.length);
-      storyModal.classList.add('open');
-      showStory(0);
+    function pauseStory(){
+      holding = true;
+      clearTimer();
+      if(!storyVideo.paused){
+        storyVideo.pause();
+      }
     }
 
-    function closeStoryModal() {
-      clearStoryTimer();
-      if (storyVideo) storyVideo.pause();
+    function resumeStory(){
+      if(!holding) return;
+      holding = false;
+      if(isVideoStory(currentList[currentIndex]) && storyVideo.paused){
+        storyVideo.play().catch(()=>{});
+      }
+      clearTimer();
+      storyTimer = setTimeout(()=>{ nextStory(); }, STORY_DURATION);
+    }
+
+    function closeStoryModal(){
+      clearTimer();
+      holding = false;
+      storyVideo.pause();
       storyModal.classList.remove('open');
     }
 
-    // abre stories ao clicar no "bolão"
+    // Zonas de toque: segurar = pause, clique curto = navega
+    function attachZone(zone, direction){
+      if(!zone) return;
+      ['mousedown','touchstart'].forEach(evt=>{
+        zone.addEventListener(evt, e => {
+          e.preventDefault();
+          holdTimeout = setTimeout(()=>{ pauseStory(); }, 180);
+        }, {passive:false});
+      });
+      ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt=>{
+        zone.addEventListener(evt, e => {
+          e.preventDefault();
+          clearTimeout(holdTimeout);
+          if(holding){
+            resumeStory();
+          }else{
+            if(direction === 'right'){ nextStory(); }
+            else{ prevStory(); }
+          }
+        }, {passive:false});
+      });
+    }
+
+    attachZone(zoneLeft, 'left');
+    attachZone(zoneRight, 'right');
+
+    // Abrir stories por estabelecimento
     document.querySelectorAll('.story-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const estId = chip.getAttribute('data-est-id');
-        openStoryModalForEst(estId);
+        if(!estId || !storiesByEstab[estId]) return;
+        currentList = storiesByEstab[estId].slice();
+        currentIndex = 0;
+        showStory(0);
       });
     });
 
-    if (closeStory) {
-      closeStory.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeStoryModal();
-      });
+    // Fechar modal
+    if(storyClose){
+      storyClose.addEventListener('click', closeStoryModal);
     }
-
-    if (storyModal) {
+    if(storyModal){
       storyModal.addEventListener('click', (e)=>{
-        if (e.target === storyModal) {
+        if(e.target === storyModal){
           closeStoryModal();
         }
       });
     }
-
-    // clique direita/esquerda para avançar/voltar
-    if (tapLeft) {
-      tapLeft.addEventListener('click', (e) => {
-        e.stopPropagation();
-        prevStory();
-      });
-    }
-    if (tapRight) {
-      tapRight.addEventListener('click', (e) => {
-        e.stopPropagation();
-        nextStory();
-      });
-    }
-
-    // segurar para pausar (igual Whats/Instagram)
-    function attachPressListeners(el){
-      if (!el) return;
-      ['mousedown','touchstart'].forEach(ev => {
-        el.addEventListener(ev, () => {
-          isPaused = true;
-        });
-      });
-      ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => {
-        el.addEventListener(ev, () => {
-          if (!storyModal.classList.contains('open')) return;
-          isPaused = false;
-          lastTickTime = Date.now();
-        });
-      });
-    }
-    attachPressListeners(storyBody);
-    attachPressListeners(storyModal);
-
     document.addEventListener('keydown', (e)=>{
       if(e.key === 'Escape'){
-        if (storyModal.classList.contains('open')) {
-          closeStoryModal();
-        } else {
-          sheet.classList.remove('open');
-        }
-      }
-      if (e.key === 'ArrowRight' && storyModal.classList.contains('open')) {
+        closeStoryModal();
+      }else if(e.key === 'ArrowRight' && storyModal.classList.contains('open')){
         nextStory();
-      }
-      if (e.key === 'ArrowLeft' && storyModal.classList.contains('open')) {
+      }else if(e.key === 'ArrowLeft' && storyModal.classList.contains('open')){
         prevStory();
       }
     });
