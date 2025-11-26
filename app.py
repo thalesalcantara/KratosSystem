@@ -1308,6 +1308,12 @@ def estab_story_novo():
     return redirect(url_for('painel_estabelecimento'))
 
 
+# Alias para endpoint usado no template
+@app.route('/estab/story/criar', methods=['POST'])
+def estab_criar_story():
+    return estab_story_novo()
+
+
 # ========= ESTAB: EDITAR / EXCLUIR LANÇAMENTO =========
 @app.route('/estab/lancamento/editar/<int:id>', methods=['POST'])
 def estab_editar_lancamento(id):
