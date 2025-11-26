@@ -1278,7 +1278,7 @@ def estab_story_novo():
     mimetype = midia.mimetype or ''
 
     tipo = 'imagem'
-    if mimetype.startswith('video') or ext in ('.mp4', '.webm', '.mov', '.avi', '.mkv'):
+    if mimetype.startswith('video') or ext in ('.mp4', '.webm', '.mov', '.avi', '.mkv', '.3gp', '.ogg'):
         tipo = 'video'
 
     filename = secure_filename(
