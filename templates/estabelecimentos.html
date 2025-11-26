@@ -143,7 +143,16 @@
       display:flex; align-items:center; justify-content:center; margin:0 auto;
       color:#4169e1; background:#eef3ff; box-shadow:0 0 10px rgba(65,105,225,.18); font-size:2rem;
     }
-    .td-yellow{ color:var(--gold)!important; font-weight:900!important; font-family:Orbitron,sans-serif; font-size:1rem!important; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .td-yellow{
+      color:var(--gold)!important;
+      font-weight:900!important;
+      font-family:Orbitron,sans-serif;
+      font-size:1rem!important;
+      max-width:180px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
     /* ===== Cards (modo alternativo) ===== */
     .cards{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
@@ -152,7 +161,11 @@
       transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
       box-shadow:0 8px 18px rgba(65,105,225,.08);
     }
-    .card-estab:hover{ transform: translateY(-3px); filter: brightness(1.02); box-shadow:0 12px 24px rgba(65,105,225,.14); }
+    .card-estab:hover{
+      transform: translateY(-3px);
+      filter: brightness(1.02);
+      box-shadow:0 12px 24px rgba(65,105,225,.14);
+    }
     .card-estab .name{ font:900 1.05rem Orbitron, sans-serif; color:var(--gold); margin-top:8px; }
     .card-estab .user{ color:#2b3e73; font-weight:700; font-size:.95rem; }
     .actions{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
