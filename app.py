@@ -771,6 +771,45 @@ def foto_cooperado(id):
     resp = send_file(BytesIO(b''), mimetype='image/jpeg')
     return _response_with_cache(resp, cache_sec, etag_base=f"cooperado_empty_{id}")
 
+# Serve logo do estabelecimento (usado no painel, catálogos, etc.)
+@app.route('/estabelecimento/logo/<int:id>')
+def logo_estabelecimento(id):
+    est = Estabelecimento.query.get_or_404(id)
+    cache_sec = int(app.config.get('SEND_FILE_MAX_AGE_DEFAULT', 86400))
+
+    # 1) Se tiver logo no banco, usa ela (não some no deploy)
+    if est.logo_data:
+        bio = BytesIO(est.logo_data)
+        resp = send_file(
+            bio,
+            mimetype=est.logo_mimetype or 'image/png',
+            download_name=est.logo_filename or f'estabelecimento_{id}.png'
+        )
+        return _response_with_cache(
+            resp,
+            cache_sec,
+            etag_base=f"est_db_{id}_{len(est.logo_data)}"
+        )
+
+    # 2) Se não tiver no banco mas tiver em disco, tenta ler do filesystem
+    if est.logo:
+        path = os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], est.logo)
+        if os.path.exists(path):
+            resp = send_file(path, mimetype='image/png')
+            try:
+                size = os.path.getsize(path)
+            except Exception:
+                size = 0
+            return _response_with_cache(
+                resp,
+                cache_sec,
+                etag_base=f"est_fs_{id}_{size}"
+            )
+
+    # 3) fallback vazio (sem logo)
+    resp = send_file(BytesIO(b''), mimetype='image/png')
+    return _response_with_cache(resp, cache_sec, etag_base=f"est_empty_{id}")
+
 
 # ====== Story mídia (cooperado vê no modal) ======
 @app.route('/story/midia/<int:story_id>')
@@ -903,15 +942,40 @@ def novo_estabelecimento():
         nome = request.form['nome']
         username = request.form['username'].strip()
         senha = request.form['senha']
+
+        # trata logo
         logo_file = request.files.get('logo')
         filename = None
+        logo_data = None
+        logo_mimetype = None
+
         if logo_file and logo_file.filename:
-            filename = secure_filename(logo_file.filename)
-            logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
+            filename = secure_filename(f"logo_{username}_{logo_file.filename}")
+            logo_file.stream.seek(0)
+            raw = logo_file.read()
+            logo_data = raw
+            logo_mimetype = logo_file.mimetype or 'image/png'
+
+            # opcional: ainda salva em disco (não é obrigatório, mas não atrapalha)
+            try:
+                path = os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename)
+                with open(path, 'wb') as f:
+                    f.write(raw)
+            except Exception:
+                pass
+
         if Estabelecimento.query.filter_by(username=username).first():
             flash('Usuário já existe!', 'danger')
             return redirect(url_for('novo_estabelecimento'))
-        est = Estabelecimento(nome=nome, username=username, logo=filename)
+
+        est = Estabelecimento(
+            nome=nome,
+            username=username,
+            logo=filename,
+            logo_data=logo_data,
+            logo_mimetype=logo_mimetype,
+            logo_filename=filename
+        )
         est.set_senha(senha)
         db.session.add(est)
         db.session.commit()
@@ -927,18 +991,32 @@ def editar_estabelecimento(id):
     est = Estabelecimento.query.get_or_404(id)
     if request.method == 'POST':
         est.nome = request.form['nome']
+
         if request.form['senha']:
             est.set_senha(request.form['senha'])
+
         logo_file = request.files.get('logo')
         if logo_file and logo_file.filename:
-            filename = secure_filename(logo_file.filename)
-            logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
+            filename = secure_filename(f"logo_{est.username}_{logo_file.filename}")
+            logo_file.stream.seek(0)
+            raw = logo_file.read()
+
             est.logo = filename
+            est.logo_filename = filename
+            est.logo_data = raw
+            est.logo_mimetype = logo_file.mimetype or 'image/png'
+
+            try:
+                path = os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename)
+                with open(path, 'wb') as f:
+                    f.write(raw)
+            except Exception:
+                pass
+
         db.session.commit()
         flash('Estabelecimento alterado!', 'success')
         return redirect(url_for('listar_estabelecimentos'))
     return render_template('estabelecimento_form.html', editar=True, estabelecimento=est)
-
 
 @app.route('/excluir_estabelecimento/<int:id>')
 def excluir_estabelecimento(id):
