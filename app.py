@@ -767,29 +767,24 @@ def listar_estabelecimentos():
     return render_template('estabelecimentos.html', admin=admin, estabelecimentos=estabelecimentos)
 
 
-@app.route('/novo_estabelecimento', methods=['GET', 'POST'])
-def novo_estabelecimento():
+@app.route('/editar_estabelecimento/<int:id>', methods=['GET', 'POST'])
+def editar_estabelecimento(id):
     if not is_admin():
         return redirect(url_for('login'))
-    if request.method == 'POST']:
-        nome = request.form['nome']
-        username = request.form['username'].strip()
-        senha = request.form['senha']
+    est = Estabelecimento.query.get_or_404(id)
+    if request.method == 'POST':
+        est.nome = request.form['nome']
+        if request.form['senha']:
+            est.set_senha(request.form['senha'])
         logo_file = request.files.get('logo')
-        filename = None
         if logo_file and logo_file.filename:
             filename = secure_filename(logo_file.filename)
             logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
-        if Estabelecimento.query.filter_by(username=username).first():
-            flash('Usuário já existe!', 'danger')
-            return redirect(url_for('novo_estabelecimento'))
-        est = Estabelecimento(nome=nome, username=username, logo=filename)
-        est.set_senha(senha)
-        db.session.add(est)
+            est.logo = filename
         db.session.commit()
-        flash('Estabelecimento cadastrado!', 'success')
+        flash('Estabelecimento alterado!', 'success')
         return redirect(url_for('listar_estabelecimentos'))
-    return render_template('estabelecimento_form.html', editar=False, estabelecimento=None)
+    return render_template('estabelecimento_form.html', editar=True, estabelecimento=est)
 
 
 @app.route('/editar_estabelecimento/<int:id>', methods=['GET', 'POST'])
@@ -797,7 +792,7 @@ def editar_estabelecimento(id):
     if not is_admin():
         return redirect(url_for('login'))
     est = Estabelecimento.query.get_or_404(id)
-    if request.method == 'POST']:
+    if request.method == 'POST':
         est.nome = request.form['nome']
         if request.form['senha']:
             est.set_senha(request.form['senha'])
