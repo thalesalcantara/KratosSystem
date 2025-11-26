@@ -1321,12 +1321,34 @@ def estab_story_novo():
     except Exception:
         dias = 1
 
-    ext = os.path.splitext(midia.filename)[1].lower()
-    mimetype = midia.mimetype or ''
+        ext = os.path.splitext(midia.filename)[1].lower()
 
-    tipo = 'imagem'
-    if mimetype.startswith('video') or ext in ('.mp4', '.webm', '.mov', '.avi', '.mkv', '.3gp', '.ogg'):
+    # Normaliza mimetype por extensão para evitar tipos estranhos
+    # e só aceitar formatos que o navegador entende bem
+    if ext in ('.jpg', '.jpeg', '.jfif', '.pjpeg', '.pjp'):
+        mimetype = 'image/jpeg'
+        tipo = 'imagem'
+    elif ext in ('.png',):
+        mimetype = 'image/png'
+        tipo = 'imagem'
+    elif ext in ('.gif',):
+        mimetype = 'image/gif'
+        tipo = 'imagem'
+    elif ext in ('.webp',):
+        mimetype = 'image/webp'
+        tipo = 'imagem'
+    elif ext in ('.mp4', '.m4v', '.mov'):
+        mimetype = 'video/mp4'
         tipo = 'video'
+    elif ext in ('.webm',):
+        mimetype = 'video/webm'
+        tipo = 'video'
+    elif ext in ('.ogg', '.ogv', '.3gp'):
+        mimetype = 'video/ogg'
+        tipo = 'video'
+    else:
+        flash('Formato não suportado. Use JPG/PNG/WEBP para imagens ou MP4/WEBM para vídeos.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))'
 
     filename = secure_filename(
         f"story_{est.id}_{int(time.time())}{ext}"
@@ -1530,7 +1552,7 @@ def painel_cooperado():
         StoryEstabelecimento.ativo == True,
         StoryEstabelecimento.expira_em > agora_utc
     ).order_by(
-        StoryEstabelecimento.criado_em.desc()
+        StoryEstabelecimento.criado_em.asc()
     ).all()
 
     # Renderização normal com template bonito
