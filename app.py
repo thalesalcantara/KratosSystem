@@ -766,25 +766,29 @@ def listar_estabelecimentos():
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
     return render_template('estabelecimentos.html', admin=admin, estabelecimentos=estabelecimentos)
 
-
-@app.route('/editar_estabelecimento/<int:id>', methods=['GET', 'POST'])
-def editar_estabelecimento(id):
+@app.route('/novo_estabelecimento', methods=['GET', 'POST'])
+def novo_estabelecimento():
     if not is_admin():
         return redirect(url_for('login'))
-    est = Estabelecimento.query.get_or_404(id)
     if request.method == 'POST':
-        est.nome = request.form['nome']
-        if request.form['senha']:
-            est.set_senha(request.form['senha'])
+        nome = request.form['nome']
+        username = request.form['username'].strip()
+        senha = request.form['senha']
         logo_file = request.files.get('logo')
+        filename = None
         if logo_file and logo_file.filename:
             filename = secure_filename(logo_file.filename)
             logo_file.save(os.path.join(app.config['UPLOAD_FOLDER_LOGOS'], filename))
-            est.logo = filename
+        if Estabelecimento.query.filter_by(username=username).first():
+            flash('Usuário já existe!', 'danger')
+            return redirect(url_for('novo_estabelecimento'))
+        est = Estabelecimento(nome=nome, username=username, logo=filename)
+        est.set_senha(senha)
+        db.session.add(est)
         db.session.commit()
-        flash('Estabelecimento alterado!', 'success')
+        flash('Estabelecimento cadastrado!', 'success')
         return redirect(url_for('listar_estabelecimentos'))
-    return render_template('estabelecimento_form.html', editar=True, estabelecimento=est)
+    return render_template('estabelecimento_form.html', editar=False, estabelecimento=None)
 
 
 @app.route('/editar_estabelecimento/<int:id>', methods=['GET', 'POST'])
