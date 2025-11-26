@@ -1375,6 +1375,7 @@ def estab_story_novo():
 
     est = Estabelecimento.query.get_or_404(session['user_id'])
 
+    # Pode vir com vários nomes diferentes do formulário
     midia = (
         request.files.get('story_midia')
         or request.files.get('midia')
@@ -1388,6 +1389,7 @@ def estab_story_novo():
     legenda = (request.form.get('legenda') or '').strip()
     dias_str = (request.form.get('dias') or request.form.get('story_dias') or '1').strip()
 
+    # Quantos dias o story vai ficar ativo (padrão 1)
     try:
         dias = int(dias_str)
         if dias <= 0:
@@ -1395,9 +1397,10 @@ def estab_story_novo():
     except Exception:
         dias = 1
 
-           ext = os.path.splitext(midia.filename)[1].lower()
+    # >>> ESSA LINHA AGORA ESTÁ COM A INDENTAÇÃO CERTA (4 ESPAÇOS) <<<
+    ext = os.path.splitext(midia.filename)[1].lower()
 
-    # Normaliza mimetype por extensão (evita formato estranho que aparece como "?")
+    # Normaliza mimetype por extensão (evita tipo estranho)
     if ext in ('.jpg', '.jpeg', '.jfif', '.pjpeg', '.pjp'):
         mimetype = 'image/jpeg'
         tipo = 'imagem'
@@ -1422,6 +1425,32 @@ def estab_story_novo():
     else:
         flash('Formato não suportado. Use JPG/PNG/WEBP para imagens ou MP4/WEBM para vídeos.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
+
+    # Salva o arquivo físico
+    filename = secure_filename(f"story_{est.id}_{int(time.time())}{ext}")
+    path = os.path.join(app.config['UPLOAD_FOLDER_STORIES'], filename)
+    midia.save(path)
+
+    # Horário em UTC, expiração em N dias
+    agora = datetime.utcnow()
+    expira_em = agora + timedelta(days=dias)
+
+    story = StoryEstabelecimento(
+        estabelecimento_id=est.id,
+        tipo=tipo,
+        filename=filename,
+        mimetype=mimetype,
+        titulo=titulo or None,
+        legenda=legenda or None,
+        criado_em=agora,
+        expira_em=expira_em,
+        ativo=True
+    )
+    db.session.add(story)
+    db.session.commit()
+
+    flash('Story criado com sucesso!', 'success')
+    return redirect(url_for('painel_estabelecimento'))
 
     filename = secure_filename(
         f"story_{est.id}_{int(time.time())}{ext}"
