@@ -1483,7 +1483,7 @@ def estab_catalogo_criar_item():
 
 
 # ========= ESTAB: EXCLUIR ITEM INDIVIDUAL DO CATÁLOGO =========
-@app.route('/estab/catalogo/item/<int:item_id>/excluir')
+@app.route('/estab/catalogo/item/<int:item_id>/excluir', methods=['GET', 'POST'])
 def estab_catalogo_excluir_item(item_id):
     if not (is_estabelecimento() or is_admin()):
         return redirect(url_for('login'))
@@ -1582,12 +1582,8 @@ def estab_catalogo_editar_item(item_id):
         else:
             return redirect(url_for('editar_estabelecimento', id=est_id))
 
-    # Se for GET, só volta pro painel (pra não quebrar o link)
-    flash('Use o formulário do painel para editar o item.', 'info')
-    if is_estabelecimento():
-        return redirect(url_for('painel_estabelecimento'))
-    else:
-        return redirect(url_for('editar_estabelecimento', id=est_id))
+    # GET: mostra uma tela de edição
+    return render_template('catalogo_item_form.html', item=item)
 
 
 # ========= ESTAB: NOVO STORY (imagem/vídeo) =========
