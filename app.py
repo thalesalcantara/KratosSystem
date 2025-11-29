@@ -1505,6 +1505,90 @@ def estab_catalogo_excluir_item(item_id):
     else:
         return redirect(url_for('editar_estabelecimento', id=est_id))
 
+# ========= ESTAB: EDITAR ITEM INDIVIDUAL DO CATÁLOGO =========
+@app.route('/estab/catalogo/item/<int:item_id>/editar', methods=['GET', 'POST'])
+def estab_catalogo_editar_item(item_id):
+    # Só estabelecimento logado ou admin podem editar
+    if not (is_estabelecimento() or is_admin()):
+        return redirect(url_for('login'))
+
+    item = CatalogoItem.query.get_or_404(item_id)
+    est_id = item.estabelecimento_id
+
+    # Se for estabelecimento, garante que é dono do item
+    if is_estabelecimento() and est_id != session.get('user_id'):
+        flash('Você não tem permissão para editar este item.', 'danger')
+        return redirect(url_for('painel_estabelecimento'))
+
+    if request.method == 'POST':
+        # Usa os mesmos nomes de campos da criação,
+        # pra ser compatível com o formulário atual
+        nome = (
+            (request.form.get('nome') or request.form.get('item_nome') or '')
+            .strip()
+        )
+        marca = (
+            (request.form.get('marca') or request.form.get('item_marca') or '')
+            .strip() or None
+        )
+        categoria = (
+            (request.form.get('categoria') or request.form.get('item_categoria') or '')
+            .strip() or None
+        )
+
+        valor_raw = (
+            request.form.get('valor')
+            or request.form.get('item_valor')
+            or ''
+        ).strip()
+        valor = None
+        if valor_raw:
+            s = (
+                valor_raw.replace('R$', '')
+                         .replace(' ', '')
+                         .replace('.', '')
+                         .replace(',', '.')
+            )
+            try:
+                valor = float(s)
+            except Exception:
+                valor = None
+
+        observacao = (
+            (request.form.get('observacao') or request.form.get('item_obs') or '')
+            .strip() or None
+        )
+
+        if not nome:
+            flash('Informe pelo menos o nome do item.', 'danger')
+            # volta pra tela certa dependendo do tipo de usuário
+            if is_estabelecimento():
+                return redirect(url_for('painel_estabelecimento'))
+            else:
+                return redirect(url_for('editar_estabelecimento', id=est_id))
+
+        # Atualiza o item
+        item.nome = nome
+        item.marca = marca
+        item.categoria = categoria
+        item.valor = valor
+        item.observacao = observacao
+
+        db.session.commit()
+        flash('Item do catálogo atualizado com sucesso!', 'success')
+
+        if is_estabelecimento():
+            return redirect(url_for('painel_estabelecimento'))
+        else:
+            return redirect(url_for('editar_estabelecimento', id=est_id))
+
+    # Se for GET, só volta pro painel (pra não quebrar o link)
+    flash('Use o formulário do painel para editar o item.', 'info')
+    if is_estabelecimento():
+        return redirect(url_for('painel_estabelecimento'))
+    else:
+        return redirect(url_for('editar_estabelecimento', id=est_id))
+
 
 # ========= ESTAB: NOVO STORY (imagem/vídeo) =========
 @app.route('/estab/story/novo', methods=['POST'])
