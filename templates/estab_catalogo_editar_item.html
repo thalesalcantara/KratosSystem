@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <title>Editar item do catálogo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Se você já usa Bootstrap em outros templates, pode reaproveitar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-light bg-white border-bottom mb-3">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Catálogo do Estabelecimento</span>
+        <a href="{{ url_for('painel_estabelecimento') }}" class="btn btn-outline-secondary btn-sm">
+            Voltar para o painel
+        </a>
+    </div>
+</nav>
+
+<div class="container my-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} mb-2">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Editar item do catálogo</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('estab_catalogo_editar_item', item_id=item.id) }}">
+                <div class="mb-3">
+                    <label class="form-label">Nome do produto *</label>
+                    <input type="text" name="nome" class="form-control"
+                           value="{{ item.nome or '' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Marca</label>
+                    <input type="text" name="marca" class="form-control"
+                           value="{{ item.marca or '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Categoria</label>
+                    <input type="text" name="categoria" class="form-control"
+                           value="{{ item.categoria or '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Valor (R$)</label>
+                    <input type="text" name="valor" class="form-control"
+                           placeholder="Ex: 35,90"
+                           value="{{ '%.2f'|format(item.valor) if item.valor is not none else '' }}">
+                    <div class="form-text">
+                        Você pode digitar com vírgula ou ponto, ex: 29,90 ou 29.90.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Observação</label>
+                    <textarea name="observacao" class="form-control" rows="3">{{ item.observacao or '' }}</textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('estab_catalogo_excluir_item', item_id=item.id) }}"
+                       class="btn btn-outline-danger"
+                       onclick="return confirm('Tem certeza que deseja excluir este item do catálogo?');">
+                        Excluir item
+                    </a>
+
+                    <div>
+                        <a href="{{ url_for('painel_estabelecimento') }}" class="btn btn-outline-secondary me-2">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Salvar alterações
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
