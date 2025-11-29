@@ -394,6 +394,44 @@ def _response_with_cache(resp: Response, seconds=None, etag_base=None):
     return resp
 
 
+def parse_valor_brl(valor_str: str | None):
+    """
+    Converte string de valor no formato brasileiro (17,89 / 1.234,56 / 17.89)
+    em float, de forma robusta. Retorna None se não conseguir converter.
+    """
+    if not valor_str:
+        return None
+
+    s = str(valor_str).strip()
+    if not s:
+        return None
+
+    # Remove símbolo de moeda e espaços
+    s = s.replace('R$', '').replace(' ', '')
+
+    # Se tiver vírgula e ponto, decidimos qual é decimal pelo último separador
+    if ',' in s and '.' in s:
+        if s.rfind(',') > s.rfind('.'):
+            # vírgula é decimal -> remove todos os pontos (milhar) e troca vírgula por ponto
+            s = s.replace('.', '')
+            s = s.replace(',', '.')
+        else:
+            # ponto é decimal -> remove vírgulas de milhar
+            s = s.replace(',', '')
+    elif ',' in s:
+        # só vírgula -> assume vírgula como decimal
+        s = s.replace('.', '')  # se tiver algum ponto, considera milhar
+        s = s.replace(',', '.')
+    else:
+        # só ponto ou sem separador -> deixa como está, mas remove vírgulas perdidas
+        s = s.replace(',', '')
+
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
 # ========= CACHE LEVE =========
 _LAST_LANC_CACHE = {"value": 0, "ts": 0.0}
 _LAST_LANC_TTL = 2.0  # segundos
@@ -1187,31 +1225,34 @@ def painel_estabelecimento():
     # Lançamento de crédito
     if request.method == 'POST' and request.form.get('form_tipo') not in ('catalogo', 'story'):
         cooperado_id = request.form.get('cooperado_id')
-        valor = request.form.get('valor')
+        valor_raw = request.form.get('valor')
         os_numero = request.form.get('os_numero')
         descricao = request.form.get('descricao')
 
-        if cooperado_id and valor and os_numero:
+        if cooperado_id and valor_raw and os_numero:
             c = Cooperado.query.get(int(cooperado_id))
             if c:
-                valor_f = float(valor)
-                novo_credito = c.credito - valor_f
-                if novo_credito < 0:
-                    flash('Crédito insuficiente para este lançamento.', 'danger')
+                valor_f = parse_valor_brl(valor_raw)
+                if valor_f is None or valor_f <= 0:
+                    flash('Valor inválido.', 'danger')
                 else:
-                    l = Lancamento(
-                        data=datetime.utcnow(),  # salvo em UTC
-                        os_numero=os_numero,
-                        cooperado_id=c.id,
-                        estabelecimento_id=est.id,
-                        valor=valor_f,
-                        descricao=descricao
-                    )
-                    db.session.add(l)
-                    c.credito = novo_credito
-                    db.session.commit()
-                    _update_last_lanc_cache_with_value(l.id)
-                    flash('Lançamento realizado com sucesso!', 'success')
+                    novo_credito = c.credito - valor_f
+                    if novo_credito < 0:
+                        flash('Crédito insuficiente para este lançamento.', 'danger')
+                    else:
+                        l = Lancamento(
+                            data=datetime.utcnow(),  # salvo em UTC
+                            os_numero=os_numero,
+                            cooperado_id=c.id,
+                            estabelecimento_id=est.id,
+                            valor=valor_f,
+                            descricao=descricao
+                        )
+                        db.session.add(l)
+                        c.credito = novo_credito
+                        db.session.commit()
+                        _update_last_lanc_cache_with_value(l.id)
+                        flash('Lançamento realizado com sucesso!', 'success')
             else:
                 flash('Cooperado não encontrado!', 'danger')
         else:
@@ -1387,11 +1428,7 @@ def estab_catalogo_upload():
                     if isinstance(v_raw, (int, float)):
                         valor = float(v_raw)
                     else:
-                        s = str(v_raw).replace('R$', '').replace('.', '').replace(',', '.')
-                        try:
-                            valor = float(s)
-                        except Exception:
-                            valor = None
+                        valor = parse_valor_brl(str(v_raw))
 
             observacao = None
             if 'observacao' in col_map and col_map['observacao'] < len(row):
@@ -1445,18 +1482,7 @@ def estab_catalogo_criar_item():
         or request.form.get('item_valor')
         or ''
     ).strip()
-    valor = None
-    if valor_raw:
-        s = (
-            valor_raw.replace('R$', '')
-                     .replace(' ', '')
-                     .replace('.', '')
-                     .replace(',', '.')
-        )
-        try:
-            valor = float(s)
-        except Exception:
-            valor = None
+    valor = parse_valor_brl(valor_raw) if valor_raw else None
 
     observacao = (
         (request.form.get('observacao') or request.form.get('item_obs') or '')
@@ -1541,18 +1567,7 @@ def estab_catalogo_editar_item(item_id):
             or request.form.get('item_valor')
             or ''
         ).strip()
-        valor = None
-        if valor_raw:
-            s = (
-                valor_raw.replace('R$', '')
-                         .replace(' ', '')
-                         .replace('.', '')
-                         .replace(',', '.')
-            )
-            try:
-                valor = float(s)
-            except Exception:
-                valor = None
+        valor = parse_valor_brl(valor_raw) if valor_raw else None
 
         observacao = (
             (request.form.get('observacao') or request.form.get('item_obs') or '')
@@ -1783,14 +1798,11 @@ def estab_editar_lancamento(id):
         return redirect(url_for('painel_estabelecimento'))
 
     os_numero = request.form.get('os_numero', '').strip()
-    valor_str = request.form.get('valor', '').strip().replace(',', '.')
+    valor_str = (request.form.get('valor', '') or '').strip()
     descricao = request.form.get('descricao', '').strip()
 
-    try:
-        novo_valor = float(valor_str)
-        if novo_valor <= 0:
-            raise ValueError()
-    except Exception:
+    novo_valor = parse_valor_brl(valor_str)
+    if novo_valor is None or novo_valor <= 0:
         flash('Valor inválido.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
