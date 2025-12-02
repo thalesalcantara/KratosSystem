@@ -1225,11 +1225,11 @@ def painel_estabelecimento():
 
     # ========= Lançamento de crédito (incluindo data retroativa) =========
     if request.method == 'POST' and request.form.get('form_tipo') not in ('catalogo', 'story'):
-        cooperado_id   = request.form.get('cooperado_id')
-        valor_raw      = request.form.get('valor')
-        os_numero      = request.form.get('os_numero')
-        descricao      = request.form.get('descricao')
-        data_lanc_s    = (request.form.get('data_lancamento') or '').strip()  # YYYY-MM-DD
+        cooperado_id = request.form.get('cooperado_id')
+        valor_raw = request.form.get('valor')
+        os_numero = request.form.get('os_numero')
+        descricao = request.form.get('descricao')
+        data_lanc_s = (request.form.get('data_lancamento') or '').strip()  # YYYY-MM-DD
 
         if cooperado_id and valor_raw and os_numero:
             c = Cooperado.query.get(int(cooperado_id))
@@ -1242,7 +1242,7 @@ def painel_estabelecimento():
                     if novo_credito < 0:
                         flash('Crédito insuficiente para este lançamento.', 'danger')
                     else:
-                        # ===== NOVO BLOCO: monta data no fuso de Brasília, com a HORA atual =====
+                        # ===== MONTA DATA NO FUSO DE BRASÍLIA COM A HORA ATUAL =====
                         try:
                             if data_lanc_s:
                                 # data escolhida no input (YYYY-MM-DD)
@@ -1253,13 +1253,14 @@ def painel_estabelecimento():
                                     agora_brt.hour, agora_brt.minute, agora_brt.second,
                                     tzinfo=BR_TZ
                                 )
+                                # salva em UTC (naive)
                                 data_utc = data_local.astimezone(UTC).replace(tzinfo=None)
                             else:
-                                # se por algum motivo vier vazio, usa agora em UTC
+                                # se vier vazio, usa agora em UTC
                                 data_utc = datetime.utcnow()
                         except Exception:
                             data_utc = datetime.utcnow()
-                        # ===== FIM NOVO BLOCO =====
+                        # ===== FIM BLOCO DATA =====
 
                         l = Lancamento(
                             data=data_utc,  # salvo em UTC (naive)
@@ -1276,8 +1277,8 @@ def painel_estabelecimento():
                         flash('Lançamento realizado com sucesso!', 'success')
             else:
                 flash('Cooperado não encontrado!', 'danger')
-            else:
-                flash('Preencha todos os campos obrigatórios!', 'danger')
+        else:
+            flash('Preencha todos os campos obrigatórios!', 'danger')
 
     # ========= Filtros (opcionais) no painel do estabelecimento =========
     di_s = request.args.get('data_inicio')
@@ -1357,6 +1358,7 @@ def painel_estabelecimento():
         stories_ativos=stories_ativos,
         stories_expirados=stories_expirados
     )
+
 
 # ========= ESTAB: IMPORTAÇÃO DE CATÁLOGO (Excel) =========
 @app.route('/estab/catalogo/upload', methods=['POST'])
@@ -1563,6 +1565,7 @@ def estab_catalogo_excluir_item(item_id):
         return redirect(url_for('painel_estabelecimento'))
     else:
         return redirect(url_for('editar_estabelecimento', id=est_id))
+
 
 # ========= ESTAB: EDITAR ITEM INDIVIDUAL DO CATÁLOGO =========
 @app.route('/estab/catalogo/item/<int:item_id>/editar', methods=['GET', 'POST'])
@@ -1814,6 +1817,7 @@ def estab_story_editar(story_id):
     flash('Edição de story ainda não tem tela própria. Use os botões do painel.', 'info')
     return redirect(url_for('painel_estabelecimento'))
 
+
 # ========= ESTAB: EDITAR / EXCLUIR LANÇAMENTO =========
 @app.route('/estab/lancamento/editar/<int:id>', methods=['POST'])
 def estab_editar_lancamento(id):
@@ -1826,6 +1830,7 @@ def estab_editar_lancamento(id):
         flash('Você não tem permissão para editar este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
+    # limite de 1h
     if datetime.utcnow() - l.data > timedelta(hours=1):
         flash('Edição permitida somente até 1 hora após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
@@ -1877,8 +1882,9 @@ def estab_excluir_lancamento(id):
         flash('Você não tem permissão para excluir este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    if datetime.utcnow() - l.data > timedelta(hours=10):
-        flash('Exclusão permitida somente até 10 hora após a criação.', 'warning')
+    # limite de 1h
+    if datetime.utcnow() - l.data > timedelta(hours=1):
+        flash('Exclusão permitida somente até 1 hora após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
 
     cooperado = Cooperado.query.get(l.cooperado_id)
