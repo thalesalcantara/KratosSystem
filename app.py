@@ -1826,8 +1826,8 @@ def estab_editar_lancamento(id):
         flash('Você não tem permissão para editar este lançamento.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    if datetime.utcnow() - l.data > timedelta(hours=10):
-        flash('Edição permitida somente até 10 horas após a criação.', 'warning')
+    if datetime.utcnow() - l.data > timedelta(hours=1):
+        flash('Edição permitida somente até 1 hora após a criação.', 'warning')
         return redirect(url_for('painel_estabelecimento'))
 
     os_numero = request.form.get('os_numero', '').strip()
