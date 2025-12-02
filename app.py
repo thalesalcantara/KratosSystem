@@ -1219,15 +1219,17 @@ def excluir_lancamento(id):
 def painel_estabelecimento():
     if not is_estabelecimento():
         return redirect(url_for('login'))
+
     est = Estabelecimento.query.get(session['user_id'])
     cooperados = Cooperado.query.order_by(Cooperado.nome).all()
 
-    # Lançamento de crédito
+    # ========= Lançamento de crédito (incluindo data retroativa) =========
     if request.method == 'POST' and request.form.get('form_tipo') not in ('catalogo', 'story'):
-        cooperado_id = request.form.get('cooperado_id')
-        valor_raw = request.form.get('valor')
-        os_numero = request.form.get('os_numero')
-        descricao = request.form.get('descricao')
+        cooperado_id   = request.form.get('cooperado_id')
+        valor_raw      = request.form.get('valor')
+        os_numero      = request.form.get('os_numero')
+        descricao      = request.form.get('descricao')
+        data_lanc_s    = (request.form.get('data_lancamento') or '').strip()  # YYYY-MM-DD
 
         if cooperado_id and valor_raw and os_numero:
             c = Cooperado.query.get(int(cooperado_id))
@@ -1240,8 +1242,21 @@ def painel_estabelecimento():
                     if novo_credito < 0:
                         flash('Crédito insuficiente para este lançamento.', 'danger')
                     else:
+                        # Data padrão: agora em UTC
+                        data_utc = datetime.utcnow()
+
+                        # Se veio uma data do form, converte do fuso de Brasília para UTC (início do dia)
+                        if data_lanc_s:
+                            try:
+                                di_utc, _ = local_bounds_to_utc_naive(data_lanc_s, None)
+                                if di_utc:
+                                    data_utc = di_utc
+                            except Exception:
+                                # se der erro, ignora e usa utcnow()
+                                pass
+
                         l = Lancamento(
-                            data=datetime.utcnow(),  # salvo em UTC
+                            data=data_utc,  # salvo em UTC (naive)
                             os_numero=os_numero,
                             cooperado_id=c.id,
                             estabelecimento_id=est.id,
@@ -1258,7 +1273,7 @@ def painel_estabelecimento():
         else:
             flash('Preencha todos os campos obrigatórios!', 'danger')
 
-    # Filtros (opcionais) no painel do estabelecimento
+    # ========= Filtros (opcionais) no painel do estabelecimento =========
     di_s = request.args.get('data_inicio')
     df_s = request.args.get('data_fim')
     di_utc, df_utc_excl = local_bounds_to_utc_naive(di_s, df_s)
@@ -1275,12 +1290,12 @@ def painel_estabelecimento():
     for l in lancamentos:
         l.data_brasilia = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
 
-    # Itens de catálogo para este estabelecimento
+    # ========= Itens de catálogo para este estabelecimento =========
     catalogo_itens = CatalogoItem.query.filter_by(
         estabelecimento_id=est.id
     ).order_by(CatalogoItem.nome).all()
 
-    # ===== Stories (ativos e expirados) =====
+    # ========= Stories (ativos e expirados) =========
     agora_utc = datetime.utcnow()
 
     stories_ativos = StoryEstabelecimento.query.filter(
@@ -1294,25 +1309,38 @@ def painel_estabelecimento():
         StoryEstabelecimento.expira_em <= agora_utc
     ).order_by(StoryEstabelecimento.expira_em.desc()).all()
 
-    # Stats agregadas (views / likes)
-    stats_rows = (
-        db.session.query(
-            StoryView.story_id,
-            func.count(StoryView.id).label('views'),
-            func.sum(
-                case((StoryView.curtiu.is_(True), 1), else_=0)
-            ).label('likes')
-        )
-        .group_by(StoryView.story_id)
-        .all()
-    )
-    stats_map = {sid: {"views": views or 0, "likes": likes or 0}
-                 for sid, views, likes in stats_rows}
+    # ========= Stats agregadas (views / likes) só pros stories deste est =========
+    story_ids = [s.id for s in stories_ativos] + [s.id for s in stories_expirados]
 
+    stats_map = {}
+    if story_ids:
+        stats_rows = (
+            db.session.query(
+                StoryView.story_id,
+                func.count(StoryView.id).label('views'),
+                func.sum(
+                    case((StoryView.curtiu.is_(True), 1), else_=0)
+                ).label('likes')
+            )
+            .filter(StoryView.story_id.in_(story_ids))
+            .group_by(StoryView.story_id)
+            .all()
+        )
+        stats_map = {
+            sid: {"views": views or 0, "likes": likes or 0}
+            for sid, views, likes in stats_rows
+        }
+
+    # Preenche atributos que o template usa (views / likes)
     for s in stories_ativos:
         d = stats_map.get(s.id, {})
-        s.views_total = d.get("views", 0)
-        s.likes_total = d.get("likes", 0)
+        s.views = d.get("views", 0)
+        s.likes = d.get("likes", 0)
+
+    for s in stories_expirados:
+        d = stats_map.get(s.id, {})
+        s.views = d.get("views", 0)
+        s.likes = d.get("likes", 0)
 
     return render_template(
         'painel_estabelecimento.html',
@@ -1323,7 +1351,6 @@ def painel_estabelecimento():
         stories_ativos=stories_ativos,
         stories_expirados=stories_expirados
     )
-
 
 # ========= ESTAB: IMPORTAÇÃO DE CATÁLOGO (Excel) =========
 @app.route('/estab/catalogo/upload', methods=['POST'])
