@@ -779,9 +779,7 @@ def excluir_cooperado(id):
 def foto_cooperado(id):
     c = Cooperado.query.get_or_404(id)
 
-    # cache leve só para a foto, sem immutable
-    cache_sec = 30  # 30 segundos já está ótimo
-
+    # 1) Decide a resposta (db -> disco -> vazio)
     if c.foto_data:
         bio = BytesIO(c.foto_data)
         resp = send_file(
@@ -789,32 +787,21 @@ def foto_cooperado(id):
             mimetype=c.foto_mimetype or 'image/jpeg',
             download_name=c.foto_filename or f'cooperado_{id}.jpg'
         )
-        return _response_with_cache(
-            resp,
-            cache_sec,
-            etag_base=f"cooperado_db_{id}_{len(c.foto_data)}"
-        )
-
-    if c.foto:
+    elif c.foto:
         path = os.path.join(app.config['UPLOAD_FOLDER_COOPERADOS'], c.foto)
         if os.path.exists(path):
             resp = send_file(path, mimetype='image/jpeg')
-            try:
-                size = os.path.getsize(path)
-            except Exception:
-                size = 0
-            return _response_with_cache(
-                resp,
-                cache_sec,
-                etag_base=f"cooperado_fs_{id}_{size}"
-            )
+        else:
+            resp = send_file(BytesIO(b''), mimetype='image/jpeg')
+    else:
+        resp = send_file(BytesIO(b''), mimetype='image/jpeg')
 
-    resp = send_file(BytesIO(b''), mimetype='image/jpeg')
-    return _response_with_cache(
-        resp,
-        cache_sec,
-        etag_base=f"cooperado_empty_{id}"
-    )
+    # 2) Desliga cache TOTALMENTE (navegador + proxy)
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+
+    return resp
 
 
 # Serve logo do estabelecimento (usado no painel, catálogos, etc.)
