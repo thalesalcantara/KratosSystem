@@ -312,7 +312,10 @@
             <tr data-id="{{ c.id }}">
               <td>
                 {% if c.foto_data or c.foto %}
-                  <img class="foto" src="{{ url_for('foto_cooperado', id=c.id) }}" alt="Foto de {{ c.nome }}" loading="lazy" />
+                  <img class="foto"
+                       src="{{ url_for('foto_cooperado', id=c.id) }}?v={{ (ts.timestamp() * 1000)|int if ts else c.id }}"
+                       alt="Foto de {{ c.nome }}"
+                       loading="lazy" />
                 {% else %}
                   <span style="font-size:1.6em; color:var(--gold);"><i class="bi bi-person-circle"></i></span>
                 {% endif %}
