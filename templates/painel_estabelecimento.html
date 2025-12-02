@@ -840,6 +840,18 @@
                 <div id="erro-lancar" class="mt-1"></div>
               </div>
 
+              <!-- NOVO: Data do lançamento -->
+              <div class="col-md-2">
+                <label class="form-label" for="data_lancamento">
+                  <i class="bi bi-calendar-event"></i> Data do lançamento
+                </label>
+                <input type="date"
+                       class="form-control"
+                       id="data_lancamento"
+                       name="data_lancamento"
+                       required>
+              </div>
+
               <div class="col-md-2">
                 <label class="form-label" for="valor"><i class="bi bi-cash-stack"></i> Valor</label>
                 <div class="input-group">
@@ -848,12 +860,12 @@
                 </div>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <label class="form-label" for="os_numero"><i class="bi bi-file-earmark-text"></i> Nº OS</label>
                 <input type="text" class="form-control" id="os_numero" name="os_numero" required placeholder="Ex: 12345">
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <label class="form-label" for="descricao"><i class="bi bi-justify-left"></i> Descrição</label>
                 <input type="text" class="form-control" id="descricao" name="descricao" placeholder="(opcional)">
               </div>
@@ -1307,370 +1319,420 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    /* ===== Relógio (Brasília / Natal) ===== */
-    function tickClock(){
-      const el = document.getElementById('clock-br');
-      if(!el) return;
-      const s = new Date().toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
-      el.textContent = 'Natal - ' + s;
+  /* ===== Relógio (Brasília / Natal) ===== */
+  function tickClock(){
+    const el = document.getElementById('clock-br');
+    if(!el) return;
+    const s = new Date().toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
+    el.textContent = 'Natal - ' + s;
+  }
+  setInterval(tickClock, 1000); tickClock();
+
+  /* ===== Info do cooperado ===== */
+  function mostrarInfoCooperado(){
+    const select = document.getElementById("cooperado_id");
+    const saldoDiv = document.getElementById("saldo-cooperado");
+    const fotoDiv  = document.getElementById("foto-cooperado-preview");
+    const option   = select ? select.options[select.selectedIndex] : null;
+    const saldo    = option ? option.getAttribute("data-saldo") : null;
+    const foto     = option ? option.getAttribute("data-foto") : null;
+
+    if(!saldoDiv || !fotoDiv) return;
+
+    saldoDiv.textContent = (saldo && select.value) ? `Saldo atual: R$ ${saldo}` : '';
+    if (foto && select.value){
+      fotoDiv.innerHTML = `<img src="${foto}" alt="Foto do Cooperado"
+        style="max-width:96px;max-height:96px;border-radius:50%;
+               border:3px solid var(--accent);box-shadow:0 0 8px #00339955;">`;
+    } else {
+      fotoDiv.innerHTML = '';
     }
-    setInterval(tickClock, 1000); tickClock();
+    checarCreditoSuficiente();
+  }
 
-    /* ===== Info do cooperado ===== */
-    function mostrarInfoCooperado(){
-      const select = document.getElementById("cooperado_id");
-      const saldoDiv = document.getElementById("saldo-cooperado");
-      const fotoDiv  = document.getElementById("foto-cooperado-preview");
-      const option   = select ? select.options[select.selectedIndex] : null;
-      const saldo    = option ? option.getAttribute("data-saldo") : null;
-      const foto     = option ? option.getAttribute("data-foto") : null;
+  function checarCreditoSuficiente(){
+    const select = document.getElementById("cooperado_id");
+    const valorInput = document.getElementById("valor");
+    const erroDiv = document.getElementById("erro-lancar");
+    const btn = document.getElementById("btn-lancar");
 
-      if(!saldoDiv || !fotoDiv) return;
+    if(!select || !valorInput || !erroDiv || !btn) return;
 
-      saldoDiv.textContent = (saldo && select.value) ? `Saldo atual: R$ ${saldo}` : '';
-      if (foto && select.value){
-        fotoDiv.innerHTML = `<img src="${foto}" alt="Foto do Cooperado"
-          style="max-width:96px;max-height:96px;border-radius:50%;
-                 border:3px solid var(--accent);box-shadow:0 0 8px #00339955;">`;
-      } else {
-        fotoDiv.innerHTML = '';
-      }
-      checarCreditoSuficiente();
+    const option = select.options[select.selectedIndex];
+    const saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
+    const valor = valorInput.value ? parseFloat(valorInput.value) : null;
+
+    if (!select.value){
+      erroDiv.textContent="";
+      btn.disabled=true;
+      return;
     }
-
-    function checarCreditoSuficiente(){
-      const select = document.getElementById("cooperado_id");
-      const valorInput = document.getElementById("valor");
-      const erroDiv = document.getElementById("erro-lancar");
-      const btn = document.getElementById("btn-lancar");
-
-      if(!select || !valorInput || !erroDiv || !btn) return;
-
-      const option = select.options[select.selectedIndex];
-      const saldo = option ? parseFloat(option.getAttribute("data-saldo-raw")) : null;
-      const valor = valorInput.value ? parseFloat(valorInput.value) : null;
-
-      if (!select.value){
-        erroDiv.textContent="";
-        btn.disabled=true; return;
-      }
-      if (saldo == null || isNaN(saldo) || saldo <= 0){
-        erroDiv.textContent="Este cooperado está sem crédito disponível!";
-        btn.disabled=true; return;
-      }
-      if (valor && valor > saldo){
-        erroDiv.textContent="O valor excede o saldo disponível!";
-        btn.disabled=true;
-      } else {
-        erroDiv.textContent="";
-        btn.disabled=false;
-      }
+    if (saldo == null || isNaN(saldo) || saldo <= 0){
+      erroDiv.textContent="Este cooperado está sem crédito disponível!";
+      btn.disabled=true;
+      return;
     }
-
-    /* ===== Helpers de data (Brasília) ===== */
-    function ymBR(d){
-      return new Date(d).toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,7); // YYYY-MM
+    if (valor && valor > saldo){
+      erroDiv.textContent="O valor excede o saldo disponível!";
+      btn.disabled=true;
+    } else {
+      erroDiv.textContent="";
+      btn.disabled=false;
     }
-    function isHojeBR(date){
-      const br = new Date().toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,10);
-      const d  = new Date(date).toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,10);
-      return br===d;
-    }
+  }
 
-    /* ===== Indicadores e Ranking a partir da tabela ===== */
-    function formatBR(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-    function atualizarIndicadores(){
-      const rows = [...document.querySelectorAll('#tbody-lanc tr')];
-      let count=0, sum=0, max=0, lastTs=0;
-      let hCount=0, hSum=0;
-      let mCount=0, mSum=0;
-      const monthNow = ymBR(new Date());
-      const porCoop = Object.create(null);
+  /* ===== Helpers de data (Brasília) ===== */
+  function ymBR(d){
+    return new Date(d).toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,7); // YYYY-MM
+  }
+  function isHojeBR(date){
+    const br = new Date().toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,10);
+    const d  = new Date(date).toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,10);
+    return br===d;
+  }
 
-      rows.forEach(tr=>{
-        const valTd = tr.querySelector('.valor');
-        if(!valTd) return;
-        const v = parseFloat(valTd.dataset.valor || '0');
-        if(isNaN(v)) return;
-        count++;
-        sum += v;
-        if (v>max) max=v;
+  /* ===== Indicadores e Ranking a partir da tabela ===== */
+  function formatBR(n){
+    return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
 
-        const createdStr = tr.getAttribute('data-created') || '';
-        const created = Date.parse(createdStr) || 0;
+  function atualizarIndicadores(){
+    const rows = [...document.querySelectorAll('#tbody-lanc tr')];
+    let count=0, sum=0, max=0, lastTs=0;
+    let hCount=0, hSum=0;
+    let mCount=0, mSum=0;
+    const monthNow = ymBR(new Date());
+    const porCoop = Object.create(null);
 
-        if (created>lastTs) lastTs = created;
-        if (created && isHojeBR(created)){ hCount++; hSum += v; }
+    rows.forEach(tr=>{
+      const valTd = tr.querySelector('.valor');
+      if(!valTd) return;
+      const v = parseFloat(valTd.dataset.valor || '0');
+      if(isNaN(v)) return;
+      count++;
+      sum += v;
+      if (v>max) max=v;
 
-        if (created && ymBR(created) === monthNow){ mCount++; mSum += v; }
+      const createdStr = tr.getAttribute('data-created') || '';
+      const created = Date.parse(createdStr) || 0;
 
-        const nome = (tr.querySelector('.coop')?.textContent || '').trim();
-        if (nome){ porCoop[nome] = (porCoop[nome]||0) + v; }
-      });
+      if (created>lastTs) lastTs = created;
+      if (created && isHojeBR(created)){ hCount++; hSum += v; }
 
-      let topNome='—', topVal=0;
-      const pares = Object.entries(porCoop).sort((a,b)=>b[1]-a[1]);
-      if (pares.length){ topNome = pares[0][0]; topVal = pares[0][1]; }
+      if (created && ymBR(created) === monthNow){ mCount++; mSum += v; }
 
-      const elCount = document.getElementById('k-count');
-      const elSum = document.getElementById('k-sum');
-      const elMax = document.getElementById('k-max');
-      const elTop = document.getElementById('k-top');
-      const elTopSub = document.getElementById('k-top-sub');
-      const elHCount = document.getElementById('h-count');
-      const elHSum = document.getElementById('h-sum');
-      const elLast = document.getElementById('k-last');
-      const elMonthSum = document.getElementById('k-month-sum');
-      const elMonthCount = document.getElementById('k-month-count');
-
-      if (elCount) elCount.textContent = count;
-      if (elSum)   elSum.textContent   = 'R$ ' + formatBR(sum);
-      if (elMax)   elMax.textContent   = 'R$ ' + formatBR(max);
-      if (elTop)   elTop.textContent   = topNome!=='—' ? topNome : '—';
-      if (elTopSub) elTopSub.textContent = topNome!=='—' ? ('Soma: R$ ' + formatBR(topVal)) : 'Maior soma';
-      if (elHCount) elHCount.textContent = hCount;
-      if (elHSum)   elHSum.textContent   = 'R$ ' + formatBR(hSum);
-
-      if (lastTs && elLast){
-        const br = new Date(lastTs).toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
-        elLast.textContent = br;
-      } else if (elLast){
-        elLast.textContent = '—';
-      }
-
-      if (elMonthSum)   elMonthSum.textContent   = 'R$ ' + formatBR(mSum);
-      if (elMonthCount) elMonthCount.textContent = mCount;
-
-      const ul = document.getElementById('rank-list');
-      if (!ul) return;
-      ul.innerHTML = '';
-      if (!pares.length){ ul.innerHTML = '<li>—</li>'; return; }
-      pares.slice(0,3).forEach(([nome,total],i)=>{
-        const li = document.createElement('li');
-        li.innerHTML = `<span class="me-1">#${i+1}</span> ${nome} <small>— R$ ${formatBR(total)}</small>`;
-        ul.appendChild(li);
-      });
-    }
-
-    /* ===== Catálogo: filtro simples (front) ===== */
-    function filtrarCatalogo(){
-      const input = document.getElementById('filtro-catalogo');
-      const termo = input ? input.value.toLowerCase() : '';
-      const linhas = document.querySelectorAll('#tabela-catalogo tbody tr');
-
-      linhas.forEach(tr=>{
-        const nome = (tr.querySelector('.cat-nome')?.textContent || '').toLowerCase();
-        const marca = (tr.querySelector('.cat-marca')?.textContent || '').toLowerCase();
-        const cat = (tr.querySelector('.cat-categoria')?.textContent || '').toLowerCase();
-        const obs = (tr.querySelector('.cat-obs')?.textContent || '').toLowerCase();
-
-        const show = !termo || nome.includes(termo) || marca.includes(termo)
-                      || cat.includes(termo) || obs.includes(termo);
-        tr.style.display = show ? '' : 'none';
-      });
-    }
-
-    /* ===== Modal Editar + restrição de 1h ===== */
-    let editarModal, tRestanteTimer=null;
-
-    document.addEventListener('DOMContentLoaded', function(){
-      mostrarInfoCooperado();
-      document.getElementById("cooperado_id")?.addEventListener("change", mostrarInfoCooperado);
-      document.getElementById("valor")?.addEventListener("input", checarCreditoSuficiente);
-
-      const modalEl = document.getElementById('modalEditarLanc');
-      if (modalEl) editarModal = new bootstrap.Modal(modalEl);
-
-      aplicarRestricaoUmaHora();
-      setInterval(aplicarRestricaoUmaHora, 60*1000);
-
-      atualizarIndicadores();
-      setInterval(atualizarIndicadores, 15000);
-
-      if (document.querySelector('.alert.alert-success')){
-        const a=document.getElementById('snd-venda');
-        a && a.play().catch(()=>{});
-      }
-
-      initSidebarTabs();
-      initTheme();
+      const nome = (tr.querySelector('.coop')?.textContent || '').trim();
+      if (nome){ porCoop[nome] = (porCoop[nome]||0) + v; }
     });
 
-    document.addEventListener('click', function(ev){
-      const tgt = ev.target.closest('#btn-lancar');
-      if (!tgt || tgt.disabled) return;
-      const a=document.getElementById('snd-venda');
-      a && a.play().catch(()=>{});
+    let topNome='—', topVal=0;
+    const pares = Object.entries(porCoop).sort((a,b)=>b[1]-a[1]);
+    if (pares.length){
+      topNome = pares[0][0];
+      topVal = pares[0][1];
+    }
+
+    const elCount = document.getElementById('k-count');
+    const elSum = document.getElementById('k-sum');
+    const elMax = document.getElementById('k-max');
+    const elTop = document.getElementById('k-top');
+    const elTopSub = document.getElementById('k-top-sub');
+    const elHCount = document.getElementById('h-count');
+    const elHSum = document.getElementById('h-sum');
+    const elLast = document.getElementById('k-last');
+    const elMonthSum = document.getElementById('k-month-sum');
+    const elMonthCount = document.getElementById('k-month-count');
+
+    if (elCount) elCount.textContent = count;
+    if (elSum)   elSum.textContent   = 'R$ ' + formatBR(sum);
+    if (elMax)   elMax.textContent   = 'R$ ' + formatBR(max);
+    if (elTop)   elTop.textContent   = topNome!=='—' ? topNome : '—';
+    if (elTopSub) elTopSub.textContent = topNome!=='—'
+      ? ('Soma: R$ ' + formatBR(topVal))
+      : 'Maior soma';
+    if (elHCount) elHCount.textContent = hCount;
+    if (elHSum)   elHSum.textContent   = 'R$ ' + formatBR(hSum);
+
+    if (lastTs && elLast){
+      const br = new Date(lastTs).toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
+      elLast.textContent = br;
+    } else if (elLast){
+      elLast.textContent = '—';
+    }
+
+    if (elMonthSum)   elMonthSum.textContent   = 'R$ ' + formatBR(mSum);
+    if (elMonthCount) elMonthCount.textContent = mCount;
+
+    const ul = document.getElementById('rank-list');
+    if (!ul) return;
+    ul.innerHTML = '';
+    if (!pares.length){
+      ul.innerHTML = '<li>—</li>';
+      return;
+    }
+    pares.slice(0,3).forEach(([nome,total],i)=>{
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="me-1">#${i+1}</span> ${nome} <small>— R$ ${formatBR(total)}</small>`;
+      ul.appendChild(li);
     });
+  }
 
-    function abrirModalEditar(btn){
-      const tr = btn.closest('tr');
-      const createdIso = tr.getAttribute('data-created');
-      const expirado = estaExpirado(createdIso);
+  /* ===== Bloqueio de edição após 1h ===== */
+  function atualizarBloqueios(){
+    const linhas = document.querySelectorAll('#tbody-lanc tr[data-created]');
+    const agora = Date.now();
+    const UMA_HORA_MS = 60 * 60 * 1000;
 
-      const id    = btn.getAttribute('data-id');
-      const os    = btn.getAttribute('data-os') || '';
-      const valor = btn.getAttribute('data-valor') || '';
-      const desc  = btn.getAttribute('data-desc') || '';
+    linhas.forEach(tr => {
+      const createdStr = tr.getAttribute('data-created') || '';
+      const created = Date.parse(createdStr);
+      if (!created) return;
 
-      document.getElementById('edit-os').value = os;
-      document.getElementById('edit-valor').value = valor.replace(',', '.');
-      document.getElementById('edit-desc').value = desc;
+      const diff = agora - created;
+      const expirado = diff > UMA_HORA_MS;
 
-      const criadoBR = createdIso
-        ? new Date(createdIso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo', hour12:false})
-        : '—';
-      document.getElementById('m-criado').textContent = criadoBR;
+      const aviso = tr.querySelector('.aviso-expirado');
+      const btnEditar = tr.querySelector('.btn-editar');
+      // se quiser bloquear exclusão também, descomente:
+      // const btnExcluir = tr.querySelector('.btn-excluir');
 
-      const restanteEl = document.getElementById('m-restante');
-      const btnSave = document.getElementById('btn-save-modal');
-      function updateRestante(){
-        const msLeft = 60*60*1000 - (new Date() - new Date(createdIso));
-        if (msLeft <= 0){
-          restanteEl.textContent = 'Expirado';
-          btnSave.disabled = true;
-          clearInterval(tRestanteTimer);
-          tRestanteTimer = null;
-        } else {
-          const m = Math.floor(msLeft/60000);
-          const s = Math.floor((msLeft%60000)/1000);
-          restanteEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-          btnSave.disabled = false;
+      if (expirado){
+        if (aviso) aviso.style.display = 'block';
+        if (btnEditar){
+          btnEditar.disabled = true;
+          btnEditar.classList.add('disabled');
         }
+        // if (btnExcluir){
+        //   btnExcluir.disabled = true;
+        //   btnExcluir.classList.add('disabled');
+        // }
+      }else{
+        if (aviso) aviso.style.display = 'none';
+        if (btnEditar){
+          btnEditar.disabled = false;
+          btnEditar.classList.remove('disabled');
+        }
+        // if (btnExcluir){
+        //   btnExcluir.disabled = false;
+        //   btnExcluir.classList.remove('disabled');
+        // }
       }
-      if (tRestanteTimer){ clearInterval(tRestanteTimer); tRestanteTimer=null; }
-      if (createdIso){ updateRestante(); tRestanteTimer=setInterval(updateRestante, 1000); }
-      else{ restanteEl.textContent='—'; btnSave.disabled=false; }
+    });
+  }
 
-      const form = document.getElementById('form-editar-modal');
-      form.action = "{{ url_for('estab_editar_lancamento', id=0) }}".replace('/0', '/' + id);
+  /* ===== Modal de edição de lançamento ===== */
+  function abrirModalEditar(btn){
+    const tr = btn.closest('tr');
+    if (!tr) return;
 
-      if (!expirado && editarModal) editarModal.show();
+    const id = tr.getAttribute('data-id');
+    const os = btn.getAttribute('data-os') || '';
+    const valor = btn.getAttribute('data-valor') || '';
+    const desc = btn.getAttribute('data-desc') || '';
+    const createdStr = tr.getAttribute('data-created') || '';
+    const created = Date.parse(createdStr);
+
+    const inputOs = document.getElementById('edit-os');
+    const inputValor = document.getElementById('edit-valor');
+    const inputDesc = document.getElementById('edit-desc');
+    const spanCriado = document.getElementById('m-criado');
+    const spanRestante = document.getElementById('m-restante');
+    const btnSave = document.getElementById('btn-save-modal');
+    const form = document.getElementById('form-editar-modal');
+
+    if (!inputOs || !inputValor || !inputDesc || !spanCriado || !spanRestante || !btnSave || !form) return;
+
+    inputOs.value = os;
+    inputValor.value = valor;
+    inputDesc.value = desc;
+
+    if (created){
+      const criadoBR = new Date(created).toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo', hour12:false });
+      spanCriado.textContent = criadoBR;
+
+      const UMA_HORA_MS = 60 * 60 * 1000;
+      const agora = Date.now();
+      const limite = created + UMA_HORA_MS;
+      const diff = limite - agora;
+
+      if (diff <= 0){
+        spanRestante.textContent = 'Expirado';
+        btnSave.disabled = true;
+        btnSave.classList.add('disabled');
+      }else{
+        const min = Math.floor(diff / 60000);
+        const seg = Math.floor((diff % 60000) / 1000);
+        spanRestante.textContent = `${min}min ${seg}s`;
+        btnSave.disabled = false;
+        btnSave.classList.remove('disabled');
+      }
+    }else{
+      spanCriado.textContent = '—';
+      spanRestante.textContent = '—';
+      btnSave.disabled = false;
+      btnSave.classList.remove('disabled');
     }
 
-    function confirmarExcluir(formEl){
-      const tr = formEl.closest('tr');
-      if (estaExpirado(tr.getAttribute('data-created'))) return false;
-      return confirm('Confirma excluir este lançamento? O crédito será devolvido ao cooperado.');
+    // Define action do form de edição (evita erro no url_for com id string)
+    const baseAction = "{{ url_for('estab_editar_lancamento', id=0) }}";
+    form.action = baseAction.replace(/0$/, id);
+
+    const modalEl = document.getElementById('modalEditarLanc');
+    if (modalEl && bootstrap && bootstrap.Modal){
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
     }
+  }
 
-    function aplicarRestricaoUmaHora(){
-      document.querySelectorAll('table tbody tr[data-created]').forEach(tr=>{
-        const createdIso = tr.getAttribute('data-created');
-        const expirado = estaExpirado(createdIso);
+  /* ===== Confirmação de exclusão ===== */
+  function confirmarExcluir(form){
+    return confirm('Tem certeza que deseja excluir este lançamento?');
+  }
 
-        const btnEditar = tr.querySelector('.btn-editar');
-        const btnExcluir = tr.querySelector('.btn-excluir');
-        const aviso = tr.querySelector('.aviso-expirado');
+  /* ===== Filtro do catálogo ===== */
+  function filtrarCatalogo(){
+    const input = document.getElementById('filtro-catalogo');
+    const termo = (input?.value || '').toLowerCase().trim();
+    const linhas = document.querySelectorAll('#tabela-catalogo tbody tr');
 
-        if (expirado){
-          if (btnEditar){ btnEditar.disabled=true; btnEditar.classList.add('disabled'); }
-          if (btnExcluir){ btnExcluir.disabled=true; btnExcluir.classList.add('disabled'); }
-          if (aviso) aviso.style.display='block';
-        } else {
-          if (btnEditar){ btnEditar.disabled=false; btnEditar.classList.remove('disabled'); }
-          if (btnExcluir){ btnExcluir.disabled=false; btnExcluir.classList.remove('disabled'); }
-          if (aviso) aviso.style.display='none';
-        }
-      });
-    }
+    linhas.forEach(tr => {
+      const nome = (tr.querySelector('.cat-nome')?.textContent || '').toLowerCase();
+      const marca = (tr.querySelector('.cat-marca')?.textContent || '').toLowerCase();
+      const cat = (tr.querySelector('.cat-categoria')?.textContent || '').toLowerCase();
+      const obs = (tr.querySelector('.cat-obs')?.textContent || '').toLowerCase();
 
-    function estaExpirado(createdIso){
-      if (!createdIso) return false;
-      const criado = new Date(createdIso);  // UTC
-      const agora  = new Date();
-      const diffMs = agora - criado;
-      return diffMs > (60*60*1000); // 1 hora
-    }
+      if (!termo){
+        tr.style.display = '';
+      }else{
+        const match = nome.includes(termo) || marca.includes(termo) || cat.includes(termo) || obs.includes(termo);
+        tr.style.display = match ? '' : 'none';
+      }
+    });
+  }
 
-    /* ===== Tabs pela sidebar ===== */
-    function initSidebarTabs(){
-      const TAB_KEY = 'estab_tab';
-      const buttons = document.querySelectorAll('.sidebar-tab');
-      const panes = document.querySelectorAll('.tab-pane');
+  /* ===== Tabs da sidebar ===== */
+  function initTabs(){
+    const tabs = document.querySelectorAll('.sidebar-tab');
+    const panes = document.querySelectorAll('.tab-pane');
 
-      function activateTab(id){
-        panes.forEach(p=>{
-          if(p.id === id){
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-tab-target');
+        if (!targetId) return;
+
+        tabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        panes.forEach(p => {
+          if (p.id === targetId){
             p.classList.add('show','active');
           }else{
             p.classList.remove('show','active');
           }
         });
-        buttons.forEach(b=>{
-          b.classList.toggle('active', b.getAttribute('data-tab-target') === id);
-        });
-        localStorage.setItem(TAB_KEY,id);
-      }
-
-      buttons.forEach(btn=>{
-        btn.addEventListener('click',()=>{
-          const id = btn.getAttribute('data-tab-target');
-          if(!id) return;
-          activateTab(id);
-        });
       });
+    });
+  }
 
-      const saved = localStorage.getItem(TAB_KEY);
-      if(saved && document.getElementById(saved)){
-        activateTab(saved);
-      }else{
-        activateTab('tab-creditos');
-      }
+  /* ===== Tema (claro/escuro) ===== */
+  function applyTheme(theme){
+    const root = document.documentElement;
+    const icon = document.getElementById('themeIcon');
+    const label = document.getElementById('themeLabel');
+
+    if (!root) return;
+    if (theme === 'dark'){
+      root.setAttribute('data-theme','dark');
+      if (icon) icon.className = 'bi bi-sun';
+      if (label) label.textContent = 'Claro';
+    }else{
+      root.removeAttribute('data-theme');
+      if (icon) icon.className = 'bi bi-moon-stars';
+      if (label) label.textContent = 'Escuro';
     }
+  }
 
-    /* ===== Tema claro/escuro + cor ===== */
-    function initTheme(){
-      const root = document.documentElement;
-      const themeToggle = document.getElementById('themeToggle');
-      const themeIcon = document.getElementById('themeIcon');
-      const themeLabel = document.getElementById('themeLabel');
-      const accentPicker = document.getElementById('accentPicker');
+  function initTheme(){
+    const toggle = document.getElementById('themeToggle');
+    const stored = localStorage.getItem('coopex-theme') || 'light';
+    applyTheme(stored);
 
-      const THEME_KEY = 'estab_theme';
-      const COLOR_KEY = 'estab_accent';
-
-      function applyTheme(t){
-        if(t === 'dark'){
-          root.setAttribute('data-theme','dark');
-          themeIcon.classList.remove('bi-moon-stars');
-          themeIcon.classList.add('bi-sun');
-          themeLabel.textContent = 'Claro';
-        }else{
-          root.setAttribute('data-theme','light');
-          themeIcon.classList.remove('bi-sun');
-          themeIcon.classList.add('bi-moon-stars');
-          themeLabel.textContent = 'Escuro';
-        }
-        localStorage.setItem(THEME_KEY,t);
-      }
-
-      function applyAccent(color){
-        if(!color) return;
-        root.style.setProperty('--accent', color);
-        root.style.setProperty('--accent-soft', color + '22');
-        root.style.setProperty('--thead', color);
-        accentPicker.value = color;
-        localStorage.setItem(COLOR_KEY,color);
-      }
-
-      const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
-      applyTheme(savedTheme);
-
-      const savedColor = localStorage.getItem(COLOR_KEY);
-      if(savedColor){
-        applyAccent(savedColor);
-      }
-
-      themeToggle?.addEventListener('click',()=>{
-        const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-        applyTheme(current === 'dark' ? 'light' : 'dark');
-      });
-
-      accentPicker?.addEventListener('input', e=>{
-        applyAccent(e.target.value);
+    if (toggle){
+      toggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('coopex-theme', next);
+        applyTheme(next);
       });
     }
-  </script>
+  }
+
+  /* ===== Cor de destaque (accent) ===== */
+  function applyAccent(color){
+    if (!color) return;
+    document.documentElement.style.setProperty('--accent', color);
+  }
+
+  function initAccent(){
+    const picker = document.getElementById('accentPicker');
+    const stored = localStorage.getItem('coopex-accent');
+    if (stored){
+      applyAccent(stored);
+      if (picker) picker.value = stored;
+    }
+
+    if (picker){
+      picker.addEventListener('input', () => {
+        const val = picker.value;
+        applyAccent(val);
+        localStorage.setItem('coopex-accent', val);
+      });
+    }
+  }
+
+  /* ===== Data padrão do lançamento (hoje em Brasília) ===== */
+  function initDataLancamentoHoje(){
+    const input = document.getElementById('data_lancamento');
+    if (!input) return;
+    try{
+      const hojeBR = new Date().toLocaleString('en-CA',{timeZone:'America/Sao_Paulo'}).slice(0,10); // YYYY-MM-DD
+      input.value = hojeBR;
+    }catch(e){
+      // fallback: data local
+      const hojeLocal = new Date().toISOString().slice(0,10);
+      input.value = hojeLocal;
+    }
+  }
+
+  /* ===== Som de venda opcional ao lançar ===== */
+  function initSomVenda(){
+    const btnLancar = document.getElementById('btn-lancar');
+    const audio = document.getElementById('snd-venda');
+    if (!btnLancar || !audio) return;
+
+    btnLancar.addEventListener('click', () => {
+      try{
+        audio.currentTime = 0;
+        audio.play();
+      }catch(e){}
+    });
+  }
+
+  /* ===== Init geral ===== */
+  document.addEventListener('DOMContentLoaded', () => {
+    checarCreditoSuficiente();
+    atualizarIndicadores();
+    atualizarBloqueios();
+    initTabs();
+    initTheme();
+    initAccent();
+    initDataLancamentoHoje();
+    initSomVenda();
+
+    // Atualiza bloqueios periodicamente (opcional)
+    setInterval(atualizarBloqueios, 60 * 1000);
+  });
+</script>
 </body>
 </html>
+
