@@ -778,7 +778,9 @@ def excluir_cooperado(id):
 @app.route('/cooperados/foto/<int:id>')
 def foto_cooperado(id):
     c = Cooperado.query.get_or_404(id)
-    cache_sec = int(app.config.get('SEND_FILE_MAX_AGE_DEFAULT', 86400))
+
+    # cache leve só para a foto, sem immutable
+    cache_sec = 30  # 30 segundos já está ótimo
 
     if c.foto_data:
         bio = BytesIO(c.foto_data)
@@ -808,7 +810,12 @@ def foto_cooperado(id):
             )
 
     resp = send_file(BytesIO(b''), mimetype='image/jpeg')
-    return _response_with_cache(resp, cache_sec, etag_base=f"cooperado_empty_{id}")
+    return _response_with_cache(
+        resp,
+        cache_sec,
+        etag_base=f"cooperado_empty_{id}"
+    )
+
 
 # Serve logo do estabelecimento (usado no painel, catálogos, etc.)
 @app.route('/estabelecimento/logo/<int:id>')
