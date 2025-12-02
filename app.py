@@ -1242,18 +1242,24 @@ def painel_estabelecimento():
                     if novo_credito < 0:
                         flash('Crédito insuficiente para este lançamento.', 'danger')
                     else:
-                        # Data padrão: agora em UTC
-                        data_utc = datetime.utcnow()
-
-                        # Se veio uma data do form, converte do fuso de Brasília para UTC (início do dia)
-                        if data_lanc_s:
-                            try:
-                                di_utc, _ = local_bounds_to_utc_naive(data_lanc_s, None)
-                                if di_utc:
-                                    data_utc = di_utc
-                            except Exception:
-                                # se der erro, ignora e usa utcnow()
-                                pass
+                        # ===== NOVO BLOCO: monta data no fuso de Brasília, com a HORA atual =====
+                        try:
+                            if data_lanc_s:
+                                # data escolhida no input (YYYY-MM-DD)
+                                d = datetime.strptime(data_lanc_s, "%Y-%m-%d").date()
+                                agora_brt = datetime.now(BR_TZ)
+                                data_local = datetime(
+                                    d.year, d.month, d.day,
+                                    agora_brt.hour, agora_brt.minute, agora_brt.second,
+                                    tzinfo=BR_TZ
+                                )
+                                data_utc = data_local.astimezone(UTC).replace(tzinfo=None)
+                            else:
+                                # se por algum motivo vier vazio, usa agora em UTC
+                                data_utc = datetime.utcnow()
+                        except Exception:
+                            data_utc = datetime.utcnow()
+                        # ===== FIM NOVO BLOCO =====
 
                         l = Lancamento(
                             data=data_utc,  # salvo em UTC (naive)
@@ -1270,8 +1276,8 @@ def painel_estabelecimento():
                         flash('Lançamento realizado com sucesso!', 'success')
             else:
                 flash('Cooperado não encontrado!', 'danger')
-        else:
-            flash('Preencha todos os campos obrigatórios!', 'danger')
+            else:
+                flash('Preencha todos os campos obrigatórios!', 'danger')
 
     # ========= Filtros (opcionais) no painel do estabelecimento =========
     di_s = request.args.get('data_inicio')
