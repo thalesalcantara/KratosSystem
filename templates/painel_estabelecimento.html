@@ -826,11 +826,19 @@
                 <select class="form-select" id="cooperado_id" name="cooperado_id" required onchange="mostrarInfoCooperado()">
                   <option value="">Selecione...</option>
                   {% for c in cooperados %}
+                  {% set ts =
+                       c.credito_atualizado_em
+                    or c.atualizado_em
+                    or c.updated_at
+                    or c.modificado_em
+                    or c.created_at
+                    or c.criado_em
+                  %}
                   <option
                     value="{{ c.id }}"
                     data-saldo="{{ '{:,.2f}'.format(c.credito) }}"
                     data-saldo-raw="{{ c.credito }}"
-                    data-foto="{{ url_for('foto_cooperado', id=c.id) if (c.foto_data or c.foto) else '' }}"
+                    data-foto="{% if c.foto_data or c.foto %}{{ url_for('foto_cooperado', id=c.id) }}?v={{ (ts.timestamp() * 1000)|int if ts else c.id }}{% endif %}"
                   >{{ c.nome }}</option>
                   {% endfor %}
                 </select>
@@ -1435,7 +1443,7 @@
     const elCount = document.getElementById('k-count');
     const elSum = document.getElementById('k-sum');
     const elMax = document.getElementById('k-max');
-    const elTop = document.getElementById('k-top');
+        const elTop = document.getElementById('k-top');
     const elTopSub = document.getElementById('k-top-sub');
     const elHCount = document.getElementById('h-count');
     const elHSum = document.getElementById('h-sum');
@@ -1732,7 +1740,7 @@
     // Atualiza bloqueios periodicamente (opcional)
     setInterval(atualizarBloqueios, 60 * 1000);
   });
-</script>
+  </script>
 </body>
 </html>
 
