@@ -1147,8 +1147,7 @@ def listar_lancamentos():
 
     # Exibição em Brasília
     for l in lancamentos:
-        brt = to_brt(l.data)
-        l.data = brt.replace(tzinfo=None)  # para o template usar strftime já em Brasília
+        l.data_brasilia = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
 
     return render_template(
         'lancamentos.html',
