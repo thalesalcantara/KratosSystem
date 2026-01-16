@@ -5,7 +5,7 @@
   <title>Lançamentos - Coopex</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
@@ -13,511 +13,475 @@
     :root{
       --bg:#f6f8ff;
       --panel:#ffffff;
-      --line:#e4ebff;
-      --ink:#0f172a;
-      --muted:#5b6b8a;
+      --line:#dbe4ff;
+      --ink:#0b1537;
+      --muted:#56648a;
 
-      --royal:#1f4fff;
-      --royal2:#1b3fd1;
-      --royal3:#6aa6ff;
+      --royal:#1f4fe0;
+      --royal2:#3a66ff;
 
-      --danger:#ef4444;
-      --ok:#10b981;
+      --thead:#f1f5ff;
+      --rowOdd:#ffffff;
+      --rowEven:#f8fbff;
 
-      --thead:#f2f6ff;
-      --shadow: 0 14px 34px rgba(31,79,255,.10);
-      --shadow2: 0 18px 46px rgba(15,23,42,.08);
+      --danger:#e25566;
+      --ok:#2e8b57;
+
+      --shadow: 0 10px 22px rgba(16, 37, 122, .10);
+      --shadow2: 0 18px 38px rgba(16, 37, 122, .14);
+
       --radius: 18px;
     }
 
     *{box-sizing:border-box}
+    html, body{ overflow-x:hidden; }
     body{
-      margin:0;
-      min-height: 100vh;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--ink);
       background:
-        radial-gradient(1200px 420px at 80% -40%, rgba(31,79,255,.12), transparent 70%),
-        radial-gradient(900px 380px at 10% 0%, rgba(16,185,129,.08), transparent 60%),
+        radial-gradient(1200px 420px at 10% -20%, rgba(31,79,224,.14), transparent 70%),
+        radial-gradient(1200px 420px at 95% 0%, rgba(58,102,255,.10), transparent 70%),
         linear-gradient(180deg, var(--bg), var(--bg));
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
     }
 
-    .container-x{
-      max-width: 1280px; /* não deixa “página sobrando demais” */
+    /* Usa a tela toda (sem sobrar “página para o lado”) */
+    .main-content{
+      width: 100%;
+      max-width: none;
+      padding: 22px 22px 30px;
       margin: 0 auto;
-      padding: 18px 12px 26px;
     }
 
-    /* ===== Topbar leve ===== */
     .topbar{
-      position: sticky;
-      top: 12px;
-      z-index: 50;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 14px;
-      border-radius: var(--radius);
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 55%, #1630a8 100%);
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      padding: 14px 16px;
+      border-radius: 18px;
+      box-shadow: var(--shadow2);
       color:#fff;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,.22);
+      position: sticky;
+      top: 14px;
+      z-index: 10;
+      border: 1px solid rgba(255,255,255,.30);
     }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-      min-width: 0;
-    }
-    .brand-ico{
-      width: 44px; height: 44px;
-      border-radius: 14px;
-      display:grid; place-items:center;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.18);
-      flex: 0 0 auto;
-    }
-    .brand-title{
-      min-width: 0;
-      line-height: 1.1;
-    }
-    .brand-title .t{
-      margin:0;
-      font-family: Orbitron, Inter, sans-serif;
+    .topbar .title{
+      display:flex; align-items:center; gap:12px;
+      font-family: Orbitron, sans-serif;
       font-weight: 800;
-      font-size: 15px;
-      letter-spacing: .6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      letter-spacing: .8px;
+      min-width: 260px;
     }
-    .brand-title .s{
-      font-weight: 600;
-      font-size: 12px;
-      opacity: .92;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .brand-badge{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.30);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 10px 18px rgba(0,0,0,.10);
     }
+    .topbar .subtitle{
+      font-family: Inter, sans-serif;
+      font-weight: 700;
+      opacity: .90;
+      letter-spacing: 0;
+      font-size: .9rem;
+    }
+    .topbar .actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
 
-    .top-actions{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .btn-top{
-      height: 42px;
-      padding: 0 12px;
+    .btn-soft{
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.35);
       border-radius: 14px;
       font-weight: 900;
-      border: 1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.10);
-      color:#fff;
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
+      padding: 10px 12px;
+      backdrop-filter: blur(6px);
     }
-    .btn-top:hover{ background: rgba(255,255,255,.16); color:#fff; }
+    .btn-soft:hover{ filter: brightness(1.04); }
 
-    /* ===== Cards ===== */
     .cardx{
-      background: var(--panel);
-      border: 1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(219,228,255,.95);
       border-radius: var(--radius);
-      box-shadow: var(--shadow2);
-      padding: 14px;
-      margin-top: 12px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-top: 14px;
     }
 
-    /* ===== Métricas ===== */
     .stats{
       display:grid;
       grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 12px;
     }
     .stat{
-      border: 1px solid var(--line);
+      background: #fff;
+      border: 1px solid rgba(219,228,255,.95);
       border-radius: 16px;
-      padding: 12px;
-      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
-      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      padding: 12px 14px;
+      box-shadow: 0 10px 18px rgba(31,79,224,.08);
+      position: relative;
+      overflow: hidden;
     }
-    .stat .k{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      color:#1f2b4a;
-      font-weight: 900;
-      font-size: 12px;
-      text-transform: հավելি;
-      letter-spacing: .06em;
+    .stat:before{
+      content:"";
+      position:absolute; inset: -30% -30% auto auto;
+      width: 170px; height: 170px;
+      background: radial-gradient(circle at 30% 30%, rgba(31,79,224,.16), transparent 60%);
+      transform: rotate(18deg);
     }
-    .stat .k i{ color: var(--royal2); }
-    .stat .v{
-      margin-top: 8px;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--royal2);
+    .stat .label{
+      position:relative;
+      color:#24345f; font-weight: 900;
+      display:flex; gap:8px; align-items:center;
+      font-size: .95rem;
+    }
+    .stat .value{
+      position:relative;
+      font: 900 1.35rem/1 Orbitron, sans-serif;
+      color: var(--royal);
+      margin-top: 10px;
       white-space: nowrap;
-      font-variant-numeric: tabular-nums;
     }
-    .stat .s{
-      margin-top: 4px;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 12px;
-    }
+    .stat .sub{ position:relative; color: var(--muted); font-size: .92rem; margin-top: 6px; font-weight: 700; }
 
-    /* ===== Filtros ===== */
-    label{
-      font-weight: 900;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color:#0f172a;
-    }
+    label{ font-weight:900; color: var(--ink); }
+
     .form-control, .form-select{
-      height: 46px;
+      border:2px solid #c7d2ff;
       border-radius: 14px;
-      border: 1px solid #cfe0ff;
+      height: 46px;
+      font-weight: 700;
+      background: #fff;
     }
     .form-control:focus, .form-select:focus{
       border-color: var(--royal);
-      box-shadow: 0 0 0 .2rem rgba(31,79,255,.14);
+      box-shadow: 0 0 0 .2rem rgba(31,79,224,.18);
     }
 
-    .btn-main{
-      height: 46px;
-      border-radius: 14px;
-      font-weight: 900;
-      border: none;
+    .btn-primary{
       background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
-      box-shadow: 0 12px 22px rgba(31,79,255,.14);
-    }
-    .btn-main:hover{ filter: brightness(1.03); }
-
-    .btn-ghost{
-      height: 46px;
+      border:none;
       border-radius: 14px;
+      height: 46px;
       font-weight: 900;
+      box-shadow: 0 12px 22px rgba(31,79,224,.18);
+    }
+    .btn-primary:hover{ filter: brightness(1.03); }
+    .btn-outline-light{
+      border-radius: 14px;
+      height: 46px;
+      border: 2px solid #c7d2ff;
+      color: var(--royal);
       background:#fff;
-      border: 1px solid #cfe0ff;
-      color: var(--royal2);
-    }
-    .btn-ghost:hover{ background:#f1f5ff; }
-
-    .btn-success{
-      height: 46px;
-      border-radius: 14px;
       font-weight: 900;
     }
+    .btn-outline-light:hover{ background:#f1f5ff; color:#12224d; }
+    .btn-success{ border-radius:14px; height:46px; font-weight:900; }
 
     .chips{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      display:flex; flex-wrap:wrap; gap:8px;
       margin-top: 10px;
     }
     .chip{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 8px 10px;
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #f3f6ff;
+      background:#f1f5ff;
+      border: 1px solid rgba(219,228,255,.95);
       color:#1b2b5e;
       font-weight: 900;
-      font-size: 12px;
-      box-shadow: 0 8px 16px rgba(31,79,255,.06);
+      font-size: .9rem;
+      box-shadow: 0 8px 14px rgba(31,79,224,.06);
     }
-    .chip i{ color: var(--royal2); }
+    .chip i{ color: var(--royal); }
 
     .hint{
       color: var(--muted);
-      font-weight: 600;
-      font-size: 12px;
-      margin-top: 8px;
+      font-weight: 700;
+      font-size: .92rem;
     }
 
-    /* ===== TABELA SEM SCROLL LATERAL ===== */
+    /* Tabela sem scroll lateral */
     .table-wrap{
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      overflow: hidden;      /* SEM scroll horizontal */
-      background:#fff;
-    }
-
-    table{
       width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;   /* chave: força caber */
-    }
-
-    thead th{
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: var(--thead);
-      border-bottom: 1px solid var(--line);
-      padding: 10px 8px;
-      font-size: 12px;
-      font-family: Orbitron, Inter, sans-serif;
-      letter-spacing: .7px;
-      color: var(--royal2);
-      text-align: center;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
-
-    tbody td{
-      border-top: 1px solid var(--line);
-      padding: 10px 8px;
-      font-size: 13px;
-      text-align:center;
-      vertical-align: middle;
+      overflow: hidden; /* impede scroll lateral */
+      border-radius: 16px;
+      border: 1px solid rgba(219,228,255,.95);
       background:#fff;
+      box-shadow: 0 10px 22px rgba(31,79,224,.08);
+    }
+
+    table#t-lanc{
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed; /* chave para caber sem overflow */
+      margin: 0;
+    }
+
+    #t-lanc thead th{
+      position: sticky; top: 0; z-index: 2;
+      background: var(--thead);
+      color: var(--royal)!important;
+      font-family: Orbitron, sans-serif;
+      letter-spacing: .8px;
+      border-bottom: 1px solid rgba(219,228,255,.95);
+      text-align:center;
+      padding: 12px 8px;
+      font-size: .92rem;
       white-space: nowrap;
+    }
+
+    #t-lanc tbody td{
+      border-top: 1px solid rgba(219,228,255,.85);
+      vertical-align: middle;
+      padding: 12px 8px;
+      text-align:center;
+      font-size: .94rem;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    tbody tr:nth-child(even) td{ background:#fbfdff; }
-    tbody tr:hover td{ background:#f3f7ff; }
+    #t-lanc tbody tr:nth-child(odd) td{ background: var(--rowOdd); }
+    #t-lanc tbody tr:nth-child(even) td{ background: var(--rowEven); }
+    #t-lanc tbody tr:hover td{ background:#eef4ff!important; }
 
-    /* data em 2 linhas */
-    td.col-data{
-      white-space: normal;
-      line-height: 1.1;
-    }
-    td.col-data small{
-      display:block;
-      color: var(--muted);
-      font-weight: 700;
-      font-size: 12px;
-      margin-top: 2px;
-    }
-
-    /* Cooperado / Estabelecimento quebram linha */
-    td.col-coop, td.col-estab{
-      text-align: left;
-      white-space: normal;
-      overflow: visible;
+    /* Permite nomes maiores em 2 linhas sem estourar */
+    .td-wrap{
+      white-space: normal !important;
+      overflow: hidden;
       text-overflow: clip;
       line-height: 1.15;
+      font-weight: 800;
+      color:#0e1b3f;
+    }
+    .td-sub{
+      display:block;
+      margin-top: 2px;
       font-weight: 700;
+      color:#42507a;
+      font-size: .88rem;
     }
-    td.col-estab{ font-weight: 600; color:#1b2b5e; }
 
-    td.valor{
+    .valor{
       font-weight: 900;
-      color: var(--royal2);
-      font-variant-numeric: tabular-nums;
+      color: var(--royal);
+      white-space: nowrap;
+      font-family: Orbitron, sans-serif;
+      font-size: .98rem;
     }
 
-    /* Pills */
     .pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 7px 10px;
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid var(--line);
+      border:1px solid rgba(219,228,255,.95);
       background:#fff;
       font-weight: 900;
-      font-size: 13px;
       color:#1b2b5e;
       white-space: nowrap;
-      box-shadow: 0 10px 16px rgba(15,23,42,.04);
+      max-width: 100%;
     }
-    .dot{
-      width:10px; height:10px;
-      border-radius:999px;
-      background: var(--royal2);
-      box-shadow: 0 0 0 3px rgba(31,79,255,.12);
+    .pill .dot{
+      width:10px; height:10px; border-radius:999px; background: var(--royal);
+      box-shadow: 0 0 0 3px rgba(31,79,224,.12);
+      flex: 0 0 auto;
     }
-    .pill.ok .dot{ background: var(--ok); box-shadow: 0 0 0 3px rgba(16,185,129,.14); }
-    .pill.danger .dot{ background: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.12); }
+    .pill.ok .dot{ background: var(--ok); box-shadow: 0 0 0 3px rgba(46,139,87,.12); }
+    .pill.danger .dot{ background: var(--danger); box-shadow: 0 0 0 3px rgba(226,85,102,.14); }
 
-    /* Ações compactas */
-    .actions{
-      display:flex;
-      gap: 6px;
-      justify-content:center;
-      align-items:center;
-      flex-wrap: nowrap;
+    .actions-cell{
+      padding: 10px 6px !important;
     }
-    .btn-ico{
-      width: 38px;
-      height: 38px;
+    .btn-ic{
+      display:inline-flex; align-items:center; justify-content:center;
+      width: 42px; height: 42px;
       border-radius: 14px;
-      display:grid;
-      place-items:center;
-      border: 1px solid #cfe0ff;
-      background:#fff;
-      color: var(--royal2);
       font-weight: 900;
+      border: none;
+      box-shadow: 0 10px 18px rgba(31,79,224,.10);
     }
-    .btn-ico:hover{ background:#f1f5ff; }
-    .btn-ico.primary{
-      border:none;
+    .btn-ic.blue{
       background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
       color:#fff;
-      box-shadow: 0 12px 22px rgba(31,79,255,.14);
     }
-    .btn-ico.danger{
-      border:none;
-      background: linear-gradient(90deg, #ef4444, #dc2626);
-      color:#fff;
-      box-shadow: 0 12px 22px rgba(239,68,68,.12);
+    .btn-ic.red{
+      background: #ffebee;
+      border: 1px solid rgba(226,85,102,.25);
+      color: var(--danger);
+      box-shadow: 0 10px 18px rgba(226,85,102,.10);
     }
+    .btn-ic.red:hover{ background:#ffe3e8; }
+    .btn-ic.blue:hover{ filter: brightness(1.03); }
 
     tfoot td{
-      background:#f3f6ff;
-      border-top: 2px solid var(--line);
+      background:#f1f5ff;
+      border-top: 2px solid rgba(219,228,255,.95);
       font-weight: 900;
       color:#1b2b5e;
       padding: 12px 10px;
-      white-space: nowrap;
     }
-
-    /* Larguras: cabem sem scroll */
-    th.w-data{ width: 11%; }
-    th.w-os{ width: 8%; }
-    th.w-coop{ width: 22%; }
-    th.w-estab{ width: 20%; }
-    th.w-compra{ width: 10%; }
-    th.w-parc{ width: 12%; }
-    th.w-sit{ width: 11%; }
-    th.w-acoes{ width: 6%; }
 
     /* Modal */
     .modal-content{
       border-radius: 18px;
-      border: 1px solid var(--line);
-      box-shadow: 0 20px 52px rgba(15,23,42,.16);
+      border: 1px solid rgba(219,228,255,.95);
+      box-shadow: var(--shadow2);
       overflow:hidden;
     }
     .modal-header{
       background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
       color:#fff;
-      border-bottom: 1px solid rgba(255,255,255,.22);
+      border-bottom: 1px solid rgba(255,255,255,.25);
     }
     .modal-title{
-      font-family: Orbitron, Inter, sans-serif;
+      font-family: Orbitron, sans-serif;
       font-weight: 900;
-      letter-spacing: .6px;
+      letter-spacing: .8px;
     }
     .modal-body{
       background:
-        radial-gradient(900px 320px at 85% -10%, rgba(31,79,255,.10), transparent 70%),
+        radial-gradient(900px 320px at 85% -10%, rgba(31,79,224,.10), transparent 70%),
         #fff;
     }
+
     .grid2{
       display:grid;
-      grid-template-columns: 1.2fr .8fr;
+      grid-template-columns: 1.1fr .9fr;
       gap: 12px;
     }
+
     .box{
       background:#fff;
-      border:1px solid var(--line);
+      border:1px solid rgba(219,228,255,.95);
       border-radius: 16px;
       padding: 12px;
-      box-shadow: 0 12px 22px rgba(15,23,42,.06);
+      box-shadow: 0 10px 18px rgba(31,79,224,.08);
     }
+
     .box h6{
-      font-family: Orbitron, Inter, sans-serif;
-      color: var(--royal2);
+      font-family: Orbitron, sans-serif;
+      color: var(--royal);
       letter-spacing: .6px;
       margin: 0 0 10px 0;
       font-weight: 900;
-      font-size: 13px;
+      font-size: .98rem;
     }
+
     .parcelas{
       display:grid;
       grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 10px;
     }
     .parcela{
-      border:1px solid var(--line);
+      border:1px solid rgba(219,228,255,.95);
       border-radius: 16px;
       padding: 10px;
       background:#fff;
+      box-shadow: 0 10px 16px rgba(31,79,224,.06);
       text-align:left;
+      overflow:hidden;
     }
     .parcela .t{
       font-weight: 900;
       color:#1b2b5e;
       display:flex; justify-content:space-between; align-items:center;
       gap: 8px;
+      font-size: .92rem;
     }
     .parcela .v{
-      font: 900 18px/1 Orbitron, Inter, sans-serif;
-      color: var(--royal2);
-      margin-top: 8px;
+      font: 900 1.20rem/1 Orbitron, sans-serif;
+      color: var(--royal);
+      margin-top: 10px;
+      white-space: nowrap;
     }
     .parcela .s{
-      margin-top: 6px;
+      margin-top: 8px;
       color: var(--muted);
-      font-weight: 700;
-      font-size: 12px;
+      font-weight: 800;
+      font-size: .88rem;
+      line-height: 1.25;
     }
     .parcela.paga{
-      background: #f2fff8;
-      border-color: rgba(16,185,129,.25);
+      background: #f3fff7;
+      border-color: rgba(46,139,87,.22);
     }
     .parcela.paga .v{ color: var(--ok); }
 
     .timeline{
       display:flex; flex-direction:column; gap:10px;
-      max-height: 320px;
+      max-height: 340px;
       overflow:auto;
       padding-right: 6px;
     }
     .event{
-      border:1px solid var(--line);
+      border:1px solid rgba(219,228,255,.95);
       border-radius: 16px;
       padding: 10px;
       background:#fff;
+      box-shadow: 0 10px 16px rgba(31,79,224,.06);
     }
     .event .row1{
       display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
     }
-    .event .amt{
-      font-family: Orbitron, Inter, sans-serif;
+    .event .row1 .tag{
+      display:inline-flex; gap:8px; align-items:center;
       font-weight: 900;
-      color: var(--royal2);
+      color:#1b2b5e;
+    }
+    .event .row1 .tag i{ color: var(--royal); }
+    .event .row2{
+      display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .event .amt{
+      font-family: Orbitron, sans-serif;
+      font-weight: 900;
+      color: var(--royal);
       white-space: nowrap;
     }
 
+    /* Colunas (controla largura sem scroll) */
+    colgroup col.c1{ width: 120px; }  /* Data */
+    colgroup col.c2{ width: 90px; }   /* OS */
+    colgroup col.c3{ width: 260px; }  /* Cooperado */
+    colgroup col.c4{ width: 260px; }  /* Estabelecimento */
+    colgroup col.c5{ width: 120px; }  /* Compra */
+    colgroup col.c6{ width: 150px; }  /* Parcela */
+    colgroup col.c7{ width: 190px; }  /* Situação */
+    colgroup col.c8{ width: 120px; }  /* Ações */
+
+    @media (max-width: 1200px){
+      .stats{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      colgroup col.c3, colgroup col.c4{ width: 220px; }
+    }
     @media (max-width: 980px){
       .stats{ grid-template-columns: 1fr; }
       .grid2{ grid-template-columns: 1fr; }
       .parcelas{ grid-template-columns: repeat(2, minmax(0,1fr)); }
       .topbar{ position: static; }
+      /* Em telas pequenas é normal precisar scroll — mas você pediu sem scroll (desktop). */
     }
   </style>
 </head>
 
 <body>
-  <div class="container-x">
-
+  <div class="main-content">
     <div class="topbar">
-      <div class="brand">
-        <div class="brand-ico"><i class="bi bi-journal-text fs-4"></i></div>
-        <div class="brand-title">
-          <div class="t">Lançamentos e Descontos</div>
-          <div class="s">Parcelamento automático em 4x com desconto flexível</div>
+      <div class="title">
+        <div class="brand-badge"><i class="bi bi-journal-text"></i></div>
+        <div>
+          <div style="font-size:1.05rem;">Lançamentos e Descontos</div>
+          <div class="subtitle">Parcelamento automático em 4x com desconto flexível</div>
         </div>
       </div>
-      <div class="top-actions">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-top">
+      <div class="actions">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-soft">
           <i class="bi bi-arrow-left-circle"></i> Dashboard
         </a>
-        <button type="button" class="btn btn-top" id="btn-hoje">
+        <button type="button" class="btn btn-soft" id="btn-hoje">
           <i class="bi bi-sun"></i> Hoje
         </button>
       </div>
@@ -527,24 +491,24 @@
     <div class="cardx">
       <div class="stats">
         <div class="stat">
-          <div class="k"><i class="bi bi-list-ul"></i> Lançamentos</div>
-          <div class="v" id="m-qtd">—</div>
-          <div class="s">Linhas visíveis</div>
+          <div class="label"><i class="bi bi-list-ul"></i> Lançamentos</div>
+          <div class="value" id="m-qtd">—</div>
+          <div class="sub">Linhas visíveis</div>
         </div>
         <div class="stat">
-          <div class="k"><i class="bi bi-cash-coin"></i> Total visível</div>
-          <div class="v" id="m-total">—</div>
-          <div class="s">Somatório dos valores</div>
+          <div class="label"><i class="bi bi-cash-coin"></i> Total visível</div>
+          <div class="value" id="m-total">—</div>
+          <div class="sub">Somatório dos valores</div>
         </div>
         <div class="stat">
-          <div class="k"><i class="bi bi-graph-up"></i> Ticket médio</div>
-          <div class="v" id="m-media">—</div>
-          <div class="s">Média por lançamento</div>
+          <div class="label"><i class="bi bi-graph-up"></i> Ticket médio</div>
+          <div class="value" id="m-media">—</div>
+          <div class="sub">Média por lançamento</div>
         </div>
         <div class="stat">
-          <div class="k"><i class="bi bi-credit-card-2-front"></i> Parcelas</div>
-          <div class="v" id="m-parc">—</div>
-          <div class="s">4x automático</div>
+          <div class="label"><i class="bi bi-credit-card-2-front"></i> Parcelas (4x)</div>
+          <div class="value" id="m-parc">—</div>
+          <div class="sub">Regras automáticas</div>
         </div>
       </div>
     </div>
@@ -553,7 +517,7 @@
     <div class="cardx">
       <form id="form-filtros" method="get" action="{{ url_for('listar_lancamentos') }}">
         <div class="row g-3 align-items-end">
-          <div class="col-md-3">
+          <div class="col-xl-3 col-lg-4 col-md-6">
             <label for="cooperado_id">Cooperado</label>
             <select name="cooperado_id" id="cooperado_id" class="form-select">
               <option value="">Todos</option>
@@ -563,7 +527,7 @@
             </select>
           </div>
 
-          <div class="col-md-3">
+          <div class="col-xl-3 col-lg-4 col-md-6">
             <label for="estabelecimento_id">Estabelecimento</label>
             <select name="estabelecimento_id" id="estabelecimento_id" class="form-select">
               <option value="">Todos</option>
@@ -573,37 +537,43 @@
             </select>
           </div>
 
-          <div class="col-md-2">
+          <div class="col-xl-2 col-lg-2 col-md-6">
             <label for="data_inicio">Data Início</label>
             <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ filtros.data_inicio or '' }}">
           </div>
 
-          <div class="col-md-2">
+          <div class="col-xl-2 col-lg-2 col-md-6">
             <label for="data_fim">Data Fim</label>
             <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ filtros.data_fim or '' }}">
           </div>
 
-          <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-main text-white">
-              <i class="bi bi-funnel"></i> Filtrar
-            </button>
+          <div class="col-xl-2 col-lg-12">
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel"></i> Filtrar
+              </button>
+            </div>
           </div>
 
-          <div class="col-md-2 d-grid">
-            <button type="button" class="btn btn-success" onclick="exportarExcel()">
-              <i class="bi bi-file-earmark-excel"></i> Exportar Excel
-            </button>
+          <div class="col-xl-2 col-lg-6 col-md-6">
+            <div class="d-grid">
+              <button type="button" class="btn btn-success" onclick="exportarExcel()">
+                <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+              </button>
+            </div>
           </div>
 
-          <div class="col-md-2 d-grid">
-            <button type="button" class="btn btn-ghost" id="btn-limpar">
-              <i class="bi bi-x-circle"></i> Limpar
-            </button>
+          <div class="col-xl-2 col-lg-6 col-md-6">
+            <div class="d-grid">
+              <button type="button" class="btn btn-outline-light" id="btn-limpar">
+                <i class="bi bi-x-circle"></i> Limpar
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="chips" id="chips-filtros"></div>
-        <div class="hint">
+        <div class="hint mt-2">
           Dica: clique no botão azul (cartão) para registrar descontos com data e editar quando quiser.
         </div>
       </form>
@@ -612,17 +582,20 @@
     <!-- Tabela -->
     <div class="cardx">
       <div class="table-wrap">
-        <table id="t-lanc">
+        <table class="align-middle" id="t-lanc">
+          <colgroup>
+            <col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"><col class="c6"><col class="c7"><col class="c8">
+          </colgroup>
           <thead>
             <tr>
-              <th class="w-data"><i class="bi bi-calendar-event"></i> Data</th>
-              <th class="w-os"><i class="bi bi-file-earmark-text"></i> Nº OS</th>
-              <th class="w-coop"><i class="bi bi-person"></i> Cooperado</th>
-              <th class="w-estab"><i class="bi bi-shop"></i> Estabelecimento</th>
-              <th class="w-compra"><i class="bi bi-currency-dollar"></i> Compra</th>
-              <th class="w-parc"><i class="bi bi-collection"></i> Parcela (4x)</th>
-              <th class="w-sit"><i class="bi bi-clipboard-check"></i> Situação</th>
-              <th class="w-acoes"><i class="bi bi-sliders2"></i> Ações</th>
+              <th><i class="bi bi-calendar-event"></i> Data</th>
+              <th><i class="bi bi-file-earmark-text"></i> Nº OS</th>
+              <th><i class="bi bi-person"></i> Cooperado</th>
+              <th><i class="bi bi-shop"></i> Estabelecimento</th>
+              <th><i class="bi bi-currency-dollar"></i> Compra</th>
+              <th><i class="bi bi-collection"></i> Parcela (4x)</th>
+              <th><i class="bi bi-clipboard-check"></i> Situação</th>
+              <th><i class="bi bi-sliders2"></i> Ações</th>
             </tr>
           </thead>
 
@@ -638,42 +611,31 @@
                     data-estab="{{ l.estabelecimento.nome }}"
                     data-desc="{{ (l.descricao or '')|e }}"
                     data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'>
-
-                  <td class="col-data">
-                    <div>{{ l.data.strftime('%d/%m/%Y') }}</div>
-                    <small>{{ l.data.strftime('%H:%M') }}</small>
+                  <td>
+                    <span style="font-weight:900">{{ l.data.strftime('%d/%m/%Y') }}</span>
+                    <span class="td-sub">{{ l.data.strftime('%H:%M') }}</span>
                   </td>
-
-                  <td style="font-weight:900">{{ l.os_numero }}</td>
-
-                  <td class="col-coop">{{ l.cooperado.nome }}</td>
-
-                  <td class="col-estab">{{ l.estabelecimento.nome }}</td>
-
-                  <td class="valor" data-col="compra">
-                    {{ "{:,.2f}".format(l.valor).replace(",", "X").replace(".", ",").replace("X", ".") }}
-                  </td>
-
+                  <td class="fw-bold">{{ l.os_numero }}</td>
+                  <td class="td-wrap">{{ l.cooperado.nome }}</td>
+                  <td class="td-wrap">{{ l.estabelecimento.nome }}</td>
+                  <td class="valor">{{ "{:,.2f}".format(l.valor) }}</td>
                   <td>
                     <span class="pill"><span class="dot"></span><span class="vparc">—</span></span>
                   </td>
-
                   <td>
-                    <span class="pill danger"><span class="dot"></span><span class="sit">—</span></span>
+                    <span class="pill danger"><span class="dot"></span><span class="sit">Pendente</span></span>
                   </td>
-
-                  <td>
-                    <div class="actions">
-                      <button type="button" class="btn-ico primary" title="Descontar / Parcelas" onclick="abrirParcelas({{ l.id }})">
+                  <td class="actions-cell">
+                    <div class="d-flex gap-2 justify-content-center">
+                      <button type="button" class="btn-ic blue" title="Descontar / Parcelas" onclick="abrirParcelas({{ l.id }})">
                         <i class="bi bi-credit-card-2-front"></i>
                       </button>
 
                       <form method="post"
                             action="{{ url_for('excluir_lancamento', id=l.id) }}"
-                            onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');"
-                            style="margin:0">
+                            onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');">
                         <input type="hidden" name="next" value="{{ request.full_path }}">
-                        <button type="submit" class="btn-ico danger" title="Excluir">
+                        <button type="submit" class="btn-ic red" title="Excluir">
                           <i class="bi bi-trash"></i>
                         </button>
                       </form>
@@ -682,7 +644,7 @@
                 </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="8" style="padding:14px;text-align:center;color:var(--muted);font-weight:700">Nenhum lançamento encontrado.</td></tr>
+              <tr><td colspan="8" style="padding:16px">Nenhum lançamento encontrado.</td></tr>
             {% endif %}
           </tbody>
 
@@ -696,7 +658,6 @@
         </table>
       </div>
     </div>
-
   </div>
 
   <!-- Modal Parcelas / Descontos -->
@@ -734,7 +695,7 @@
                   <input type="text" class="form-control" id="mp-valor" placeholder="Ex.: 20,00">
                 </div>
                 <div class="col-12 d-grid mt-1">
-                  <button type="button" class="btn btn-main text-white" id="mp-add">
+                  <button type="button" class="btn btn-primary" id="mp-add">
                     <i class="bi bi-plus-circle"></i> Registrar desconto
                   </button>
                 </div>
@@ -743,23 +704,20 @@
               <div class="mt-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <h6 class="m-0"><i class="bi bi-clock-history"></i> Histórico (editável)</h6>
-                  <button class="btn btn-ghost btn-sm" type="button" id="mp-clear-local" title="Limpa apenas no navegador (teste)">
-                    Limpar local
-                  </button>
                 </div>
                 <div class="hint mt-1">Você pode editar a data e o valor de qualquer desconto.</div>
                 <div class="timeline mt-2" id="mp-timeline"></div>
               </div>
 
               <div class="hint mt-3">
-                Enquanto não tiver endpoint de banco, o navegador salva localmente para não “sumir”.
+                Observação: se você ainda não salvou no banco, os descontos ficam no navegador até você integrar a API.
               </div>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fechar</button>
         </div>
       </div>
     </div>
@@ -797,16 +755,20 @@
     }
 
     // =========================
-    // Armazenamento local (provisório)
+    // Armazenamento local (silencioso)
     // =========================
     function keyDescontos(id){ return `coopex_descontos_${id}`; }
 
     function getHistorico(row){
       const id = row.dataset.id;
+
+      // 1) localStorage (se existir)
       const ls = localStorage.getItem(keyDescontos(id));
       if (ls){
-        try { return JSON.parse(ls) || []; } catch(e){}
+        try { return JSON.parse(ls) || []; } catch(e){ /* ignore */ }
       }
+
+      // 2) back-end (se vier no data-historico)
       try{
         const raw = row.dataset.historico || '[]';
         const arr = JSON.parse(raw);
@@ -818,10 +780,6 @@
 
     function setHistorico(id, hist){
       localStorage.setItem(keyDescontos(id), JSON.stringify(hist || []));
-    }
-
-    function clearHistorico(id){
-      localStorage.removeItem(keyDescontos(id));
     }
 
     // =========================
@@ -869,7 +827,9 @@
         restante = to2(restante - sugerida);
 
         parcelas.push({
-          n: i, base, sugerida, pago: pagoNesta, faltou,
+          n: i, base, sugerida,
+          pago: pagoNesta,
+          faltou,
           status: (faltou <= 0.0001) ? 'paga' : 'pendente'
         });
       }
@@ -925,8 +885,28 @@
       if (df) add('bi-calendar-minus', `Fim: ${new Date(df+'T00:00:00').toLocaleDateString('pt-BR')}`);
     }
 
+    // Default mês atual sem loop / sumir
+    (function defaultMesAtualGuard(){
+      const hasDI = "{{ filtros.data_inicio or '' }}";
+      const hasDF = "{{ filtros.data_fim or '' }}";
+      if (!hasDI && !hasDF){
+        const guardKey = 'coopex_default_mes_atual_aplicado';
+        if (sessionStorage.getItem(guardKey) === '1') return;
+        sessionStorage.setItem(guardKey, '1');
+
+        const now = new Date();
+        const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        const url = new URL(window.location.href);
+        url.searchParams.set('data_inicio', localISODate(first));
+        url.searchParams.set('data_fim', localISODate(now));
+        window.location.replace(url.toString());
+      }else{
+        sessionStorage.removeItem('coopex_default_mes_atual_aplicado');
+      }
+    })();
+
     // =========================
-    // Preenche Parcela sugerida e Situação (SEM "Saldo"; usa "Total")
+    // Preenche "Parcela" e "Situação"
     // =========================
     function atualizarLinhaParcelas(tr){
       const total = parseFloat(tr.dataset.valor || '0') || 0;
@@ -947,8 +927,7 @@
         pill.classList.remove('danger');
         pill.classList.add('ok');
       }else{
-        // AQUI: mostra Total (como você pediu), não "Saldo"
-        sitEl.textContent = `Total ${brl(calc.total)}`;
+        sitEl.textContent = `Total ${brl(calc.saldo)}`;
         pill.classList.remove('ok');
         pill.classList.add('danger');
       }
@@ -961,7 +940,7 @@
     }
 
     // =========================
-    // Modal: Parcelas / Descontos
+    // Modal
     // =========================
     let modal;
     let currentId = null;
@@ -1006,28 +985,23 @@
         ev.className = 'event';
         ev.innerHTML = `
           <div class="row1">
-            <span style="font-weight:900;color:#1b2b5e">
-              <i class="bi bi-calendar2-check" style="color:var(--royal2)"></i>
-              Desconto #${idx+1}
-            </span>
+            <span class="tag"><i class="bi bi-calendar2-check"></i> Desconto #${idx+1}</span>
             <span class="amt">${brl(parseFloat(d.valor)||0)}</span>
           </div>
-
-          <div class="row g-2 mt-2 align-items-end">
-            <div class="col-md-6">
-              <label class="mb-1" style="font-size:.78rem">Data</label>
+          <div class="row2">
+            <div style="min-width:220px">
+              <label class="mb-1" style="font-size:.88rem">Data</label>
               <input type="date" class="form-control form-control-sm" value="${(d.data||'').slice(0,10)}" data-edit-date="${idx}">
             </div>
-            <div class="col-md-6">
-              <label class="mb-1" style="font-size:.78rem">Valor</label>
+            <div style="min-width:220px">
+              <label class="mb-1" style="font-size:.88rem">Valor</label>
               <input type="text" class="form-control form-control-sm" value="${formatBRInput(parseFloat(d.valor)||0)}" data-edit-valor="${idx}">
             </div>
-
-            <div class="col-12 d-flex gap-2 justify-content-end">
-              <button type="button" class="btn btn-sm btn-primary" style="border-radius:12px;font-weight:900" data-save="${idx}">
+            <div class="d-flex align-items-end gap-2">
+              <button type="button" class="btn btn-primary btn-sm" data-save="${idx}">
                 <i class="bi bi-check2-circle"></i> Salvar
               </button>
-              <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:12px;font-weight:900" data-del="${idx}">
+              <button type="button" class="btn btn-outline-light btn-sm" data-del="${idx}">
                 <i class="bi bi-trash3"></i> Remover
               </button>
             </div>
@@ -1091,12 +1065,21 @@
       const date = (document.getElementById('mp-date').value || '').slice(0,10);
       const val = parseBRL(document.getElementById('mp-valor').value);
 
-      if(!date){ alert('Informe a data do desconto.'); return; }
-      if(isNaN(val) || val <= 0){ alert('Informe um valor válido para o desconto.'); return; }
+      if(!date){
+        alert('Informe a data do desconto.');
+        return;
+      }
+      if(isNaN(val) || val <= 0){
+        alert('Informe um valor válido para o desconto.');
+        return;
+      }
 
       const hist = getHistorico(tr);
       hist.push({ data: date, valor: to2(val) });
       setHistorico(currentId, hist);
+
+      // Ideal: salvar no banco via endpoint (quando você tiver a API)
+      // fetch(`/api/lancamentos/${currentId}/descontos`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({data:date, valor:val}) })
 
       refreshModal();
       document.getElementById('mp-valor').value = '';
@@ -1107,7 +1090,6 @@
       if(!tr) return;
 
       const hist = getHistorico(tr);
-
       const dateInput = document.querySelector(`[data-edit-date="${idx}"]`);
       const valInput  = document.querySelector(`[data-edit-valor="${idx}"]`);
       if(!dateInput || !valInput) return;
@@ -1115,11 +1097,20 @@
       const date = (dateInput.value || '').slice(0,10);
       const val  = parseBRL(valInput.value);
 
-      if(!date){ alert('Informe a data do desconto.'); return; }
-      if(isNaN(val) || val <= 0){ alert('Informe um valor válido.'); return; }
+      if(!date){
+        alert('Informe a data do desconto.');
+        return;
+      }
+      if(isNaN(val) || val <= 0){
+        alert('Informe um valor válido.');
+        return;
+      }
 
       hist[idx] = { ...hist[idx], data: date, valor: to2(val) };
       setHistorico(currentId, hist);
+
+      // Ideal: atualizar no banco
+      // fetch(`/api/descontos/${hist[idx].id}`, { method:'PUT', ... })
 
       refreshModal();
     }
@@ -1127,9 +1118,14 @@
     function removerDesconto(idx){
       const tr = getRowById(currentId);
       if(!tr) return;
+
       const hist = getHistorico(tr);
       hist.splice(idx, 1);
       setHistorico(currentId, hist);
+
+      // Ideal: remover do banco
+      // fetch(`/api/descontos/${id}`, { method:'DELETE' })
+
       refreshModal();
     }
 
@@ -1164,15 +1160,6 @@
     document.addEventListener('DOMContentLoaded', ()=>{
       modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
       document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
-
-      document.getElementById('mp-clear-local').addEventListener('click', ()=>{
-        if(!currentId) return;
-        if(confirm('Limpar descontos apenas do navegador (teste)?')){
-          clearHistorico(currentId);
-          refreshModal();
-        }
-      });
-
       atualizarTodasLinhas();
     });
   </script>
