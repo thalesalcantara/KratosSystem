@@ -286,6 +286,7 @@ class Lancamento(db.Model):
     descricao = db.Column(db.String(250))
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
+    
         # ===== NOVO: controle de desconto manual em "4x" =====
     parcelas_total = db.Column(db.Integer, default=4)     # só controle visual
     saldo_aberto = db.Column(db.Float, nullable=True)     # quanto falta concluir
@@ -1246,7 +1247,7 @@ def excluir_lancamento(id):
     cooperado = Cooperado.query.get(l.cooperado_id)
     if cooperado:
         valor_restante = float(l.saldo_aberto) if (l.saldo_aberto is not None) else float(l.valor or 0)
-cooperado.credito += valor_restante
+        cooperado.credito += valor_restante
 
     try:
         db.session.delete(l)
@@ -1259,6 +1260,7 @@ cooperado.credito += valor_restante
 
     next_url = request.form.get('next') or url_for('listar_lancamentos')
     return redirect(next_url)
+
 
 @app.post('/lancamentos/<int:id>/descontar')
 def descontar_lancamento_admin(id):
@@ -1364,16 +1366,17 @@ def painel_estabelecimento():
                         # ===== FIM BLOCO DATA =====
 
                         l = Lancamento(
-                            data=data_utc,  # salvo em UTC (naive)
+                            data=data_utc,
                             os_numero=os_numero,
                             cooperado_id=c.id,
                             estabelecimento_id=est.id,
                             valor=valor_f,
-                            descricao=descricao
+                            descricao=descricao,
                             parcelas_total=4,
                             saldo_aberto=valor_f,
                             concluido=False
                         )
+
                         db.session.add(l)
                         c.credito = novo_credito
                         db.session.commit()
@@ -1997,7 +2000,7 @@ def estab_excluir_lancamento(id):
         return redirect(url_for('painel_estabelecimento'))
 
     valor_restante = float(l.saldo_aberto) if (l.saldo_aberto is not None) else float(l.valor or 0)
-cooperado.credito += valor_restante
+    cooperado.credito += valor_restante
 
     db.session.delete(l)
     db.session.commit()
