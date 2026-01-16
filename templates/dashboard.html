@@ -4,369 +4,910 @@
   <meta charset="UTF-8" />
   <title>Dashboard Admin - Coopex</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Fonts + Bootstrap + Icons + Chart.js -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
-      /* Tema: Azul Royal (#4169e1) + Branco */
-      --bg:#f7f9ff;
+      /* Mesma paleta do HTML anterior */
+      --bg:#f6f8ff;
       --panel:#ffffff;
-      --panel2:#ffffff;
-      --line:#e5ebff;
-      --ink:#0d1b3f;
-      --muted:#5c6c92;
-      --gold:#4169e1;     /* reaproveitado como cor destaque (royal) */
-      --accent:#4169e1;
+      --line:#e4ebff;
+      --ink:#0f172a;
+      --muted:#5b6b8a;
 
-      --ok:#43d38b;
-      --warn:#ffb84d;
-      --danger:#ff6b7a;
+      --royal:#1f4fff;
+      --royal2:#1b3fd1;
+      --royal3:#6aa6ff;
+
+      --thead:#f2f6ff;
+      --shadow: 0 14px 34px rgba(31,79,255,.10);
+      --shadow2: 0 18px 46px rgba(15,23,42,.08);
+      --radius: 18px;
+
+      --warn1:#ffd24d;
+      --warn2:#ffb84d;
+      --danger1:#ef4444;
+      --danger2:#dc2626;
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0;min-height:100vh;
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
       background:
-        radial-gradient(1200px 500px at 85% -20%, rgba(65,105,225,.12), transparent 60%),
+        radial-gradient(1200px 420px at 80% -40%, rgba(31,79,255,.12), transparent 70%),
+        radial-gradient(900px 380px at 10% 0%, rgba(31,79,255,.06), transparent 60%),
         linear-gradient(180deg, var(--bg), var(--bg));
-      color:var(--ink);font-family:Roboto,Arial,sans-serif;
+      overflow-x:hidden;
+    }
+
+    /* ===== Layout ===== */
+    .page{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 280px 1fr;
     }
 
     /* ===== Sidebar ===== */
     .sidebar{
-      width:230px;height:100vh;position:fixed;left:0;top:0;z-index:10;
-      background:#ffffff;
-      border-right:1px solid var(--line);
-      box-shadow: 3px 0 18px rgba(65,105,225,.12);
-      display:flex;flex-direction:column;align-items:center;padding:20px 10px;
-      color:var(--ink);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 16px 14px;
+      border-right: 1px solid var(--line);
+      background:
+        radial-gradient(1000px 420px at 50% -30%, rgba(31,79,255,.12), transparent 60%),
+        #fff;
+      box-shadow: 8px 0 22px rgba(15,23,42,.04);
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
     }
-    .logo{width:168px;filter:drop-shadow(0 0 14px rgba(65,105,225,.35));margin:8px auto 6px}
-    .sidebar-funcao{font-family:Orbitron,sans-serif;color:var(--gold);font-weight:700;margin:8px 0 18px}
-    .nav-link{
-      width:100%;color:var(--ink);border-radius:10px;padding:10px 14px;margin:3px 0;
-      display:flex;align-items:center;gap:10px;text-decoration:none;
-      transition:background .18s ease,color .18s ease;
-    }
-    .nav-link:hover,.nav-link.active{background:#eef3ff;color:var(--gold)}
-    .nav-link i{font-size:1.2rem;color:var(--gold)}
 
-    /* ===== Main ===== */
-    .main{margin-left:230px;padding:22px 18px}
-    .topbar{
-      background:linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
-      border:1px solid rgba(255,255,255,.28);
-      border-radius:14px;padding:10px 14px;margin-bottom:16px;
-      display:flex;align-items:center;gap:10px;justify-content:flex-end;
-      box-shadow:0 12px 28px rgba(65,105,225,.22);
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+    }
+    .brand img{
+      width: 48px; height: 48px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #f3f6ff;
+      border: 1px solid var(--line);
+      padding: 6px;
+    }
+    .brand .t{
+      margin:0;
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      letter-spacing: .6px;
+      font-size: 14px;
+      color: var(--royal2);
+      line-height: 1.1;
+    }
+    .brand .s{
+      margin: 2px 0 0 0;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .navx{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .navx a{
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background:#fff;
+      color: var(--ink);
+      font-weight: 900;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      transition: transform .08s ease, filter .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .navx a i{ color: var(--royal2); font-size: 1.15rem; }
+    .navx a:hover{
+      transform: translateY(-1px);
+      background: #f3f7ff;
+      box-shadow: 0 14px 30px rgba(31,79,255,.10);
+    }
+    .navx a.active{
+      border: none;
       color:#fff;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      box-shadow: 0 14px 30px rgba(31,79,255,.18);
     }
-    .topbar .who{margin-right:auto;color:#fff;font-weight:800}
-    .topbar .btn-outline-warning{border-color:#fff;color:#fff}
-    .topbar .btn-outline-warning:hover{background:#fff;color:#4169e1}
+    .navx a.active i{ color:#fff; }
 
-    h2{font-family:Orbitron,sans-serif;color:var(--gold);letter-spacing:1.4px;margin:8px 0 14px}
-
-    /* ===== Cards/KPIs ===== */
-    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
-    .kpi{
-      background:linear-gradient(160deg, var(--panel), var(--panel2));
-      border:1px solid var(--line);border-radius:14px;padding:12px 14px;
-      box-shadow: 0 8px 22px rgba(65,105,225,.08);
+    .sidebar .mini{
+      margin-top:auto;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
     }
-    .kpi .label{color:#1b2b5e;display:flex;align-items:center;gap:8px;font-weight:800}
-    .kpi .value{font:900 1.35rem Orbitron,sans-serif;color:var(--gold);margin-top:6px}
-    .kpi .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
+    .mini .who{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+    .who .dot{
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      background: #f3f6ff;
+      border: 1px solid var(--line);
+      display:grid;
+      place-items:center;
+      color: var(--royal2);
+      font-size: 1.2rem;
+    }
+    .who .name{
+      min-width:0;
+      font-weight: 900;
+      color:#1b2b5e;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .who .role{
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .mini .btns{
+      display:flex;
+      gap: 8px;
+    }
+    .btn-side{
+      flex:1;
+      height: 42px;
+      border-radius: 14px;
+      font-weight: 900;
+      border: 1px solid #cfe0ff;
+      background:#fff;
+      color: var(--royal2);
+    }
+    .btn-side:hover{ background:#f1f5ff; }
 
+    /* ===== Content ===== */
+    .content{
+      padding: 18px 16px 28px;
+      min-width: 0;
+    }
+
+    /* ===== Header ===== */
+    .header{
+      position: sticky;
+      top: 12px;
+      z-index: 40;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 14px;
+      border-radius: var(--radius);
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 55%, #1630a8 100%);
+      color:#fff;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.22);
+    }
+    .header .left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width:0;
+    }
+    .header .ico{
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      flex:0 0 auto;
+    }
+    .header h1{
+      margin:0;
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: .7px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .header .sub{
+      margin:2px 0 0 0;
+      font-weight: 700;
+      font-size: 12px;
+      opacity:.92;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .header .actions{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn-top{
+      height: 42px;
+      padding: 0 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .btn-top:hover{ background: rgba(255,255,255,.16); color:#fff; }
+    .btn-top.primary{
+      border:none;
+      background: rgba(255,255,255,.92);
+      color: var(--royal2);
+      box-shadow: 0 12px 22px rgba(15,23,42,.10);
+    }
+    .btn-top.primary:hover{ filter: brightness(1.02); }
+
+    /* ===== Cards ===== */
+    .cardx{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    /* ===== Filter card ===== */
+    .filter-grid{
+      display:grid;
+      grid-template-columns: 1.2fr 1.2fr .9fr .9fr;
+      gap: 12px;
+      align-items:end;
+    }
+    .filter-grid label{
+      font-weight: 900;
+      color:#1b2b5e;
+      font-size: 12px;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .field{
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid #cfe0ff;
+      padding: 0 12px;
+      font-weight: 800;
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+    }
+    .field:focus{
+      outline:none;
+      border-color: var(--royal);
+      box-shadow: 0 0 0 .2rem rgba(31,79,255,.14);
+    }
+    .filter-actions{
+      display:flex;
+      gap: 10px;
+      justify-content:flex-end;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .btn-main{
+      height: 48px;
+      border-radius: 16px;
+      font-weight: 900;
+      border: none;
+      padding: 0 14px;
+      color:#fff;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      box-shadow: 0 12px 22px rgba(31,79,255,.14);
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .btn-main:hover{ filter:brightness(1.02); color:#fff; }
+    .btn-ghost{
+      height: 48px;
+      border-radius: 16px;
+      font-weight: 900;
+      background:#fff;
+      border: 1px solid #cfe0ff;
+      color: var(--royal2);
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .btn-ghost:hover{ background:#f1f5ff; }
+    .chips{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
     .chip{
-      display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
-      border:1px solid var(--line);background:#f1f5ff;color:#1b2b5e;font-weight:800;font-size:.85rem
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f3f6ff;
+      color:#1b2b5e;
+      font-weight: 900;
+      font-size: 12px;
+      box-shadow: 0 8px 16px rgba(31,79,255,.06);
     }
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
+    .chip i{ color: var(--royal2); }
 
-    /* ===== Cards de navegação ===== */
-    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
-    .card-quick{
-      text-decoration:none;background:#ffffff;
-      border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center;
-      color:var(--ink);transition:transform .12s ease, filter .12s ease, box-shadow .12s ease;
-      box-shadow:0 8px 20px rgba(65,105,225,.10);
+    /* ===== KPIs ===== */
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+      gap: 12px;
     }
-    .card-quick:hover{transform:translateY(-3px);filter:brightness(1.02);box-shadow:0 12px 26px rgba(65,105,225,.16)}
-    .card-quick i{font-size:2rem;color:var(--gold);display:block;margin-bottom:6px}
-    .card-quick .big{font:900 1.2rem Orbitron,sans-serif;color:var(--gold)}
-
-    /* ===== Painéis ===== */
-    .panel{
-      background:linear-gradient(160deg, var(--panel), var(--panel2));
-      border:1px solid var(--line);border-radius:16px;padding:14px;
-      margin-top:12px; box-shadow:0 8px 20px rgba(65,105,225,.08);
-      color:var(--ink);
+    .kpi{
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      min-width: 0;
     }
-    .panel h3{font:700 1.05rem Orbitron,sans-serif;color:var(--gold);margin:4px 0 10px}
-    .panel small{color:var(--muted)}
+    .kpi .k{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      color:#1f2b4a;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .kpi .k i{ color: var(--royal2); }
+    .kpi .v{
+      margin-top: 8px;
+      font: 900 22px/1 Orbitron, Inter, sans-serif;
+      color: var(--royal2);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .kpi .s{
+      margin-top: 6px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
 
-    /* ===== Top cooperados list ===== */
-    .toplist{display:grid;grid-template-columns:1fr;gap:8px}
-    .topitem{display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-    .topitem .rank{width:28px;height:28px;border-radius:8px;background:#eef3ff;display:flex;align-items:center;justify-content:center;font-weight:800;color:#1b2b5e}
-    .bar{height:8px;background:#eef3ff;border-radius:999px;overflow:hidden}
-    .bar>span{display:block;height:100%;background:linear-gradient(90deg,#4169e1,#7da0ff);}
+    /* ===== Quick actions ===== */
+    .quick{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+    }
+    .qcard{
+      text-decoration:none;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      color: var(--ink);
+      transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      min-width:0;
+    }
+    .qcard:hover{
+      transform: translateY(-1px);
+      background:#f3f7ff;
+      box-shadow: 0 14px 30px rgba(31,79,255,.10);
+    }
+    .qicon{
+      width: 46px; height: 46px;
+      border-radius: 16px;
+      display:grid;
+      place-items:center;
+      background: #f3f6ff;
+      border: 1px solid var(--line);
+      color: var(--royal2);
+      font-size: 1.25rem;
+      flex:0 0 auto;
+    }
+    .qtitle{
+      font-weight: 900;
+      color:#1b2b5e;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .qsub{
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-    /* ===== Chart area ===== */
+    /* ===== Charts area ===== */
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.35fr .95fr;
+      gap: 12px;
+      align-items:start;
+    }
+    .panel-title{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 2px 0 10px;
+    }
+    .panel-title h3{
+      margin:0;
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      letter-spacing:.7px;
+      color: var(--royal2);
+      font-size: 14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .panel-title small{
+      color: var(--muted);
+      font-weight: 700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      display:block;
+    }
     #graficoCooperados{max-height:360px}
 
-    /* ===== Notify ===== */
+    /* Top list */
+    .toplist{display:grid;grid-template-columns:1fr;gap:10px}
+    .topitem{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      min-width:0;
+    }
+    .rank{
+      width: 34px; height: 34px;
+      border-radius: 14px;
+      background: #f3f6ff;
+      border: 1px solid var(--line);
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      color: var(--royal2);
+      flex:0 0 auto;
+    }
+    .bar{
+      height: 10px;
+      background:#eef3ff;
+      border-radius:999px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+    }
+    .bar>span{
+      display:block;
+      height:100%;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
+    }
+
+    /* Notify */
     #notif-container{position:fixed;top:16px;right:16px;z-index:9999}
     .notif{
-      background:#4169e1;color:#fff;font-weight:900;border-radius:12px;padding:10px 14px;margin-top:8px;
-      box-shadow:0 10px 24px rgba(65,105,225,.28),0 2px 6px rgba(65,105,225,.25);
-      opacity:0;transform:translateY(-10px);transition:opacity .18s,transform .18s
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      color:#fff;
+      font-weight: 900;
+      border-radius: 16px;
+      padding: 10px 14px;
+      margin-top: 8px;
+      box-shadow: 0 12px 26px rgba(31,79,255,.18);
+      opacity:0;
+      transform:translateY(-10px);
+      transition:opacity .18s,transform .18s;
+      border: 1px solid rgba(255,255,255,.22);
     }
     .notif.show{opacity:1;transform:translateY(0)}
 
-    @media (max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.cards{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:900px){.sidebar{display:none}.main{margin-left:0;padding:12px}.kpis{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}}
+    /* Responsive */
+    @media (max-width: 1180px){
+      .kpis{grid-template-columns: repeat(3, minmax(0,1fr));}
+      .quick{grid-template-columns: repeat(2, minmax(0,1fr));}
+      .grid2{grid-template-columns: 1fr;}
+    }
+    @media (max-width: 1100px){
+      .page{grid-template-columns: 1fr;}
+      .sidebar{position: static;height:auto;border-right:none;border-bottom:1px solid var(--line);}
+    }
+    @media (max-width: 720px){
+      .filter-grid{grid-template-columns: 1fr;}
+      .kpis{grid-template-columns: repeat(2, minmax(0,1fr));}
+      .quick{grid-template-columns: 1fr;}
+      .header{position: static;}
+    }
   </style>
 </head>
+
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" class="logo" />
-    <div class="sidebar-funcao">Gestor</div>
-    <a class="nav-link active" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a class="nav-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people"></i> Cooperados</a>
-    <a class="nav-link" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i> Estabelecimentos</a>
-    <a class="nav-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i> Lançamentos</a>
-    <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i> Sair</a>
-  </aside>
+  <div class="page">
 
-  <!-- Main -->
-  <main class="main">
-    <div class="topbar">
-      <div class="who">Bem-vindo, {{ admin.nome }}</div>
-      <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm">Sair <i class="bi bi-power"></i></a>
-    </div>
-
-    <h2><i class="bi bi-speedometer2"></i> Painel de Controle</h2>
-
-    <!-- Filtros -->
-    <form method="get" action="{{ url_for('dashboard') }}" class="row g-3 panel" id="form-filtros">
-      <div class="col-md-3">
-        <label class="form-label" for="cooperado_id">Cooperado</label>
-        <select class="form-select" id="cooperado_id" name="cooperado_id">
-          <option value="">Todos</option>
-          {% for c in cooperados %}
-            <option value="{{ c.id }}" {% if filtros.cooperado_id and filtros.cooperado_id|int == c.id %}selected{% endif %}>{{ c.nome }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label" for="estabelecimento_id">Estabelecimento</label>
-        <select class="form-select" id="estabelecimento_id" name="estabelecimento_id">
-          <option value="">Todos</option>
-          {% for e in estabelecimentos %}
-            <option value="{{ e.id }}" {% if filtros.estabelecimento_id and filtros.estabelecimento_id|int == e.id %}selected{% endif %}>{{ e.nome }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label" for="data_inicio">Data Início</label>
-        <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ filtros.data_inicio or '' }}" />
-      </div>
-      <div class="col-md-3">
-        <label class="form-label" for="data_fim">Data Fim</label>
-        <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ filtros.data_fim or '' }}" />
-      </div>
-      <div class="col-12 d-flex gap-2 justify-content-end">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filtrar</button>
-        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light" style="border-color:#c9d4ff;color:#4169e1"><i class="bi bi-x-circle"></i> Limpar</a>
-      </div>
-
-      <!-- chips dos filtros ativos -->
-      <div class="chips" id="chips-filtros"></div>
-    </form>
-
-    <!-- KPIs -->
-    <section class="kpis">
-      <div class="kpi">
-        <div class="label"><i class="bi bi-journal-check"></i> Pedidos</div>
-        <div class="value" id="kpi-pedidos">{{ total_pedidos or 0 }}</div>
-        <div class="sub">Total no período</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-cash-stack"></i> Valor total</div>
-        <div class="value" id="kpi-valor">R$ {{ ('{:,.2f}'.format(total_valor|default(0))) }}</div>
-        <div class="sub">Soma dos lançamentos</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-people"></i> Cooperados</div>
-        <div class="value">{{ total_cooperados or 0 }}</div>
-        <div class="sub">Cadastrados</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-building"></i> Estabelecimentos</div>
-        <div class="value">{{ total_estabelecimentos or 0 }}</div>
-        <div class="sub">Ativos</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-graph-up"></i> Média por pedido</div>
-        <div class="value" id="kpi-media">—</div>
-        <div class="sub">Calculada no navegador</div>
-      </div>
-      <div class="kpi">
-        <div class="label"><i class="bi bi-trophy"></i> Top cooperado</div>
-        <div class="value" id="kpi-top">—</div>
-        <div class="sub" id="kpi-top-sub">maior participação</div>
-      </div>
-    </section>
-
-    <!-- atalhos -->
-    <section class="cards">
-      <a class="card-quick" href="{{ url_for('listar_lancamentos') }}">
-        <i class="bi bi-journal-text"></i><span class="big">Lançamentos</span>
-        <div><small>Histórico e exportação</small></div>
-      </a>
-      <a class="card-quick" href="{{ url_for('listar_cooperados') }}">
-        <i class="bi bi-people"></i><span class="big">Cooperados</span>
-        <div><small>Consulta e ajustes</small></div>
-      </a>
-      <a class="card-quick" href="{{ url_for('listar_estabelecimentos') }}">
-        <i class="bi bi-building"></i><span class="big">Estabelecimentos</span>
-        <div><small>Parceiros ativos</small></div>
-      </a>
-      <a class="card-quick" href="{{ url_for('listar_lancamentos') }}">
-        <i class="bi bi-file-earmark-excel"></i><span class="big">Exportar</span>
-        <div><small>Planilha Excel</small></div>
-      </a>
-    </section>
-
-    <!-- gráfico + top lista -->
-    <div class="row g-3">
-      <div class="col-lg-7">
-        <div class="panel">
-          <h3><i class="bi bi-pie-chart"></i> Distribuição por cooperado</h3>
-          <small>Baseada na lista atual ({{ (cooperado_nomes|length) if cooperado_nomes else 0 }} cooperados)</small>
-          <canvas id="graficoCooperados" height="360"></canvas>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" />
+        <div style="min-width:0">
+          <p class="t">COOPEX</p>
+          <p class="s">Painel administrativo</p>
         </div>
       </div>
-      <div class="col-lg-5">
-        <div class="panel">
-          <h3><i class="bi bi-list-ol"></i> Top 8 cooperados</h3>
-          <div class="toplist" id="toplist"></div>
+
+      <nav class="navx">
+        <a class="active" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people"></i> Cooperados</a>
+        <a href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i> Estabelecimentos</a>
+        <a href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i> Lançamentos</a>
+        <a href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i> Sair</a>
+      </nav>
+
+      <div class="mini">
+        <div class="who">
+          <div class="dot"><i class="bi bi-person-badge"></i></div>
+          <div style="min-width:0">
+            <div class="name">Bem-vindo, {{ admin.nome }}</div>
+            <div class="role">Gestor</div>
+          </div>
+        </div>
+        <div class="btns">
+          <a href="{{ url_for('logout') }}" class="btn btn-side"><i class="bi bi-power"></i> Sair</a>
         </div>
       </div>
-    </div>
-  </main>
+    </aside>
+
+    <!-- Content -->
+    <main class="content">
+      <div class="header">
+        <div class="left">
+          <div class="ico"><i class="bi bi-speedometer2 fs-4"></i></div>
+          <div style="min-width:0">
+            <h1>Dashboard</h1>
+            <div class="sub">Visão geral do período filtrado</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a href="{{ url_for('listar_lancamentos') }}" class="btn btn-top">
+            <i class="bi bi-journal-text"></i> Lançamentos
+          </a>
+          <a href="{{ url_for('logout') }}" class="btn btn-top primary">
+            <i class="bi bi-power"></i> Sair
+          </a>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="cardx">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} text-center mb-0">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Filtros -->
+      <form method="get" action="{{ url_for('dashboard') }}" class="cardx" id="form-filtros">
+        <div class="filter-grid">
+          <div>
+            <label for="cooperado_id">Cooperado</label>
+            <select class="form-select field" id="cooperado_id" name="cooperado_id">
+              <option value="">Todos</option>
+              {% for c in cooperados %}
+                <option value="{{ c.id }}" {% if filtros.cooperado_id and filtros.cooperado_id|int == c.id %}selected{% endif %}>
+                  {{ c.nome }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label for="estabelecimento_id">Estabelecimento</label>
+            <select class="form-select field" id="estabelecimento_id" name="estabelecimento_id">
+              <option value="">Todos</option>
+              {% for e in estabelecimentos %}
+                <option value="{{ e.id }}" {% if filtros.estabelecimento_id and filtros.estabelecimento_id|int == e.id %}selected{% endif %}>
+                  {{ e.nome }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label for="data_inicio">Data início</label>
+            <input type="date" id="data_inicio" name="data_inicio" class="form-control field" value="{{ filtros.data_inicio or '' }}" />
+          </div>
+
+          <div>
+            <label for="data_fim">Data fim</label>
+            <input type="date" id="data_fim" name="data_fim" class="form-control field" value="{{ filtros.data_fim or '' }}" />
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-main">
+            <i class="bi bi-funnel"></i> Filtrar
+          </button>
+          <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">
+            <i class="bi bi-x-circle"></i> Limpar
+          </a>
+        </div>
+
+        <div class="chips" id="chips-filtros"></div>
+      </form>
+
+      <!-- KPIs -->
+      <section class="cardx">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="k"><i class="bi bi-journal-check"></i> Pedidos</div>
+            <div class="v" id="kpi-pedidos">{{ total_pedidos or 0 }}</div>
+            <div class="s">Total no período</div>
+          </div>
+
+          <div class="kpi">
+            <div class="k"><i class="bi bi-cash-stack"></i> Valor total</div>
+            <div class="v" id="kpi-valor">R$ {{ ('{:,.2f}'.format(total_valor|default(0))) }}</div>
+            <div class="s">Soma dos lançamentos</div>
+          </div>
+
+          <div class="kpi">
+            <div class="k"><i class="bi bi-people"></i> Cooperados</div>
+            <div class="v">{{ total_cooperados or 0 }}</div>
+            <div class="s">Cadastrados</div>
+          </div>
+
+          <div class="kpi">
+            <div class="k"><i class="bi bi-building"></i> Estabelecimentos</div>
+            <div class="v">{{ total_estabelecimentos or 0 }}</div>
+            <div class="s">Ativos</div>
+          </div>
+
+          <div class="kpi">
+            <div class="k"><i class="bi bi-graph-up"></i> Média</div>
+            <div class="v" id="kpi-media">—</div>
+            <div class="s">Valor por pedido</div>
+          </div>
+
+          <div class="kpi">
+            <div class="k"><i class="bi bi-trophy"></i> Top</div>
+            <div class="v" id="kpi-top">—</div>
+            <div class="s" id="kpi-top-sub">maior participação</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Atalhos -->
+      <section class="cardx">
+        <div class="quick">
+          <a class="qcard" href="{{ url_for('listar_lancamentos') }}">
+            <div class="qicon"><i class="bi bi-journal-text"></i></div>
+            <div style="min-width:0">
+              <div class="qtitle">Lançamentos</div>
+              <div class="qsub">Histórico e exportação</div>
+            </div>
+          </a>
+
+          <a class="qcard" href="{{ url_for('listar_cooperados') }}">
+            <div class="qicon"><i class="bi bi-people"></i></div>
+            <div style="min-width:0">
+              <div class="qtitle">Cooperados</div>
+              <div class="qsub">Consulta e ajustes</div>
+            </div>
+          </a>
+
+          <a class="qcard" href="{{ url_for('listar_estabelecimentos') }}">
+            <div class="qicon"><i class="bi bi-building"></i></div>
+            <div style="min-width:0">
+              <div class="qtitle">Estabelecimentos</div>
+              <div class="qsub">Parceiros ativos</div>
+            </div>
+          </a>
+
+          <a class="qcard" href="{{ url_for('listar_lancamentos') }}">
+            <div class="qicon"><i class="bi bi-file-earmark-excel"></i></div>
+            <div style="min-width:0">
+              <div class="qtitle">Exportar</div>
+              <div class="qsub">Planilha Excel</div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Gráfico + Top -->
+      <section class="cardx">
+        <div class="grid2">
+          <div>
+            <div class="panel-title">
+              <h3><i class="bi bi-pie-chart"></i> Distribuição por cooperado</h3>
+              <small>({{ (cooperado_nomes|length) if cooperado_nomes else 0 }} cooperados)</small>
+            </div>
+            <canvas id="graficoCooperados" height="360"></canvas>
+          </div>
+
+          <div>
+            <div class="panel-title">
+              <h3><i class="bi bi-list-ol"></i> Top 8 cooperados</h3>
+              <small>participação no período</small>
+            </div>
+            <div class="toplist" id="toplist"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <!-- Som + balão -->
   <audio id="snd-servico" preload="auto" playsinline src="{{ url_for('statics_files', filename='servico.mp3') }}"></audio>
   <div id="notif-container" aria-live="polite"></div>
 
   <script>
-    // ===== Helpers
+    // ===== Data do backend
     const labels = {{ cooperado_nomes|tojson or '[]' }};
     const valores = {{ lancamentos_contagem|tojson or '[]' }};
     const totalPedidos = Number({{ total_pedidos or 0 }});
     const totalValor = Number({{ total_valor or 0 }});
     const brl = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
-    // KPI média por pedido (sem mexer no backend)
+    // KPI média
     (function(){
       const media = totalPedidos > 0 ? (totalValor/totalPedidos) : 0;
-      document.getElementById('kpi-media').textContent = brl(media);
+      const el = document.getElementById('kpi-media');
+      if (el) el.textContent = brl(media);
     })();
 
-    // Chips de filtro (sem back extra)
+    // Chips de filtros ativos
     (function(){
       const chipsBox = document.getElementById('chips-filtros');
+      if(!chipsBox) return;
+
       const add = (icon, txt) => {
         const s = document.createElement('span');
         s.className = 'chip';
         s.innerHTML = `<i class="bi ${icon}"></i> ${txt}`;
         chipsBox.appendChild(s);
       };
+
       const di = "{{ filtros.data_inicio or '' }}";
       const df = "{{ filtros.data_fim or '' }}";
       const co = "{{ filtros.cooperado_id or '' }}";
       const es = "{{ filtros.estabelecimento_id or '' }}";
+
       if (co){ const sel = document.getElementById('cooperado_id'); add('bi-person', sel.options[sel.selectedIndex].text); }
       if (es){ const sel = document.getElementById('estabelecimento_id'); add('bi-building', sel.options[sel.selectedIndex].text); }
       if (di){ add('bi-calendar-plus', new Date(di).toLocaleDateString('pt-BR')); }
       if (df){ add('bi-calendar-minus', new Date(df).toLocaleDateString('pt-BR')); }
     })();
 
-    // Cores (até 300)
+    // Cores para gráfico (sem depender de paleta fixa do Chart)
     function buildColors(n){
-      const max=300, k=Math.min(n,max); const out=[];
+      const max = 220, k = Math.min(n||1, max);
+      const out = [];
       for (let i=0;i<k;i++){
-        const hue=Math.round(i*360/k), ring=i%3, sat= ring===0?85: ring===1?72:62, light= ring===0?55:50;
-        out.push(`hsl(${hue} ${sat}% ${light}%)`);
+        const hue = Math.round(i * 360 / k);
+        out.push(`hsl(${hue} 78% 55%)`);
       }
-      while(out.length<n) out.push(out[out.length%k]);
+      while(out.length < (n||1)) out.push(out[out.length % k]);
       return out;
     }
 
-    // Plugin: label central + disco de freio
+    // Plugin de centro do donut (leve)
     const donutCenter = {
       id:'donutCenter',
-      afterDraw(chart,args,plug){
-        const {ctx} = chart; const meta=chart.getDatasetMeta(0);
-        if(!meta || !meta.data || !meta.data.length) return;
-        const a0=meta.data[0]; const {x:cx,y:cy,innerRadius:rIn,outerRadius:rOut}=a0;
+      afterDraw(chart){
+        const meta = chart.getDatasetMeta(0);
+        if(!meta?.data?.length) return;
+        const a0 = meta.data[0];
+        const { ctx } = chart;
+        const cx = a0.x, cy = a0.y, rIn = a0.innerRadius;
 
-        // Grooves
+        const total = (chart.data.datasets[0].data || []).reduce((a,b)=>a+(+b||0),0);
+
         ctx.save();
-        ctx.strokeStyle = '#4169e11a'; ctx.lineWidth = Math.max(1,(rOut-rIn)*.02);
-        for(let i=0;i<12;i++){ const ang=i*Math.PI*2/12; ctx.beginPath();
-          ctx.moveTo(cx+Math.cos(ang)*rIn*0.98, cy+Math.sin(ang)*rIn*0.98);
-          ctx.lineTo(cx+Math.cos(ang)*rOut*0.98, cy+Math.sin(ang)*rOut*0.98); ctx.stroke(); }
-        // Hub
-        ctx.fillStyle='#dbe4ff'; ctx.beginPath(); ctx.arc(cx,cy,rIn*0.9,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle='#c7d2ff'; ctx.beginPath(); ctx.arc(cx,cy,rIn*0.55,0,Math.PI*2); ctx.fill();
-        // Holes
-        ctx.fillStyle='#ffffff'; const holes=5, rr=rIn*0.08, dist=rIn*0.68;
-        for(let i=0;i<holes;i++){ const ang=i*Math.PI*2/holes-Math.PI/2; const x=cx+Math.cos(ang)*dist, y=cy+Math.sin(ang)*dist;
-          ctx.beginPath(); ctx.arc(x,y,rr,0,Math.PI*2); ctx.fill(); }
-        // Center text (total)
-        const total = valores.reduce((a,b)=>a+(+b||0),0);
-        ctx.fillStyle='#4169e1'; ctx.font='900 18px Orbitron, sans-serif'; ctx.textAlign='center';
-        ctx.fillText('Total', cx, cy-6);
-        ctx.fillStyle='#0d1b3f'; ctx.font='700 14px Roboto, sans-serif';
-        ctx.fillText(total.toLocaleString('pt-BR'), cx, cy+14);
+        ctx.fillStyle = '#e9efff';
+        ctx.beginPath(); ctx.arc(cx, cy, rIn*0.92, 0, Math.PI*2); ctx.fill();
+
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--royal2').trim() || '#1b3fd1';
+        ctx.font = '900 16px Orbitron, Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Total', cx, cy-4);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '800 13px Inter, sans-serif';
+        ctx.fillText(total.toLocaleString('pt-BR'), cx, cy+16);
         ctx.restore();
       }
     };
 
     // Gráfico
     (function(){
-      const el=document.getElementById('graficoCooperados');
+      const el = document.getElementById('graficoCooperados');
       if(!el) return;
-      const dataValid = Array.isArray(labels) && labels.length && Array.isArray(valores) && valores.length;
-      const colors = buildColors(labels.length || 1);
 
-      const chart = new Chart(el.getContext('2d'), {
+      const dataValid = Array.isArray(labels) && labels.length && Array.isArray(valores) && valores.length;
+      const colors = buildColors(dataValid ? labels.length : 1);
+
+      new Chart(el.getContext('2d'), {
         type:'doughnut',
         data:{
-          labels: dataValid? labels : ['Sem dados'],
-          datasets:[{ data: dataValid? valores : [1], backgroundColor: colors, borderColor:'#e5ebff', borderWidth:1, hoverOffset:8 }]
+          labels: dataValid ? labels : ['Sem dados'],
+          datasets:[{
+            data: dataValid ? valores : [1],
+            backgroundColor: colors,
+            borderColor: '#e4ebff',
+            borderWidth: 1,
+            hoverOffset: 10
+          }]
         },
         options:{
-          cutout:'55%',
+          cutout:'58%',
           plugins:{
-            legend:{ labels:{ color:'#0d1b3f' } },
-            tooltip:{ callbacks:{ label:(c)=> (c.label? c.label+': ':'') + (c.parsed||0).toLocaleString('pt-BR') } }
+            legend:{ labels:{ color:'#0f172a' } },
+            tooltip:{
+              callbacks:{ label:(c)=> (c.label? c.label+': ':'') + (c.parsed||0).toLocaleString('pt-BR') }
+            }
           }
         },
         plugins:[donutCenter]
       });
 
-      // KPIs derivados: top cooperado
+      // KPI Top
       if (dataValid){
         const total = valores.reduce((a,b)=>a+(+b||0),0) || 1;
-        let topI=0; for(let i=1;i<valores.length;i++){ if((+valores[i])>(+valores[topI])) topI=i; }
+        let topI = 0;
+        for(let i=1;i<valores.length;i++){
+          if ((+valores[i]||0) > (+valores[topI]||0)) topI = i;
+        }
         const topNome = labels[topI] || '—';
         const topPct = ((+valores[topI]||0)/total)*100;
         document.getElementById('kpi-top').textContent = topNome;
@@ -376,36 +917,41 @@
       }
     })();
 
-    // Toplist (Top 8) com barras
+    // Toplist
     (function(){
       const box = document.getElementById('toplist');
       if(!box) return;
+
       const arr = (labels||[]).map((n,i)=>({nome:n, qtd:+(valores[i]||0)}));
       arr.sort((a,b)=>b.qtd-a.qtd);
       const total = arr.reduce((s,x)=>s+x.qtd,0) || 1;
+
       (arr.slice(0,8)).forEach((it,idx)=>{
-        const li = document.createElement('div');
         const pct = (it.qtd/total)*100;
-        li.className='topitem';
-        li.innerHTML = `
+        const div = document.createElement('div');
+        div.className = 'topitem';
+        div.innerHTML = `
           <div class="rank">${idx+1}</div>
-          <div class="flex-grow-1">
-            <div style="display:flex;justify-content:space-between;gap:8px;">
-              <strong>${it.nome}</strong>
-              <span>${it.qtd.toLocaleString('pt-BR')} <small>(${pct.toFixed(1)}%)</small></span>
+          <div class="flex-grow-1" style="min-width:0">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline">
+              <strong style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.nome}</strong>
+              <span style="color:var(--muted);font-weight:800">${it.qtd.toLocaleString('pt-BR')} <small>(${pct.toFixed(1)}%)</small></span>
             </div>
-            <div class="bar mt-1"><span style="width:${pct.toFixed(2)}%"></span></div>
-          </div>`;
-        box.appendChild(li);
+            <div class="bar mt-2"><span style="width:${pct.toFixed(2)}%"></span></div>
+          </div>
+        `;
+        box.appendChild(div);
       });
-      if (arr.length===0){
-        const li=document.createElement('div');
-        li.className='topitem'; li.innerHTML='<div class="flex-grow-1 text-center">Sem dados para exibir.</div>';
-        box.appendChild(li);
+
+      if (arr.length === 0){
+        const div = document.createElement('div');
+        div.className = 'topitem';
+        div.innerHTML = `<div class="flex-grow-1 text-center" style="color:var(--muted);font-weight:800">Sem dados para exibir.</div>`;
+        box.appendChild(div);
       }
     })();
 
-    // Som + balões para novos lançamentos (mantido)
+    // Som + notificações (mantido)
     (function () {
       let lastId = {{ ultimo_lancamento_id or 0 }};
       const audio = document.getElementById('snd-servico');
@@ -418,7 +964,7 @@
         notifBox.appendChild(div);
         void div.offsetWidth;
         div.classList.add('show');
-        setTimeout(() => { div.classList.remove('show'); setTimeout(() => div.remove(), 300); }, 3000);
+        setTimeout(() => { div.classList.remove('show'); setTimeout(() => div.remove(), 260); }, 2800);
       }
 
       async function ping() {
