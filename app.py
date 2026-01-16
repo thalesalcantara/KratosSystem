@@ -662,7 +662,10 @@ def painel_admin():
 def api_ultimo_lancamento():
     last_id, cached = _get_cached_last_lanc_id()
     resp = jsonify({"last_id": int(last_id)})
-    resp.headers['Cache-Control'] = 'public, max-age=2'
+
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
     if cached:
         resp.headers['X-Cache-Hit'] = '1'
     return resp
@@ -673,14 +676,20 @@ def api_lancamento_info():
     lanc_id = request.args.get('id', type=int)
     if not lanc_id:
         return jsonify({"error": "id requerido"}), 400
+
     l = Lancamento.query.get_or_404(lanc_id)
     nome = l.cooperado.nome if l.cooperado else ""
-    return jsonify({
+
+    resp = jsonify({
         "id": l.id,
         "cooperado": nome,
         "valor": float(l.valor),
         "os_numero": l.os_numero
     })
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+    return resp
 
 
 # ========= COOPERADOS CRUD =========
