@@ -194,6 +194,32 @@ def ensure_schema():
             except Exception:
                 db.session.rollback()
 
+        # ===== lancamento =====
+        try:
+            cols_lanc = {
+                r[0] for r in db.session.execute(text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'lancamento'"
+                )).fetchall()
+            }
+        except Exception:
+            cols_lanc = set()
+
+        alter_lanc = []
+        if 'parcelas_total' not in cols_lanc:
+            alter_lanc.append("ADD COLUMN IF NOT EXISTS parcelas_total INTEGER DEFAULT 4")
+        if 'saldo_aberto' not in cols_lanc:
+            alter_lanc.append("ADD COLUMN IF NOT EXISTS saldo_aberto DOUBLE PRECISION")
+        if 'concluido' not in cols_lanc:
+            alter_lanc.append("ADD COLUMN IF NOT EXISTS concluido BOOLEAN DEFAULT FALSE")
+
+        if alter_lanc:
+            try:
+                db.session.execute(text("ALTER TABLE lancamento " + ", ".join(alter_lanc)))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
 
 # ========= MODELS =========
 class Cooperado(db.Model):
@@ -260,10 +286,27 @@ class Lancamento(db.Model):
     descricao = db.Column(db.String(250))
     cooperado = db.relationship('Cooperado')
     estabelecimento = db.relationship('Estabelecimento')
+        # ===== NOVO: controle de desconto manual em "4x" =====
+    parcelas_total = db.Column(db.Integer, default=4)     # só controle visual
+    saldo_aberto = db.Column(db.Float, nullable=True)     # quanto falta concluir
+    concluido = db.Column(db.Boolean, default=False)
+
+    descontos = db.relationship(
+        'DescontoLancamento',
+        backref='lancamento',
+        cascade='all, delete-orphan'
+    )
 
 
 Index('ix_lancamento_coop_estab_data',
       Lancamento.cooperado_id, Lancamento.estabelecimento_id, Lancamento.data.desc())
+class DescontoLancamento(db.Model):
+    __tablename__ = 'desconto_lancamento'
+    id = db.Column(db.Integer, primary_key=True)
+    lancamento_id = db.Column(db.Integer, db.ForeignKey('lancamento.id'), nullable=False, index=True)
+    valor = db.Column(db.Float, nullable=False)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow, index=True)  # UTC (naive)
+    observacao = db.Column(db.String(255), nullable=True)
 
 
 # ====== Catálogo de Itens por Estabelecimento ======
@@ -1193,7 +1236,8 @@ def excluir_lancamento(id):
 
     cooperado = Cooperado.query.get(l.cooperado_id)
     if cooperado:
-        cooperado.credito += float(l.valor or 0)
+        valor_restante = float(l.saldo_aberto) if (l.saldo_aberto is not None) else float(l.valor or 0)
+cooperado.credito += valor_restante
 
     try:
         db.session.delete(l)
@@ -1203,6 +1247,60 @@ def excluir_lancamento(id):
     except Exception:
         db.session.rollback()
         flash('Não foi possível excluir o lançamento.', 'danger')
+
+    next_url = request.form.get('next') or url_for('listar_lancamentos')
+    return redirect(next_url)
+
+@app.post('/lancamentos/<int:id>/descontar')
+def descontar_lancamento_admin(id):
+    if not is_admin():
+        return redirect(url_for('login'))
+
+    l = Lancamento.query.get_or_404(id)
+    coop = Cooperado.query.get(l.cooperado_id)
+
+    if not coop:
+        flash('Cooperado não encontrado.', 'danger')
+        return redirect(url_for('listar_lancamentos'))
+
+    if l.concluido:
+        flash('Este lançamento já está concluído.', 'warning')
+        return redirect(url_for('listar_lancamentos'))
+
+    valor_f = parse_valor_brl(request.form.get('valor_desconto'))
+    obs = (request.form.get('observacao') or '').strip() or None
+
+    if valor_f is None or valor_f <= 0:
+        flash('Informe um valor de desconto válido.', 'danger')
+        return redirect(url_for('listar_lancamentos'))
+
+    saldo = float(l.saldo_aberto) if (l.saldo_aberto is not None) else float(l.valor or 0)
+
+    if valor_f > saldo:
+        flash(f'O desconto não pode ser maior que o saldo em aberto (R$ {saldo:.2f}).', 'danger')
+        return redirect(url_for('listar_lancamentos'))
+
+    # devolve crédito para o cooperado (pagamento do débito)
+    coop.credito += float(valor_f)
+
+    # registra histórico do desconto
+    d = DescontoLancamento(
+        lancamento_id=l.id,
+        valor=float(valor_f),
+        observacao=obs
+    )
+    db.session.add(d)
+
+    # baixa o saldo
+    novo_saldo = saldo - float(valor_f)
+    if novo_saldo <= 0.00001:
+        l.saldo_aberto = 0.0
+        l.concluido = True
+    else:
+        l.saldo_aberto = float(novo_saldo)
+
+    db.session.commit()
+    flash('Desconto registrado e crédito devolvido automaticamente.', 'success')
 
     next_url = request.form.get('next') or url_for('listar_lancamentos')
     return redirect(next_url)
@@ -1263,6 +1361,9 @@ def painel_estabelecimento():
                             estabelecimento_id=est.id,
                             valor=valor_f,
                             descricao=descricao
+                            parcelas_total=4,
+                            saldo_aberto=valor_f,
+                            concluido=False
                         )
                         db.session.add(l)
                         c.credito = novo_credito
@@ -1886,7 +1987,8 @@ def estab_excluir_lancamento(id):
         flash('Cooperado não encontrado.', 'danger')
         return redirect(url_for('painel_estabelecimento'))
 
-    cooperado.credito += l.valor
+    valor_restante = float(l.saldo_aberto) if (l.saldo_aberto is not None) else float(l.valor or 0)
+cooperado.credito += valor_restante
 
     db.session.delete(l)
     db.session.commit()
