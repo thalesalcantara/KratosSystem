@@ -5,291 +5,437 @@
   <title>Lançamentos - Coopex</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
   <style>
     :root{
-      --bg:#f7f9ff;
+      --bg:#f6f8ff;
       --panel:#ffffff;
-      --line:#dbe4ff;
-      --ink:#0d1b3f;
-      --muted:#5c6c92;
-      --royal:#4169e1;
-      --royal2:#5a7df0;
-      --thead:#eef3ff;
-      --rowOdd:#ffffff;
-      --rowEven:#f7fbff;
-      --danger:#e25566;
-      --ok:#2e8b57;
-      --shadow: 0 10px 24px rgba(65,105,225,.12);
-      --shadow2: 0 14px 34px rgba(65,105,225,.16);
-      --radius: 16px;
+      --line:#e4ebff;
+      --ink:#0f172a;
+      --muted:#5b6b8a;
+
+      --royal:#1f4fff;
+      --royal2:#1b3fd1;
+      --royal3:#6aa6ff;
+
+      --danger:#ef4444;
+      --ok:#10b981;
+
+      --thead:#f2f6ff;
+      --shadow: 0 14px 34px rgba(31,79,255,.10);
+      --shadow2: 0 18px 46px rgba(15,23,42,.08);
+      --radius: 18px;
     }
 
     *{box-sizing:border-box}
     body{
-      background:
-        radial-gradient(1400px 480px at 80% -40%, rgba(65,105,225,.10), transparent 70%),
-        linear-gradient(180deg, var(--bg), var(--bg));
-      font-family: Roboto, Arial, sans-serif;
+      margin:0;
       min-height: 100vh;
-      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--ink);
+      background:
+        radial-gradient(1200px 420px at 80% -40%, rgba(31,79,255,.12), transparent 70%),
+        radial-gradient(900px 380px at 10% 0%, rgba(16,185,129,.08), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg));
     }
 
-    .main-content{
-      margin:0 auto;
-      max-width: 1280px;
-      padding: 28px 14px 28px;
+    .container-x{
+      max-width: 1280px; /* não deixa “página sobrando demais” */
+      margin: 0 auto;
+      padding: 18px 12px 26px;
     }
 
+    /* ===== Topbar leve ===== */
     .topbar{
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
-      padding: 12px 14px;
-      border-radius: 16px;
-      box-shadow: var(--shadow2);
-      color:#fff;
       position: sticky;
       top: 12px;
-      z-index: 10;
-      border: 1px solid rgba(255,255,255,.35);
+      z-index: 50;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 14px;
+      border-radius: var(--radius);
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 55%, #1630a8 100%);
+      color:#fff;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.22);
     }
-    .topbar .title{
-      display:flex; align-items:center; gap:10px;
-      font-family: Orbitron, sans-serif;
-      font-weight: 800;
-      letter-spacing: 1px;
-    }
-    .topbar .actions{
-      display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
-    }
-    .btn-soft{
-      background:#fff;
-      color: var(--royal);
-      border: 1px solid rgba(255,255,255,.65);
-      border-radius: 12px;
-      font-weight: 900;
-      padding: 10px 12px;
-      box-shadow: 0 10px 18px rgba(255,255,255,.18);
-    }
-    .btn-soft:hover{ filter: brightness(0.98); }
 
-    .dashboard-card{
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .brand-ico{
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      flex: 0 0 auto;
+    }
+    .brand-title{
+      min-width: 0;
+      line-height: 1.1;
+    }
+    .brand-title .t{
+      margin:0;
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: .6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brand-title .s{
+      font-weight: 600;
+      font-size: 12px;
+      opacity: .92;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn-top{
+      height: 42px;
+      padding: 0 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .btn-top:hover{ background: rgba(255,255,255,.16); color:#fff; }
+
+    /* ===== Cards ===== */
+    .cardx{
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px;
-      margin-top: 14px;
+      box-shadow: var(--shadow2);
+      padding: 14px;
+      margin-top: 12px;
     }
 
-    .h2{
-      font-family: Orbitron, sans-serif;
-      color: var(--royal);
-      letter-spacing: 1.2px;
-      margin: 0 0 8px 0;
-    }
-
+    /* ===== Métricas ===== */
     .stats{
       display:grid;
       grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 12px;
     }
     .stat{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 14px;
-      box-shadow: 0 8px 18px rgba(65,105,225,.10);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
     }
-    .stat .label{
-      color:#2b3e73; font-weight: 900;
-      display:flex; gap:8px; align-items:center;
+    .stat .k{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      color:#1f2b4a;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: հավելি;
+      letter-spacing: .06em;
     }
-    .stat .value{
-      font: 900 1.35rem/1 Orbitron, sans-serif;
-      color: var(--royal);
+    .stat .k i{ color: var(--royal2); }
+    .stat .v{
       margin-top: 8px;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--royal2);
       white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
-    .stat .sub{ color: var(--muted); font-size: .92rem; margin-top: 4px; }
+    .stat .s{
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+    }
 
-    .filters{
-      display:flex; flex-wrap:wrap; gap:10px; align-items:end;
+    /* ===== Filtros ===== */
+    label{
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color:#0f172a;
     }
-    label{ font-weight:900; color: var(--ink); }
     .form-control, .form-select{
-      border:2px solid #c7d2ff;
-      border-radius: 12px;
       height: 46px;
+      border-radius: 14px;
+      border: 1px solid #cfe0ff;
     }
     .form-control:focus, .form-select:focus{
       border-color: var(--royal);
-      box-shadow: 0 0 0 .2rem rgba(65,105,225,.18);
+      box-shadow: 0 0 0 .2rem rgba(31,79,255,.14);
     }
-    .btn-primary{
+
+    .btn-main{
+      height: 46px;
+      border-radius: 14px;
+      font-weight: 900;
+      border: none;
       background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
-      border:none;
-      border-radius: 12px;
-      height: 46px;
-      font-weight: 900;
-      box-shadow: 0 10px 18px rgba(65,105,225,.16);
+      box-shadow: 0 12px 22px rgba(31,79,255,.14);
     }
-    .btn-primary:hover{ filter: brightness(1.02); }
-    .btn-outline-light{
-      border-radius: 12px;
+    .btn-main:hover{ filter: brightness(1.03); }
+
+    .btn-ghost{
       height: 46px;
-      border-color: #c7d2ff;
-      color: var(--royal);
+      border-radius: 14px;
+      font-weight: 900;
       background:#fff;
+      border: 1px solid #cfe0ff;
+      color: var(--royal2);
+    }
+    .btn-ghost:hover{ background:#f1f5ff; }
+
+    .btn-success{
+      height: 46px;
+      border-radius: 14px;
       font-weight: 900;
     }
-    .btn-outline-light:hover{ background:#eef3ff; color:#1b2b5e; }
-    .btn-success{ border-radius:12px; height:46px; font-weight:900; }
 
     .chips{
-      display:flex; flex-wrap:wrap; gap:8px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-top: 10px;
     }
     .chip{
-      display:inline-flex; align-items:center; gap:6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background:#eef3ff;
-      border: 1px solid var(--line);
-      color:#1b2b5e;
-      font-weight: 900;
-      font-size: .9rem;
-      box-shadow: 0 6px 12px rgba(65,105,225,.08);
-    }
-    .chip i{ color: var(--royal); }
-
-    .table{
-      margin:0;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius: 12px;
-      overflow:hidden;
-      color: var(--ink);
-    }
-    .table thead th{
-      position: sticky; top: 0; z-index: 2;
-      background: var(--thead);
-      color: var(--royal)!important;
-      font-family: Orbitron, sans-serif;
-      letter-spacing: 1px;
-      border-bottom: 1px solid var(--line);
-      text-align:center;
-      padding: 12px 10px;
-      white-space: nowrap;
-    }
-    .table tbody td{
-      border-top: 1px solid var(--line);
-      vertical-align: middle;
-      padding: 12px 10px;
-      text-align:center;
-    }
-    .table-striped>tbody>tr:nth-of-type(odd)>*{ background-color: var(--rowOdd); }
-    .table-striped>tbody>tr:nth-of-type(even)>*{ background-color: var(--rowEven); }
-    .table-hover tbody tr:hover>*{ background-color:#ecf2ff!important; }
-
-    .valor{
-      font-weight: 900;
-      color: var(--royal);
-      white-space: nowrap;
-      font-family: Orbitron, sans-serif;
-    }
-
-    .pill{
-      display:inline-flex; align-items:center; gap:6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-weight: 900;
-      color:#1b2b5e;
-      white-space: nowrap;
-    }
-    .pill .dot{
-      width:10px; height:10px; border-radius:999px; background: var(--royal);
-      box-shadow: 0 0 0 3px rgba(65,105,225,.12);
-    }
-    .pill.ok .dot{ background: var(--ok); box-shadow: 0 0 0 3px rgba(46,139,87,.12); }
-    .pill.danger .dot{ background: var(--danger); box-shadow: 0 0 0 3px rgba(226,85,102,.14); }
-
-    .btn-mini{
-      border-radius: 12px;
-      font-weight: 900;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
       padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f3f6ff;
+      color:#1b2b5e;
+      font-weight: 900;
+      font-size: 12px;
+      box-shadow: 0 8px 16px rgba(31,79,255,.06);
     }
-    .btn-mini-primary{
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+    .chip i{ color: var(--royal2); }
+
+    .hint{
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    /* ===== TABELA SEM SCROLL LATERAL ===== */
+    .table-wrap{
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;      /* SEM scroll horizontal */
+      background:#fff;
+    }
+
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;   /* chave: força caber */
+    }
+
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--thead);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      font-size: 12px;
+      font-family: Orbitron, Inter, sans-serif;
+      letter-spacing: .7px;
+      color: var(--royal2);
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    tbody td{
+      border-top: 1px solid var(--line);
+      padding: 10px 8px;
+      font-size: 13px;
+      text-align:center;
+      vertical-align: middle;
+      background:#fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    tbody tr:nth-child(even) td{ background:#fbfdff; }
+    tbody tr:hover td{ background:#f3f7ff; }
+
+    /* data em 2 linhas */
+    td.col-data{
+      white-space: normal;
+      line-height: 1.1;
+    }
+    td.col-data small{
+      display:block;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    /* Cooperado / Estabelecimento quebram linha */
+    td.col-coop, td.col-estab{
+      text-align: left;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.15;
+      font-weight: 700;
+    }
+    td.col-estab{ font-weight: 600; color:#1b2b5e; }
+
+    td.valor{
+      font-weight: 900;
+      color: var(--royal2);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Pills */
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background:#fff;
+      font-weight: 900;
+      font-size: 13px;
+      color:#1b2b5e;
+      white-space: nowrap;
+      box-shadow: 0 10px 16px rgba(15,23,42,.04);
+    }
+    .dot{
+      width:10px; height:10px;
+      border-radius:999px;
+      background: var(--royal2);
+      box-shadow: 0 0 0 3px rgba(31,79,255,.12);
+    }
+    .pill.ok .dot{ background: var(--ok); box-shadow: 0 0 0 3px rgba(16,185,129,.14); }
+    .pill.danger .dot{ background: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.12); }
+
+    /* Ações compactas */
+    .actions{
+      display:flex;
+      gap: 6px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap: nowrap;
+    }
+    .btn-ico{
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      border: 1px solid #cfe0ff;
+      background:#fff;
+      color: var(--royal2);
+      font-weight: 900;
+    }
+    .btn-ico:hover{ background:#f1f5ff; }
+    .btn-ico.primary{
       border:none;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
       color:#fff;
+      box-shadow: 0 12px 22px rgba(31,79,255,.14);
     }
-    .btn-mini-primary:hover{ filter: brightness(1.02); color:#fff; }
-    .btn-mini-outline{
-      border: 1px solid #c7d2ff;
-      color: var(--royal);
-      background: #fff;
+    .btn-ico.danger{
+      border:none;
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+      color:#fff;
+      box-shadow: 0 12px 22px rgba(239,68,68,.12);
     }
-    .btn-mini-outline:hover{ background:#eef3ff; }
 
     tfoot td{
-      background:#eef3ff;
+      background:#f3f6ff;
       border-top: 2px solid var(--line);
       font-weight: 900;
       color:#1b2b5e;
+      padding: 12px 10px;
+      white-space: nowrap;
     }
 
-    /* Modal inovado */
+    /* Larguras: cabem sem scroll */
+    th.w-data{ width: 11%; }
+    th.w-os{ width: 8%; }
+    th.w-coop{ width: 22%; }
+    th.w-estab{ width: 20%; }
+    th.w-compra{ width: 10%; }
+    th.w-parc{ width: 12%; }
+    th.w-sit{ width: 11%; }
+    th.w-acoes{ width: 6%; }
+
+    /* Modal */
     .modal-content{
       border-radius: 18px;
       border: 1px solid var(--line);
-      box-shadow: var(--shadow2);
+      box-shadow: 0 20px 52px rgba(15,23,42,.16);
       overflow:hidden;
     }
     .modal-header{
       background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
       color:#fff;
-      border-bottom: 1px solid rgba(255,255,255,.25);
+      border-bottom: 1px solid rgba(255,255,255,.22);
     }
     .modal-title{
-      font-family: Orbitron, sans-serif;
+      font-family: Orbitron, Inter, sans-serif;
       font-weight: 900;
-      letter-spacing: 1px;
+      letter-spacing: .6px;
     }
     .modal-body{
       background:
-        radial-gradient(900px 320px at 85% -10%, rgba(65,105,225,.10), transparent 70%),
+        radial-gradient(900px 320px at 85% -10%, rgba(31,79,255,.10), transparent 70%),
         #fff;
     }
-
     .grid2{
       display:grid;
       grid-template-columns: 1.2fr .8fr;
       gap: 12px;
     }
-
     .box{
       background:#fff;
       border:1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 12px;
-      box-shadow: 0 8px 18px rgba(65,105,225,.10);
+      box-shadow: 0 12px 22px rgba(15,23,42,.06);
     }
-
     .box h6{
-      font-family: Orbitron, sans-serif;
-      color: var(--royal);
-      letter-spacing: .8px;
+      font-family: Orbitron, Inter, sans-serif;
+      color: var(--royal2);
+      letter-spacing: .6px;
       margin: 0 0 10px 0;
       font-weight: 900;
+      font-size: 13px;
     }
-
     .parcelas{
       display:grid;
       grid-template-columns: repeat(4, minmax(0,1fr));
@@ -297,38 +443,33 @@
     }
     .parcela{
       border:1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 10px;
       background:#fff;
-      box-shadow: 0 8px 18px rgba(65,105,225,.08);
       text-align:left;
     }
     .parcela .t{
       font-weight: 900;
       color:#1b2b5e;
       display:flex; justify-content:space-between; align-items:center;
+      gap: 8px;
     }
     .parcela .v{
-      font: 900 1.25rem/1 Orbitron, sans-serif;
-      color: var(--royal);
+      font: 900 18px/1 Orbitron, Inter, sans-serif;
+      color: var(--royal2);
       margin-top: 8px;
     }
     .parcela .s{
       margin-top: 6px;
       color: var(--muted);
-      font-weight: 800;
-      font-size: .92rem;
+      font-weight: 700;
+      font-size: 12px;
     }
     .parcela.paga{
-      background: #f3fff7;
-      border-color: rgba(46,139,87,.22);
+      background: #f2fff8;
+      border-color: rgba(16,185,129,.25);
     }
     .parcela.paga .v{ color: var(--ok); }
-    .parcela.atraso{
-      background: #fff3f5;
-      border-color: rgba(226,85,102,.22);
-    }
-    .parcela.atraso .v{ color: var(--danger); }
 
     .timeline{
       display:flex; flex-direction:column; gap:10px;
@@ -338,35 +479,18 @@
     }
     .event{
       border:1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 10px;
       background:#fff;
-      box-shadow: 0 8px 18px rgba(65,105,225,.08);
     }
     .event .row1{
       display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
     }
-    .event .row1 .tag{
-      display:inline-flex; gap:8px; align-items:center;
-      font-weight: 900;
-      color:#1b2b5e;
-    }
-    .event .row1 .tag i{ color: var(--royal); }
-    .event .row2{
-      display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;
-      margin-top: 8px;
-    }
     .event .amt{
-      font-family: Orbitron, sans-serif;
+      font-family: Orbitron, Inter, sans-serif;
       font-weight: 900;
-      color: var(--royal);
+      color: var(--royal2);
       white-space: nowrap;
-    }
-
-    .hint{
-      color: var(--muted);
-      font-weight: 800;
-      font-size: .92rem;
     }
 
     @media (max-width: 980px){
@@ -379,53 +503,54 @@
 </head>
 
 <body>
-  <div class="main-content">
+  <div class="container-x">
+
     <div class="topbar">
-      <div class="title">
-        <i class="bi bi-journal-text"></i>
-        <div>
-          <div style="font-size:1.05rem;">Lançamentos e Descontos</div>
-          <div style="font-size:.88rem;opacity:.9;font-family:Roboto;">Parcelamento automático em 4x com desconto flexível</div>
+      <div class="brand">
+        <div class="brand-ico"><i class="bi bi-journal-text fs-4"></i></div>
+        <div class="brand-title">
+          <div class="t">Lançamentos e Descontos</div>
+          <div class="s">Parcelamento automático em 4x com desconto flexível</div>
         </div>
       </div>
-      <div class="actions">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-soft">
+      <div class="top-actions">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-top">
           <i class="bi bi-arrow-left-circle"></i> Dashboard
         </a>
-        <button type="button" class="btn btn-soft" id="btn-hoje">
+        <button type="button" class="btn btn-top" id="btn-hoje">
           <i class="bi bi-sun"></i> Hoje
         </button>
       </div>
     </div>
 
     <!-- Métricas -->
-    <div class="dashboard-card">
+    <div class="cardx">
       <div class="stats">
         <div class="stat">
-          <div class="label"><i class="bi bi-list-ul"></i> Lançamentos</div>
-          <div class="value" id="m-qtd">—</div>
-          <div class="sub">Linhas visíveis</div>
+          <div class="k"><i class="bi bi-list-ul"></i> Lançamentos</div>
+          <div class="v" id="m-qtd">—</div>
+          <div class="s">Linhas visíveis</div>
         </div>
         <div class="stat">
-          <div class="label"><i class="bi bi-cash-coin"></i> Total visível</div>
-          <div class="value" id="m-total">—</div>
-          <div class="sub">Somatório dos valores</div>
+          <div class="k"><i class="bi bi-cash-coin"></i> Total visível</div>
+          <div class="v" id="m-total">—</div>
+          <div class="s">Somatório dos valores</div>
         </div>
         <div class="stat">
-          <div class="label"><i class="bi bi-graph-up"></i> Ticket médio</div>
-          <div class="value" id="m-media">—</div>
-          <div class="sub">Média por lançamento</div>
+          <div class="k"><i class="bi bi-graph-up"></i> Ticket médio</div>
+          <div class="v" id="m-media">—</div>
+          <div class="s">Média por lançamento</div>
         </div>
         <div class="stat">
-          <div class="label"><i class="bi bi-credit-card-2-front"></i> Parcelas (4x)</div>
-          <div class="value" id="m-parc">—</div>
-          <div class="sub">Regras automáticas</div>
+          <div class="k"><i class="bi bi-credit-card-2-front"></i> Parcelas</div>
+          <div class="v" id="m-parc">—</div>
+          <div class="s">4x automático</div>
         </div>
       </div>
     </div>
 
     <!-- Filtros -->
-    <div class="dashboard-card">
+    <div class="cardx">
       <form id="form-filtros" method="get" action="{{ url_for('listar_lancamentos') }}">
         <div class="row g-3 align-items-end">
           <div class="col-md-3">
@@ -459,7 +584,7 @@
           </div>
 
           <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-main text-white">
               <i class="bi bi-funnel"></i> Filtrar
             </button>
           </div>
@@ -471,43 +596,39 @@
           </div>
 
           <div class="col-md-2 d-grid">
-            <button type="button" class="btn btn-outline-light" id="btn-limpar">
+            <button type="button" class="btn btn-ghost" id="btn-limpar">
               <i class="bi bi-x-circle"></i> Limpar
             </button>
           </div>
         </div>
 
         <div class="chips" id="chips-filtros"></div>
-        <div class="hint mt-2">
-          Dica: clique em <strong>Descontar / Parcelas</strong> para registrar descontos com data e editar quando quiser.
+        <div class="hint">
+          Dica: clique no botão azul (cartão) para registrar descontos com data e editar quando quiser.
         </div>
       </form>
     </div>
 
     <!-- Tabela -->
-    <div class="dashboard-card">
-      <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle" id="t-lanc">
+    <div class="cardx">
+      <div class="table-wrap">
+        <table id="t-lanc">
           <thead>
             <tr>
-              <th><i class="bi bi-calendar-event"></i> Data</th>
-              <th><i class="bi bi-file-earmark-text"></i> Nº OS</th>
-              <th><i class="bi bi-person"></i> Cooperado</th>
-              <th><i class="bi bi-shop"></i> Estabelecimento</th>
-              <th><i class="bi bi-currency-dollar"></i> Compra (R$)</th>
-              <th><i class="bi bi-collection"></i> Parcela sugerida (4x)</th>
-              <th><i class="bi bi-clipboard-check"></i> Situação</th>
-              <th><i class="bi bi-sliders2"></i> Ações</th>
+              <th class="w-data"><i class="bi bi-calendar-event"></i> Data</th>
+              <th class="w-os"><i class="bi bi-file-earmark-text"></i> Nº OS</th>
+              <th class="w-coop"><i class="bi bi-person"></i> Cooperado</th>
+              <th class="w-estab"><i class="bi bi-shop"></i> Estabelecimento</th>
+              <th class="w-compra"><i class="bi bi-currency-dollar"></i> Compra</th>
+              <th class="w-parc"><i class="bi bi-collection"></i> Parcela (4x)</th>
+              <th class="w-sit"><i class="bi bi-clipboard-check"></i> Situação</th>
+              <th class="w-acoes"><i class="bi bi-sliders2"></i> Ações</th>
             </tr>
           </thead>
 
           <tbody>
             {% if lancamentos %}
               {% for l in lancamentos %}
-                {# IMPORTANTE:
-                   - data-valor precisa ser numérico com ponto (.) para o JS.
-                   - desconto_data pode vir do back-end (opcional) / historico pode vir (opcional).
-                #}
                 <tr class="l-row"
                     data-id="{{ l.id }}"
                     data-data="{{ l.data.strftime('%Y-%m-%dT%H:%M:%S') }}"
@@ -517,29 +638,43 @@
                     data-estab="{{ l.estabelecimento.nome }}"
                     data-desc="{{ (l.descricao or '')|e }}"
                     data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'>
-                  <td>{{ l.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                  <td class="fw-bold">{{ l.os_numero }}</td>
-                  <td>{{ l.cooperado.nome }}</td>
-                  <td class="text-start">{{ l.estabelecimento.nome }}</td>
-                  <td class="valor" data-col="compra">{{ "{:,.2f}".format(l.valor) }}</td>
+
+                  <td class="col-data">
+                    <div>{{ l.data.strftime('%d/%m/%Y') }}</div>
+                    <small>{{ l.data.strftime('%H:%M') }}</small>
+                  </td>
+
+                  <td style="font-weight:900">{{ l.os_numero }}</td>
+
+                  <td class="col-coop">{{ l.cooperado.nome }}</td>
+
+                  <td class="col-estab">{{ l.estabelecimento.nome }}</td>
+
+                  <td class="valor" data-col="compra">
+                    {{ "{:,.2f}".format(l.valor).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                  </td>
+
                   <td>
                     <span class="pill"><span class="dot"></span><span class="vparc">—</span></span>
                   </td>
+
                   <td>
-                    <span class="pill danger"><span class="dot"></span><span class="sit">Pendente</span></span>
+                    <span class="pill danger"><span class="dot"></span><span class="sit">—</span></span>
                   </td>
+
                   <td>
-                    <div class="d-flex gap-2 justify-content-center flex-wrap">
-                      <button type="button" class="btn btn-mini btn-mini-primary" onclick="abrirParcelas({{ l.id }})">
-                        <i class="bi bi-credit-card-2-front"></i> Descontar / Parcelas
+                    <div class="actions">
+                      <button type="button" class="btn-ico primary" title="Descontar / Parcelas" onclick="abrirParcelas({{ l.id }})">
+                        <i class="bi bi-credit-card-2-front"></i>
                       </button>
 
                       <form method="post"
                             action="{{ url_for('excluir_lancamento', id=l.id) }}"
-                            onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');">
+                            onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');"
+                            style="margin:0">
                         <input type="hidden" name="next" value="{{ request.full_path }}">
-                        <button type="submit" class="btn btn-mini btn-danger">
-                          <i class="bi bi-trash"></i> Excluir
+                        <button type="submit" class="btn-ico danger" title="Excluir">
+                          <i class="bi bi-trash"></i>
                         </button>
                       </form>
                     </div>
@@ -547,7 +682,7 @@
                 </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="8">Nenhum lançamento encontrado.</td></tr>
+              <tr><td colspan="8" style="padding:14px;text-align:center;color:var(--muted);font-weight:700">Nenhum lançamento encontrado.</td></tr>
             {% endif %}
           </tbody>
 
@@ -561,6 +696,7 @@
         </table>
       </div>
     </div>
+
   </div>
 
   <!-- Modal Parcelas / Descontos -->
@@ -598,7 +734,7 @@
                   <input type="text" class="form-control" id="mp-valor" placeholder="Ex.: 20,00">
                 </div>
                 <div class="col-12 d-grid mt-1">
-                  <button type="button" class="btn btn-primary" id="mp-add">
+                  <button type="button" class="btn btn-main text-white" id="mp-add">
                     <i class="bi bi-plus-circle"></i> Registrar desconto
                   </button>
                 </div>
@@ -607,7 +743,7 @@
               <div class="mt-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <h6 class="m-0"><i class="bi bi-clock-history"></i> Histórico (editável)</h6>
-                  <button class="btn btn-outline-light btn-sm" type="button" id="mp-clear-local" title="Limpa apenas no navegador (teste)">
+                  <button class="btn btn-ghost btn-sm" type="button" id="mp-clear-local" title="Limpa apenas no navegador (teste)">
                     Limpar local
                   </button>
                 </div>
@@ -616,14 +752,14 @@
               </div>
 
               <div class="hint mt-3">
-                Integração ideal: salvar/editar no banco (endpoint). Enquanto isso, o navegador salva localmente para não “sumir”.
+                Enquanto não tiver endpoint de banco, o navegador salva localmente para não “sumir”.
               </div>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Fechar</button>
         </div>
       </div>
     </div>
@@ -643,14 +779,12 @@
     function parseBRL(input){
       const s = onlyDigitsAndCommaDot(input);
       if(!s) return NaN;
-      // aceita "1.234,56" e "1234.56"
       const norm = s.includes(',') ? s.replace(/\./g,'').replace(',', '.') : s;
       const n = parseFloat(norm);
       return isNaN(n) ? NaN : to2(n);
     }
 
     function formatBRInput(n){
-      // para preencher input
       if(isNaN(n)) return '';
       return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
@@ -663,18 +797,16 @@
     }
 
     // =========================
-    // Armazenamento local (provisório p/ não "sumir")
+    // Armazenamento local (provisório)
     // =========================
     function keyDescontos(id){ return `coopex_descontos_${id}`; }
 
     function getHistorico(row){
       const id = row.dataset.id;
-      // 1) tenta localStorage
       const ls = localStorage.getItem(keyDescontos(id));
       if (ls){
-        try { return JSON.parse(ls) || []; } catch(e){ /*ignore*/ }
+        try { return JSON.parse(ls) || []; } catch(e){}
       }
-      // 2) tenta vir do back-end no data-historico
       try{
         const raw = row.dataset.historico || '[]';
         const arr = JSON.parse(raw);
@@ -695,16 +827,10 @@
     // =========================
     // Motor de parcelas (4x) com acúmulo
     // =========================
-    // Retorna estrutura das 4 parcelas "teóricas", mas com "sugestão dinâmica" por acúmulo:
-    // - parcelaBase = total/4
-    // - descontos são aplicados em ordem de data (e ordem de criação se empate)
-    // - o que faltar para completar uma parcela acumula na próxima (fica maior)
-    // - o que sobrar (desconto acima do devido) abate parcelas seguintes
     function calcularParcelas(total, descontos){
       total = to2(total);
       const base = to2(total / 4);
 
-      // normaliza e ordena descontos por data (YYYY-MM-DD), e por idx
       const ds = (descontos || [])
         .map((d, idx)=>({
           id: d.id ?? `tmp_${idx}`,
@@ -720,56 +846,34 @@
         return a.idx - b.idx;
       });
 
-      // saldo de pagamento total
       let pagoTotal = 0;
       ds.forEach(d => pagoTotal = to2(pagoTotal + d.valor));
       if(pagoTotal > total) pagoTotal = total;
 
-      // Agora montamos as parcelas com "dívida" rolando
       const parcelas = [];
       let restante = total;
-      let carry = 0; // "falta" acumulada por desconto parcial
-      // Observação: carry > 0 significa que a próxima parcela deve ser maior para compensar
-      // carry < 0 significa que houve pagamento a mais que antecipou, então a próxima parcela fica menor.
-
-      // Para apuração de status, distribuímos o pagoTotal pelas parcelas na ordem
+      let carry = 0;
       let pagoDistribuir = pagoTotal;
 
       for(let i=1;i<=4;i++){
-        // sugestão atual = base + carry (respeitando limites)
         let sugerida = to2(base + carry);
-
-        // limita sugerida para não passar do restante do total no final
         if (sugerida < 0) sugerida = 0;
         if (sugerida > restante) sugerida = restante;
 
-        // quanto foi "pago" nesta parcela (pela distribuição sequencial)
         const pagoNesta = to2(Math.min(pagoDistribuir, sugerida));
         pagoDistribuir = to2(pagoDistribuir - pagoNesta);
 
-        // quanto faltou nesta parcela
         const faltou = to2(sugerida - pagoNesta);
-
-        // atualiza carry:
-        // - se faltou, carry aumenta (próxima fica maior)
-        // - se pagou exatamente, carry zera
-        // - se tivesse pago a mais (não ocorre aqui pq pagoNesta <= sugerida), carry negativo não aparece nessa forma
-        // Porém o "pagamento a mais" entra como redução do restante total e diminui sugeridas futuras via "restante".
         carry = to2(faltou);
 
         restante = to2(restante - sugerida);
 
         parcelas.push({
-          n: i,
-          base,
-          sugerida,
-          pago: pagoNesta,
-          faltou,
+          n: i, base, sugerida, pago: pagoNesta, faltou,
           status: (faltou <= 0.0001) ? 'paga' : 'pendente'
         });
       }
 
-      // Situação geral
       const saldo = to2(total - pagoTotal);
       return { total, base, pagoTotal, saldo, parcelas, descontosOrdenados: ds };
     }
@@ -802,6 +906,7 @@
     function atualizarChips(){
       const chips = document.getElementById('chips-filtros');
       chips.innerHTML = '';
+
       const coopSel  = document.getElementById('cooperado_id');
       const estabSel = document.getElementById('estabelecimento_id');
       const di = document.getElementById('data_inicio').value;
@@ -820,36 +925,14 @@
       if (df) add('bi-calendar-minus', `Fim: ${new Date(df+'T00:00:00').toLocaleDateString('pt-BR')}`);
     }
 
-    // Default mês atual sem loop "aparece e desaparece"
-    (function defaultMesAtualGuard(){
-      const hasDI = "{{ filtros.data_inicio or '' }}";
-      const hasDF = "{{ filtros.data_fim or '' }}";
-      if (!hasDI && !hasDF){
-        // guard por sessão (evita recarregar infinitamente)
-        const guardKey = 'coopex_default_mes_atual_aplicado';
-        if (sessionStorage.getItem(guardKey) === '1') return;
-        sessionStorage.setItem(guardKey, '1');
-
-        const now = new Date();
-        const first = new Date(now.getFullYear(), now.getMonth(), 1);
-        const url = new URL(window.location.href);
-        url.searchParams.set('data_inicio', localISODate(first));
-        url.searchParams.set('data_fim', localISODate(now));
-        window.location.replace(url.toString());
-      }else{
-        sessionStorage.removeItem('coopex_default_mes_atual_aplicado');
-      }
-    })();
-
     // =========================
-    // Preenche coluna "Parcela sugerida" e situação por linha
+    // Preenche Parcela sugerida e Situação (SEM "Saldo"; usa "Total")
     // =========================
     function atualizarLinhaParcelas(tr){
       const total = parseFloat(tr.dataset.valor || '0') || 0;
       const hist = getHistorico(tr);
       const calc = calcularParcelas(total, hist);
 
-      // "Parcela sugerida" => primeira parcela ainda pendente (sugestão dinâmica)
       const primeiraPendente = calc.parcelas.find(p => p.status !== 'paga') || calc.parcelas[3];
       const sug = primeiraPendente ? primeiraPendente.sugerida : calc.parcelas[3].sugerida;
 
@@ -864,7 +947,8 @@
         pill.classList.remove('danger');
         pill.classList.add('ok');
       }else{
-        sitEl.textContent = `Saldo ${brl(calc.saldo)}`;
+        // AQUI: mostra Total (como você pediu), não "Saldo"
+        sitEl.textContent = `Total ${brl(calc.total)}`;
         pill.classList.remove('ok');
         pill.classList.add('danger');
       }
@@ -922,23 +1006,28 @@
         ev.className = 'event';
         ev.innerHTML = `
           <div class="row1">
-            <span class="tag"><i class="bi bi-calendar2-check"></i> Desconto #${idx+1}</span>
+            <span style="font-weight:900;color:#1b2b5e">
+              <i class="bi bi-calendar2-check" style="color:var(--royal2)"></i>
+              Desconto #${idx+1}
+            </span>
             <span class="amt">${brl(parseFloat(d.valor)||0)}</span>
           </div>
-          <div class="row2">
-            <div style="min-width:220px">
-              <label class="mb-1" style="font-size:.88rem">Data</label>
+
+          <div class="row g-2 mt-2 align-items-end">
+            <div class="col-md-6">
+              <label class="mb-1" style="font-size:.78rem">Data</label>
               <input type="date" class="form-control form-control-sm" value="${(d.data||'').slice(0,10)}" data-edit-date="${idx}">
             </div>
-            <div style="min-width:220px">
-              <label class="mb-1" style="font-size:.88rem">Valor</label>
+            <div class="col-md-6">
+              <label class="mb-1" style="font-size:.78rem">Valor</label>
               <input type="text" class="form-control form-control-sm" value="${formatBRInput(parseFloat(d.valor)||0)}" data-edit-valor="${idx}">
             </div>
-            <div class="d-flex align-items-end gap-2">
-              <button type="button" class="btn btn-mini btn-mini-primary" data-save="${idx}">
+
+            <div class="col-12 d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-sm btn-primary" style="border-radius:12px;font-weight:900" data-save="${idx}">
                 <i class="bi bi-check2-circle"></i> Salvar
               </button>
-              <button type="button" class="btn btn-mini btn-mini-outline" data-del="${idx}">
+              <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:12px;font-weight:900" data-del="${idx}">
                 <i class="bi bi-trash3"></i> Remover
               </button>
             </div>
@@ -947,7 +1036,6 @@
         tl.appendChild(ev);
       });
 
-      // binds
       tl.querySelectorAll('button[data-save]').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           const i = parseInt(btn.getAttribute('data-save'), 10);
@@ -973,7 +1061,6 @@
       document.getElementById('mp-title').textContent = `Parcelas e Descontos • OS ${tr.dataset.os}`;
       document.getElementById('mp-sub').textContent = `${tr.dataset.coop} • ${tr.dataset.estab} • Compra ${brl(total)}`;
 
-      // default date hoje
       document.getElementById('mp-date').value = localISODate(new Date());
       document.getElementById('mp-valor').value = '';
 
@@ -1004,22 +1091,12 @@
       const date = (document.getElementById('mp-date').value || '').slice(0,10);
       const val = parseBRL(document.getElementById('mp-valor').value);
 
-      if(!date){
-        alert('Informe a data do desconto.');
-        return;
-      }
-      if(isNaN(val) || val <= 0){
-        alert('Informe um valor válido para o desconto.');
-        return;
-      }
+      if(!date){ alert('Informe a data do desconto.'); return; }
+      if(isNaN(val) || val <= 0){ alert('Informe um valor válido para o desconto.'); return; }
 
       const hist = getHistorico(tr);
       hist.push({ data: date, valor: to2(val) });
-
       setHistorico(currentId, hist);
-
-      // TODO: integrar no backend (ideal):
-      // fetch(`/api/lancamentos/${currentId}/descontos`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({data:date, valor:val}) })
 
       refreshModal();
       document.getElementById('mp-valor').value = '';
@@ -1038,20 +1115,11 @@
       const date = (dateInput.value || '').slice(0,10);
       const val  = parseBRL(valInput.value);
 
-      if(!date){
-        alert('Informe a data do desconto.');
-        return;
-      }
-      if(isNaN(val) || val <= 0){
-        alert('Informe um valor válido.');
-        return;
-      }
+      if(!date){ alert('Informe a data do desconto.'); return; }
+      if(isNaN(val) || val <= 0){ alert('Informe um valor válido.'); return; }
 
       hist[idx] = { ...hist[idx], data: date, valor: to2(val) };
       setHistorico(currentId, hist);
-
-      // TODO: backend:
-      // fetch(`/api/descontos/${hist[idx].id}`, { method:'PUT', ... })
 
       refreshModal();
     }
@@ -1062,10 +1130,6 @@
       const hist = getHistorico(tr);
       hist.splice(idx, 1);
       setHistorico(currentId, hist);
-
-      // TODO: backend:
-      // fetch(`/api/descontos/${id}`, { method:'DELETE' })
-
       refreshModal();
     }
 
@@ -1098,13 +1162,9 @@
     // Init
     // =========================
     document.addEventListener('DOMContentLoaded', ()=>{
-      // modal bootstrap
       modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
-
-      // bind add desconto
       document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
 
-      // limpar local (teste)
       document.getElementById('mp-clear-local').addEventListener('click', ()=>{
         if(!currentId) return;
         if(confirm('Limpar descontos apenas do navegador (teste)?')){
