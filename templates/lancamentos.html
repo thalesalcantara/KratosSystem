@@ -1,220 +1,431 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Lançamentos - Coopex</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
   <style>
     :root{
-      /* Azul royal + branco */
       --bg:#f7f9ff;
-      --ink:#0d1b3f;        /* texto principal */
-      --muted:#5c6c92;      /* texto secundário */
-      --royal:#4169e1;      /* azul-royal */
-      --royal-2:#5a7df0;    /* variação p/ hover */
-      --accent:#4169e1;     /* foco/bordas */
-      --card1:#ffffff;
-      --card2:#ffffff;
+      --panel:#ffffff;
+      --line:#dbe4ff;
+      --ink:#0d1b3f;
+      --muted:#5c6c92;
+      --royal:#4169e1;
+      --royal2:#5a7df0;
       --thead:#eef3ff;
       --rowOdd:#ffffff;
       --rowEven:#f7fbff;
-      --line:#dbe4ff;
-      --field:#ffffff;
-      --fieldBorder:#c7d2ff;
-      --fieldFocus:#4169e1;
       --danger:#e25566;
       --ok:#2e8b57;
+      --shadow: 0 10px 24px rgba(65,105,225,.12);
+      --shadow2: 0 14px 34px rgba(65,105,225,.16);
+      --radius: 16px;
     }
 
+    *{box-sizing:border-box}
     body{
       background:
-        radial-gradient(1400px 480px at 80% -40%, rgba(65,105,225,.08), transparent 70%),
+        radial-gradient(1400px 480px at 80% -40%, rgba(65,105,225,.10), transparent 70%),
         linear-gradient(180deg, var(--bg), var(--bg));
-      font-family:Roboto, Arial, sans-serif;
-      min-height:100vh;
-      margin:0;
-      color:var(--ink);
+      font-family: Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
     }
 
     .main-content{
       margin:0 auto;
-      max-width:1200px;
-      padding:38px 14px 28px;
+      max-width: 1280px;
+      padding: 28px 14px 28px;
     }
 
-    h2{
-      font-family:Orbitron, sans-serif;
-      color:var(--royal);
-      margin-bottom:16px;
-      text-align:center;
-      letter-spacing:1.2px;
+    .topbar{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      padding: 12px 14px;
+      border-radius: 16px;
+      box-shadow: var(--shadow2);
+      color:#fff;
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      border: 1px solid rgba(255,255,255,.35);
     }
+    .topbar .title{
+      display:flex; align-items:center; gap:10px;
+      font-family: Orbitron, sans-serif;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .topbar .actions{
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .btn-soft{
+      background:#fff;
+      color: var(--royal);
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 12px;
+      font-weight: 900;
+      padding: 10px 12px;
+      box-shadow: 0 10px 18px rgba(255,255,255,.18);
+    }
+    .btn-soft:hover{ filter: brightness(0.98); }
 
-    /* Cards e containers */
     .dashboard-card{
-      background:linear-gradient(120deg, var(--card1) 0%, var(--card2) 100%);
-      border-radius:16px;
-      border:1px solid var(--line);
-      box-shadow:0 10px 24px rgba(65,105,225,.12);
-      padding:18px 16px;
-      margin-bottom:22px;
-      color:var(--ink);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-top: 14px;
     }
 
-    /* Mini cards de métricas */
+    .h2{
+      font-family: Orbitron, sans-serif;
+      color: var(--royal);
+      letter-spacing: 1.2px;
+      margin: 0 0 8px 0;
+    }
+
     .stats{
-      display:grid; gap:12px;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      margin-bottom:4px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
     }
     .stat{
       background:#fff;
       border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px 14px;
-      box-shadow:0 6px 16px rgba(65,105,225,.10);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 8px 18px rgba(65,105,225,.10);
     }
-    .stat .label{ color:#2b3e73; font-weight:800; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
-    .stat .value{ font:900 1.35rem/1 Orbitron, sans-serif; color:var(--royal); margin-top:6px; }
-    .stat .sub{ color:var(--muted); font-size:.92rem; margin-top:4px; }
+    .stat .label{
+      color:#2b3e73; font-weight: 900;
+      display:flex; gap:8px; align-items:center;
+    }
+    .stat .value{
+      font: 900 1.35rem/1 Orbitron, sans-serif;
+      color: var(--royal);
+      margin-top: 8px;
+      white-space: nowrap;
+    }
+    .stat .sub{ color: var(--muted); font-size: .92rem; margin-top: 4px; }
 
-    /* Filtros */
-    label{font-weight:700;color:var(--ink);letter-spacing:.2px;}
-    .form-control, .form-select{
-      background:var(--field);
-      color:var(--ink);
-      border:2px solid var(--fieldBorder);
-      border-radius:12px;
-      height:46px;
+    .filters{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:end;
     }
-    .form-control::placeholder{color:var(--muted);}
+    label{ font-weight:900; color: var(--ink); }
+    .form-control, .form-select{
+      border:2px solid #c7d2ff;
+      border-radius: 12px;
+      height: 46px;
+    }
     .form-control:focus, .form-select:focus{
-      border-color:var(--fieldFocus);
-      box-shadow:0 0 0 .2rem rgba(65,105,225,.18);
+      border-color: var(--royal);
+      box-shadow: 0 0 0 .2rem rgba(65,105,225,.18);
     }
     .btn-primary{
-      background:linear-gradient(90deg, var(--royal) 0%, var(--royal-2) 100%);
-      color:#fff;
-      font-weight:800;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
       border:none;
-      border-radius:12px;
-      height:46px;
+      border-radius: 12px;
+      height: 46px;
+      font-weight: 900;
+      box-shadow: 0 10px 18px rgba(65,105,225,.16);
     }
-    .btn-primary:hover{filter:brightness(1.03);}
-    .btn-success{font-weight:800;border-radius:12px;height:46px;}
+    .btn-primary:hover{ filter: brightness(1.02); }
     .btn-outline-light{
-      border-radius:12px;height:46px;border-color:#c7d2ff;color:var(--royal);background:#fff;font-weight:800;
+      border-radius: 12px;
+      height: 46px;
+      border-color: #c7d2ff;
+      color: var(--royal);
+      background:#fff;
+      font-weight: 900;
     }
-    .btn-outline-light:hover{background:#eef3ff;color:#1b2b5e;}
-    .btn-today{
-      background:#fff;border:2px solid var(--royal);color:var(--royal);font-weight:800;border-radius:12px;height:46px;
-    }
-    .btn-today:hover{background:#eef3ff;}
+    .btn-outline-light:hover{ background:#eef3ff; color:#1b2b5e; }
+    .btn-success{ border-radius:12px; height:46px; font-weight:900; }
 
-    /* Chips dos filtros ativos */
-    .active-filters{
-      display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;
+    .chips{
+      display:flex; flex-wrap:wrap; gap:8px;
+      margin-top: 10px;
     }
     .chip{
       display:inline-flex; align-items:center; gap:6px;
-      padding:6px 10px; border-radius:999px; border:1px solid var(--line);
-      background:#eef3ff; color:#1b2b5e; font-weight:800; font-size:.9rem;
-      box-shadow:0 6px 12px rgba(65,105,225,.08);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background:#eef3ff;
+      border: 1px solid var(--line);
+      color:#1b2b5e;
+      font-weight: 900;
+      font-size: .9rem;
+      box-shadow: 0 6px 12px rgba(65,105,225,.08);
     }
-    .chip i{opacity:.9;color:var(--royal);}
+    .chip i{ color: var(--royal); }
 
-    /* Tabela */
-    .table{color:var(--ink);border-radius:12px;overflow:hidden;margin:0;background:#fff;border:1px solid var(--line);}
+    .table{
+      margin:0;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius: 12px;
+      overflow:hidden;
+      color: var(--ink);
+    }
     .table thead th{
-      position:sticky; top:0; z-index:5;
-      background:var(--thead);
-      color:var(--royal)!important;
-      font-family:Orbitron, sans-serif;
-      letter-spacing:1px;
+      position: sticky; top: 0; z-index: 2;
+      background: var(--thead);
+      color: var(--royal)!important;
+      font-family: Orbitron, sans-serif;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--line);
       text-align:center;
-      border-bottom:1px solid var(--line);
+      padding: 12px 10px;
+      white-space: nowrap;
     }
     .table tbody td{
-      color:var(--ink);
-      border-top:1px solid var(--line);
-      vertical-align:middle;
-      padding-top:12px; padding-bottom:12px;
+      border-top: 1px solid var(--line);
+      vertical-align: middle;
+      padding: 12px 10px;
+      text-align:center;
     }
-    .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:var(--rowOdd);}
-    .table-striped>tbody>tr:nth-of-type(even)>*{background-color:var(--rowEven);}
-    .table-hover tbody tr:hover>*{background-color:#ecf2ff!important;}
+    .table-striped>tbody>tr:nth-of-type(odd)>*{ background-color: var(--rowOdd); }
+    .table-striped>tbody>tr:nth-of-type(even)>*{ background-color: var(--rowEven); }
+    .table-hover tbody tr:hover>*{ background-color:#ecf2ff!important; }
 
-    /* Rodapé de totais */
+    .valor{
+      font-weight: 900;
+      color: var(--royal);
+      white-space: nowrap;
+      font-family: Orbitron, sans-serif;
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight: 900;
+      color:#1b2b5e;
+      white-space: nowrap;
+    }
+    .pill .dot{
+      width:10px; height:10px; border-radius:999px; background: var(--royal);
+      box-shadow: 0 0 0 3px rgba(65,105,225,.12);
+    }
+    .pill.ok .dot{ background: var(--ok); box-shadow: 0 0 0 3px rgba(46,139,87,.12); }
+    .pill.danger .dot{ background: var(--danger); box-shadow: 0 0 0 3px rgba(226,85,102,.14); }
+
+    .btn-mini{
+      border-radius: 12px;
+      font-weight: 900;
+      padding: 8px 10px;
+    }
+    .btn-mini-primary{
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      border:none;
+      color:#fff;
+    }
+    .btn-mini-primary:hover{ filter: brightness(1.02); color:#fff; }
+    .btn-mini-outline{
+      border: 1px solid #c7d2ff;
+      color: var(--royal);
+      background: #fff;
+    }
+    .btn-mini-outline:hover{ background:#eef3ff; }
+
     tfoot td{
       background:#eef3ff;
-      border-top:2px solid var(--line);
-      font-weight:800;
+      border-top: 2px solid var(--line);
+      font-weight: 900;
       color:#1b2b5e;
     }
 
-    /* Valor em destaque */
-    .valor{white-space:nowrap; font-weight:900; color:var(--royal);}
-    .valor.neg{color:var(--danger);}
-
-    .alert{
-      background:var(--royal);
+    /* Modal inovado */
+    .modal-content{
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .modal-header{
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
       color:#fff;
-      font-weight:800;
-      border-radius:10px;
-      margin-bottom:10px;
-      text-align:center;
-      border:none;
-      box-shadow:0 8px 22px rgba(65,105,225,.18);
+      border-bottom: 1px solid rgba(255,255,255,.25);
+    }
+    .modal-title{
+      font-family: Orbitron, sans-serif;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+    .modal-body{
+      background:
+        radial-gradient(900px 320px at 85% -10%, rgba(65,105,225,.10), transparent 70%),
+        #fff;
     }
 
-    /* Resumo por estabelecimento */
-    #resumo-estab-card h3{font:700 1.02rem Orbitron, sans-serif; color:var(--royal); margin:0 0 10px;}
-    #resumo-estab small{color:var(--muted)}
-    #btn-clear-local{border:none;background:transparent;color:#4169e1;font-weight:800}
-    #btn-clear-local:hover{text-decoration:underline}
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+    }
 
-    @media (max-width:900px){
-      .main-content{padding:14px 6px;}
-      .dashboard-card{padding:14px 10px;}
-      .table thead th{font-size:.92rem;}
-      .table tbody td{font-size:.98rem;}
-      .stats{grid-template-columns:1fr;}
+    .box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 8px 18px rgba(65,105,225,.10);
+    }
+
+    .box h6{
+      font-family: Orbitron, sans-serif;
+      color: var(--royal);
+      letter-spacing: .8px;
+      margin: 0 0 10px 0;
+      font-weight: 900;
+    }
+
+    .parcelas{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+    }
+    .parcela{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      background:#fff;
+      box-shadow: 0 8px 18px rgba(65,105,225,.08);
+      text-align:left;
+    }
+    .parcela .t{
+      font-weight: 900;
+      color:#1b2b5e;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .parcela .v{
+      font: 900 1.25rem/1 Orbitron, sans-serif;
+      color: var(--royal);
+      margin-top: 8px;
+    }
+    .parcela .s{
+      margin-top: 6px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: .92rem;
+    }
+    .parcela.paga{
+      background: #f3fff7;
+      border-color: rgba(46,139,87,.22);
+    }
+    .parcela.paga .v{ color: var(--ok); }
+    .parcela.atraso{
+      background: #fff3f5;
+      border-color: rgba(226,85,102,.22);
+    }
+    .parcela.atraso .v{ color: var(--danger); }
+
+    .timeline{
+      display:flex; flex-direction:column; gap:10px;
+      max-height: 320px;
+      overflow:auto;
+      padding-right: 6px;
+    }
+    .event{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      background:#fff;
+      box-shadow: 0 8px 18px rgba(65,105,225,.08);
+    }
+    .event .row1{
+      display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .event .row1 .tag{
+      display:inline-flex; gap:8px; align-items:center;
+      font-weight: 900;
+      color:#1b2b5e;
+    }
+    .event .row1 .tag i{ color: var(--royal); }
+    .event .row2{
+      display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;
+      margin-top: 8px;
+    }
+    .event .amt{
+      font-family: Orbitron, sans-serif;
+      font-weight: 900;
+      color: var(--royal);
+      white-space: nowrap;
+    }
+
+    .hint{
+      color: var(--muted);
+      font-weight: 800;
+      font-size: .92rem;
+    }
+
+    @media (max-width: 980px){
+      .stats{ grid-template-columns: 1fr; }
+      .grid2{ grid-template-columns: 1fr; }
+      .parcelas{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .topbar{ position: static; }
     }
   </style>
 </head>
+
 <body>
   <div class="main-content">
-    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light mb-3">
-      <i class="bi bi-arrow-left-circle"></i> Voltar ao Dashboard
-    </a>
-
-    <h2><i class="bi bi-journal-text"></i> Histórico de Lançamentos</h2>
-
-    <!-- Cards de métricas (preenchidos via JS) -->
-    <div class="stats dashboard-card" style="padding:14px 14px;">
-      <div class="stat">
-        <div class="label"><i class="bi bi-list-ul"></i> Lançamentos</div>
-        <div class="value" id="m-qtd">—</div>
-        <div class="sub">Quantidade visível</div>
+    <div class="topbar">
+      <div class="title">
+        <i class="bi bi-journal-text"></i>
+        <div>
+          <div style="font-size:1.05rem;">Lançamentos e Descontos</div>
+          <div style="font-size:.88rem;opacity:.9;font-family:Roboto;">Parcelamento automático em 4x com desconto flexível</div>
+        </div>
       </div>
-      <div class="stat">
-        <div class="label"><i class="bi bi-cash-coin"></i> Valor total</div>
-        <div class="value" id="m-total">—</div>
-        <div class="sub">Somatório dos valores</div>
-      </div>
-      <div class="stat">
-        <div class="label"><i class="bi bi-graph-up"></i> Ticket médio</div>
-        <div class="value" id="m-media">—</div>
-        <div class="sub">Média por lançamento</div>
+      <div class="actions">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-soft">
+          <i class="bi bi-arrow-left-circle"></i> Dashboard
+        </a>
+        <button type="button" class="btn btn-soft" id="btn-hoje">
+          <i class="bi bi-sun"></i> Hoje
+        </button>
       </div>
     </div>
 
-    <div class="dashboard-card mb-4">
+    <!-- Métricas -->
+    <div class="dashboard-card">
+      <div class="stats">
+        <div class="stat">
+          <div class="label"><i class="bi bi-list-ul"></i> Lançamentos</div>
+          <div class="value" id="m-qtd">—</div>
+          <div class="sub">Linhas visíveis</div>
+        </div>
+        <div class="stat">
+          <div class="label"><i class="bi bi-cash-coin"></i> Total visível</div>
+          <div class="value" id="m-total">—</div>
+          <div class="sub">Somatório dos valores</div>
+        </div>
+        <div class="stat">
+          <div class="label"><i class="bi bi-graph-up"></i> Ticket médio</div>
+          <div class="value" id="m-media">—</div>
+          <div class="sub">Média por lançamento</div>
+        </div>
+        <div class="stat">
+          <div class="label"><i class="bi bi-credit-card-2-front"></i> Parcelas (4x)</div>
+          <div class="value" id="m-parc">—</div>
+          <div class="sub">Regras automáticas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="dashboard-card">
       <form id="form-filtros" method="get" action="{{ url_for('listar_lancamentos') }}">
         <div class="row g-3 align-items-end">
           <div class="col-md-3">
@@ -261,93 +472,90 @@
 
           <div class="col-md-2 d-grid">
             <button type="button" class="btn btn-outline-light" id="btn-limpar">
-              <i class="bi bi-x-circle"></i> Limpar filtros
-            </button>
-          </div>
-
-          <div class="col-md-2 d-grid">
-            <button type="button" class="btn btn-today" id="btn-hoje" title="Preenche com a data de hoje e envia">
-              <i class="bi bi-sun"></i> Hoje
+              <i class="bi bi-x-circle"></i> Limpar
             </button>
           </div>
         </div>
 
-        <!-- Chips com filtros ativos (preenchidos via JS) -->
-        <div class="active-filters" id="chips-filtros"></div>
+        <div class="chips" id="chips-filtros"></div>
+        <div class="hint mt-2">
+          Dica: clique em <strong>Descontar / Parcelas</strong> para registrar descontos com data e editar quando quiser.
+        </div>
       </form>
     </div>
 
-    <!-- Resumo por Estabelecimento -->
-    <div class="dashboard-card" id="resumo-estab-card">
-      <div class="d-flex align-items-center justify-content-between mb-2">
-        <h3><i class="bi bi-building"></i> Resumo por Estabelecimento (linhas visíveis)</h3>
-        <button id="btn-clear-local" type="button" title="Limpar filtro local por estabelecimento (apenas na tabela)">Limpar filtro local</button>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-hover table-striped align-middle text-center" id="t-resumo-estab">
-          <thead>
-            <tr>
-              <th>Estabelecimento</th>
-              <th>Lançamentos</th>
-              <th>Ticket Médio</th>
-              <th>Total (visível)</th>
-              <th>Total Mês Atual</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <small id="resumo-estab-nota">Os números consideram as linhas visíveis após aplicar os filtros. “Total Mês Atual” considera o mês vigente no fuso de Brasília, usando a data de cada lançamento.</small>
-    </div>
-
+    <!-- Tabela -->
     <div class="dashboard-card">
       <div class="table-responsive">
-        <table class="table table-striped table-hover text-center align-middle" id="t-lanc">
+        <table class="table table-striped table-hover align-middle" id="t-lanc">
           <thead>
             <tr>
               <th><i class="bi bi-calendar-event"></i> Data</th>
               <th><i class="bi bi-file-earmark-text"></i> Nº OS</th>
               <th><i class="bi bi-person"></i> Cooperado</th>
               <th><i class="bi bi-shop"></i> Estabelecimento</th>
-              <th><i class="bi bi-currency-dollar"></i> Valor (R$)</th>
-              <th><i class="bi bi-justify-left"></i> Descrição</th>
-              <th><i class="bi bi-trash"></i> Ações</th>
+              <th><i class="bi bi-currency-dollar"></i> Compra (R$)</th>
+              <th><i class="bi bi-collection"></i> Parcela sugerida (4x)</th>
+              <th><i class="bi bi-clipboard-check"></i> Situação</th>
+              <th><i class="bi bi-sliders2"></i> Ações</th>
             </tr>
           </thead>
+
           <tbody>
             {% if lancamentos %}
               {% for l in lancamentos %}
-                <tr>
-                  <td data-data="{{ l.data.strftime('%Y-%m-%dT%H:%M:%S') }}">{{ l.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                  <td class="os">{{ l.os_numero }}</td>
-                  <td class="coop">{{ l.cooperado.nome }}</td>
-                  <td class="estab">{{ l.estabelecimento.nome }}</td>
-                  <td class="valor"
-                      data-valor="{{ '%.2f'|format(l.valor) }}">
-                    {{ "{:,.2f}".format(l.valor) }}
+                {# IMPORTANTE:
+                   - data-valor precisa ser numérico com ponto (.) para o JS.
+                   - desconto_data pode vir do back-end (opcional) / historico pode vir (opcional).
+                #}
+                <tr class="l-row"
+                    data-id="{{ l.id }}"
+                    data-data="{{ l.data.strftime('%Y-%m-%dT%H:%M:%S') }}"
+                    data-valor="{{ '%.2f'|format(l.valor) }}"
+                    data-os="{{ l.os_numero }}"
+                    data-coop="{{ l.cooperado.nome }}"
+                    data-estab="{{ l.estabelecimento.nome }}"
+                    data-desc="{{ (l.descricao or '')|e }}"
+                    data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'>
+                  <td>{{ l.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                  <td class="fw-bold">{{ l.os_numero }}</td>
+                  <td>{{ l.cooperado.nome }}</td>
+                  <td class="text-start">{{ l.estabelecimento.nome }}</td>
+                  <td class="valor" data-col="compra">{{ "{:,.2f}".format(l.valor) }}</td>
+                  <td>
+                    <span class="pill"><span class="dot"></span><span class="vparc">—</span></span>
                   </td>
-                  <td class="desc">{{ l.descricao or '' }}</td>
-                  <td class="text-center">
-                    <form method="post"
-                          action="{{ url_for('excluir_lancamento', id=l.id) }}"
-                          onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');">
-                      <input type="hidden" name="next" value="{{ request.full_path }}">
-                      <button type="submit" class="btn btn-sm btn-danger">
-                        <i class="bi bi-trash"></i> Excluir
+                  <td>
+                    <span class="pill danger"><span class="dot"></span><span class="sit">Pendente</span></span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                      <button type="button" class="btn btn-mini btn-mini-primary" onclick="abrirParcelas({{ l.id }})">
+                        <i class="bi bi-credit-card-2-front"></i> Descontar / Parcelas
                       </button>
-                    </form>
+
+                      <form method="post"
+                            action="{{ url_for('excluir_lancamento', id=l.id) }}"
+                            onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');">
+                        <input type="hidden" name="next" value="{{ request.full_path }}">
+                        <button type="submit" class="btn btn-mini btn-danger">
+                          <i class="bi bi-trash"></i> Excluir
+                        </button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="7">Nenhum lançamento encontrado.</td></tr>
+              <tr><td colspan="8">Nenhum lançamento encontrado.</td></tr>
             {% endif %}
           </tbody>
+
           <tfoot>
             <tr>
-              <td colspan="5" class="text-end">Totais (visíveis):</td>
+              <td colspan="4" class="text-end">Totais (visíveis):</td>
               <td id="tf-total" class="valor">—</td>
-              <td id="tf-qtd" class="text-start">— itens</td>
+              <td colspan="3" id="tf-qtd" class="text-start">— itens</td>
             </tr>
           </tfoot>
         </table>
@@ -355,13 +563,98 @@
     </div>
   </div>
 
-  <script>
-    // ---- Utilidades
-    const brl = v => v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
-    const parseNum = s => parseFloat(String(s).replace(/\./g,'').replace(',', '.'));
-    const tz = 'America/Sao_Paulo';
+  <!-- Modal Parcelas / Descontos -->
+  <div class="modal fade" id="modalParcelas" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title" id="mp-title">Parcelas e Descontos</div>
+            <div style="opacity:.92;font-weight:800" id="mp-sub">—</div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
 
-    // Gera YYYY-MM-DD no fuso local (sem UTC)
+        <div class="modal-body">
+          <div class="grid2">
+            <div class="box">
+              <h6><i class="bi bi-collection"></i> Parcelamento em 4x (com acúmulo automático)</h6>
+              <div class="parcelas" id="mp-parcelas"></div>
+              <div class="hint mt-3">
+                Regra: se você descontar <strong>menos</strong> que a parcela, o restante <strong>vai para a próxima</strong>.
+              </div>
+            </div>
+
+            <div class="box">
+              <h6><i class="bi bi-calendar2-check"></i> Registrar desconto com data</h6>
+
+              <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                  <label>Data do desconto</label>
+                  <input type="date" class="form-control" id="mp-date">
+                </div>
+                <div class="col-md-6">
+                  <label>Valor descontado (R$)</label>
+                  <input type="text" class="form-control" id="mp-valor" placeholder="Ex.: 20,00">
+                </div>
+                <div class="col-12 d-grid mt-1">
+                  <button type="button" class="btn btn-primary" id="mp-add">
+                    <i class="bi bi-plus-circle"></i> Registrar desconto
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h6 class="m-0"><i class="bi bi-clock-history"></i> Histórico (editável)</h6>
+                  <button class="btn btn-outline-light btn-sm" type="button" id="mp-clear-local" title="Limpa apenas no navegador (teste)">
+                    Limpar local
+                  </button>
+                </div>
+                <div class="hint mt-1">Você pode editar a data e o valor de qualquer desconto.</div>
+                <div class="timeline mt-2" id="mp-timeline"></div>
+              </div>
+
+              <div class="hint mt-3">
+                Integração ideal: salvar/editar no banco (endpoint). Enquanto isso, o navegador salva localmente para não “sumir”.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Utilitários
+    // =========================
+    const brl = v => v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    const to2 = n => (Math.round((n + Number.EPSILON)*100)/100);
+
+    function onlyDigitsAndCommaDot(s){
+      return String(s||'').replace(/[^\d,.-]/g,'').trim();
+    }
+
+    function parseBRL(input){
+      const s = onlyDigitsAndCommaDot(input);
+      if(!s) return NaN;
+      // aceita "1.234,56" e "1234.56"
+      const norm = s.includes(',') ? s.replace(/\./g,'').replace(',', '.') : s;
+      const n = parseFloat(norm);
+      return isNaN(n) ? NaN : to2(n);
+    }
+
+    function formatBRInput(n){
+      // para preencher input
+      if(isNaN(n)) return '';
+      return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     function localISODate(d=new Date()){
       const y = d.getFullYear();
       const m = String(d.getMonth()+1).padStart(2,'0');
@@ -369,36 +662,143 @@
       return `${y}-${m}-${day}`;
     }
 
-    // Marca valores negativos
-    function pintarNegativos(){
-      document.querySelectorAll('#t-lanc .valor').forEach(td=>{
-        const v = parseFloat(td.dataset.valor);
-        td.classList.toggle('neg', !isNaN(v) && v < 0);
-      });
+    // =========================
+    // Armazenamento local (provisório p/ não "sumir")
+    // =========================
+    function keyDescontos(id){ return `coopex_descontos_${id}`; }
+
+    function getHistorico(row){
+      const id = row.dataset.id;
+      // 1) tenta localStorage
+      const ls = localStorage.getItem(keyDescontos(id));
+      if (ls){
+        try { return JSON.parse(ls) || []; } catch(e){ /*ignore*/ }
+      }
+      // 2) tenta vir do back-end no data-historico
+      try{
+        const raw = row.dataset.historico || '[]';
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      }catch(e){
+        return [];
+      }
     }
 
-    // Atualiza métricas e rodapé com base nas linhas VISÍVEIS
-    function atualizarMetricas(){
-      const linhas = [...document.querySelectorAll('#t-lanc tbody tr')]
-        .filter(tr => tr.style.display !== 'none');
-      let soma = 0, qtd = 0;
-      linhas.forEach(tr=>{
-        const td = tr.querySelector('.valor');
-        if (!td) return;
-        const v = parseFloat(td.dataset.valor);
-        if (!isNaN(v)){ soma += v; qtd++; }
-      });
-      const media = qtd ? (soma / qtd) : 0;
+    function setHistorico(id, hist){
+      localStorage.setItem(keyDescontos(id), JSON.stringify(hist || []));
+    }
 
-      document.getElementById('m-qtd').textContent   = qtd.toLocaleString('pt-BR');
+    function clearHistorico(id){
+      localStorage.removeItem(keyDescontos(id));
+    }
+
+    // =========================
+    // Motor de parcelas (4x) com acúmulo
+    // =========================
+    // Retorna estrutura das 4 parcelas "teóricas", mas com "sugestão dinâmica" por acúmulo:
+    // - parcelaBase = total/4
+    // - descontos são aplicados em ordem de data (e ordem de criação se empate)
+    // - o que faltar para completar uma parcela acumula na próxima (fica maior)
+    // - o que sobrar (desconto acima do devido) abate parcelas seguintes
+    function calcularParcelas(total, descontos){
+      total = to2(total);
+      const base = to2(total / 4);
+
+      // normaliza e ordena descontos por data (YYYY-MM-DD), e por idx
+      const ds = (descontos || [])
+        .map((d, idx)=>({
+          id: d.id ?? `tmp_${idx}`,
+          data: String(d.data || '').slice(0,10),
+          valor: to2(parseFloat(d.valor) || 0),
+          idx
+        }))
+        .filter(d => d.valor > 0 && d.data);
+
+      ds.sort((a,b)=>{
+        if(a.data < b.data) return -1;
+        if(a.data > b.data) return 1;
+        return a.idx - b.idx;
+      });
+
+      // saldo de pagamento total
+      let pagoTotal = 0;
+      ds.forEach(d => pagoTotal = to2(pagoTotal + d.valor));
+      if(pagoTotal > total) pagoTotal = total;
+
+      // Agora montamos as parcelas com "dívida" rolando
+      const parcelas = [];
+      let restante = total;
+      let carry = 0; // "falta" acumulada por desconto parcial
+      // Observação: carry > 0 significa que a próxima parcela deve ser maior para compensar
+      // carry < 0 significa que houve pagamento a mais que antecipou, então a próxima parcela fica menor.
+
+      // Para apuração de status, distribuímos o pagoTotal pelas parcelas na ordem
+      let pagoDistribuir = pagoTotal;
+
+      for(let i=1;i<=4;i++){
+        // sugestão atual = base + carry (respeitando limites)
+        let sugerida = to2(base + carry);
+
+        // limita sugerida para não passar do restante do total no final
+        if (sugerida < 0) sugerida = 0;
+        if (sugerida > restante) sugerida = restante;
+
+        // quanto foi "pago" nesta parcela (pela distribuição sequencial)
+        const pagoNesta = to2(Math.min(pagoDistribuir, sugerida));
+        pagoDistribuir = to2(pagoDistribuir - pagoNesta);
+
+        // quanto faltou nesta parcela
+        const faltou = to2(sugerida - pagoNesta);
+
+        // atualiza carry:
+        // - se faltou, carry aumenta (próxima fica maior)
+        // - se pagou exatamente, carry zera
+        // - se tivesse pago a mais (não ocorre aqui pq pagoNesta <= sugerida), carry negativo não aparece nessa forma
+        // Porém o "pagamento a mais" entra como redução do restante total e diminui sugeridas futuras via "restante".
+        carry = to2(faltou);
+
+        restante = to2(restante - sugerida);
+
+        parcelas.push({
+          n: i,
+          base,
+          sugerida,
+          pago: pagoNesta,
+          faltou,
+          status: (faltou <= 0.0001) ? 'paga' : 'pendente'
+        });
+      }
+
+      // Situação geral
+      const saldo = to2(total - pagoTotal);
+      return { total, base, pagoTotal, saldo, parcelas, descontosOrdenados: ds };
+    }
+
+    // =========================
+    // UI: métricas e chips
+    // =========================
+    function atualizarMetricasTabela(){
+      const rows = [...document.querySelectorAll('#t-lanc tbody tr.l-row')]
+        .filter(tr => tr.style.display !== 'none');
+
+      let soma = 0, qtd = 0;
+      rows.forEach(tr=>{
+        const v = parseFloat(tr.dataset.valor || '0') || 0;
+        soma = to2(soma + v);
+        qtd++;
+      });
+
+      const media = qtd ? to2(soma / qtd) : 0;
+
+      document.getElementById('m-qtd').textContent = qtd.toLocaleString('pt-BR');
       document.getElementById('m-total').textContent = brl(soma);
       document.getElementById('m-media').textContent = brl(media);
+      document.getElementById('m-parc').textContent = '4x automático';
 
       document.getElementById('tf-total').textContent = brl(soma);
-      document.getElementById('tf-qtd').textContent   = `${qtd.toLocaleString('pt-BR')} itens`;
+      document.getElementById('tf-qtd').textContent = `${qtd.toLocaleString('pt-BR')} itens`;
     }
 
-    // Gera chips dos filtros ativos
     function atualizarChips(){
       const chips = document.getElementById('chips-filtros');
       chips.innerHTML = '';
@@ -416,39 +816,262 @@
 
       if (coopSel.value)  add('bi-person', coopSel.options[coopSel.selectedIndex].text);
       if (estabSel.value) add('bi-shop', estabSel.options[estabSel.selectedIndex].text);
-      if (di) add('bi-calendar-plus',  `Início: ${new Date(di + 'T00:00:00').toLocaleDateString('pt-BR')}`);
-      if (df) add('bi-calendar-minus', `Fim: ${new Date(df + 'T00:00:00').toLocaleDateString('pt-BR')}`);
+      if (di) add('bi-calendar-plus', `Início: ${new Date(di+'T00:00:00').toLocaleDateString('pt-BR')}`);
+      if (df) add('bi-calendar-minus', `Fim: ${new Date(df+'T00:00:00').toLocaleDateString('pt-BR')}`);
     }
 
-    // ===== Default: sempre mês atual quando vier sem filtros =====
-    (function defaultMesAtual(){
+    // Default mês atual sem loop "aparece e desaparece"
+    (function defaultMesAtualGuard(){
       const hasDI = "{{ filtros.data_inicio or '' }}";
       const hasDF = "{{ filtros.data_fim or '' }}";
       if (!hasDI && !hasDF){
+        // guard por sessão (evita recarregar infinitamente)
+        const guardKey = 'coopex_default_mes_atual_aplicado';
+        if (sessionStorage.getItem(guardKey) === '1') return;
+        sessionStorage.setItem(guardKey, '1');
+
         const now = new Date();
         const first = new Date(now.getFullYear(), now.getMonth(), 1);
         const url = new URL(window.location.href);
         url.searchParams.set('data_inicio', localISODate(first));
         url.searchParams.set('data_fim', localISODate(now));
         window.location.replace(url.toString());
+      }else{
+        sessionStorage.removeItem('coopex_default_mes_atual_aplicado');
       }
     })();
 
-    // ===== Botão Hoje (preenche hoje e envia)
-    document.getElementById('btn-hoje')?.addEventListener('click', ()=>{
-      const d = localISODate(new Date());
-      document.getElementById('data_inicio').value = d;
-      document.getElementById('data_fim').value    = d;
-      document.getElementById('form-filtros').submit();
-    });
+    // =========================
+    // Preenche coluna "Parcela sugerida" e situação por linha
+    // =========================
+    function atualizarLinhaParcelas(tr){
+      const total = parseFloat(tr.dataset.valor || '0') || 0;
+      const hist = getHistorico(tr);
+      const calc = calcularParcelas(total, hist);
 
-    // Limpar filtros (volta para a rota sem querystring)
-    document.getElementById('btn-limpar').addEventListener('click', () => {
-      const base = "{{ url_for('listar_lancamentos') }}";
-      window.location.href = base;
-    });
+      // "Parcela sugerida" => primeira parcela ainda pendente (sugestão dinâmica)
+      const primeiraPendente = calc.parcelas.find(p => p.status !== 'paga') || calc.parcelas[3];
+      const sug = primeiraPendente ? primeiraPendente.sugerida : calc.parcelas[3].sugerida;
 
-    // Export Excel (mantido)
+      tr.querySelector('.vparc').textContent = brl(sug);
+
+      const sitEl = tr.querySelector('.sit');
+      const pill = sitEl?.closest('.pill');
+      const ok = calc.saldo <= 0.0001;
+
+      if (ok){
+        sitEl.textContent = 'Quitado';
+        pill.classList.remove('danger');
+        pill.classList.add('ok');
+      }else{
+        sitEl.textContent = `Saldo ${brl(calc.saldo)}`;
+        pill.classList.remove('ok');
+        pill.classList.add('danger');
+      }
+    }
+
+    function atualizarTodasLinhas(){
+      document.querySelectorAll('#t-lanc tbody tr.l-row').forEach(tr => atualizarLinhaParcelas(tr));
+      atualizarMetricasTabela();
+      atualizarChips();
+    }
+
+    // =========================
+    // Modal: Parcelas / Descontos
+    // =========================
+    let modal;
+    let currentId = null;
+
+    function getRowById(id){
+      return document.querySelector(`#t-lanc tbody tr.l-row[data-id="${id}"]`);
+    }
+
+    function renderParcelas(calc){
+      const wrap = document.getElementById('mp-parcelas');
+      wrap.innerHTML = '';
+      calc.parcelas.forEach(p=>{
+        const div = document.createElement('div');
+        div.className = 'parcela ' + (p.status === 'paga' ? 'paga' : '');
+        div.innerHTML = `
+          <div class="t">
+            <span>Parcela ${p.n}</span>
+            <span class="pill ${p.status==='paga'?'ok':'danger'}" style="padding:4px 8px;font-size:.82rem">
+              <span class="dot"></span>${p.status==='paga'?'Paga':'Pendente'}
+            </span>
+          </div>
+          <div class="v">${brl(p.sugerida)}</div>
+          <div class="s">Base: ${brl(p.base)} • Pago: ${brl(p.pago)} • Falta: ${brl(p.faltou)}</div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function renderTimeline(hist){
+      const tl = document.getElementById('mp-timeline');
+      tl.innerHTML = '';
+      if (!hist.length){
+        const empty = document.createElement('div');
+        empty.className = 'event';
+        empty.innerHTML = `<div class="hint">Nenhum desconto registrado ainda.</div>`;
+        tl.appendChild(empty);
+        return;
+      }
+
+      hist.forEach((d, idx)=>{
+        const ev = document.createElement('div');
+        ev.className = 'event';
+        ev.innerHTML = `
+          <div class="row1">
+            <span class="tag"><i class="bi bi-calendar2-check"></i> Desconto #${idx+1}</span>
+            <span class="amt">${brl(parseFloat(d.valor)||0)}</span>
+          </div>
+          <div class="row2">
+            <div style="min-width:220px">
+              <label class="mb-1" style="font-size:.88rem">Data</label>
+              <input type="date" class="form-control form-control-sm" value="${(d.data||'').slice(0,10)}" data-edit-date="${idx}">
+            </div>
+            <div style="min-width:220px">
+              <label class="mb-1" style="font-size:.88rem">Valor</label>
+              <input type="text" class="form-control form-control-sm" value="${formatBRInput(parseFloat(d.valor)||0)}" data-edit-valor="${idx}">
+            </div>
+            <div class="d-flex align-items-end gap-2">
+              <button type="button" class="btn btn-mini btn-mini-primary" data-save="${idx}">
+                <i class="bi bi-check2-circle"></i> Salvar
+              </button>
+              <button type="button" class="btn btn-mini btn-mini-outline" data-del="${idx}">
+                <i class="bi bi-trash3"></i> Remover
+              </button>
+            </div>
+          </div>
+        `;
+        tl.appendChild(ev);
+      });
+
+      // binds
+      tl.querySelectorAll('button[data-save]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = parseInt(btn.getAttribute('data-save'), 10);
+          salvarEdicao(i);
+        });
+      });
+      tl.querySelectorAll('button[data-del]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = parseInt(btn.getAttribute('data-del'), 10);
+          removerDesconto(i);
+        });
+      });
+    }
+
+    function abrirParcelas(id){
+      currentId = String(id);
+      const tr = getRowById(currentId);
+      if(!tr) return;
+
+      const total = parseFloat(tr.dataset.valor || '0') || 0;
+      const hist = getHistorico(tr);
+
+      document.getElementById('mp-title').textContent = `Parcelas e Descontos • OS ${tr.dataset.os}`;
+      document.getElementById('mp-sub').textContent = `${tr.dataset.coop} • ${tr.dataset.estab} • Compra ${brl(total)}`;
+
+      // default date hoje
+      document.getElementById('mp-date').value = localISODate(new Date());
+      document.getElementById('mp-valor').value = '';
+
+      const calc = calcularParcelas(total, hist);
+      renderParcelas(calc);
+      renderTimeline(hist);
+
+      modal.show();
+    }
+    window.abrirParcelas = abrirParcelas;
+
+    function refreshModal(){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+      const total = parseFloat(tr.dataset.valor || '0') || 0;
+      const hist = getHistorico(tr);
+      const calc = calcularParcelas(total, hist);
+      renderParcelas(calc);
+      renderTimeline(hist);
+      atualizarLinhaParcelas(tr);
+      atualizarMetricasTabela();
+    }
+
+    function adicionarDesconto(){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+
+      const date = (document.getElementById('mp-date').value || '').slice(0,10);
+      const val = parseBRL(document.getElementById('mp-valor').value);
+
+      if(!date){
+        alert('Informe a data do desconto.');
+        return;
+      }
+      if(isNaN(val) || val <= 0){
+        alert('Informe um valor válido para o desconto.');
+        return;
+      }
+
+      const hist = getHistorico(tr);
+      hist.push({ data: date, valor: to2(val) });
+
+      setHistorico(currentId, hist);
+
+      // TODO: integrar no backend (ideal):
+      // fetch(`/api/lancamentos/${currentId}/descontos`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({data:date, valor:val}) })
+
+      refreshModal();
+      document.getElementById('mp-valor').value = '';
+    }
+
+    function salvarEdicao(idx){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+
+      const hist = getHistorico(tr);
+
+      const dateInput = document.querySelector(`[data-edit-date="${idx}"]`);
+      const valInput  = document.querySelector(`[data-edit-valor="${idx}"]`);
+      if(!dateInput || !valInput) return;
+
+      const date = (dateInput.value || '').slice(0,10);
+      const val  = parseBRL(valInput.value);
+
+      if(!date){
+        alert('Informe a data do desconto.');
+        return;
+      }
+      if(isNaN(val) || val <= 0){
+        alert('Informe um valor válido.');
+        return;
+      }
+
+      hist[idx] = { ...hist[idx], data: date, valor: to2(val) };
+      setHistorico(currentId, hist);
+
+      // TODO: backend:
+      // fetch(`/api/descontos/${hist[idx].id}`, { method:'PUT', ... })
+
+      refreshModal();
+    }
+
+    function removerDesconto(idx){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+      const hist = getHistorico(tr);
+      hist.splice(idx, 1);
+      setHistorico(currentId, hist);
+
+      // TODO: backend:
+      // fetch(`/api/descontos/${id}`, { method:'DELETE' })
+
+      refreshModal();
+    }
+
+    // =========================
+    // Botões gerais
+    // =========================
     function exportarExcel(){
       const params = new URLSearchParams({
         cooperado_id: document.getElementById('cooperado_id').value || '',
@@ -460,95 +1083,39 @@
     }
     window.exportarExcel = exportarExcel;
 
-    // ===== Resumo por Estabelecimento (visível + mês atual)
-    function isInCurrentMonth(dateIso){
-      if(!dateIso) return false;
-      const d = new Date(dateIso);
-      const now = new Date();
-      return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
-    }
+    document.getElementById('btn-limpar')?.addEventListener('click', ()=>{
+      window.location.href = "{{ url_for('listar_lancamentos') }}";
+    });
 
-    function montarResumoEstabelecimentos(){
-      const rows = [...document.querySelectorAll('#t-lanc tbody tr')];
-      const mapa = Object.create(null);
+    document.getElementById('btn-hoje')?.addEventListener('click', ()=>{
+      const d = localISODate(new Date());
+      document.getElementById('data_inicio').value = d;
+      document.getElementById('data_fim').value = d;
+      document.getElementById('form-filtros').submit();
+    });
 
-      rows.forEach(tr=>{
-        if(tr.style.display==='none') return; // só visíveis
-        const nome = (tr.querySelector('.estab')?.textContent || '').trim();
-        const v = parseFloat(tr.querySelector('.valor')?.dataset.valor || '0') || 0;
-        const dataIso = tr.children[0]?.getAttribute('data-data') || '';
-        if(!nome) return;
-        if(!mapa[nome]) mapa[nome] = { total:0, qtd:0, mesTotal:0, mesQtd:0 };
-        mapa[nome].total += v;
-        mapa[nome].qtd += 1;
-        if (isInCurrentMonth(dataIso)){
-          mapa[nome].mesTotal += v;
-          mapa[nome].mesQtd += 1;
+    // =========================
+    // Init
+    // =========================
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // modal bootstrap
+      modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
+
+      // bind add desconto
+      document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
+
+      // limpar local (teste)
+      document.getElementById('mp-clear-local').addEventListener('click', ()=>{
+        if(!currentId) return;
+        if(confirm('Limpar descontos apenas do navegador (teste)?')){
+          clearHistorico(currentId);
+          refreshModal();
         }
       });
 
-      const tbody = document.querySelector('#t-resumo-estab tbody');
-      tbody.innerHTML = '';
-
-      const nomes = Object.keys(mapa).sort((a,b)=> mapa[b].total - mapa[a].total);
-      nomes.forEach(nome=>{
-        const it = mapa[nome];
-        const ticket = it.qtd ? (it.total / it.qtd) : 0;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="text-start">
-            <button type="button" class="btn btn-link p-0 fw-bold" data-estab="${nome}" style="text-decoration:none;color:var(--royal)">
-              ${nome}
-            </button>
-          </td>
-          <td>${it.qtd.toLocaleString('pt-BR')}</td>
-          <td>${brl(ticket)}</td>
-          <td class="valor">${brl(it.total)}</td>
-          <td class="valor">${brl(it.mesTotal)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      // Clique no nome => filtra localmente a tabela principal por estabelecimento
-      tbody.querySelectorAll('button[data-estab]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const alvo = btn.getAttribute('data-estab');
-          filtrarTabelaPorEstabelecimentoLocal(alvo);
-        });
-      });
-    }
-
-    function filtrarTabelaPorEstabelecimentoLocal(nome){
-      const rows = document.querySelectorAll('#t-lanc tbody tr');
-      rows.forEach(tr=>{
-        const e = (tr.querySelector('.estab')?.textContent || '').trim();
-        tr.style.display = (e===nome) ? '' : 'none';
-      });
-      atualizarMetricas();
-      montarResumoEstabelecimentos();
-    }
-
-    // Limpa filtro local (somente visual)
-    document.getElementById('btn-clear-local')?.addEventListener('click', ()=>{
-      document.querySelectorAll('#t-lanc tbody tr').forEach(tr=> tr.style.display='');
-      atualizarMetricas();
-      montarResumoEstabelecimentos();
-    });
-
-    // Init
-    document.addEventListener('DOMContentLoaded', () => {
-      pintarNegativos();
-      atualizarMetricas();
-      atualizarChips();
-      montarResumoEstabelecimentos();
+      atualizarTodasLinhas();
     });
   </script>
-
-  <!--
-    NOTA sobre fuso e “Hoje”:
-    1) Este HTML usa data LOCAL (sem toISOString/UTC) para hoje e mês vigente.
-    2) No back-end, compare até o FIM do dia com: df = df + timedelta(days=1) e usar < df.
-  -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
