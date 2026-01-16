@@ -2,381 +2,839 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Cooperados - Coopex (Lista contínua)</title>
+  <title>Cooperados - Coopex</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Fonts + Bootstrap + Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
   <style>
     :root{
-      /* ===== Paleta: Azul Royal (#4169E1) + Branco ===== */
-      --bg:#f7f9ff;
-      --ink:#0d1b3f;          /* texto principal */
-      --muted:#5c6c92;        /* secundário */
-      --gold:#4169e1;         /* usamos a var 'gold' como azul-royal */
-      --accent:#5a7df0;       /* azul claro/hover */
-      --card1:#ffffff;
-      --card2:#ffffff;
-      --thead:#f0f4ff;        /* cabeçalho tabela */
-      --rowOdd:#ffffff;
-      --rowEven:#f7fbff;
-      --line:#e2e8ff;
-      --field:#ffffff;
-      --fieldBorder:#c7d2ff;
-      --fieldFocus:#4169e1;
-      --glass:rgba(255,255,255,.82);
+      --bg:#f6f8ff;
+      --panel:#ffffff;
+      --line:#e4ebff;
+      --ink:#0f172a;
+      --muted:#5b6b8a;
+
+      --royal:#1f4fff;     /* azul royal principal */
+      --royal2:#1b3fd1;    /* tom escuro */
+      --royal3:#6aa6ff;    /* tom claro */
+
+      --ok:#10b981;
+      --danger:#ef4444;
+
+      --thead:#f2f6ff;
+      --shadow: 0 14px 34px rgba(31,79,255,.10);
+      --shadow2: 0 18px 46px rgba(15,23,42,.08);
+      --radius: 18px;
     }
 
-    html,body{height:100%}
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0; background:
-        radial-gradient(1400px 480px at 80% -40%, rgba(65,105,225,.10), transparent 70%),
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 420px at 80% -40%, rgba(31,79,255,.12), transparent 70%),
+        radial-gradient(900px 380px at 10% 0%, rgba(16,185,129,.07), transparent 60%),
         linear-gradient(180deg, var(--bg), var(--bg));
-      color:var(--ink);
-      font-family:Roboto, Arial, sans-serif;
-      text-shadow:none;
       overflow-x:hidden;
     }
 
-    /* ===== Topbar ===== */
-    .topbar{
-      position:sticky; top:0; z-index:60; height:68px;
-      display:flex; align-items:center; gap:12px; padding:0 16px;
-      background:linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
-      border-bottom:1px solid rgba(255,255,255,.35);
-      box-shadow:0 10px 28px rgba(65,105,225,.28);
+    /* ===== LAYOUT ===== */
+    .page{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar{
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 16px 14px;
+      border-right: 1px solid var(--line);
+      background:
+        radial-gradient(1000px 420px at 50% -30%, rgba(31,79,255,.12), transparent 60%),
+        #fff;
+      box-shadow: 8px 0 22px rgba(15,23,42,.04);
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+    }
+    .brand img{
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #f3f6ff;
+      border: 1px solid var(--line);
+      padding: 6px;
+    }
+    .brand .t{
+      margin:0;
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      letter-spacing: .6px;
+      font-size: 14px;
+      color: var(--royal2);
+      line-height: 1.1;
+    }
+    .brand .s{
+      margin: 2px 0 0 0;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .navx{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .navx a{
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background:#fff;
+      color: var(--ink);
+      font-weight: 900;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      transition: transform .08s ease, filter .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .navx a i{ color: var(--royal2); font-size: 1.15rem; }
+    .navx a:hover{
+      transform: translateY(-1px);
+      background: #f3f7ff;
+      box-shadow: 0 14px 30px rgba(31,79,255,.10);
+    }
+    .navx a.active{
+      border: none;
       color:#fff;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      box-shadow: 0 14px 30px rgba(31,79,255,.18);
     }
-    .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .brand img{ height:36px; width:auto; filter: drop-shadow(0 0 8px rgba(65,105,225,.35)); }
-    .brand h1{
-      margin:0; font:700 1.08rem/1 Orbitron, sans-serif; letter-spacing:1.2px; color:#fff;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .topbar .spacer{flex:1}
-    .btn-new{
-      background:linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
-      color:#fff; font-weight:800; border:none; border-radius:999px; padding:.6rem 1rem;
-      box-shadow:0 8px 20px rgba(65,105,225,.28);
-    }
-    .btn-new:hover{ filter:brightness(1.03); color:#fff; }
-    .btn-back{
-      color:#fff; border-color:#ffffffb3; border-radius:999px;
-    }
-    .btn-back:hover{ background:#fff; color:#4169e1; }
+    .navx a.active i{ color:#fff; }
 
-    /* ===== Container ===== */
-    .wrap{ max-width:1280px; margin:0 auto; padding:22px 14px 34px; }
+    .sidebar .meta{
+      margin-top:auto;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+    }
+    .meta .k{
+      font-weight: 900;
+      color:#1b2b5e;
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+    }
+    .meta .v{
+      margin-top: 8px;
+      font: 900 22px/1 Orbitron, Inter, sans-serif;
+      color: var(--royal2);
+    }
+    .meta .btns{
+      display:flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-side{
+      flex:1;
+      height: 42px;
+      border-radius: 14px;
+      font-weight: 900;
+      border: 1px solid #cfe0ff;
+      background:#fff;
+      color: var(--royal2);
+    }
+    .btn-side:hover{ background:#f1f5ff; }
 
-    /* ===== Cards de métricas ===== */
-    .stats{ display:grid; gap:14px; grid-template-columns: repeat(3, minmax(0,1fr)); margin:14px 0 18px; }
+    /* ===== CONTENT ===== */
+    .content{
+      padding: 18px 16px 28px;
+      min-width: 0;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar{
+      position: sticky;
+      top: 12px;
+      z-index: 40;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 14px;
+      border-radius: var(--radius);
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 55%, #1630a8 100%);
+      color:#fff;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.22);
+    }
+    .topbar .left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .topbar .ico{
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      flex:0 0 auto;
+    }
+    .topbar h1{
+      margin:0;
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: .7px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .topbar .sub{
+      margin:2px 0 0 0;
+      font-weight: 700;
+      font-size: 12px;
+      opacity:.92;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .topbar .actions{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn-top{
+      height: 42px;
+      padding: 0 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .btn-top:hover{ background: rgba(255,255,255,.16); color:#fff; }
+    .btn-top.primary{
+      border:none;
+      background: rgba(255,255,255,.92);
+      color: var(--royal2);
+      box-shadow: 0 12px 22px rgba(15,23,42,.10);
+    }
+    .btn-top.primary:hover{ filter: brightness(1.02); }
+
+    /* ===== CARDS ===== */
+    .cardx{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    /* ===== STATS ===== */
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
     .stat{
-      background:linear-gradient(120deg, var(--card1), var(--card2));
-      border:1px solid var(--line);
-      border-radius:16px; padding:14px 16px;
-      box-shadow:0 8px 26px rgba(65,105,225,.12);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
     }
-    .stat .label{ color:#2b3e73; font-weight:800; letter-spacing:.4px; display:flex; align-items:center; gap:8px; }
-    .stat .value{ font:900 1.7rem/1.2 Orbitron, sans-serif; color:var(--gold); margin-top:6px; }
-    .stat .sub{ color:var(--muted); font-size:.95rem; margin-top:6px; }
+    .stat .k{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      color:#1f2b4a;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .stat .k i{ color: var(--royal2); }
+    .stat .v{
+      margin-top: 8px;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--royal2);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat .s{
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
 
-    /* ===== Filtros (sticky) ===== */
-    .filters{
-      position:sticky; top:78px; z-index:50;
-      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-      background:var(--glass); border:1px solid var(--line);
-      border-radius:16px; padding:12px; backdrop-filter: blur(8px);
-      box-shadow:0 8px 26px rgba(65,105,225,.10);
+    /* ===== FILTER BAR ===== */
+    .filterbar{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items:center;
+      justify-content: space-between;
     }
-    .filters .field{ flex:1 1 260px; position:relative; }
-    .filters input[type="text"],
-    .filters input[type="number"]{
-      width:100%; height:46px; border-radius:12px; border:2px solid var(--fieldBorder);
-      background:var(--field); color:var(--ink); padding:10px 14px; font-size:1rem;
-      box-shadow:inset 0 0 0 1px rgba(65,105,225,.05);
+    .search{
+      flex: 1 1 320px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid #cfe0ff;
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
     }
-    .filters input::placeholder{ color:var(--muted); }
-    .filters input:focus{ outline:none; border-color:var(--fieldFocus); box-shadow:0 0 0 .2rem rgba(65,105,225,.18); }
+    .search i{ color:#7b8ac0; font-size: 1.1rem; }
+    .search input{
+      border:none;
+      outline:none;
+      width: 100%;
+      font-weight: 800;
+      color: var(--ink);
+      background: transparent;
+    }
+    .search input::placeholder{ color:#7b8ac0; font-weight: 700; }
+    .field{
+      width: 230px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid #cfe0ff;
+      padding: 0 12px;
+      font-weight: 800;
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+    }
+    .field:focus{
+      outline:none;
+      border-color: var(--royal);
+      box-shadow: 0 0 0 .2rem rgba(31,79,255,.14);
+    }
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid #cfe0ff;
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+      font-weight: 900;
+      color:#1b2b5e;
+      height: 48px;
+    }
+    .toggle input{ transform: scale(1.1); }
+    .btn-ghost{
+      height: 48px;
+      border-radius: 16px;
+      font-weight: 900;
+      background:#fff;
+      border: 1px solid #cfe0ff;
+      color: var(--royal2);
+      box-shadow: 0 10px 22px rgba(15,23,42,.04);
+    }
+    .btn-ghost:hover{ background:#f1f5ff; }
 
-    .switch{
-      display:inline-flex; align-items:center; gap:8px; color:var(--ink);
-      padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:#fff;
-      font-weight:700; box-shadow:0 6px 14px rgba(65,105,225,.08);
+    .chips{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
     }
     .chip{
-      display:inline-flex; gap:6px; align-items:center; padding:8px 12px; border-radius:999px;
-      border:1px solid var(--line); background:#eef3ff; color:#1b2b5e; font-weight:800;
-      box-shadow:0 6px 14px rgba(65,105,225,.08);
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f3f6ff;
+      color:#1b2b5e;
+      font-weight: 900;
+      font-size: 12px;
+      box-shadow: 0 8px 16px rgba(31,79,255,.06);
     }
-    .chip .count{ background:#dbe6ff; padding:1px 8px; border-radius:999px; color:#1b2b5e; font-weight:900; }
+    .chip i{ color: var(--royal2); }
+    .chip .count{
+      background: #dbe6ff;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-weight: 900;
+    }
 
-    .btn-clear{
-      color:#4169e1; border-color:#c7d2ff; border-radius:12px; height:46px; font-weight:700; background:#fff;
+    /* ===== TABLE ===== */
+    .table-wrap{
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background:#fff;
     }
-    .btn-clear:hover{ background:#eef3ff; color:#1b2b5e; }
 
-    /* ===== Tabela (rolagem contínua) ===== */
-    .card-table{
-      margin-top:16px; background:var(--card1);
-      border:1px solid var(--line); border-radius:16px; padding:10px;
-      box-shadow:0 10px 24px rgba(65,105,225,.12);
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
     }
-    .table-title{
-      display:flex; align-items:center; gap:10px; padding:6px 8px 10px 8px;
-      font:800 1.04rem Orbitron, sans-serif; color:var(--gold);
-    }
-    .table-responsive{
-      border-radius:12px; overflow:auto;
-      background:#fff; /* fundo claro atrás do thead */
-      border:1px solid var(--line);
-    }
-    table{ width:100%; margin:0; color:var(--ink); }
 
-    /* Cabeçalho */
     thead th{
-      position:sticky; top:0; z-index:20;
-      background:var(--thead) !important;
-      color:var(--gold) !important;
-      font-family:Orbitron, sans-serif;
-      letter-spacing:1px; text-align:center;
-      border-bottom:2px solid var(--line) !important;
-      padding:14px 10px; white-space:nowrap;
-      box-shadow:0 2px 0 rgba(65,105,225,.10);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--thead);
+      border-bottom: 1px solid var(--line);
+      padding: 12px 8px;
+      font-size: 12px;
+      font-family: Orbitron, Inter, sans-serif;
+      letter-spacing: .7px;
+      color: var(--royal2);
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
     }
-    th.sortable{ cursor:pointer; user-select:none; }
-    th.sortable .sort{ margin-left:6px; opacity:1; font-size:1.05em; color:var(--gold); }
 
-    /* Corpo da tabela */
     tbody td{
-      border-top:1px solid var(--line);
-      padding:12px 10px; vertical-align:middle; text-shadow:none;
-      color:var(--ink);
+      border-top: 1px solid var(--line);
+      padding: 12px 8px;
+      font-size: 13px;
+      text-align:center;
+      vertical-align: middle;
+      background:#fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .table-striped>tbody>tr:nth-of-type(odd)>*{ background-color:var(--rowOdd) !important; }
-    .table-striped>tbody>tr:nth-of-type(even)>*{ background-color:var(--rowEven) !important; }
-    .table-hover tbody tr:hover>*{ background-color:#ecf2ff !important; }
 
-    /* Foto e textos */
+    tbody tr:nth-child(even) td{ background:#fbfdff; }
+    tbody tr:hover td{ background:#f3f7ff; }
+
+    td.col-nome, td.col-user{
+      text-align:left;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.15;
+      font-weight: 800;
+      color:#1b2b5e;
+    }
+    td.col-user{ font-weight: 700; color:#2b3e73; }
+
     .foto{
-      width:56px; height:56px; object-fit:cover; border-radius:50%;
-      border:2px solid var(--gold); background:#fff; box-shadow:0 0 6px rgba(65,105,225,.25);
+      width:52px; height:52px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 2px solid rgba(31,79,255,.45);
+      background:#fff;
+      box-shadow: 0 10px 16px rgba(31,79,255,.10);
     }
-    .gold{ color:var(--gold)!important; font-weight:900; letter-spacing:.2px; }
-    .username{ color:var(--ink); font-weight:700; }
+    .foto-ico{
+      width:52px; height:52px;
+      border-radius:999px;
+      display:grid; place-items:center;
+      border: 2px solid rgba(31,79,255,.45);
+      background:#f3f6ff;
+      color: var(--royal2);
+      box-shadow: 0 10px 16px rgba(31,79,255,.10);
+      font-size: 1.35rem;
+    }
 
-    /* Ações */
-    .btn-outline-primary{ color:var(--gold); border-color:var(--gold); }
-    .btn-outline-primary:hover{ color:#fff; background:var(--gold); border-color:var(--gold); }
-    .btn-outline-warning{ color:#fff; background:var(--gold); border-color:var(--gold); }
-    .btn-outline-warning:hover{ filter:brightness(1.05); }
-    .btn-outline-danger{ color:#c62839; border-color:#ff6b7a; }
-    .btn-outline-danger:hover{ color:#fff; background:#ff6b7a; border-color:#ff6b7a; }
+    td.valor{
+      font-weight: 900;
+      color: var(--royal2);
+      font-variant-numeric: tabular-nums;
+    }
 
-    /* Offcanvas (painel lateral) */
+    /* actions */
+    .actions-cell{
+      display:flex;
+      gap: 6px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap: nowrap;
+    }
+    .btn-ico{
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      border: 1px solid #cfe0ff;
+      background:#fff;
+      color: var(--royal2);
+      font-weight: 900;
+    }
+    .btn-ico:hover{ background:#f1f5ff; }
+    .btn-ico.primary{
+      border:none;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      color:#fff;
+      box-shadow: 0 12px 22px rgba(31,79,255,.14);
+    }
+    .btn-ico.warn{
+      border:none;
+      background: linear-gradient(90deg, #ffd24d, #ffb84d);
+      color:#1f2937;
+      box-shadow: 0 12px 22px rgba(255,184,77,.18);
+    }
+    .btn-ico.danger{
+      border:none;
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+      color:#fff;
+      box-shadow: 0 12px 22px rgba(239,68,68,.12);
+    }
+
+    /* Sort icons */
+    th.sortable{ cursor:pointer; user-select:none; }
+    th.sortable .sort{ margin-left:6px; opacity:1; font-size: 1.05em; color: var(--royal2); }
+
+    /* Offcanvas */
     .offcanvas{
-      background:#ffffff;
-      color:var(--ink);
+      background:#fff;
       border-left:1px solid var(--line);
-      box-shadow:-8px 0 24px rgba(65,105,225,.12);
+      box-shadow:-18px 0 50px rgba(15,23,42,.14);
     }
-    .oc-head{ font-family:Orbitron, sans-serif; color:var(--gold); letter-spacing:1px; }
-    .oc-data .lbl{ color:#2b3e73; font-weight:800; }
-    .oc-data .val{ color:#0d1b3f; font-weight:800; }
-    /* Ajuste para o botão de fechar ficar visível em fundo claro */
-    .offcanvas .btn-close-white{ filter: invert(0) !important; opacity:.7; }
-    .offcanvas .btn-close-white:hover{ opacity:1; }
+    .oc-head{
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      letter-spacing: .7px;
+      color: var(--royal2);
+    }
+    .oc-card{
+      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
+      box-shadow: 0 12px 22px rgba(15,23,42,.06);
+    }
+    .oc-k{
+      color:#2b3e73;
+      font-weight: 900;
+      display:flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .oc-v{
+      font-weight: 900;
+      color:#0f172a;
+    }
+    .oc-actions .btn{
+      border-radius: 16px;
+      font-weight: 900;
+      height: 48px;
+    }
 
-    /* Alertas */
+    /* Alerts */
     .alert{
-      background:var(--gold); color:#ffffff; font-weight:900; border:none; border-radius:12px;
-      text-align:center; box-shadow:0 8px 22px rgba(65,105,225,.18);
+      border:none;
+      border-radius: 16px;
+      font-weight: 900;
+      box-shadow: 0 12px 22px rgba(31,79,255,.10);
+    }
+    .alert-info, .alert-success, .alert-warning, .alert-danger{
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 100%);
+      color:#fff;
     }
 
-    @media (max-width: 992px){
-      .stats{ grid-template-columns:1fr; }
-      thead th{ font-size:.95rem; }
-      tbody td{ font-size:1rem; }
-      .foto{ width:48px; height:48px; }
+    /* Responsive */
+    @media (max-width: 1100px){
+      .page{ grid-template-columns: 1fr; }
+      .sidebar{
+        position: static;
+        height: auto;
+        border-right:none;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+    @media (max-width: 980px){
+      .stats{ grid-template-columns: 1fr; }
+      .field{ width: 100%; }
+      .toggle{ width: 100%; justify-content:space-between; }
+      .topbar{ position: static; }
+      table{ table-layout:auto; }
+      thead th{ white-space: nowrap; }
     }
   </style>
 </head>
+
 <body>
+  <div class="page">
 
-  <!-- ===== TOPBAR ===== -->
-  <div class="topbar">
-    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-back">
-      <i class="bi bi-arrow-left-circle"></i>
-    </a>
-    <div class="brand">
-      <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex" />
-      <h1>Cooperados — Coopex</h1>
-    </div>
-    <div class="spacer"></div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Coopex">
+        <div style="min-width:0">
+          <p class="t">COOPEX</p>
+          <p class="s">Gestão de cooperados</p>
+        </div>
+      </div>
 
-    <span class="chip" title="Total de cooperados">
-      Total <span class="count" id="count-total">{{ cooperados|length }}</span>
-    </span>
+      <nav class="navx">
+        <a href="{{ url_for('dashboard') }}">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a class="active" href="{{ url_for('listar_cooperados') }}">
+          <i class="bi bi-people"></i> Cooperados
+        </a>
+        <a href="{{ url_for('listar_estabelecimentos') }}">
+          <i class="bi bi-building"></i> Estabelecimentos
+        </a>
+        <a href="{{ url_for('listar_lancamentos') }}">
+          <i class="bi bi-journal-text"></i> Lançamentos
+        </a>
+        <a href="{{ url_for('logout') }}">
+          <i class="bi bi-box-arrow-left"></i> Sair
+        </a>
+      </nav>
 
-    <a href="{{ url_for('novo_cooperado') }}" class="btn btn-new ms-2">
-      <i class="bi bi-person-plus"></i> Novo Cooperado
-    </a>
-  </div>
+      <div class="meta">
+        <div class="k"><i class="bi bi-people-fill"></i> Total de cooperados</div>
+        <div class="v" id="side-total">{{ cooperados|length }}</div>
+        <div class="btns">
+          <a class="btn btn-side" href="{{ url_for('dashboard') }}"><i class="bi bi-arrow-left-circle"></i></a>
+          <a class="btn btn-side" href="{{ url_for('novo_cooperado') }}"><i class="bi bi-person-plus"></i></a>
+        </div>
+      </div>
+    </aside>
 
-  <div class="wrap">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} text-center my-2">
-            {{ message }}
+    <!-- ===== CONTENT ===== -->
+    <main class="content">
+      <div class="topbar">
+        <div class="left">
+          <div class="ico"><i class="bi bi-people-fill fs-4"></i></div>
+          <div style="min-width:0">
+            <h1>Cooperados</h1>
+            <div class="sub">Lista contínua com busca, filtros, ordenação e painel lateral</div>
           </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+        </div>
+        <div class="actions">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-top">
+            <i class="bi bi-arrow-left-circle"></i> Voltar
+          </a>
+          <a href="{{ url_for('novo_cooperado') }}" class="btn btn-top primary">
+            <i class="bi bi-person-plus"></i> Novo
+          </a>
+        </div>
+      </div>
 
-    <!-- ===== MÉTRICAS ===== -->
-    <div class="stats" id="stats-cards">
-      <div class="stat">
-        <div class="label"><i class="bi bi-people"></i> Cooperados</div>
-        <div class="value" id="m-total">{{ cooperados|length }}</div>
-        <div class="sub">Cadastrados no sistema</div>
-      </div>
-      <div class="stat">
-        <div class="label"><i class="bi bi-cash-coin"></i> Crédito total</div>
-        <div class="value" id="m-sum">—</div>
-        <div class="sub">Soma dos créditos</div>
-      </div>
-      <div class="stat">
-        <div class="label"><i class="bi bi-activity"></i> Média por cooperado</div>
-        <div class="value" id="m-avg">—</div>
-        <div class="sub">Crédito médio</div>
-      </div>
-    </div>
-
-    <!-- ===== FILTROS ===== -->
-    <div class="filters mb-3">
-      <div class="field">
-        <input id="f-busca" type="text" placeholder="Buscar por nome ou usuário…" />
-      </div>
-      <div class="field" style="max-width:240px">
-        <input id="f-credito" type="number" step="0.01" min="0" placeholder="Crédito máximo (R$)" />
-      </div>
-      <label class="switch">
-        <input id="f-diferente" class="form-check-input" type="checkbox" />
-        <span>Somente crédito diferente</span>
-      </label>
-      <button class="btn btn-outline-light btn-clear ms-auto" id="btn-clear">
-        <i class="bi bi-x-circle"></i> Limpar filtros
-      </button>
-      <span class="chip ms-2" title="Itens visíveis após filtros">
-        Visíveis <span class="count" id="count-visiveis">{{ cooperados|length }}</span>
-      </span>
-    </div>
-
-    <!-- ===== TABELA (SEM PAGINAÇÃO — rolagem contínua) ===== -->
-    <div class="card-table">
-      <div class="table-title"><i class="bi bi-people-fill"></i> Lista de cooperados</div>
-      <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle text-center" id="t-coops">
-          <thead>
-            <tr>
-              <th>Foto</th>
-              <th class="sortable" data-key="nome" data-type="text">
-                Nome <i class="bi bi-arrow-down-up sort"></i>
-              </th>
-              <th class="sortable" data-key="username" data-type="text">
-                Usuário <i class="bi bi-arrow-down-up sort"></i>
-              </th>
-              <th class="sortable" data-key="credito" data-type="number">
-                Crédito (R$) <i class="bi bi-arrow-down-up sort"></i>
-              </th>
-              <th class="sortable" data-key="ajuste" data-type="date">
-                Último ajuste <i class="bi bi-arrow-down-up sort"></i>
-              </th>
-              <th style="width:220px">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for c in cooperados %}
-            {% set ts =
-                 c.credito_atualizado_em
-              or c.atualizado_em
-              or c.updated_at
-              or c.modificado_em
-              or c.created_at
-              or c.criado_em
-            %}
-            <tr data-id="{{ c.id }}">
-              <td>
-                {% if c.foto_data or c.foto %}
-                  <img class="foto"
-                       src="{{ url_for('foto_cooperado', id=c.id) }}?v={{ (ts.timestamp() * 1000)|int if ts else c.id }}"
-                       alt="Foto de {{ c.nome }}"
-                       loading="lazy" />
-                {% else %}
-                  <span style="font-size:1.6em; color:var(--gold);"><i class="bi bi-person-circle"></i></span>
-                {% endif %}
-              </td>
-              <td class="gold" data-nome="{{ c.nome }}">{{ c.nome }}</td>
-              <td class="username" data-username="{{ c.username }}">{{ c.username }}</td>
-              <td class="gold" data-credito="{{ '%.2f'|format(c.credito) }}">{{ "{:,.2f}".format(c.credito) }}</td>
-              <td class="ajuste"
-                  data-ajuste="{{ ts.isoformat() if ts else '' }}"
-                  data-order="{{ (ts.timestamp() * 1000)|int if ts else 0 }}">
-                {{ ts.strftime('%d/%m/%Y %H:%M') if ts else '—' }}
-              </td>
-              <td>
-                <div class="d-flex flex-wrap gap-1 justify-content-center">
-                  <button class="btn btn-outline-primary btn-sm" onclick="abrirPainel(this)" title="Ver detalhes">
-                    <i class="bi bi-eye"></i>
-                  </button>
-                  <a href="{{ url_for('editar_cooperado', id=c.id) }}" class="btn btn-outline-primary btn-sm">Editar</a>
-                  <a href="{{ url_for('ajustar_credito_individual', id=c.id) }}" class="btn btn-outline-warning btn-sm">Ajustar</a>
-                  <a href="{{ url_for('excluir_cooperado', id=c.id) }}" class="btn btn-outline-danger btn-sm"
-                     onclick="return confirm('Excluir este cooperado?')">Excluir</a>
-                </div>
-              </td>
-            </tr>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="cardx">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} text-center mb-0">
+                {{ message }}
+              </div>
             {% endfor %}
-            {% if not cooperados %}
-              <tr><td colspan="6" class="text-center">Nenhum cooperado cadastrado.</td></tr>
-            {% endif %}
-          </tbody>
-        </table>
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Métricas -->
+      <div class="cardx">
+        <div class="stats">
+          <div class="stat">
+            <div class="k"><i class="bi bi-people"></i> Cooperados</div>
+            <div class="v" id="m-total">{{ cooperados|length }}</div>
+            <div class="s">Cadastrados no sistema</div>
+          </div>
+          <div class="stat">
+            <div class="k"><i class="bi bi-cash-coin"></i> Crédito total</div>
+            <div class="v" id="m-sum">—</div>
+            <div class="s">Soma dos créditos</div>
+          </div>
+          <div class="stat">
+            <div class="k"><i class="bi bi-activity"></i> Média por cooperado</div>
+            <div class="v" id="m-avg">—</div>
+            <div class="s">Crédito médio</div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- Filtros -->
+      <div class="cardx">
+        <div class="filterbar">
+          <div class="search">
+            <i class="bi bi-search"></i>
+            <input id="f-busca" type="text" placeholder="Buscar por nome ou usuário…" />
+          </div>
+
+          <input id="f-credito" class="field" type="number" step="0.01" min="0" placeholder="Crédito máx. (R$)" />
+
+          <label class="toggle">
+            <span>Somente crédito diferente</span>
+            <input id="f-diferente" class="form-check-input m-0" type="checkbox" />
+          </label>
+
+          <button class="btn btn-ghost" id="btn-clear" type="button">
+            <i class="bi bi-x-circle"></i> Limpar
+          </button>
+        </div>
+
+        <div class="chips">
+          <span class="chip" title="Total de cooperados">
+            <i class="bi bi-people-fill"></i> Total <span class="count" id="count-total">{{ cooperados|length }}</span>
+          </span>
+          <span class="chip" title="Itens visíveis após filtros">
+            <i class="bi bi-eye"></i> Visíveis <span class="count" id="count-visiveis">{{ cooperados|length }}</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Tabela -->
+      <div class="cardx">
+        <div class="table-wrap">
+          <table id="t-coops">
+            <thead>
+              <tr>
+                <th style="width:88px">Foto</th>
+                <th class="sortable" data-key="nome" data-type="text" style="width:22%">
+                  Nome <i class="bi bi-arrow-down-up sort"></i>
+                </th>
+                <th class="sortable" data-key="username" data-type="text" style="width:18%">
+                  Usuário <i class="bi bi-arrow-down-up sort"></i>
+                </th>
+                <th class="sortable" data-key="credito" data-type="number" style="width:16%">
+                  Crédito (R$) <i class="bi bi-arrow-down-up sort"></i>
+                </th>
+                <th class="sortable" data-key="ajuste" data-type="date" style="width:18%">
+                  Último ajuste <i class="bi bi-arrow-down-up sort"></i>
+                </th>
+                <th style="width:160px">Ações</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for c in cooperados %}
+              {% set ts =
+                   c.credito_atualizado_em
+                or c.atualizado_em
+                or c.updated_at
+                or c.modificado_em
+                or c.created_at
+                or c.criado_em
+              %}
+              <tr class="coop-row" data-id="{{ c.id }}">
+                <td>
+                  {% if c.foto_data or c.foto %}
+                    <img class="foto"
+                         src="{{ url_for('foto_cooperado', id=c.id) }}?v={{ (ts.timestamp() * 1000)|int if ts else c.id }}"
+                         alt="Foto de {{ c.nome }}"
+                         loading="lazy" />
+                  {% else %}
+                    <div class="foto-ico"><i class="bi bi-person-circle"></i></div>
+                  {% endif %}
+                </td>
+
+                <td class="col-nome" data-nome="{{ c.nome }}">{{ c.nome }}</td>
+
+                <td class="col-user" data-username="{{ c.username }}">{{ c.username }}</td>
+
+                <td class="valor" data-credito="{{ '%.2f'|format(c.credito) }}">
+                  {{ "{:,.2f}".format(c.credito).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                </td>
+
+                <td class="col-user ajuste"
+                    data-ajuste="{{ ts.isoformat() if ts else '' }}"
+                    data-order="{{ (ts.timestamp() * 1000)|int if ts else 0 }}">
+                  {{ ts.strftime('%d/%m/%Y %H:%M') if ts else '—' }}
+                </td>
+
+                <td>
+                  <div class="actions-cell">
+                    <button class="btn-ico primary" type="button" title="Ver detalhes" onclick="abrirPainel(this)">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <a class="btn-ico" title="Editar" href="{{ url_for('editar_cooperado', id=c.id) }}">
+                      <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a class="btn-ico warn" title="Ajustar crédito" href="{{ url_for('ajustar_credito_individual', id=c.id) }}">
+                      <i class="bi bi-sliders"></i>
+                    </a>
+                    <a class="btn-ico danger" title="Excluir"
+                       href="{{ url_for('excluir_cooperado', id=c.id) }}"
+                       onclick="return confirm('Excluir este cooperado?')">
+                      <i class="bi bi-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+
+              {% if not cooperados %}
+                <tr><td colspan="6" style="padding:14px;text-align:center;color:var(--muted);font-weight:800">Nenhum cooperado cadastrado.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <!-- ===== OFFCANVAS / Painel lateral ===== -->
+  <!-- Offcanvas -->
   <div class="offcanvas offcanvas-end" tabindex="-1" id="oc-coop" aria-labelledby="ocLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title oc-head" id="ocLabel"><i class="bi bi-person-vcard"></i> Cooperado</h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
     </div>
     <div class="offcanvas-body">
       <div class="d-flex align-items-center gap-3 mb-3">
-        <img id="oc-foto" src="" alt="Foto" class="foto" style="width:66px;height:66px;">
-        <div>
-          <div class="h5 m-0 gold" id="oc-nome">—</div>
-          <div class="username" id="oc-user">@—</div>
+        <img id="oc-foto" src="" alt="Foto" class="foto" style="width:70px;height:70px;">
+        <div style="min-width:0">
+          <div class="h5 m-0" style="font-family:Orbitron, Inter, sans-serif;font-weight:900;color:var(--royal2)" id="oc-nome">—</div>
+          <div style="color:var(--muted);font-weight:800" id="oc-user">@—</div>
         </div>
       </div>
 
-      <div class="oc-data mb-3">
-        <div class="d-flex justify-content-between">
-          <span class="lbl"><i class="bi bi-cash-coin"></i> Crédito</span>
-          <span class="val" id="oc-credito">—</span>
+      <div class="oc-card mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="oc-k"><i class="bi bi-cash-coin"></i> Crédito</span>
+          <span class="oc-v" id="oc-credito">—</span>
         </div>
-        <div class="d-flex justify-content-between mt-2">
-          <span class="lbl"><i class="bi bi-clock-history"></i> Último ajuste</span>
-          <span class="val" id="oc-ajuste">—</span>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <span class="oc-k"><i class="bi bi-clock-history"></i> Último ajuste</span>
+          <span class="oc-v" id="oc-ajuste">—</span>
         </div>
       </div>
 
-      <div class="d-grid gap-2">
+      <div class="d-grid gap-2 oc-actions">
         <a id="oc-editar" href="#" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i> Editar</a>
         <a id="oc-ajustar" href="#" class="btn btn-outline-warning"><i class="bi bi-sliders"></i> Ajustar crédito</a>
         <a id="oc-excluir" href="#" class="btn btn-outline-danger"
@@ -389,17 +847,33 @@
     // ===== Helpers
     const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 
-    // ===== Métricas (sum/avg a partir da tabela)
+    function parseFloatSafe(v){
+      const n = parseFloat(String(v||'').replace(',', '.'));
+      return isNaN(n) ? 0 : n;
+    }
+
+    // ===== Métricas (sum/avg) apenas de linhas visíveis
     function atualizarMetricas(){
-      const cels = document.querySelectorAll('#t-coops tbody td[data-credito]');
+      const rows = [...document.querySelectorAll('#t-coops tbody tr.coop-row')].filter(tr => tr.style.display !== 'none');
       let sum = 0, n = 0;
-      cels.forEach(td=>{ const v = parseFloat(td.dataset.credito); if(!isNaN(v)){ sum += v; n++; } });
+      rows.forEach(tr=>{
+        const td = tr.querySelector('td[data-credito]');
+        if(!td) return;
+        const v = parseFloatSafe(td.dataset.credito);
+        sum += v; n++;
+      });
       const avg = n ? (sum/n) : 0;
-      document.getElementById('m-sum').textContent = sum.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-      document.getElementById('m-avg').textContent = avg.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-      document.getElementById('m-total').textContent = document.querySelectorAll('#t-coops tbody tr').length;
-      document.getElementById('count-total').textContent = document.getElementById('m-total').textContent;
-      document.getElementById('count-visiveis').textContent = document.querySelectorAll('#t-coops tbody tr').length;
+
+      const fmt = (x)=> x.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('m-sum').textContent = fmt(sum);
+      document.getElementById('m-avg').textContent = fmt(avg);
+
+      const total = document.querySelectorAll('#t-coops tbody tr.coop-row').length;
+      document.getElementById('m-total').textContent = total;
+      document.getElementById('count-total').textContent = total;
+      document.getElementById('side-total').textContent = total;
+
+      document.getElementById('count-visiveis').textContent = rows.length;
     }
 
     // ===== Filtros
@@ -407,118 +881,134 @@
     const fCredito = document.getElementById('f-credito');
     const fDif = document.getElementById('f-diferente');
     const btnClear = document.getElementById('btn-clear');
-    const elCountVisiveis = document.getElementById('count-visiveis');
 
     function aplicarFiltros(){
       const q = norm(fBusca.value);
-      const cred = parseFloat((fCredito.value||"").replace(",","."));  // aceita vírgula
+      const cred = (fCredito.value === '' || fCredito.value === null) ? NaN : parseFloatSafe(fCredito.value);
       const dif = fDif.checked;
-      const rows = [...document.querySelectorAll('#t-coops tbody tr')];
+
+      const rows = [...document.querySelectorAll('#t-coops tbody tr.coop-row')];
       let vis = 0;
 
       rows.forEach(tr=>{
-        if (tr.classList.contains('no-result')) return;
-        const nome = norm(tr.children[1]?.innerText);
-        const user = norm(tr.children[2]?.innerText);
-        const credito = parseFloat(tr.children[3]?.dataset.credito);
+        const nome = norm(tr.querySelector('[data-nome]')?.textContent || '');
+        const user = norm(tr.querySelector('[data-username]')?.textContent || '');
+        const credito = parseFloatSafe(tr.querySelector('[data-credito]')?.dataset.credito);
+
         let show = (!q || nome.includes(q) || user.includes(q));
+
         if (!isNaN(cred)){
           show = show && (dif ? (credito !== cred) : (credito <= cred));
         }
+
         tr.style.display = show ? '' : 'none';
         if(show) vis++;
       });
 
-      // Nenhum resultado
+      // linha "sem resultado"
       const tbody = document.querySelector('#t-coops tbody');
       let noRow = tbody.querySelector('.no-result');
-      if (vis===0){
+      if (vis === 0){
         if(!noRow){
           noRow = document.createElement('tr');
           noRow.className='no-result';
-          noRow.innerHTML = `<td colspan="6" class="text-center">Nenhum cooperado encontrado.</td>`;
+          noRow.innerHTML = `<td colspan="6" style="padding:14px;text-align:center;color:var(--muted);font-weight:800">Nenhum cooperado encontrado.</td>`;
           tbody.appendChild(noRow);
         }
-      } else if(noRow){ noRow.remove(); }
+      } else if(noRow){
+        noRow.remove();
+      }
 
-      // Atualiza contagem
-      elCountVisiveis.textContent = vis;
+      atualizarMetricas();
     }
 
     btnClear.addEventListener('click', ()=>{
-      fBusca.value=''; fCredito.value=''; fDif.checked=false; aplicarFiltros();
+      fBusca.value='';
+      fCredito.value='';
+      fDif.checked=false;
+      aplicarFiltros();
     });
+
     ['input','change'].forEach(evt=>{
       fBusca.addEventListener(evt, aplicarFiltros);
       fCredito.addEventListener(evt, aplicarFiltros);
       fDif.addEventListener(evt, aplicarFiltros);
     });
 
-    // ===== Ordenação (inclui data de "Último ajuste") — usa data-order
+    // ===== Ordenação (mantém compatível com seu HTML)
     const ths = document.querySelectorAll('th.sortable');
     let sortState = {};
+
     ths.forEach(th=>{
       th.addEventListener('click', ()=>{
         const key = th.dataset.key, type = th.dataset.type;
-        sortState[key] = (sortState[key]==='asc'?'desc':'asc');
-        ths.forEach(x=>x.classList.toggle('active', x===th));
+        sortState[key] = (sortState[key] === 'asc' ? 'desc' : 'asc');
 
-        const rows = [...document.querySelectorAll('#t-coops tbody tr')].filter(r=>!r.classList.contains('no-result'));
+        const rows = [...document.querySelectorAll('#t-coops tbody tr.coop-row')];
         rows.sort((a,b)=>{
           const va = getVal(a, key, type);
           const vb = getVal(b, key, type);
-          if (type==='number') return (sortState[key]==='asc') ? (va-vb) : (vb-va);
-          if (type==='date')   return (sortState[key]==='asc') ? (va-vb) : (vb-va);
-          return (sortState[key]==='asc') ? (va>vb?1:va<vb?-1:0) : (va<vb?1:va>vb?-1:0);
+
+          if(type === 'number' || type === 'date'){
+            return (sortState[key] === 'asc') ? (va - vb) : (vb - va);
+          }
+          return (sortState[key] === 'asc')
+            ? (va > vb ? 1 : va < vb ? -1 : 0)
+            : (va < vb ? 1 : va > vb ? -1 : 0);
         });
+
         const tbody = document.querySelector('#t-coops tbody');
-        rows.forEach(r=>tbody.appendChild(r));
+        rows.forEach(r => tbody.appendChild(r));
+
+        // mantém a linha "no-result" no final, se existir
+        const noRow = tbody.querySelector('.no-result');
+        if(noRow) tbody.appendChild(noRow);
       });
     });
+
     function getVal(row, key, type){
-      if (key==='nome')     return norm(row.children[1]?.dataset.nome || row.children[1]?.innerText);
-      if (key==='username') return norm(row.children[2]?.dataset.username || row.children[2]?.innerText);
-      if (key==='credito')  return parseFloat(row.children[3]?.dataset.credito || '0') || 0;
-      if (key==='ajuste')   return parseInt(row.children[4]?.dataset.order || '0', 10) || 0; // <- usa data-order
+      if (key==='nome')     return norm(row.querySelector('[data-nome]')?.textContent || '');
+      if (key==='username') return norm(row.querySelector('[data-username]')?.textContent || '');
+      if (key==='credito')  return parseFloatSafe(row.querySelector('[data-credito]')?.dataset.credito || 0);
+      if (key==='ajuste')   return parseInt(row.querySelector('.ajuste')?.dataset.order || '0', 10) || 0;
       return type==='number' ? 0 : '';
     }
 
-    // ===== Offcanvas / Painel lateral
+    // ===== Offcanvas
     let oc;
     document.addEventListener('DOMContentLoaded', ()=>{
-      const el = document.getElementById('oc-coop');
-      oc = new bootstrap.Offcanvas(el);
+      oc = new bootstrap.Offcanvas(document.getElementById('oc-coop'));
+      atualizarMetricas();
+      aplicarFiltros();
     });
 
     function abrirPainel(btn){
       const tr = btn.closest('tr');
       const id = tr.getAttribute('data-id');
-      const nome = tr.children[1]?.innerText || '—';
-      const user = tr.children[2]?.innerText || '—';
-      const credito = tr.children[3]?.innerText || '—';
-      const ajuste = tr.children[4]?.innerText || '—';
+
+      const nome = tr.querySelector('[data-nome]')?.textContent || '—';
+      const user = tr.querySelector('[data-username]')?.textContent || '—';
+      const credito = tr.querySelector('[data-credito]')?.textContent || '—';
+      const ajuste = tr.querySelector('.ajuste')?.textContent || '—';
       const img = tr.querySelector('img.foto')?.getAttribute('src');
 
       document.getElementById('oc-nome').textContent = nome;
       document.getElementById('oc-user').textContent = '@' + user;
       document.getElementById('oc-credito').textContent = credito;
       document.getElementById('oc-ajuste').textContent = ajuste;
-      const f = document.getElementById('oc-foto');
-      if(img){ f.src = img; f.style.visibility='visible'; } else { f.src=''; f.style.visibility='hidden'; }
 
-      // Rotas (sem mexer no app.py)
+      const f = document.getElementById('oc-foto');
+      if(img){ f.src = img; f.style.visibility='visible'; }
+      else { f.src=''; f.style.visibility='hidden'; }
+
+      // Rotas (sem mexer no backend)
       document.getElementById('oc-editar').href  = "{{ url_for('editar_cooperado', id=0) }}".replace('/0','/'+id);
       document.getElementById('oc-ajustar').href = "{{ url_for('ajustar_credito_individual', id=0) }}".replace('/0','/'+id);
       document.getElementById('oc-excluir').href = "{{ url_for('excluir_cooperado', id=0) }}".replace('/0','/'+id);
 
       oc.show();
     }
-
-    // ===== Init
-    document.addEventListener('DOMContentLoaded', ()=>{
-      atualizarMetricas();
-      aplicarFiltros();
-    });
+    window.abrirPainel = abrirPainel;
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
