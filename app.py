@@ -816,14 +816,26 @@ def editar_cooperado(id):
     return render_template('cooperado_form.html', editar=True, cooperado=cooperado)
 
 
+from sqlalchemy.exc import IntegrityError
+
 @app.route('/cooperados/excluir/<int:id>')
 def excluir_cooperado(id):
     if not is_admin():
         return redirect(url_for('login'))
+
     cooperado = Cooperado.query.get_or_404(id)
-    db.session.delete(cooperado)
-    db.session.commit()
-    flash('Cooperado excluído!', 'success')
+
+    try:
+        db.session.delete(cooperado)
+        db.session.commit()
+        flash('Cooperado excluído!', 'success')
+    except IntegrityError:
+        db.session.rollback()
+        flash('Não é possível excluir: este cooperado possui lançamentos vinculados. Use “desativar” ou apague os lançamentos primeiro.', 'danger')
+    except Exception:
+        db.session.rollback()
+        flash('Erro ao excluir cooperado.', 'danger')
+
     return redirect(url_for('listar_cooperados'))
 
 
