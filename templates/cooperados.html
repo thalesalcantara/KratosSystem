@@ -788,11 +788,16 @@
                     <a class="btn-ico warn" title="Ajustar crédito" href="{{ url_for('ajustar_credito_individual', id=c.id) }}">
                       <i class="bi bi-sliders"></i>
                     </a>
-                    <a class="btn-ico danger" title="Excluir"
-                       href="{{ url_for('excluir_cooperado', id=c.id) }}"
-                       onclick="return confirm('Excluir este cooperado?')">
-                      <i class="bi bi-trash"></i>
-                    </a>
+
+                    <!-- EXCLUIR (POST + cooperado_id) -->
+                    <form class="m-0 p-0" style="display:inline;"
+                          action="{{ url_for('excluir_cooperado', cooperado_id=c.id) }}"
+                          method="POST"
+                          onsubmit="return confirm('Excluir este cooperado?')">
+                      <button class="btn-ico danger" type="submit" title="Excluir">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
                   </div>
                 </td>
               </tr>
@@ -837,8 +842,14 @@
       <div class="d-grid gap-2 oc-actions">
         <a id="oc-editar" href="#" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i> Editar</a>
         <a id="oc-ajustar" href="#" class="btn btn-outline-warning"><i class="bi bi-sliders"></i> Ajustar crédito</a>
-        <a id="oc-excluir" href="#" class="btn btn-outline-danger"
-           onclick="return confirm('Excluir este cooperado?')"><i class="bi bi-trash"></i> Excluir</a>
+
+        <!-- EXCLUIR (POST + cooperado_id) -->
+        <form id="oc-excluir-form" method="POST" action="#"
+              onsubmit="return confirm('Excluir este cooperado?')">
+          <button type="submit" class="btn btn-outline-danger">
+            <i class="bi bi-trash"></i> Excluir
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -935,7 +946,7 @@
       fDif.addEventListener(evt, aplicarFiltros);
     });
 
-    // ===== Ordenação (mantém compatível com seu HTML)
+    // ===== Ordenação
     const ths = document.querySelectorAll('th.sortable');
     let sortState = {};
 
@@ -1001,10 +1012,12 @@
       if(img){ f.src = img; f.style.visibility='visible'; }
       else { f.src=''; f.style.visibility='hidden'; }
 
-      // Rotas (sem mexer no backend)
+      // Rotas (mantém o backend; excluir agora é POST + cooperado_id)
       document.getElementById('oc-editar').href  = "{{ url_for('editar_cooperado', id=0) }}".replace('/0','/'+id);
       document.getElementById('oc-ajustar').href = "{{ url_for('ajustar_credito_individual', id=0) }}".replace('/0','/'+id);
-      document.getElementById('oc-excluir').href = "{{ url_for('excluir_cooperado', id=0) }}".replace('/0','/'+id);
+
+      document.getElementById('oc-excluir-form').action =
+        "{{ url_for('excluir_cooperado', cooperado_id=0) }}".replace('/0','/'+id);
 
       oc.show();
     }
