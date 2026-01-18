@@ -816,25 +816,29 @@ def editar_cooperado(id):
     return render_template('cooperado_form.html', editar=True, cooperado=cooperado)
 
 
-from flask import redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
-from app import db
-import os
 
-@app.route("/cooperados/excluir/<int:cooperado_id>", methods=["POST"])  # recomendo POST
+@app.route("/cooperados/excluir/<int:cooperado_id>", methods=["POST"])
 def excluir_cooperado(cooperado_id):
-    cooperado = Usuario.query.get_or_404(cooperado_id)
+    if not is_admin():
+        return redirect(url_for("login"))
+
+    cooperado = Cooperado.query.get_or_404(cooperado_id)
 
     try:
         db.session.delete(cooperado)
         db.session.commit()
         flash("Cooperado excluído com sucesso.", "success")
-    except IntegrityError as e:
+
+    except IntegrityError:
         db.session.rollback()
-        # Isso acontece quando há entregas/lancamentos ligados ao cooperado
-        flash("Não foi possível excluir: este cooperado possui lançamentos vinculados. Inative em vez de excluir.", "warning")
-        # Se quiser logar:
-        app.logger.exception("Erro ao excluir cooperado_id=%s", cooperado_id)
+        flash(
+            "Não foi possível excluir: este cooperado possui lançamentos vinculados. "
+            "Inative em vez de excluir.",
+            "warning"
+        )
+        app.logger.exception("IntegrityError ao excluir cooperado_id=%s", cooperado_id)
+
     except Exception:
         db.session.rollback()
         flash("Erro inesperado ao excluir cooperado.", "danger")
