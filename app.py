@@ -567,7 +567,7 @@ def dashboard():
     if not is_admin():
         return redirect(url_for('login'))
     admin = Admin.query.get(session['user_id'])
-    cooperados = Cooperado.query.order_by(Cooperado.nome).all()
+    cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
 
     filtros = {
@@ -699,7 +699,9 @@ def listar_cooperados():
     if not is_admin():
         return redirect(url_for('login'))
     admin = Admin.query.get(session['user_id'])
-    cooperados = Cooperado.query.order_by(Cooperado.nome).all()
+
+    cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
+
     return render_template('cooperados.html', admin=admin, cooperados=cooperados)
 
 
@@ -843,6 +845,25 @@ def get_or_create_placeholder_cooperado() -> "Cooperado":
     db.session.add(ph)
     db.session.commit()
     return ph
+
+
+# --- PLACEHOLDER helpers ---
+PLACEHOLDER_USERNAME = "cooperado_removido"
+PLACEHOLDER_NOME = "COOPERADO REMOVIDO"
+
+def is_placeholder_username(username: str | None) -> bool:
+    u = (username or "").strip().lower()
+    # cobre o correto e também os errados antigos (ex: cooperado_removid)
+    return u == PLACEHOLDER_USERNAME or u.startswith("cooperado_removid")
+
+def cooperados_visiveis_query():
+    # Tudo que NÃO é placeholder
+    return Cooperado.query.filter(
+        Cooperado.username.isnot(None),
+        Cooperado.username != PLACEHOLDER_USERNAME,
+        ~Cooperado.username.like("cooperado_removid%")
+    )
+
 
 
 @app.route("/cooperados/excluir/<int:cooperado_id>", methods=["POST"])
@@ -1038,7 +1059,7 @@ def ajustar_credito():
     if cooperado_id:
         return ajustar_credito_individual(int(cooperado_id))
 
-    cooperados = Cooperado.query.order_by(Cooperado.nome).all()
+    cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
     if request.method == 'POST':
         cooperado_id = request.form.get('cooperado_id')
         novo_credito = request.form.get('credito')
@@ -1192,7 +1213,7 @@ def listar_lancamentos():
     if not is_admin():
         return redirect(url_for('login'))
     admin = Admin.query.get(session['user_id'])
-    cooperados = Cooperado.query.order_by(Cooperado.nome).all()
+    cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
     estabelecimentos = Estabelecimento.query.order_by(Estabelecimento.nome).all()
     filtros = {
         'cooperado_id': request.args.get('cooperado_id'),
@@ -1394,7 +1415,7 @@ def painel_estabelecimento():
         return redirect(url_for('login'))
 
     est = Estabelecimento.query.get(session['user_id'])
-    cooperados = Cooperado.query.order_by(Cooperado.nome).all()
+    cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
 
     # ========= Lançamento de crédito (incluindo data retroativa) =========
     if request.method == 'POST' and request.form.get('form_tipo') not in ('catalogo', 'story'):
