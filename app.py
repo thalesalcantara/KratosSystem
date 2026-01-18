@@ -818,6 +818,33 @@ def editar_cooperado(id):
 
 from sqlalchemy.exc import IntegrityError
 
+# Cooperado “placeholder” para manter histórico quando excluir cooperado com lançamentos
+PLACEHOLDER_USERNAME = "cooperado_removido"
+PLACEHOLDER_NOME = "COOPERADO REMOVIDO"
+
+
+def get_or_create_placeholder_cooperado() -> "Cooperado":
+    """
+    Garante a existência de um cooperado placeholder.
+    Usado para receber os lançamentos de cooperados excluídos, evitando erro de FK.
+    """
+    ph = Cooperado.query.filter_by(username=PLACEHOLDER_USERNAME).first()
+    if ph:
+        return ph
+
+    ph = Cooperado(
+        nome=PLACEHOLDER_NOME,
+        username=PLACEHOLDER_USERNAME,
+        credito=0
+    )
+    # Placeholder não deve autenticar
+    ph.senha_hash = None
+
+    db.session.add(ph)
+    db.session.commit()
+    return ph
+
+
 @app.route("/cooperados/excluir/<int:cooperado_id>", methods=["POST"])
 def excluir_cooperado(cooperado_id):
     if not is_admin():
@@ -825,17 +852,41 @@ def excluir_cooperado(cooperado_id):
 
     cooperado = Cooperado.query.get_or_404(cooperado_id)
 
+    # Não permitir excluir o placeholder
+    if cooperado.username == PLACEHOLDER_USERNAME:
+        flash("Este cooperado é usado para manter histórico e não pode ser excluído.", "warning")
+        return redirect(url_for("listar_cooperados"))
+
     try:
+        # 1) Se existirem lançamentos vinculados, transfere para placeholder
+        qtd_lanc = Lancamento.query.filter_by(cooperado_id=cooperado.id).count()
+        if qtd_lanc > 0:
+            placeholder = get_or_create_placeholder_cooperado()
+            Lancamento.query.filter_by(cooperado_id=cooperado.id).update(
+                {"cooperado_id": placeholder.id},
+                synchronize_session=False
+            )
+
+        # 2) Remove vínculos que não são histórico financeiro (views/likes de stories)
+        # (Se sua tabela story_view existir; você tem o model StoryView no app)
+        try:
+            StoryView.query.filter_by(cooperado_id=cooperado.id).delete(synchronize_session=False)
+        except Exception:
+            # Se por algum motivo não existir a tabela/model em runtime, não bloqueia a exclusão
+            pass
+
+        # 3) Agora pode excluir o cooperado
         db.session.delete(cooperado)
         db.session.commit()
+
         flash("Cooperado excluído com sucesso.", "success")
 
     except IntegrityError:
         db.session.rollback()
         flash(
-            "Não foi possível excluir: este cooperado possui lançamentos vinculados. "
-            "Inative em vez de excluir.",
-            "warning"
+            "Não foi possível excluir: ainda existem vínculos no banco para este cooperado. "
+            "Se persistir, me envie a tabela/constraint que aparece no erro (ForeignKey).",
+            "danger"
         )
         app.logger.exception("IntegrityError ao excluir cooperado_id=%s", cooperado_id)
 
