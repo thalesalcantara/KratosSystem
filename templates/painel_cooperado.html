@@ -51,7 +51,7 @@
       min-height: 100dvh;
     }
 
-    /* TOP (perfil + actions) */
+    /* TOP */
     .top{
       position: sticky;
       top: 0;
@@ -145,20 +145,6 @@
       gap:10px;
       flex:0 0 auto;
     }
-    .iconbtn{
-      width: 42px;
-      height: 42px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.20);
-      background: rgba(255,255,255,.12);
-      color:#fff;
-      cursor:pointer;
-      font-weight: 900;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      -webkit-tap-highlight-color: transparent;
-    }
     .logout{
       height: 42px;
       padding: 0 12px;
@@ -176,7 +162,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* SWITCHER (sem nav fixo embaixo = não corta mais) */
+    /* SWITCHER */
     .switcher{
       position:relative;
       margin-top: 10px;
@@ -280,7 +266,7 @@
       white-space:nowrap;
     }
 
-    /* STORIES (Instagram-like no topo do Início) */
+    /* STORIES */
     .stories-wrap{
       padding: 12px 12px 12px 12px;
       background: rgba(255,255,255,.65);
@@ -355,7 +341,7 @@
       color: #64748B;
     }
 
-    /* STATS (crédito + valor do mês) */
+    /* STATS */
     .stats{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -410,7 +396,7 @@
       font-weight: 900;
     }
 
-    /* FILTRO “Social” */
+    /* FILTRO */
     .filter-bar{
       display:flex;
       align-items:center;
@@ -473,16 +459,17 @@
       -webkit-tap-highlight-color: transparent;
     }
     details.group summary::-webkit-details-marker{display:none}
+
     .g-left{
       display:flex;
       align-items:center;
       gap: 10px;
       min-width:0;
-      flex:1;
+      flex: 1 1 auto;
     }
     .g-badge{
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 16px;
       background: linear-gradient(135deg, var(--royal), var(--royal-700));
       color:#fff;
@@ -495,26 +482,29 @@
     }
     .g-name{
       min-width:0;
-      flex:1;
+      flex: 1 1 auto;
     }
     .g-name b{
       display:block;
-      font-size: 13px;
+      font-size: 12.5px; /* menor pra não “encostar” na figurinha */
       font-weight: 900;
       color: var(--ink);
+      line-height: 1.15;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      max-width: 260px;
     }
     .g-name small{
       display:block;
       margin-top:3px;
-      font-size: 11px;
-      font-weight: 800;
+      font-size: 10.5px;
+      font-weight: 900;
       color: #64748B;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      max-width: 260px;
     }
     .g-right{
       display:flex;
@@ -523,7 +513,7 @@
       flex:0 0 auto;
     }
     .g-total{
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
       color: var(--royal-700);
       background: var(--royal-50);
@@ -573,6 +563,7 @@
       align-items:center;
       gap: 8px;
       min-width:0;
+      flex-wrap:wrap;
     }
     .p-os{
       font-size: 11px;
@@ -603,7 +594,7 @@
       word-break: break-word;
     }
 
-    /* “piloto” no valor + cores por idade */
+    /* Valor com “piloto” + cores */
     .amount{
       position:relative;
       font-size: 12px;
@@ -927,7 +918,7 @@
       background: var(--royal-50);
     }
 
-    /* STORY MODAL (mantido, bem “Instagram”) */
+    /* STORY MODAL */
     .story-modal{
       position:fixed;
       inset:0;
@@ -1088,12 +1079,11 @@
         </div>
 
         <div class="top-actions">
-          <button class="iconbtn" id="openFiltersTop" type="button" title="Filtrar lançamentos">⏱️</button>
           <a class="logout" href="{{ url_for('logout') }}">🚪 <span>Sair</span></a>
         </div>
       </div>
 
-      <!-- Switcher no topo (sem botões fixos embaixo) -->
+      <!-- Switcher -->
       <div class="switcher" role="tablist" aria-label="Navegação">
         <button class="sw active" type="button" data-target="home-section" role="tab" aria-selected="true">
           <span class="i">🏠</span> Início
@@ -1110,7 +1100,7 @@
       <!-- INÍCIO -->
       <section id="home-section" class="page">
 
-        <!-- Stories estilo Instagram -->
+        <!-- Stories -->
         <div class="stories-wrap" style="margin-bottom:12px;">
           <div class="head" style="margin-bottom:10px;">
             <div>
@@ -1150,7 +1140,7 @@
           {% endif %}
         </div>
 
-        <!-- Stats + total do mês atual (calculado via JS) -->
+        <!-- Stats (mês atual + mês anterior ficam no feed; total do mês é só do mês atual) -->
         <div class="stats" style="margin-bottom:12px;">
           <div class="stat">
             <div class="chip">💳</div>
@@ -1171,7 +1161,7 @@
           </div>
         </div>
 
-        <!-- filtro rápido -->
+        <!-- ÚNICO local de filtro -->
         <div class="filter-bar" style="margin-bottom:12px;">
           <button class="filter-pill" id="openFiltersMid" type="button">
             <span>Filtrar lançamentos por data</span>
@@ -1184,14 +1174,17 @@
           <div class="head">
             <div>
               <h3 class="title">Lançamentos por estabelecimento</h3>
-              <p class="sub">Toque na setinha para abrir/fechar cada parceiro.</p>
+              <p class="sub">Mostrando apenas mês atual + mês anterior (2 meses).</p>
             </div>
-            <span class="badge">🧾 Feed organizado</span>
+            <span class="badge">🧾 2 meses</span>
           </div>
 
           <div id="groups" class="groups"></div>
+          <div id="launchEmpty" class="empty" style="display:none;">
+            Nenhum lançamento encontrado para o mês atual e o mês anterior.
+          </div>
 
-          <!-- Render bruto (JS reorganiza e colore) -->
+          <!-- Render bruto (JS filtra p/ 2 meses, agrupa e colore) -->
           <div id="rawLaunches" style="display:none;">
             {% for l in lancamentos %}
               <div class="raw-launch"
@@ -1204,10 +1197,6 @@
               </div>
             {% endfor %}
           </div>
-
-          {% if not lancamentos %}
-            <div class="empty">Nenhum lançamento neste período.</div>
-          {% endif %}
         </section>
       </section>
 
@@ -1381,10 +1370,8 @@
     </script>
 
     <script>
-      /* =========================
-         Tabs (Topo) - sem nav embaixo
-         ========================= */
-      const LAST_TAB_KEY = 'coopex_coop_tab_v2';
+      /* Tabs (Topo) */
+      const LAST_TAB_KEY = 'coopex_coop_tab_v3';
       const sws = document.querySelectorAll('.sw[data-target]');
       const pages = {
         'home-section': document.getElementById('home-section'),
@@ -1425,12 +1412,9 @@
         else activate('home-section');
       });
 
-      /* =========================
-         Sheet filtros
-         ========================= */
+      /* Sheet filtros */
       const sheet = document.getElementById('sheet');
       const overlay = document.getElementById('overlay');
-      const openFiltersTop = document.getElementById('openFiltersTop');
       const openFiltersMid = document.getElementById('openFiltersMid');
       const closeFilters = document.getElementById('closeFilters');
       const cancelSheet = document.getElementById('cancelSheet');
@@ -1447,7 +1431,6 @@
         overlay.classList.remove('show');
       }
 
-      if(openFiltersTop) openFiltersTop.addEventListener('click', openSheet);
       if(openFiltersMid) openFiltersMid.addEventListener('click', openSheet);
       if(closeFilters) closeFilters.addEventListener('click', closeSheet);
       if(cancelSheet) cancelSheet.addEventListener('click', closeSheet);
@@ -1458,22 +1441,16 @@
         if(e.key === 'Escape') closeSheet();
       });
 
-      /* =========================
-         Lançamentos agrupados + cores por mês
-         - mês atual: azul (current)
-         - 1 mês atrás: neutro (mid)
-         - 2+ meses atrás: vermelho (old)
-         ========================= */
+      /* Lançamentos: mostrar SOMENTE mês atual + mês anterior (2 meses) */
       (function buildLaunchUI(){
         const raw = document.getElementById('rawLaunches');
         const out = document.getElementById('groups');
+        const empty = document.getElementById('launchEmpty');
         const monthTotalEl = document.getElementById('monthTotal');
         const monthCountEl = document.getElementById('monthCount');
         if(!raw || !out) return;
 
         const nodes = Array.from(raw.querySelectorAll('.raw-launch'));
-        if(!nodes.length) return;
-
         const fmtBRL = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
         const now = new Date();
         const nowYM = now.getFullYear()*12 + now.getMonth();
@@ -1483,18 +1460,19 @@
           return (nowYM - ym);
         }
 
+        // 0 = mês atual, 1 = mês anterior, 2+ = ignorar
         function classify(date){
           const d = monthsDiff(date);
           if(d <= 0) return 'current';
-          if(d >= 2) return 'old';
-          return 'mid';
+          if(d === 1) return 'mid';
+          return 'old';
         }
 
-        // Agrupar por estab
         const groups = new Map();
         let monthTotal = 0;
         let monthCount = 0;
 
+        // filtra para 2 meses
         nodes.forEach(n=>{
           const estab = (n.dataset.estab || '—').trim() || '—';
           const val = parseFloat((n.dataset.valor || '0').replace(',','.')) || 0;
@@ -1504,13 +1482,11 @@
           const descJson = n.dataset.desc || '""';
 
           let date = null;
-          if(iso){
-            date = new Date(iso);
-          }
-          if(!date || isNaN(date.getTime())){
-            // fallback: se não houver ISO, não faz cores por mês
-            date = new Date();
-          }
+          if(iso) date = new Date(iso);
+          if(!date || isNaN(date.getTime())) date = new Date();
+
+          const diff = monthsDiff(date);
+          if(diff > 1) return; // >>> só 2 meses (atual + anterior)
 
           const tag = classify(date);
 
@@ -1526,14 +1502,22 @@
         if(monthTotalEl) monthTotalEl.textContent = fmtBRL.format(monthTotal);
         if(monthCountEl) monthCountEl.textContent = String(monthCount);
 
-        // Ordenar grupos por total do mês atual (desc)
-        const groupArr = Array.from(groups.entries()).map(([name, list])=>{
-          const currentSum = list.filter(x=>x.tag==='current').reduce((a,b)=>a+b.val,0);
-          const allSum = list.reduce((a,b)=>a+b.val,0);
-          return {name, list, currentSum, allSum};
-        }).sort((a,b)=> b.currentSum - a.currentSum);
+        // se ficou vazio depois do filtro
+        if(groups.size === 0){
+          out.innerHTML = '';
+          if(empty) empty.style.display = 'block';
+          return;
+        }else{
+          if(empty) empty.style.display = 'none';
+        }
 
-        // Render
+        // prepara + ordena por total (2 meses)
+        const groupArr = Array.from(groups.entries()).map(([name, list])=>{
+          const sum2m = list.reduce((a,b)=>a + b.val, 0);
+          const sumCurrent = list.filter(x=>x.tag==='current').reduce((a,b)=>a+b.val,0);
+          return {name, list, sum2m, sumCurrent};
+        }).sort((a,b)=> b.sum2m - a.sum2m);
+
         out.innerHTML = '';
         groupArr.forEach((g, idx)=>{
           const details = document.createElement('details');
@@ -1556,8 +1540,7 @@
           b.textContent = g.name;
 
           const sm = document.createElement('small');
-          const qtd = g.list.length;
-          sm.textContent = qtd + ' lançamento(s) no período';
+          sm.textContent = g.list.length + ' lançamento(s) • 2 meses';
 
           nameBox.appendChild(b);
           nameBox.appendChild(sm);
@@ -1568,9 +1551,10 @@
           const right = document.createElement('div');
           right.className = 'g-right';
 
+          // >>> total do estabelecimento (2 meses) no cabeçalho
           const tot = document.createElement('div');
           tot.className = 'g-total';
-          tot.textContent = 'Mês: ' + fmtBRL.format(g.currentSum);
+          tot.textContent = 'Total: ' + fmtBRL.format(g.sum2m);
 
           const arrow = document.createElement('div');
           arrow.className = 'g-arrow';
@@ -1585,7 +1569,6 @@
           const body = document.createElement('div');
           body.className = 'g-body';
 
-          // Ordenar lançamentos do grupo (mais recente primeiro)
           g.list.sort((a,b)=> b.date - a.date);
 
           g.list.forEach(item=>{
@@ -1608,7 +1591,6 @@
 
             top.appendChild(os);
             top.appendChild(when);
-
             left.appendChild(top);
 
             try{
@@ -1622,12 +1604,11 @@
             }catch(e){}
 
             const amount = document.createElement('div');
-            amount.className = 'amount ' + item.tag;
+            amount.className = 'amount ' + item.tag; // current (azul) / mid (neutro)
             amount.textContent = fmtBRL.format(item.val);
 
             post.appendChild(left);
             post.appendChild(amount);
-
             body.appendChild(post);
           });
 
@@ -1637,16 +1618,13 @@
         });
       })();
 
-      /* =========================
-         Pesquisa do catálogo (filtra enquanto digita)
-         ========================= */
+      /* Pesquisa do catálogo */
       (function setupCatalogSearch(){
         const input = document.getElementById('catalogSearch');
         const clearBtn = document.getElementById('catalogClear');
         const countEl = document.getElementById('catalogCount');
         const emptyEl = document.getElementById('catalogEmptySearch');
         const grid = document.getElementById('catalogGrid');
-
         if(!grid || !input) return;
 
         const cards = Array.from(grid.querySelectorAll('.catalog-card-js'));
@@ -1682,11 +1660,9 @@
 
         function filter(q){
           const query = norm(q).trim();
-
           if(clearBtn) clearBtn.style.display = query ? 'inline-flex' : 'none';
 
           let visibleCount = 0;
-
           items.forEach(item=>{
             const match = !query || (item.dataset.searchKey || '').includes(query);
             item.style.display = match ? '' : 'none';
@@ -1721,9 +1697,7 @@
         }
       })();
 
-      /* =========================
-         PLAYER DE STORIES (Instagram)
-         ========================= */
+      /* STORIES (Instagram) */
       const storyModal   = document.getElementById('storyModal');
       const storyImg     = document.getElementById('storyImg');
       const storyVideo   = document.getElementById('storyVideo');
