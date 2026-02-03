@@ -3,263 +3,836 @@
 <head>
   <meta charset="utf-8">
   <title>Painel do Cooperado</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+
   <style>
     :root{
+      /* Brand */
       --royal:#4169E1;
-      --royal-600:#2f52c9;
-      --royal-50:#f5f7ff;
-      --ink:#020617;
-      --muted:#6b7280;
-      --line:#e3e8ff;
-      --ok:#0fb98b;
-      --danger:#ef4444;
-      --bg-main:#f3f4ff;
-      --bg:#ffffff;
-      --card: #ffffffee;
-      --blur: 14px;
-      --radius: 18px;
-      --shadow-soft: 0 10px 25px rgba(15, 23, 42, .10);
-      --shadow-strong: 0 18px 40px rgba(65,105,225,.30);
+      --royal-700:#2449C9;
+      --royal-50:#F3F6FF;
+
+      /* UI */
+      --ink:#0B1220;
+      --muted:#6B7280;
+      --line:#E6ECFF;
+      --ok:#10B981;
+      --danger:#EF4444;
+
+      --bg:#FFFFFF;
+      --bg-soft:#F5F7FF;
+
+      --radius-xl:22px;
+      --radius-lg:18px;
+      --radius-md:14px;
+
+      --shadow: 0 14px 38px rgba(15,23,42,.10);
+      --shadow-strong: 0 18px 46px rgba(65,105,225,.22);
+
+      --nav-h: 74px; /* base (sem safe-area) */
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
       color:var(--ink);
       background:
-        radial-gradient(1400px 800px at 110% -10%, rgba(65,105,225,.12), transparent 60%),
-        radial-gradient(1400px 800px at -10% 110%, rgba(65,105,225,.10), transparent 60%),
-        radial-gradient(900px 600px at 10% 0, rgba(56,189,248,.10), transparent 60%),
-        #eef2ff;
+        radial-gradient(900px 500px at 10% 0%, rgba(65,105,225,.14), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(59,130,246,.10), transparent 55%),
+        radial-gradient(900px 500px at 20% 110%, rgba(99,102,241,.10), transparent 55%),
+        #EEF2FF;
     }
 
-    /* APP BAR */
-    .appbar{
-      position:sticky; top:0; z-index:40; overflow:hidden;
-      background:
-        radial-gradient(circle at 0% 0%, rgba(59,130,246,.3), transparent 55%),
-        radial-gradient(circle at 100% 0%, rgba(14,165,233,.35), transparent 55%),
-        linear-gradient(120deg, #111827, #1d2a6b);
-      color:#fff;
-      padding:16px 16px 54px 16px;
-      box-shadow:var(--shadow-strong);
+    button, input { font-family: inherit; }
+
+    /* Container “phone-like” (focado em 6") */
+    .phone{
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position:relative;
     }
-    .appbar-inner{
-      max-width:1080px;
-      margin:0 auto;
+
+    /* TOP BAR (social style) */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 14px 12px 14px;
+      background:
+        linear-gradient(135deg, #0B1220 0%, #142A74 45%, #0B1220 100%);
+      box-shadow: var(--shadow-strong);
+      border-bottom-left-radius: 22px;
+      border-bottom-right-radius: 22px;
+      overflow: hidden;
+    }
+
+    .topbar::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(420px 220px at 10% 0%, rgba(65,105,225,.50), transparent 60%),
+        radial-gradient(420px 220px at 90% 0%, rgba(14,165,233,.35), transparent 60%);
+      pointer-events:none;
+      opacity:.95;
+    }
+
+    .topbar-inner{
+      position:relative;
       display:flex;
       align-items:center;
-      gap:12px;
+      gap: 12px;
+      min-width:0;
     }
-    .avatar-wrap{
-      position:relative;
-      width:52px;height:52px;
-      border-radius:50%;
-      padding:2px;
-      background:conic-gradient(from 180deg, #facc15, #a855f7, #22c55e, #f97316, #facc15);
-      box-shadow:0 0 0 2px #ffffff44;
-    }
+
     .avatar{
-      width:100%;
-      height:100%;
-      border-radius:50%;
+      width: 46px; height: 46px;
+      border-radius: 999px;
+      padding: 2px;
+      background: conic-gradient(from 180deg, #60A5FA, #A78BFA, #34D399, #60A5FA);
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.20);
+    }
+    .avatar img{
+      width:100%; height:100%;
+      border-radius:999px;
       object-fit:cover;
-      border:2px solid #0f172a;
-      background:#020617;
+      display:block;
+      border: 2px solid rgba(11,18,32,.85);
+      background:#0B1220;
     }
-    .hello{margin:0;font-weight:900;font-size:18px;line-height:1.1;letter-spacing:.01em}
-    .sub{margin:4px 0 0 0;font-size:11px;opacity:.95}
-    .badge-role{
-      display:inline-flex;
-      align-items:center;
-      gap:5px;
-      margin-top:4px;
-      font-size:11px;
-      padding:3px 7px;
-      border-radius:999px;
-      background:#020617aa;
-      border:1px solid #ffffff33;
+
+    .who{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
     }
-    .badge-role span.icon{font-size:12px}
-    .logout{
-      margin-left:auto;
-      color:#111827;
-      text-decoration:none;
-      font-weight:800;
-      font-size:13px;
-      border:1px solid #ffffff99;
-      padding:7px 13px;
-      border-radius:999px;
+    .who h1{
+      margin:0;
+      font-size: 16px;
+      font-weight: 900;
+      color:#fff;
+      letter-spacing:.01em;
       white-space:nowrap;
-      backdrop-filter: blur(8px);
-      background:#e5e7eb;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 270px;
+    }
+    .who .sub{
+      font-size: 11px;
+      color: rgba(255,255,255,.78);
+      font-weight: 700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 270px;
+    }
+
+    .pill-role{
+      margin-top:4px;
       display:inline-flex;
       align-items:center;
       gap:6px;
-    }
-    .logout span.icon{font-size:14px}
-    .logout:hover{
-      background:#f9fafb;
-    }
-    .wave{
-      position:absolute; left:0; right:0; bottom:-1px; height:52px; pointer-events:none;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="90" viewBox="0 0 1440 90" fill="none"><path d="M0 36C240 70 480 70 720 36C960 2 1200 2 1440 36V90H0V36Z" fill="white"/></svg>') center/cover no-repeat;
-    }
-
-    .wrap{
-      max-width:1080px;
-      margin:-40px auto 88px auto;
-      padding:0 14px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      color:#fff;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      width: fit-content;
     }
 
-    /* Cards */
-    .glass{
-      background: var(--card);
-      border:1px solid #ffffffaa;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(var(--blur));
-    }
-    .metric-grid{
-      display:grid; gap:14px; grid-template-columns: repeat(12, 1fr);
-    }
-    .metric-card{
-      grid-column: span 12;
-      padding:16px 16px 14px 16px; position:relative; overflow:hidden;
-    }
-    @media(min-width:840px){
-      .metric-card.span-4{grid-column: span 4}
-      .metric-card.span-12{grid-column: span 12}
-    }
-    .metric-title{
-      margin:0 0 6px 0; font-size:11px; color:#4b5563; font-weight:800;
-      letter-spacing:.14em; text-transform:uppercase;
-    }
-    .metric-header{
-      display:flex; align-items:center; gap:8px; margin-bottom:4px;
-    }
-    .metric-icon{
-      width:26px;height:26px;border-radius:9px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:14px;
-      background:#eef2ff;
-      color:var(--royal-600);
-    }
-    .metric-value{
-      font-size:30px; font-weight:900; letter-spacing:0.01em;
-      margin-top:2px;
-    }
-    .ok{color:var(--ok)}
-    .hint{color:var(--muted); font-size:12px; margin-top:6px}
-    .spark{
-      position:absolute; right:10px; top:12px; width:8px; height:8px; border-radius:50%;
-      background: radial-gradient(circle, #ffffff 0, #e5e7eb 40%, transparent 70%);
-      box-shadow:0 0 0 8px rgba(255,255,255,.55), 0 0 0 14px rgba(65,105,225,.12);
-      opacity:.75;
+    .actions-top{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex: 0 0 auto;
     }
 
+    .iconbtn{
+      width: 40px; height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.12);
+      color:#fff;
+      font-weight: 900;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .12s ease, filter .12s ease;
+      backdrop-filter: blur(8px);
+    }
+    .iconbtn:active{ transform: scale(.98); }
+    .logoutbtn{
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.14);
+      color:#fff;
+      font-weight: 900;
+      font-size: 12px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition: transform .12s ease, filter .12s ease;
+      backdrop-filter: blur(8px);
+      white-space:nowrap;
+    }
+    .logoutbtn:active{ transform: scale(.99); }
+
+    /* CONTENT */
+    .content{
+      padding: 12px 12px 0 12px;
+      padding-bottom: calc(var(--nav-h) + 18px + env(safe-area-inset-bottom));
+    }
+
+    /* PAGE SWITCH ANIM */
+    .page{ display:block; }
+    .page-hidden{ display:none; }
+    .fade-in{ animation: fadein .18s ease; }
+    @keyframes fadein{
+      from{ opacity:0; transform: translateY(6px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .fade-in{ animation:none; }
+      *{ scroll-behavior:auto !important; transition:none !important; }
+    }
+
+    /* Cards modern */
+    .card{
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.70);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+      overflow:hidden;
+      backdrop-filter: blur(14px);
+    }
+
+    .stack{ display:flex; flex-direction:column; gap: 12px; }
+
+    /* Header “Crédito / total” estilo social stats */
+    .stats{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat{
+      padding: 14px 14px 12px 14px;
+      position:relative;
+      min-width:0;
+    }
+    .stat .k{
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      color:#334155;
+      margin:0 0 8px 0;
+      opacity:.85;
+    }
+    .stat .v{
+      font-size: 24px;
+      font-weight: 900;
+      margin:0;
+      color: var(--ink);
+      letter-spacing:.01em;
+    }
+    .stat .v.ok{ color: var(--ok); }
+    .stat .h{
+      margin:6px 0 0 0;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .stat .chip{
+      position:absolute;
+      top: 12px; right: 12px;
+      width: 30px; height: 30px;
+      border-radius: 12px;
+      display:flex; align-items:center; justify-content:center;
+      background: var(--royal-50);
+      color: var(--royal-700);
+      border: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    /* Section header */
     .section{
-      padding:12px 14px; margin-top:4px;
+      padding: 14px;
     }
     .section-head{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap:wrap;
     }
-    .section-title{
-      margin:0; font-size:12px; font-weight:900; letter-spacing:.14em; color:#0b1220; text-transform:uppercase;
+    .title{
+      margin:0;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      color:#0B1220;
     }
-    .section-sub{
-      margin:2px 0 0 0;
-      font-size:11px;
-      color:#6b7280;
-      font-weight:500;
+    .subtitle{
+      margin:4px 0 0 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
     }
     .badge{
-      background:#eef2ff; color:var(--royal-600); font-weight:800; padding:4px 10px; border-radius:999px; font-size:11px;
-      display:inline-flex; align-items:center; gap:6px;
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--royal-50);
+      border: 1px solid var(--line);
+      color: var(--royal-700);
+      font-size: 11px;
+      font-weight: 900;
+      white-space:nowrap;
     }
-    .badge span.icon{font-size:13px}
-    .empty{padding:18px; color:var(--muted); text-align:center; font-size:13px}
 
-    /* STORIES */
-    .stories-card{padding:14px 14px 12px 14px;}
+    .empty{
+      padding: 14px;
+      text-align:center;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    /* STORIES (social) */
     .stories-row{
       display:flex;
-      flex-wrap:nowrap;
+      gap: 10px;
       overflow-x:auto;
-      gap:10px;
-      padding:4px 2px 4px 2px;
-      scrollbar-width:thin;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
     }
-    .stories-row::-webkit-scrollbar{height:5px}
-    .stories-row::-webkit-scrollbar-thumb{background:rgba(15,23,42,.25);border-radius:999px}
+    .stories-row::-webkit-scrollbar{ height:5px; }
+    .stories-row::-webkit-scrollbar-thumb{ background: rgba(11,18,32,.25); border-radius:999px; }
 
-    .story-chip{
+    .story{
       border:0;
       background:transparent;
-      color:inherit;
       padding:0;
       cursor:pointer;
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:6px;
-      min-width:70px;
+      gap: 6px;
+      min-width: 76px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .12s ease;
     }
-    .story-ring{
-      width:64px;
-      height:64px;
-      border-radius:50%;
-      padding:2px;
-      background:conic-gradient(from 140deg,#f97316,#ec4899,#6366f1,#22c55e,#f97316);
+    .story:active{ transform: scale(.98); }
+    .ring{
+      width: 66px;
+      height: 66px;
+      border-radius: 999px;
+      padding: 2px;
+      background: conic-gradient(from 140deg, #60A5FA, #A78BFA, #34D399, #60A5FA);
+      box-shadow: 0 12px 28px rgba(15,23,42,.18);
       display:flex;
       align-items:center;
       justify-content:center;
-      box-shadow:0 10px 24px rgba(15,23,42,.25);
     }
-    .story-inner{
+    .ring .inner{
       width:100%;
       height:100%;
-      border-radius:50%;
-      background:#020617;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size:22px;
-      color:#e5e7eb;
+      border-radius:999px;
+      background: #0B1220;
       overflow:hidden;
       position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:900;
+      font-size: 22px;
     }
-    .story-inner img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
+    .ring .inner img{ width:100%; height:100%; object-fit:cover; display:block; }
     .story-name{
-      font-size:11px;
-      font-weight:800;
-      color:#111827;
-      max-width:80px;
-      text-overflow:ellipsis;
-      overflow:hidden;
+      font-size: 11px;
+      font-weight: 900;
+      color: #0B1220;
+      max-width: 90px;
       white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
       text-align:center;
     }
-    .story-pill{
-      font-size:10px;
-      font-weight:800;
-      color:#64748b;
+    .story-meta{
+      font-size: 10px;
+      font-weight: 900;
+      color: #64748B;
     }
 
-    /* MODAL STORY – tela cheia */
+    /* FEED (Lançamentos) */
+    .feed{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    .post{
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      box-shadow: 0 10px 26px rgba(15,23,42,.06);
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      min-width:0;
+    }
+    .post-top{
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+      min-width:0;
+    }
+    .post-dot{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--royal), var(--royal-700));
+      color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 900;
+      box-shadow: 0 10px 22px rgba(65,105,225,.20);
+      flex:0 0 auto;
+    }
+    .post-head{
+      min-width:0;
+      flex:1 1 auto;
+    }
+    .post-estab{
+      margin:0;
+      font-size: 13px;
+      font-weight: 900;
+      color: #0B1220;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .post-sub{
+      margin:3px 0 0 0;
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748B;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .post-price{
+      flex:0 0 auto;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--royal-700);
+      background: var(--royal-50);
+      border: 1px solid var(--line);
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space:nowrap;
+    }
+    .post-desc{
+      font-size: 12px;
+      color:#334155;
+      font-weight: 700;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    /* FAB filtros (social action) */
+    .fab{
+      position:fixed;
+      right: 16px;
+      bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom));
+      z-index: 60;
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border:0;
+      cursor:pointer;
+      background: linear-gradient(135deg, var(--royal), var(--royal-700));
+      box-shadow: var(--shadow-strong);
+      color:#fff;
+      font-weight: 900;
+      font-size: 20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .12s ease;
+    }
+    .fab:active{ transform: scale(.98); }
+
+    /* Bottom sheet filtros (modern) */
+    .sheet{
+      position:fixed;
+      left:0; right:0;
+      bottom:-110%;
+      z-index: 80;
+      transition: bottom .22s ease;
+      padding: 0 0 env(safe-area-inset-bottom) 0;
+    }
+    .sheet.open{ bottom:0; }
+    .sheet-inner{
+      max-width: 480px;
+      margin: 0 auto;
+      background:#fff;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      border: 1px solid var(--line);
+      box-shadow: 0 -18px 46px rgba(15,23,42,.22);
+      overflow:hidden;
+    }
+    .sheet-drag{
+      width: 48px;
+      height: 5px;
+      border-radius:999px;
+      background:#E5E7EB;
+      margin: 10px auto 6px auto;
+    }
+    .sheet-head{
+      padding: 6px 14px 10px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .sheet-head h4{
+      margin:0;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      color:#0B1220;
+    }
+    .sheet-close{
+      border:0;
+      background: var(--royal-50);
+      color: var(--royal-700);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .sheet-body{
+      padding: 0 14px 14px 14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    label{ font-size: 11px; font-weight: 900; color:#334155; }
+    input[type="date"]{
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background:#fff;
+      padding: 10px 12px;
+      font-weight: 800;
+      color:#0B1220;
+      min-width:0;
+    }
+    .sheet-actions{
+      grid-column: 1 / -1;
+      display:flex;
+      gap: 10px;
+    }
+    .btn{
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background:#fff;
+      font-weight: 900;
+      cursor:pointer;
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      color:#0B1220;
+    }
+    .btn.primary{
+      border:0;
+      color:#fff;
+      background: linear-gradient(135deg, var(--royal), var(--royal-700));
+      box-shadow: 0 12px 26px rgba(65,105,225,.22);
+    }
+    .btn.ghost{
+      color: var(--royal-700);
+      background: var(--royal-50);
+    }
+
+    /* BOTTOM NAV (social) */
+    .bottom-nav{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index: 70;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom)) 12px;
+      background: rgba(255,255,255,.92);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 -10px 30px rgba(15,23,42,.10);
+    }
+    .nav-inner{
+      max-width: 480px;
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      align-items:center;
+    }
+    .tab{
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      height: 46px;
+      border-radius: 16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 12px;
+      color: #6B7280;
+      transition: background .12s ease, color .12s ease, transform .12s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .tab:active{ transform: scale(.99); }
+    .tab .i{
+      width: 30px; height: 30px;
+      border-radius: 12px;
+      display:flex; align-items:center; justify-content:center;
+      background: #F3F4F6;
+      border: 1px solid #E5E7EB;
+      font-size: 15px;
+    }
+    .tab.active{
+      color: var(--royal-700);
+      background: var(--royal-50);
+      border: 1px solid var(--line);
+    }
+    .tab.active .i{
+      background: linear-gradient(135deg, var(--royal), var(--royal-700));
+      border: 0;
+      color:#fff;
+    }
+
+    /* CATALOG (social marketplace) */
+    .searchbar{
+      position: sticky;
+      top: 88px; /* abaixo do topbar (aprox) */
+      z-index: 40;
+      padding: 10px 0 8px 0;
+      background: linear-gradient(to bottom, rgba(245,247,255,.95), rgba(245,247,255,.55));
+      backdrop-filter: blur(12px);
+    }
+    .searchbox{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      background:#fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px 12px;
+      box-shadow: 0 10px 26px rgba(15,23,42,.06);
+    }
+    .searchbox .sicon{ font-size: 16px; }
+    .searchbox input{
+      width:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--ink);
+      min-width:0;
+    }
+    .searchbox input::placeholder{ color:#9CA3AF; font-weight:800; }
+
+    .searchmeta{
+      margin-top: 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .clear{
+      border:0;
+      cursor:pointer;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--royal-50);
+      border: 1px solid var(--line);
+      color: var(--royal-700);
+      font-weight: 900;
+      display:none;
+      white-space:nowrap;
+    }
+
+    .catalog-list{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .shop{
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,.70);
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .shop-head{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--line);
+      min-width:0;
+    }
+    .shop-logo{
+      width: 42px; height: 42px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--royal), var(--royal-700));
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      position:relative;
+      overflow:hidden;
+      flex:0 0 auto;
+      box-shadow: 0 12px 26px rgba(65,105,225,.18);
+    }
+    .shop-logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .shop-info{
+      min-width:0;
+      flex:1 1 auto;
+    }
+    .shop-name{
+      margin:0;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--ink);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .shop-count{
+      margin-top:4px;
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--royal-700);
+      background: var(--royal-50);
+      border: 1px solid var(--line);
+      white-space:nowrap;
+      width: fit-content;
+    }
+
+    .items{
+      padding: 10px 10px 12px 10px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .item{
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 10px 10px;
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 10px;
+      align-items:start;
+      min-width:0;
+      box-shadow: 0 8px 20px rgba(15,23,42,.05);
+    }
+    .iname{
+      font-size: 12px;
+      font-weight: 900;
+      color:#0B1220;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
+    }
+    .iprice{
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--royal-700);
+      background: var(--royal-50);
+      border: 1px solid var(--line);
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space:nowrap;
+      text-align:right;
+      flex:0 0 auto;
+    }
+    .imeta{
+      grid-column: 1 / -1;
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748B;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
+    }
+    .inote{
+      grid-column: 1 / -1;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      word-break: break-word;
+      line-height: 1.35;
+    }
+
+    .catalog-empty{
+      padding: 14px;
+      text-align:center;
+      font-weight: 800;
+      color: var(--muted);
+      font-size: 12px;
+      border-radius: var(--radius-xl);
+      border: 1px dashed var(--line);
+      background: rgba(255,255,255,.65);
+    }
+
+    /* Story modal (mantido, com leve polimento) */
     .story-modal{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.97);
+      background:rgba(0,0,0,.96);
       display:none;
       align-items:center;
       justify-content:center;
@@ -267,76 +840,75 @@
     }
     .story-modal.open{display:flex;}
     .story-frame{
-      position:relative;
       width:100%;
       height:100vh;
-      max-width:100%;
-      max-height:100vh;
+      max-width: 480px;
       background:#000;
       display:flex;
       flex-direction:column;
+      position:relative;
     }
-    .story-progress-bar{
+    .story-progress{
       position:absolute;
-      left:0;right:0;top:0;
+      left:0; right:0; top:0;
       display:flex;
       gap:4px;
-      padding:8px 10px 0 10px;
-      z-index:3;
+      padding: 10px 10px 0 10px;
+      z-index: 3;
     }
-    .story-progress-seg{
-      flex:1;
-      height:3px;
-      border-radius:999px;
-      background:rgba(255,255,255,.25);
-      overflow:hidden;
-    }
-    .story-progress-fill{
-      width:0%;
-      height:100%;
-      background:#ffffff;
-      transform-origin:left center;
-    }
-    .story-header{
-      position:relative;
+    .seg{ flex:1; height:3px; border-radius:999px; background:rgba(255,255,255,.22); overflow:hidden; }
+    .fill{ width:0%; height:100%; background:#fff; }
+
+    .story-head{
       z-index:2;
-      padding:18px 13px 10px 13px;
+      padding: 18px 12px 10px 12px;
       display:flex;
       align-items:center;
-      gap:8px;
-      color:#e5e7eb;
-      font-size:13px;
+      gap: 10px;
+      color:#fff;
+      min-width:0;
     }
-    .story-dot{
-      width:30px;height:30px;border-radius:999px;
-      background:linear-gradient(120deg,var(--royal),var(--royal-600));
-      display:flex;align-items:center;justify-content:center;
-      font-size:12px;font-weight:900;color:#fff;
-      box-shadow:0 0 0 2px #111827;
+    .s-dot{
+      width: 34px; height: 34px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--royal), var(--royal-700));
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 900;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.12);
+      flex:0 0 auto;
     }
-    .story-header h5{
-      margin:0;font-size:13px;font-weight:800;
+    .s-title{
+      min-width:0;
+      flex:1;
     }
-    .story-header span{font-size:11px;color:#9ca3af}
-    .story-close{
-      margin-left:auto;
+    .s-title h5{
+      margin:0;
+      font-size: 13px;
+      font-weight: 900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .s-title span{ font-size: 11px; font-weight: 800; color: rgba(255,255,255,.70); }
+    .s-close{
       border:0;
-      background:#02061766;
-      color:#e5e7eb;
-      font-size:22px;
       cursor:pointer;
-      padding:4px 8px;
-      border-radius:999px;
+      width: 40px; height: 40px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      font-size: 22px;
+      font-weight: 900;
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
     }
-    .story-close:hover{
-      background:#6b728044;
-    }
+
     .story-body{
-      position:relative;
       flex:1;
       display:flex;
       align-items:center;
       justify-content:center;
+      position:relative;
       overflow:hidden;
     }
     .story-body img,
@@ -344,824 +916,795 @@
       width:100%;
       height:100%;
       object-fit:contain;
-      display:block;
       background:#000;
+      display:block;
     }
-    .story-touch-layer{
-      position:absolute;
-      inset:0;
+    .touch{
+      position:absolute; inset:0;
       display:flex;
       z-index:4;
     }
-    .story-touch-zone{flex:1;}
+    .zone{ flex:1; }
 
     .story-caption{
-      padding:10px 13px 18px 13px;
-      font-size:12px;
-      color:#e5e7eb;
-      border-top:1px solid #1f2937;
-      background:linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.5));
+      padding: 10px 12px 16px 12px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,.45));
       display:flex;
+      gap: 10px;
       align-items:flex-start;
-      justify-content:space-between;
-      gap:8px;
+      color:#fff;
     }
-    .story-caption-text{
+    .cap{
       flex:1;
-      white-space:pre-line;
-      min-height:24px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: pre-line;
+      min-height: 24px;
     }
-    .story-like{
+    .like{
+      min-width: 100px;
       display:flex;
       flex-direction:column;
       align-items:flex-end;
-      gap:4px;
-      min-width:90px;
+      gap: 6px;
     }
-    .story-like-btn{
+    .likebtn{
       border-radius:999px;
-      border:1px solid #e5e7eb;
+      border: 1px solid rgba(255,255,255,.70);
       background:transparent;
-      color:#f9fafb;
-      font-size:11px;
-      font-weight:800;
-      padding:4px 11px;
+      color:#fff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 6px 12px;
       cursor:pointer;
       display:inline-flex;
       align-items:center;
-      gap:4px;
-    }
-    .story-like-btn.liked{
-      background:#f9fafb;
-      color:#111827;
-    }
-    .story-like-stats{
-      font-size:10px;
-      color:#9ca3af;
-      text-align:right;
-    }
-
-    /* Timeline */
-    .timeline{position:relative; padding-left:14px; display:flex; flex-direction:column; gap:10px}
-    .timeline:before{
-      content:""; position:absolute; left:6px; top:0; bottom:0; width:2px;
-      background:linear-gradient(var(--royal-50), var(--royal));
-      border-radius:2px;
-    }
-    .tx{
-      position:relative; padding:12px 12px 12px 14px; border:1px solid var(--line); border-radius:16px; background:#f9fafb;
-      display:grid; grid-template-columns: 1fr auto; gap:4px 10px; align-items:center;
-      box-shadow:0 10px 24px rgba(17,24,39,.04);
-    }
-    .tx:before{
-      content:""; position:absolute; left:-2px; top:16px; width:10px; height:10px; border-radius:50%;
-      background:var(--royal); box-shadow:0 0 0 3px #eef2ff;
-    }
-    .tx-estab{
-      font-weight:900; color:#0b1220; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .tx-valor{
-      font-weight:900; color:#0b1220; font-size:16px; padding:6px 10px; border-radius:10px;
-      background:var(--royal-50); border:1px solid var(--line);
-    }
-    .tx-os{font-size:12px; color:#64748b; font-weight:800}
-    .tx-quando{font-size:12px; color:#334155; font-weight:800; text-align:right}
-    .tx-desc{grid-column:1 / -1; font-size:12px; color:#475569}
-
-    /* FAB filtros */
-    .fab{
-      position:fixed; right:16px; bottom:88px; z-index:35;
-      background:linear-gradient(135deg, var(--royal), var(--royal-600));
-      color:#fff; border:0; width:54px; height:54px; border-radius:50%;
-      box-shadow:var(--shadow-strong); cursor:pointer; font-weight:900; font-size:22px;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .fab span{transform:translateY(1px);}
-    .fab:hover{transform:translateY(-1px);}
-
-    /* Bottom sheet filtros */
-    .sheet{
-      position:fixed; left:0; right:0; bottom:-100%; z-index:45; transition:bottom .25s ease;
-      background:#fff; border-top-left-radius:20px; border-top-right-radius:20px;
-      box-shadow:0 -18px 40px rgba(17,24,39,.25); border-top:1px solid var(--line);
-    }
-    .sheet.open{ bottom:0; }
-    .sheet .drag{ width:46px; height:5px; background:#e5e7eb; border-radius:999px; margin:10px auto; }
-    .sheet h4{ margin:4px 16px 8px 16px; font-size:13px; font-weight:900; letter-spacing:.10em; color:#0b1220; text-transform:uppercase }
-    .sheet form{ padding:0 16px 16px 16px; display:grid; grid-template-columns:1fr 1fr; gap:10px }
-    .field{ display:flex; flex-direction:column; gap:6px }
-    label{ font-size:12px; color:#334155; font-weight:800 }
-    input[type="date"]{
-      padding:12px 12px; height:44px; border:1px solid var(--line); border-radius:12px; background:#fff; min-width:0;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
-    }
-    .actions{ grid-column:1 / -1; display:flex; gap:10px }
-    .btn{
-      height:44px; border-radius:12px; border:1px solid var(--line); font-weight:900; cursor:pointer; flex:1;
-    }
-    .btn.primary{
-      color:#fff; background:linear-gradient(120deg, var(--royal), var(--royal-600)); border:0;
-      box-shadow:0 10px 24px rgba(65,105,225,.25);
-    }
-    .btn.ghost{
-      color:var(--royal-600); background:#fff;
-    }
-
-    /* Bottom nav */
-    .bottom-nav{
-      position:fixed; left:0; right:0; bottom:0; z-index:42;
-      background:#f9fafb; border-top:1px solid var(--line);
-      display:flex; justify-content:space-around; padding:8px 10px;
-      box-shadow:0 -6px 18px rgba(15,23,42,.08);
-    }
-    .tab{
-      color:#6b7280; text-decoration:none; font-weight:800; font-size:11px;
-      display:flex; gap:6px; align-items:center; padding:7px 11px; border-radius:999px; border:none; background:transparent; cursor:pointer;
-    }
-    .tab span.icon{font-size:16px;}
-    .tab.active{ color:var(--royal-600); background:#e0e7ff; }
-
-    .page{display:block;}
-    .page-hidden{display:none;}
-
-    /* Catálogos */
-    .catalog-grid{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .catalog-card{
-      padding:14px;
-    }
-    .catalog-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      border-bottom:1px solid var(--line);
-      padding-bottom:8px;
-      margin-bottom:8px;
-    }
-    .catalog-head-left{
-      display:flex;align-items:center;gap:10px;
-    }
-    .catalog-logo{
-      width:32px;height:32px;border-radius:11px;
-      overflow:hidden;
-      background:#0f172a;
-      display:flex;align-items:center;justify-content:center;
-      font-size:13px;font-weight:900;color:#e5e7eb;
-      border:1px solid #c7d2fe;
-    }
-    .catalog-logo img{
-      width:100%;height:100%;object-fit:cover;display:block;
-    }
-    .catalog-estab{
-      font-weight:900;
-      font-size:14px;
-      color:#0b1220;
-    }
-    .catalog-pill{
-      font-size:11px;
-      font-weight:800;
-      color:#4b5563;
-      background:#f3f4ff;
-      padding:4px 9px;
-      border-radius:999px;
-      white-space:nowrap;
-    }
-    .catalog-items{
-      display:grid;
-      grid-template-columns:1fr;
       gap:6px;
     }
-    @media(min-width:720px){
-      .catalog-items{grid-template-columns:1fr 1fr;}
+    .likebtn.liked{
+      background:#fff;
+      color:#0B1220;
     }
-    .catalog-item{
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#f9fafb;
-      padding:8px 10px;
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:2px 8px;
-      font-size:12px;
-    }
-    .catalog-name{
-      font-weight:800;
-      color:#0f172a;
-      white-space:nowrap;
-      text-overflow:ellipsis;
-      overflow:hidden;
-    }
-    .catalog-price{
-      font-weight:900;
-      color:var(--royal-600);
-      font-size:13px;
+    .likestats{
+      font-size: 10px;
+      font-weight: 800;
+      color: rgba(255,255,255,.70);
       text-align:right;
-    }
-    .catalog-meta{
-      font-size:11px;
-      color:#6b7280;
-    }
-    .catalog-note{
-      grid-column:1 / -1;
-      font-size:11px;
-      color:#4b5563;
-    }
-    .catalog-empty-global{
-      padding:18px;
-      text-align:center;
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    @media(min-width:900px){
-      .appbar{border-bottom-left-radius:18px;border-bottom-right-radius:18px}
-      .wrap{margin-top:-52px}
-      .timeline{gap:12px}
     }
   </style>
 </head>
-<body>
 
-  <!-- APP BAR -->
-  <header class="appbar">
-    <div class="appbar-inner">
-      <div class="avatar-wrap">
-        <img class="avatar" src="{{ url_for('foto_cooperado', id=coop.id) }}" alt="foto do cooperado" onerror="this.style.visibility='hidden'">
-      </div>
-      <div>
-        <h1 class="hello">Olá, {{ coop.nome }}</h1>
-        <div class="sub">Usuário: <b>@{{ coop.username }}</b></div>
-        <div class="badge-role">
-          <span class="icon">🛵</span>
-          <span>Cooperado Coopex</span>
+<body>
+  <div class="phone">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="avatar">
+          <img src="{{ url_for('foto_cooperado', id=coop.id) }}" alt="foto do cooperado" onerror="this.style.visibility='hidden'">
+        </div>
+
+        <div class="who">
+          <h1>Olá, {{ coop.nome }}</h1>
+          <div class="sub">@{{ coop.username }}</div>
+          <div class="pill-role">🛵 Cooperado Coopex</div>
+        </div>
+
+        <div class="actions-top">
+          <!-- Botão abre filtros (só aparece na aba Início via JS) -->
+          <button class="iconbtn" id="openFiltersTop" type="button" title="Filtrar lançamentos">⏱️</button>
+
+          <a class="logoutbtn" href="{{ url_for('logout') }}">
+            🚪 <span>Sair</span>
+          </a>
         </div>
       </div>
-      <a class="logout" href="{{ url_for('logout') }}">
-        <span class="icon">🚪</span><span>Sair</span>
-      </a>
-    </div>
-    <div class="wave" aria-hidden="true"></div>
-  </header>
+    </header>
 
-  <main class="wrap">
-    <!-- PÁGINA INÍCIO -->
-    <section id="home-section" class="page">
-      <section class="metric-grid">
-        <!-- Crédito -->
-        <article class="glass metric-card span-4">
-          <span class="spark" aria-hidden="true"></span>
-          <div class="metric-header">
-            <div class="metric-icon">💳</div>
-            <div>
-              <h3 class="metric-title">Crédito disponível</h3>
+    <!-- CONTENT -->
+    <main class="content">
+
+      <!-- HOME -->
+      <section id="home-section" class="page">
+        <div class="stack">
+
+          <!-- Stats -->
+          <div class="stats">
+            <div class="card stat">
+              <div class="chip">💳</div>
+              <p class="k">Crédito disponível</p>
+              <p class="v ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</p>
+              {% if coop.credito_atualizado_em %}
+                <p class="h">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</p>
+              {% else %}
+                <p class="h">Sem ajustes manuais.</p>
+              {% endif %}
+            </div>
+
+            <div class="card stat">
+              <div class="chip">🧾</div>
+              <p class="k">Lançamentos</p>
+              <p class="v">{{ total_lanc }}</p>
+              <p class="h">Já filtrados por data.</p>
             </div>
           </div>
-          <div class="metric-value ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</div>
-          {% if coop.credito_atualizado_em %}
-            <div class="hint">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</div>
-          {% else %}
-            <div class="hint">Sem ajustes manuais registrados.</div>
-          {% endif %}
-        </article>
 
-        <!-- Total lançamentos -->
-        <article class="glass metric-card span-4">
-          <div class="metric-header">
-            <div class="metric-icon">🧾</div>
-            <div>
-              <h3 class="metric-title">Lançamentos no período</h3>
-            </div>
-          </div>
-          <div class="metric-value">{{ total_lanc }}</div>
-          <div class="hint">Itens listados abaixo, já filtrados por data.</div>
-        </article>
-
-        <!-- Stories -->
-        <article class="glass metric-card span-12 section stories-card" id="stories">
-          <div class="section-head">
-            <div>
-              <h3 class="section-title">Stories dos estabelecimentos</h3>
-              <p class="section-sub">Promoções rápidas, avisos e recados pensados para você.</p>
-            </div>
-            <span class="badge"><span class="icon">⚡</span><span>Novidades em tempo real</span></span>
-          </div>
-
-          {% if stories_ativos_coop and estab_por_id %}
-            <div class="stories-row" aria-label="Stories de estabelecimentos">
-              {% for est_id, est in estab_por_id.items() %}
-                {% set est_stories = stories_ativos_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
-                {% if est_stories %}
-                  <button
-                    type="button"
-                    class="story-chip"
-                    data-est-id="{{ est_id }}"
-                    data-est-nome="{{ est.nome }}"
-                  >
-                    <div class="story-ring">
-                      <div class="story-inner">
-                        {% if est.id %}
-                          <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
-                        {% endif %}
-                        <span style="position:absolute;">{{ est.nome[:2].upper() }}</span>
-                      </div>
-                    </div>
-                    <div class="story-name" title="{{ est.nome }}">{{ est.nome }}</div>
-                    <div class="story-pill">
-                      {{ est_stories|length }} story{{ 'ies' if est_stories|length>1 else '' }}
-                    </div>
-                  </button>
-                {% endif %}
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="empty">Ainda não há stories ativos dos estabelecimentos que lançam em seu nome.</div>
-          {% endif %}
-        </article>
-
-        <!-- LANÇAMENTOS -->
-        <article id="lancamentos" class="glass metric-card span-12 section">
-          <div class="section-head">
-            <div>
-              <h3 class="section-title">Meus lançamentos</h3>
-              <p class="section-sub">Visualize todas as saídas do seu crédito com horário de Brasília.</p>
-            </div>
-            <span class="badge"><span class="icon">⏱️</span><span>Horário de Brasília</span></span>
-          </div>
-
-          <div class="timeline" aria-label="Lançamentos">
-            {% if lancamentos %}
-              {% for l in lancamentos %}
-              <div class="tx">
-                <div class="tx-estab">{{ l.estabelecimento.nome if l.estabelecimento else '—' }}</div>
-                <div class="tx-valor">R$ {{ '%.2f'|format(l.valor or 0) }}</div>
-                <div class="tx-os">OS: {{ l.os_numero or '—' }}</div>
-                <div class="tx-quando">
-                  {% if l.data_brasilia %}
-                    {{ l.data_brasilia }}
-                  {% else %}
-                    {{ l.data.strftime('%d/%m/%Y %H:%M') }}
-                  {% endif %}
-                </div>
-                {% if l.descricao %}<div class="tx-desc">{{ l.descricao }}</div>{% endif %}
+          <!-- Stories -->
+          <section class="card section" id="stories">
+            <div class="section-head">
+              <div>
+                <h3 class="title">Stories</h3>
+                <p class="subtitle">Promoções e recados rápidos dos parceiros.</p>
               </div>
-              {% endfor %}
+              <span class="badge">⚡ Atualiza rápido</span>
+            </div>
+
+            {% if stories_ativos_coop and estab_por_id %}
+              <div class="stories-row" aria-label="Stories de estabelecimentos">
+                {% for est_id, est in estab_por_id.items() %}
+                  {% set est_stories = stories_ativos_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
+                  {% if est_stories %}
+                    <button
+                      type="button"
+                      class="story"
+                      data-est-id="{{ est_id }}"
+                      data-est-nome="{{ est.nome }}"
+                    >
+                      <div class="ring">
+                        <div class="inner">
+                          {% if est.id %}
+                            <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
+                          {% endif %}
+                          <span style="position:absolute;">{{ est.nome[:2].upper() }}</span>
+                        </div>
+                      </div>
+                      <div class="story-name" title="{{ est.nome }}">{{ est.nome }}</div>
+                      <div class="story-meta">{{ est_stories|length }} story{{ 'ies' if est_stories|length>1 else '' }}</div>
+                    </button>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="empty">Ainda não há stories ativos dos estabelecimentos que lançam em seu nome.</div>
+            {% endif %}
+          </section>
+
+          <!-- Feed Lançamentos -->
+          <section class="card section" id="lancamentos">
+            <div class="section-head">
+              <div>
+                <h3 class="title">Meus lançamentos</h3>
+                <p class="subtitle">Horário de Brasília (GMT-3).</p>
+              </div>
+              <span class="badge">⏱️ Brasília</span>
+            </div>
+
+            {% if lancamentos %}
+              <div class="feed" aria-label="Lançamentos">
+                {% for l in lancamentos %}
+                  <div class="post">
+                    <div class="post-top">
+                      <div class="post-dot">🧾</div>
+
+                      <div class="post-head">
+                        <p class="post-estab">{{ l.estabelecimento.nome if l.estabelecimento else '—' }}</p>
+                        <p class="post-sub">
+                          <span>OS: {{ l.os_numero or '—' }}</span>
+                          <span>•</span>
+                          <span>
+                            {% if l.data_brasilia %}
+                              {{ l.data_brasilia }}
+                            {% else %}
+                              {{ l.data.strftime('%d/%m/%Y %H:%M') }}
+                            {% endif %}
+                          </span>
+                        </p>
+                      </div>
+
+                      <div class="post-price">R$ {{ '%.2f'|format(l.valor or 0) }}</div>
+                    </div>
+
+                    {% if l.descricao %}
+                      <div class="post-desc">{{ l.descricao }}</div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
             {% else %}
               <div class="empty">Nenhum lançamento neste período.</div>
             {% endif %}
-          </div>
+          </section>
 
-          <div class="hint" style="margin-top:8px">
-            * Os horários já estão convertidos para Brasília (GMT-3).
-          </div>
-        </article>
-      </section>
-    </section>
-
-    <!-- PÁGINA CATÁLOGOS -->
-    <section id="catalogos-section" class="page page-hidden">
-      <section class="glass metric-card span-12 section">
-        <div class="section-head">
-          <div>
-            <h3 class="section-title">Catálogos dos estabelecimentos</h3>
-            <p class="section-sub">Consulte os produtos oferecidos por cada parceiro antes de solicitar.</p>
-          </div>
-          <span class="badge"><span class="icon">📚</span><span>Visão por parceiro</span></span>
         </div>
+      </section>
 
-        {% if catalogo_itens_coop and estab_por_id %}
-          <div class="catalog-grid">
-            {% for est_id, est in estab_por_id.items() %}
-              {% set itens_est = catalogo_itens_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
-              {% if itens_est %}
-                <article class="glass catalog-card">
-                  <div class="catalog-head">
-                    <div class="catalog-head-left">
-                      <div class="catalog-logo">
-                        {% if est.id %}
-                          <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
-                        {% endif %}
-                        <span style="position:absolute; font-size:11px;">{{ est.nome[:2].upper() }}</span>
-                      </div>
-                      <div class="catalog-estab">{{ est.nome }}</div>
-                    </div>
-                    <div class="catalog-pill">{{ itens_est|length }} item{{ 's' if itens_est|length>1 else '' }}</div>
-                  </div>
-                  <div class="catalog-items">
-                    {% for item in itens_est %}
-                      <div class="catalog-item">
-                        <div class="catalog-name" title="{{ item.nome }}">{{ item.nome }}</div>
-                        <div class="catalog-price">R$ {{ '%.2f'|format(item.valor or 0) }}</div>
-                        <div class="catalog-meta">
-                          {% if item.marca %}Marca: {{ item.marca }}{% endif %}
-                          {% if item.categoria %}{{ ' • ' if item.marca }}Categoria: {{ item.categoria }}{% endif %}
-                          {% if not item.marca and not item.categoria %}&nbsp;{% endif %}
+      <!-- CATÁLOGOS -->
+      <section id="catalogos-section" class="page page-hidden">
+        <div class="stack">
+
+          <section class="card section">
+            <div class="section-head">
+              <div>
+                <h3 class="title">Catálogos</h3>
+                <p class="subtitle">Pesquise itens pelo nome enquanto digita.</p>
+              </div>
+              <span class="badge">📚 Parceiros</span>
+            </div>
+
+            {% if catalogo_itens_coop and estab_por_id %}
+              <div class="searchbar">
+                <div class="searchbox">
+                  <span class="sicon">🔎</span>
+                  <input id="catalogSearch" type="search" inputmode="search" autocomplete="off"
+                         placeholder="Digite o nome do item, marca, categoria ou parceiro..." />
+                </div>
+                <div class="searchmeta">
+                  <div><span id="catalogCount">0</span> item(ns) exibido(s)</div>
+                  <button type="button" class="clear" id="catalogClear">Limpar</button>
+                </div>
+              </div>
+
+              <div class="catalog-list" id="catalogGrid">
+                {% for est_id, est in estab_por_id.items() %}
+                  {% set itens_est = catalogo_itens_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
+                  {% if itens_est %}
+                    <article class="shop catalog-card-js" data-estab="{{ est.nome }}">
+                      <div class="shop-head">
+                        <div class="shop-logo">
+                          {% if est.id %}
+                            <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
+                          {% endif %}
+                          <span style="position:absolute;font-size:12px;">{{ est.nome[:2].upper() }}</span>
                         </div>
-                        {% if item.observacao %}
-                          <div class="catalog-note">{{ item.observacao }}</div>
-                        {% endif %}
+
+                        <div class="shop-info">
+                          <p class="shop-name" title="{{ est.nome }}">{{ est.nome }}</p>
+                          <div class="shop-count">
+                            <span class="catalog-pill-count">{{ itens_est|length }}</span> item{{ 's' if itens_est|length>1 else '' }}
+                          </div>
+                        </div>
                       </div>
-                    {% endfor %}
-                  </div>
-                </article>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="catalog-empty-global">
-            Nenhum catálogo disponível ainda para os estabelecimentos que lançam em seu nome.
-          </div>
-        {% endif %}
+
+                      <div class="items">
+                        {% for item in itens_est %}
+                          <div class="item catalog-item-js"
+                               data-item="{{ item.nome }}"
+                               data-estab="{{ est.nome }}"
+                               data-marca="{{ item.marca or '' }}"
+                               data-categoria="{{ item.categoria or '' }}"
+                               data-obs="{{ item.observacao or '' }}">
+                            <div class="iname" title="{{ item.nome }}">{{ item.nome }}</div>
+                            <div class="iprice">R$ {{ '%.2f'|format(item.valor or 0) }}</div>
+
+                            <div class="imeta">
+                              {% if item.marca %}Marca: {{ item.marca }}{% endif %}
+                              {% if item.categoria %}{{ ' • ' if item.marca }}Categoria: {{ item.categoria }}{% endif %}
+                              {% if not item.marca and not item.categoria %}&nbsp;{% endif %}
+                            </div>
+
+                            {% if item.observacao %}
+                              <div class="inote">{{ item.observacao }}</div>
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </article>
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+              <div class="catalog-empty" id="catalogEmptySearch" style="display:none;">
+                Nenhum item encontrado com esse termo.
+              </div>
+
+            {% else %}
+              <div class="catalog-empty">
+                Nenhum catálogo disponível ainda para os estabelecimentos que lançam em seu nome.
+              </div>
+            {% endif %}
+          </section>
+
+        </div>
       </section>
-    </section>
-  </main>
 
-  <!-- FAB filtros -->
-  <button class="fab" id="openFilters" title="Filtrar lançamentos">
-    <span>⟳</span>
-  </button>
+    </main>
 
-  <!-- BOTTOM SHEET filtros -->
-  <div class="sheet" id="sheet">
-    <div class="drag" id="closeFilters" aria-hidden="true"></div>
-    <h4>Filtros dos lançamentos</h4>
-    <form method="get" action="{{ url_for('painel_cooperado') }}">
-      <div class="field">
-        <label for="di">Data início</label>
-        <input id="di" type="date" name="data_inicio" value="{{ data_inicio }}">
-      </div>
-      <div class="field">
-        <label for="df">Data fim</label>
-        <input id="df" type="date" name="data_fim" value="{{ data_fim }}">
-      </div>
-      <div class="actions">
-        <button type="submit" class="btn primary">Aplicar</button>
-        {% if data_inicio or data_fim %}
-        <a class="btn ghost" href="{{ url_for('painel_cooperado') }}">Limpar</a>
-        {% else %}
-        <button type="button" class="btn ghost" id="cancelSheet">Fechar</button>
-        {% endif %}
-      </div>
-    </form>
-  </div>
+    <!-- FAB (filtros) -->
+    <button class="fab" id="openFilters" title="Filtrar lançamentos">⏱️</button>
 
-  <!-- MODAL STORY -->
-  <div class="story-modal" id="storyModal">
-    <div class="story-frame">
-      <div class="story-progress-bar" id="storyProgress"></div>
-      <div class="story-header">
-        <div class="story-dot" id="storyInitial">E</div>
-        <div>
-          <h5 id="storyTitle">Estabelecimento</h5>
-          <span id="storySub">Story</span>
+    <!-- SHEET filtros -->
+    <div class="sheet" id="sheet" aria-hidden="true">
+      <div class="sheet-inner">
+        <div class="sheet-drag" id="closeFilters"></div>
+        <div class="sheet-head">
+          <h4>Filtros dos lançamentos</h4>
+          <button type="button" class="sheet-close" id="cancelSheet">Fechar</button>
         </div>
-        <button class="story-close" id="closeStory" aria-label="Fechar story">×</button>
+
+        <form method="get" action="{{ url_for('painel_cooperado') }}">
+          <div class="sheet-body">
+            <div class="field">
+              <label for="di">Data início</label>
+              <input id="di" type="date" name="data_inicio" value="{{ data_inicio }}">
+            </div>
+            <div class="field">
+              <label for="df">Data fim</label>
+              <input id="df" type="date" name="data_fim" value="{{ data_fim }}">
+            </div>
+
+            <div class="sheet-actions">
+              <button type="submit" class="btn primary">Aplicar</button>
+
+              {% if data_inicio or data_fim %}
+                <a class="btn ghost" href="{{ url_for('painel_cooperado') }}">Limpar</a>
+              {% else %}
+                <button type="button" class="btn ghost" id="cancelSheet2">Fechar</button>
+              {% endif %}
+            </div>
+          </div>
+        </form>
       </div>
-      <div class="story-body">
-        <img id="storyImg" src="" alt="story" style="display:none;">
-        <video id="storyVideo" playsinline muted style="display:none;"></video>
-        <div class="story-touch-layer">
-          <div class="story-touch-zone" data-dir="prev"></div>
-          <div class="story-touch-zone" data-dir="next"></div>
+    </div>
+
+    <!-- STORY MODAL -->
+    <div class="story-modal" id="storyModal">
+      <div class="story-frame">
+        <div class="story-progress" id="storyProgress"></div>
+
+        <div class="story-head">
+          <div class="s-dot" id="storyInitial">E</div>
+          <div class="s-title">
+            <h5 id="storyTitle">Estabelecimento</h5>
+            <span id="storySub">Story</span>
+          </div>
+          <button class="s-close" id="closeStory" aria-label="Fechar story">×</button>
         </div>
-      </div>
-      <div class="story-caption">
-        <div class="story-caption-text" id="storyCaption"></div>
-        <div class="story-like">
-          <button id="storyLikeBtn" type="button" class="story-like-btn">
-            👍 <span>TOP</span>
-          </button>
-          <div id="storyLikeStats" class="story-like-stats"></div>
+
+        <div class="story-body">
+          <img id="storyImg" src="" alt="story" style="display:none;">
+          <video id="storyVideo" playsinline muted style="display:none;"></video>
+
+          <div class="touch">
+            <div class="zone" data-dir="prev"></div>
+            <div class="zone" data-dir="next"></div>
+          </div>
+        </div>
+
+        <div class="story-caption">
+          <div class="cap" id="storyCaption"></div>
+          <div class="like">
+            <button id="storyLikeBtn" type="button" class="likebtn">👍 <span>TOP</span></button>
+            <div id="storyLikeStats" class="likestats"></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Bottom nav -->
-  <nav class="bottom-nav" aria-label="Navegação">
-    <button class="tab active" type="button" data-target="home-section">
-      <span class="icon">🏠</span><span>Início</span>
-    </button>
-    <button class="tab" type="button" data-target="catalogos-section">
-      <span class="icon">📚</span><span>Catálogos</span>
-    </button>
-    <a class="tab" href="{{ url_for('logout') }}">
-      <span class="icon">🚪</span><span>Sair</span>
-    </a>
-  </nav>
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav" aria-label="Navegação">
+      <div class="nav-inner">
+        <button class="tab active" type="button" data-target="home-section">
+          <span class="i">🏠</span> Início
+        </button>
+        <button class="tab" type="button" data-target="catalogos-section">
+          <span class="i">📚</span> Catálogos
+        </button>
+        <a class="tab" href="{{ url_for('logout') }}" style="text-decoration:none;">
+          <span class="i">🚪</span> Sair
+        </a>
+      </div>
+    </nav>
 
-  <!-- Mapa de stories disponível para o JS -->
-  <script>
-    window.COOP_STORIES = [
-      {% for s in stories_ativos_coop %}
-        {
-          id: {{ s.id }},
-          estId: {{ s.estabelecimento_id }},
-          tipo: "{{ s.tipo }}",
-          titulo: {{ (s.titulo or '')|tojson }},
-          legenda: {{ (s.legenda or '')|tojson }},
-          src: "{{ url_for('story_midia', story_id=s.id) }}"
-        }{% if not loop.last %},{% endif %}
-      {% endfor %}
-    ];
-  </script>
+    <!-- STORIES MAP -->
+    <script>
+      window.COOP_STORIES = [
+        {% for s in stories_ativos_coop %}
+          {
+            id: {{ s.id }},
+            estId: {{ s.estabelecimento_id }},
+            tipo: "{{ s.tipo }}",
+            titulo: {{ (s.titulo or '')|tojson }},
+            legenda: {{ (s.legenda or '')|tojson }},
+            src: "{{ url_for('story_midia', story_id=s.id) }}"
+          }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+    </script>
 
-  <script>
-    // Bottom-sheet filtros
-    const sheet = document.getElementById('sheet');
-    const openFilters = document.getElementById('openFilters');
-    const closeFilters = document.getElementById('closeFilters');
-    const cancelBtn = document.getElementById('cancelSheet');
+    <script>
+      /* ==========================
+         TAB NAV (Início/Catálogos)
+         ========================== */
+      const tabs = document.querySelectorAll('.bottom-nav .tab[data-target]');
+      const pages = {
+        'home-section': document.getElementById('home-section'),
+        'catalogos-section': document.getElementById('catalogos-section')
+      };
+      const LAST_TAB_KEY = 'coopex_coop_tab';
 
-    if(openFilters){
-      openFilters.addEventListener('click', ()=> sheet.classList.add('open'));
-    }
-    if(closeFilters){
-      closeFilters.addEventListener('click', ()=> sheet.classList.remove('open'));
-    }
-    if(cancelBtn){
-      cancelBtn.addEventListener('click', ()=> sheet.classList.remove('open'));
-    }
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') sheet.classList.remove('open'); });
+      const fab = document.getElementById('openFilters');
+      const topFilterBtn = document.getElementById('openFiltersTop');
 
-    // Navegação entre abas (Início / Catálogos) com persistência
-    const tabs = document.querySelectorAll('.bottom-nav .tab[data-target]');
-    const pages = {
-      'home-section': document.getElementById('home-section'),
-      'catalogos-section': document.getElementById('catalogos-section')
-    };
-    const LAST_TAB_KEY = 'coopex_coop_tab';
+      function setFilterButtons(target){
+        const show = (target === 'home-section');
+        if(fab) fab.style.display = show ? 'flex' : 'none';
+        if(topFilterBtn) topFilterBtn.style.display = show ? 'flex' : 'none';
+      }
 
-    function activateTab(target){
-      tabs.forEach(t => t.classList.remove('active'));
-      const btn = document.querySelector('.bottom-nav .tab[data-target="'+target+'"]');
-      if(btn) btn.classList.add('active');
+      function activateTab(target){
+        tabs.forEach(t => t.classList.remove('active'));
+        const btn = document.querySelector('.bottom-nav .tab[data-target="'+target+'"]');
+        if(btn) btn.classList.add('active');
 
-      Object.keys(pages).forEach(id=>{
-        if(pages[id]){
-          if(id === target) pages[id].classList.remove('page-hidden');
-          else pages[id].classList.add('page-hidden');
+        Object.keys(pages).forEach(id=>{
+          const el = pages[id];
+          if(!el) return;
+          if(id === target){
+            el.classList.remove('page-hidden');
+            el.classList.add('fade-in');
+            setTimeout(()=>el.classList.remove('fade-in'), 250);
+          }else{
+            el.classList.add('page-hidden');
+          }
+        });
+
+        setFilterButtons(target);
+        localStorage.setItem(LAST_TAB_KEY, target);
+
+        if(target === 'catalogos-section'){
+          const inp = document.getElementById('catalogSearch');
+          if(inp) setTimeout(()=>inp.focus(), 80);
         }
+      }
+
+      tabs.forEach(tab=>{
+        tab.addEventListener('click', ()=>{
+          const target = tab.getAttribute('data-target');
+          if(!target) return;
+          activateTab(target);
+        });
       });
-      localStorage.setItem(LAST_TAB_KEY, target);
-    }
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const target = tab.getAttribute('data-target');
-        if(!target) return;
-        activateTab(target);
+      document.addEventListener('DOMContentLoaded', ()=>{
+        const saved = localStorage.getItem(LAST_TAB_KEY);
+        if(saved && pages[saved]) activateTab(saved);
+        else activateTab('home-section');
       });
-    });
 
-    // Ao carregar, manter a última aba que o cooperado usou
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const saved = localStorage.getItem(LAST_TAB_KEY);
-      if(saved && pages[saved]){
-        activateTab(saved);
+      /* ==========================
+         SHEET FILTROS
+         ========================== */
+      const sheet = document.getElementById('sheet');
+      const closeFilters = document.getElementById('closeFilters');
+      const cancelSheet = document.getElementById('cancelSheet');
+      const cancelSheet2 = document.getElementById('cancelSheet2');
+
+      function openSheet(){
+        if(!sheet) return;
+        sheet.classList.add('open');
+        sheet.setAttribute('aria-hidden','false');
       }
-    });
-
-    // PLAYER DE STORIES
-    const storyModal   = document.getElementById('storyModal');
-    const storyImg     = document.getElementById('storyImg');
-    const storyVideo   = document.getElementById('storyVideo');
-    const storyTitle   = document.getElementById('storyTitle');
-    const storySub     = document.getElementById('storySub');
-    const storyCaption = document.getElementById('storyCaption');
-    const storyInitial = document.getElementById('storyInitial');
-    const closeStory   = document.getElementById('closeStory');
-    const progressWrap = document.getElementById('storyProgress');
-    const storyLikeBtn = document.getElementById('storyLikeBtn');
-    const storyLikeStats = document.getElementById('storyLikeStats');
-
-    const STORY_DURATION = 5000;
-    let currentEstId = null;
-    let currentEstName = '';
-    let storyList = [];
-    let currentIndex = 0;
-    let timer = null;
-    let isPaused = false;
-    let progressFills = [];
-    let currentStoryId = null;
-
-    function buildProgressBar(count){
-      progressWrap.innerHTML = '';
-      progressFills = [];
-      for(let i=0;i<count;i++){
-        const seg = document.createElement('div');
-        seg.className = 'story-progress-seg';
-        const fill = document.createElement('div');
-        fill.className = 'story-progress-fill';
-        seg.appendChild(fill);
-        progressWrap.appendChild(seg);
-        progressFills.push(fill);
+      function closeSheet(){
+        if(!sheet) return;
+        sheet.classList.remove('open');
+        sheet.setAttribute('aria-hidden','true');
       }
-    }
 
-    function updateProgressBar(elapsedRatio=0){
-      progressFills.forEach((fill, idx)=>{
-        if(idx < currentIndex){
-          fill.style.width = '100%';
-        } else if(idx === currentIndex){
-          fill.style.width = (elapsedRatio*100)+'%';
-        } else {
-          fill.style.width = '0%';
-        }
+      if(fab) fab.addEventListener('click', openSheet);
+      if(topFilterBtn) topFilterBtn.addEventListener('click', openSheet);
+      if(closeFilters) closeFilters.addEventListener('click', closeSheet);
+      if(cancelSheet) cancelSheet.addEventListener('click', closeSheet);
+      if(cancelSheet2) cancelSheet2.addEventListener('click', closeSheet);
+
+      document.addEventListener('keydown', (e)=>{
+        if(e.key === 'Escape') closeSheet();
       });
-    }
 
-    function updateLikeUI(liked, views, likes){
-      if(typeof liked === 'boolean' && storyLikeBtn){
-        storyLikeBtn.dataset.liked = liked ? '1' : '0';
-        storyLikeBtn.classList.toggle('liked', liked);
-      }
-      if(storyLikeStats){
-        const v = typeof views === 'number' ? views : 0;
-        const l = typeof likes === 'number' ? likes : 0;
-        storyLikeStats.textContent = v + ' visualizações • ' + l + ' TOP';
-      }
-    }
+      /* ==========================
+         PESQUISA DO CATÁLOGO
+         (filtra enquanto digita)
+         ========================== */
+      (function setupCatalogSearch(){
+        const input = document.getElementById('catalogSearch');
+        const clearBtn = document.getElementById('catalogClear');
+        const countEl = document.getElementById('catalogCount');
+        const emptyEl = document.getElementById('catalogEmptySearch');
+        const grid = document.getElementById('catalogGrid');
 
-    function registrarView(likedValue){
-      if(!currentStoryId) return;
-      fetch("{{ url_for('registrar_story_view') }}", {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({story_id: currentStoryId, liked: likedValue})
-      })
-      .then(r=>r.json())
-      .then(data=>{
-        if(data && data.ok){
-          updateLikeUI(data.liked, data.views, data.likes);
+        if(!grid || !input) return;
+
+        const cards = Array.from(grid.querySelectorAll('.catalog-card-js'));
+        const items = Array.from(grid.querySelectorAll('.catalog-item-js'));
+
+        function norm(str){
+          try{
+            return (str||'')
+              .toString()
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g,'');
+          }catch(e){
+            return (str||'').toString().toLowerCase();
+          }
         }
-      })
-      .catch(()=>{});
-    }
 
-    function showStory(story){
-      if(!storyModal) return;
-      currentStoryId = story.id;
-      storyTitle.textContent = currentEstName;
-      storySub.textContent = story.titulo || 'Story';
-      storyCaption.textContent = story.legenda || '';
-      storyInitial.textContent = (currentEstName || 'E').slice(0,2).toUpperCase();
+        items.forEach(el=>{
+          const key = [
+            el.dataset.item || '',
+            el.dataset.estab || '',
+            el.dataset.marca || '',
+            el.dataset.categoria || '',
+            el.dataset.obs || ''
+          ].join(' ');
+          el.dataset.searchKey = norm(key);
+        });
 
-      storyImg.style.display = 'none';
-      storyVideo.style.display = 'none';
-      storyVideo.pause();
-      storyVideo.removeAttribute('src');
-
-      if(story.tipo === 'video'){
-        storyVideo.style.display = 'block';
-        storyVideo.src = story.src;
-        storyVideo.load();
-        storyVideo.play().catch(()=>{});
-      }else{
-        storyImg.style.display = 'block';
-        storyImg.src = story.src;
-      }
-
-      updateProgressBar(0);
-      updateLikeUI(null, 0, 0);
-      registrarView(null);
-    }
-
-    function startTimer(){
-      clearInterval(timer);
-      let elapsed = 0;
-      const step = 50;
-      timer = setInterval(()=>{
-        if(isPaused) return;
-        elapsed += step;
-        const ratio = Math.min(1, elapsed / STORY_DURATION);
-        updateProgressBar(ratio);
-        if(elapsed >= STORY_DURATION){
-          nextStory();
+        function updateMeta(visible){
+          if(countEl) countEl.textContent = String(visible);
+          if(emptyEl) emptyEl.style.display = (visible === 0) ? 'block' : 'none';
         }
-      }, step);
-    }
 
-    function openStoryForEst(estId, estName){
-      const all = window.COOP_STORIES || [];
-      const list = all.filter(s => s.estId === estId);
-      if(!list.length) return;
+        function filter(q){
+          const query = norm(q).trim();
 
-      currentEstId = estId;
-      currentEstName = estName || '';
-      storyList = list;
-      currentIndex = 0;
+          if(clearBtn) clearBtn.style.display = query ? 'inline-flex' : 'none';
 
-      buildProgressBar(storyList.length);
-      showStory(storyList[currentIndex]);
-      startTimer();
+          let visibleCount = 0;
 
-      storyModal.classList.add('open');
-    }
+          items.forEach(item=>{
+            const match = !query || (item.dataset.searchKey || '').includes(query);
+            item.style.display = match ? '' : 'none';
+            if(match) visibleCount++;
+          });
 
-    function nextStory(){
-      if(currentIndex < storyList.length - 1){
-        currentIndex++;
-        showStory(storyList[currentIndex]);
-        startTimer();
-      }else{
-        closeStoryModal();
+          cards.forEach(card=>{
+            const cardItems = Array.from(card.querySelectorAll('.catalog-item-js'));
+            const anyVisible = cardItems.some(ci => ci.style.display !== 'none');
+            card.style.display = anyVisible ? '' : 'none';
+
+            const pillCount = card.querySelector('.catalog-pill-count');
+            if(pillCount){
+              const vis = cardItems.filter(ci => ci.style.display !== 'none').length;
+              pillCount.textContent = String(vis);
+            }
+          });
+
+          updateMeta(visibleCount);
+        }
+
+        filter('');
+
+        input.addEventListener('input', (e)=> filter(e.target.value));
+
+        if(clearBtn){
+          clearBtn.addEventListener('click', ()=>{
+            input.value = '';
+            filter('');
+            input.focus();
+          });
+        }
+      })();
+
+      /* ==========================
+         STORIES PLAYER
+         ========================== */
+      const storyModal   = document.getElementById('storyModal');
+      const storyImg     = document.getElementById('storyImg');
+      const storyVideo   = document.getElementById('storyVideo');
+      const storyTitle   = document.getElementById('storyTitle');
+      const storySub     = document.getElementById('storySub');
+      const storyCaption = document.getElementById('storyCaption');
+      const storyInitial = document.getElementById('storyInitial');
+      const closeStory   = document.getElementById('closeStory');
+      const progressWrap = document.getElementById('storyProgress');
+      const storyLikeBtn = document.getElementById('storyLikeBtn');
+      const storyLikeStats = document.getElementById('storyLikeStats');
+
+      const STORY_DURATION = 5000;
+      let currentEstName = '';
+      let storyList = [];
+      let currentIndex = 0;
+      let timer = null;
+      let isPaused = false;
+      let progressFills = [];
+      let currentStoryId = null;
+
+      function buildProgressBar(count){
+        progressWrap.innerHTML = '';
+        progressFills = [];
+        for(let i=0;i<count;i++){
+          const seg = document.createElement('div');
+          seg.className = 'seg';
+          const fill = document.createElement('div');
+          fill.className = 'fill';
+          seg.appendChild(fill);
+          progressWrap.appendChild(seg);
+          progressFills.push(fill);
+        }
       }
-    }
-
-    function prevStory(){
-      if(currentIndex > 0){
-        currentIndex--;
-        showStory(storyList[currentIndex]);
-        startTimer();
-      }else{
-        currentIndex = 0;
-        showStory(storyList[currentIndex]);
-        startTimer();
+      function updateProgress(ratio=0){
+        progressFills.forEach((fill, idx)=>{
+          if(idx < currentIndex) fill.style.width = '100%';
+          else if(idx === currentIndex) fill.style.width = (ratio*100)+'%';
+          else fill.style.width = '0%';
+        });
       }
-    }
 
-    function closeStoryModal(){
-      if(!storyModal) return;
-      storyModal.classList.remove('open');
-      clearInterval(timer);
-      timer = null;
-      if(storyVideo){
+      function updateLikeUI(liked, views, likes){
+        if(typeof liked === 'boolean' && storyLikeBtn){
+          storyLikeBtn.dataset.liked = liked ? '1' : '0';
+          storyLikeBtn.classList.toggle('liked', liked);
+        }
+        if(storyLikeStats){
+          const v = typeof views === 'number' ? views : 0;
+          const l = typeof likes === 'number' ? likes : 0;
+          storyLikeStats.textContent = v + ' visualizações • ' + l + ' TOP';
+        }
+      }
+
+      function registrarView(likedValue){
+        if(!currentStoryId) return;
+        fetch("{{ url_for('registrar_story_view') }}", {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({story_id: currentStoryId, liked: likedValue})
+        })
+        .then(r=>r.json())
+        .then(data=>{
+          if(data && data.ok){
+            updateLikeUI(data.liked, data.views, data.likes);
+          }
+        })
+        .catch(()=>{});
+      }
+
+      function showStory(story){
+        currentStoryId = story.id;
+        storyTitle.textContent = currentEstName;
+        storySub.textContent = story.titulo || 'Story';
+        storyCaption.textContent = story.legenda || '';
+        storyInitial.textContent = (currentEstName || 'E').slice(0,2).toUpperCase();
+
+        storyImg.style.display = 'none';
+        storyVideo.style.display = 'none';
         storyVideo.pause();
+        storyVideo.removeAttribute('src');
+
+        if(story.tipo === 'video'){
+          storyVideo.style.display = 'block';
+          storyVideo.src = story.src;
+          storyVideo.load();
+          storyVideo.play().catch(()=>{});
+        }else{
+          storyImg.style.display = 'block';
+          storyImg.src = story.src;
+        }
+
+        updateProgress(0);
+        updateLikeUI(null, 0, 0);
+        registrarView(null);
       }
-      currentStoryId = null;
-    }
 
-    // Abrir story ao clicar no chip
-    document.querySelectorAll('.story-chip').forEach(chip=>{
-      chip.addEventListener('click', ()=>{
-        const estId = Number(chip.getAttribute('data-est-id'));
-        const estName = chip.getAttribute('data-est-nome') || '';
-        openStoryForEst(estId, estName);
-      });
-    });
+      function startTimer(){
+        clearInterval(timer);
+        let elapsed = 0;
+        const step = 50;
+        timer = setInterval(()=>{
+          if(isPaused) return;
+          elapsed += step;
+          const ratio = Math.min(1, elapsed / STORY_DURATION);
+          updateProgress(ratio);
+          if(elapsed >= STORY_DURATION) nextStory();
+        }, step);
+      }
 
-    // Fechar
-    if(closeStory){
-      closeStory.addEventListener('click', closeStoryModal);
-    }
-    if(storyModal){
-      storyModal.addEventListener('click',(e)=>{
-        if(e.target === storyModal){
+      function openStoryForEst(estId, estName){
+        const all = window.COOP_STORIES || [];
+        const list = all.filter(s => s.estId === estId);
+        if(!list.length) return;
+
+        currentEstName = estName || '';
+        storyList = list;
+        currentIndex = 0;
+
+        buildProgressBar(storyList.length);
+        showStory(storyList[currentIndex]);
+        startTimer();
+
+        storyModal.classList.add('open');
+      }
+
+      function closeStoryModal(){
+        storyModal.classList.remove('open');
+        clearInterval(timer);
+        timer = null;
+        storyVideo.pause();
+        currentStoryId = null;
+      }
+
+      function nextStory(){
+        if(currentIndex < storyList.length - 1){
+          currentIndex++;
+          showStory(storyList[currentIndex]);
+          startTimer();
+        }else{
           closeStoryModal();
         }
-      });
-    }
-    document.addEventListener('keydown',(e)=>{
-      if(e.key === 'Escape'){
-        closeStoryModal();
       }
-    });
-
-    // Zonas de toque + segurar para pausar
-    document.querySelectorAll('.story-touch-zone').forEach(zone=>{
-      let holdTimeout = null;
-      let held = false;
-
-      function startHold(e){
-        held = false;
-        isPaused = false;
-        holdTimeout = setTimeout(()=>{
-          held = true;
-          isPaused = true;
-        }, 200);
-      }
-      function endHold(e){
-        clearTimeout(holdTimeout);
-        if(held){
-          isPaused = false;
-          return;
+      function prevStory(){
+        if(currentIndex > 0){
+          currentIndex--;
+          showStory(storyList[currentIndex]);
+          startTimer();
+        }else{
+          currentIndex = 0;
+          showStory(storyList[currentIndex]);
+          startTimer();
         }
-        const dir = zone.getAttribute('data-dir');
-        if(dir === 'next') nextStory();
-        else prevStory();
       }
 
-      zone.addEventListener('mousedown', startHold);
-      zone.addEventListener('touchstart', startHold, {passive:true});
-
-      zone.addEventListener('mouseup', endHold);
-      zone.addEventListener('mouseleave', endHold);
-      zone.addEventListener('touchend', endHold);
-      zone.addEventListener('touchcancel', endHold);
-    });
-
-    // Botão TOP (curtida)
-    if(storyLikeBtn){
-      storyLikeBtn.addEventListener('click', ()=>{
-        if(!currentStoryId) return;
-        const likedNow = storyLikeBtn.dataset.liked === '1' ? false : true;
-        registrarView(likedNow);
+      document.querySelectorAll('.story').forEach(chip=>{
+        chip.addEventListener('click', ()=>{
+          const estId = Number(chip.getAttribute('data-est-id'));
+          const estName = chip.getAttribute('data-est-nome') || '';
+          openStoryForEst(estId, estName);
+        });
       });
-    }
-  </script>
+
+      if(closeStory){
+        closeStory.addEventListener('click', closeStoryModal);
+      }
+      if(storyModal){
+        storyModal.addEventListener('click',(e)=>{
+          if(e.target === storyModal) closeStoryModal();
+        });
+      }
+      document.addEventListener('keydown',(e)=>{
+        if(e.key === 'Escape') closeStoryModal();
+      });
+
+      document.querySelectorAll('.zone').forEach(zone=>{
+        let holdTimeout = null;
+        let held = false;
+
+        function startHold(){
+          held = false;
+          isPaused = false;
+          holdTimeout = setTimeout(()=>{
+            held = true;
+            isPaused = true;
+          }, 200);
+        }
+        function endHold(){
+          clearTimeout(holdTimeout);
+          if(held){
+            isPaused = false;
+            return;
+          }
+          const dir = zone.getAttribute('data-dir');
+          if(dir === 'next') nextStory();
+          else prevStory();
+        }
+
+        zone.addEventListener('mousedown', startHold);
+        zone.addEventListener('touchstart', startHold, {passive:true});
+
+        zone.addEventListener('mouseup', endHold);
+        zone.addEventListener('mouseleave', endHold);
+        zone.addEventListener('touchend', endHold);
+        zone.addEventListener('touchcancel', endHold);
+      });
+
+      if(storyLikeBtn){
+        storyLikeBtn.addEventListener('click', ()=>{
+          if(!currentStoryId) return;
+          const likedNow = storyLikeBtn.dataset.liked === '1' ? false : true;
+          registrarView(likedNow);
+        });
+      }
+    </script>
+
+  </div>
 </body>
 </html>
