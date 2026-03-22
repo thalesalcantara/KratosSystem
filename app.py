@@ -6,6 +6,7 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from sqlalchemy import text, func, Index, case
@@ -516,6 +517,91 @@ def add_perf_headers(resp: Response):
 
 
 # ========= LOGIN/LOGOUT =========
+
+
+# ========= SSO ENTRE SISTEMAS =========
+PORTAL_ADMIN_URL = os.environ.get("PORTAL_ADMIN_URL", "https://financas-dxsu.onrender.com")
+
+def _sso_shared_serializer():
+    shared = os.environ.get("SSO_SHARED_SECRET", "COOPEX_SSO_SHARED_CHANGE_ME_2026")
+    return URLSafeTimedSerializer(shared, salt="coopex-sso-v1")
+
+def sso_load_shared(token: str, max_age_seconds: int = 45):
+    return _sso_shared_serializer().loads(token, max_age=max_age_seconds)
+
+def sso_dump_shared(payload: dict) -> str:
+    return _sso_shared_serializer().dumps(payload)
+
+def _get_or_create_sso_admin():
+    adm = Admin.query.order_by(Admin.id.asc()).first()
+    if adm:
+        return adm
+    adm = Admin(nome='Portal COOPEX', username='portal_coopex_sso')
+    adm.set_senha(os.environ.get('SSO_FALLBACK_ADMIN_PASSWORD', 'coopex05289'))
+    db.session.add(adm)
+    db.session.commit()
+    return adm
+
+@app.route('/autologin')
+def autologin():
+    token = (request.args.get('token') or '').strip()
+    if not token:
+        return redirect(url_for('login'))
+    try:
+        data = sso_load_shared(token, max_age_seconds=45)
+    except SignatureExpired:
+        flash('Link expirou. Clique novamente no portal.', 'danger')
+        return redirect(url_for('login'))
+    except BadSignature:
+        flash('Link inválido.', 'danger')
+        return redirect(url_for('login'))
+
+    if data.get('aud') != 'sistema-2':
+        flash('Destino inválido.', 'danger')
+        return redirect(url_for('login'))
+
+    adm = _get_or_create_sso_admin()
+    session.clear()
+    session.permanent = True
+    session['user_id'] = adm.id
+    session['user_tipo'] = 'admin'
+    next_url = data.get('next') or url_for('dashboard')
+    return redirect(next_url)
+
+@app.route('/voltar-admin')
+def voltar_admin():
+    token = sso_dump_shared({
+        'aud': 'painel-destino',
+        'orig': 'sistema-2',
+        'tipo': 'admin',
+        'next': '/admin?tab=sistemas',
+        'iat': int(datetime.utcnow().timestamp()),
+    })
+    return redirect(f"{PORTAL_ADMIN_URL}/sso/entrar?token={token}")
+
+@app.context_processor
+def inject_portal_admin_link():
+    return {'voltar_admin_url': url_for('voltar_admin')}
+
+@app.after_request
+def inject_voltar_admin_button(response):
+    try:
+        ctype = (response.content_type or '').lower()
+        if 'text/html' not in ctype:
+            return response
+        if request.path.startswith('/static') or request.path in ['/login', '/autologin', '/logout']:
+            return response
+        if not session.get('user_id'):
+            return response
+        body = response.get_data(as_text=True)
+        if 'voltar-admin-flutuante' in body or '</body>' not in body:
+            return response
+        btn = '<a id="voltar-admin-flutuante" href="%s" style="position:fixed;right:18px;bottom:18px;z-index:9999;background:#2747d9;color:#fff;text-decoration:none;padding:10px 14px;border-radius:999px;font-weight:700;box-shadow:0 10px 24px rgba(0,0,0,.18);font-family:Arial,sans-serif;">Voltar ao Admin</a>' % url_for('voltar_admin')
+        response.set_data(body.replace('</body>', btn + '</body>'))
+    except Exception:
+        return response
+    return response
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
