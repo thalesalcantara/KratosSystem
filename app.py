@@ -551,6 +551,7 @@ def voltar_admin():
         'aud': 'painel-destino',
         'orig': 'sistema2',
         'tipo': 'admin',
+        'role': 'master',
         'next': '/admin?tab=sistemas',
         'iat': int(datetime.utcnow().timestamp()),
     })
