@@ -569,23 +569,6 @@ def voltar_admin():
     })
     return redirect(f"{PORTAL_PRINCIPAL_URL.rstrip('/')}" + '/sso/entrar?token=' + token)
 
-@app.after_request
-def _inject_voltar_admin_button(resp):
-    try:
-        if session.get('user_tipo') != 'admin':
-            return resp
-        ctype = (resp.headers.get('Content-Type') or '').lower()
-        if 'text/html' not in ctype:
-            return resp
-        body = resp.get_data(as_text=True)
-        if 'id="voltar-admin-flutuante"' in body or '</body>' not in body:
-            return resp
-        btn = '<a id="voltar-admin-flutuante" href="%s" style="position:fixed;right:18px;bottom:18px;z-index:9999;background:#2747d9;color:#fff;text-decoration:none;padding:10px 14px;border-radius:999px;font-weight:700;box-shadow:0 10px 24px rgba(0,0,0,.18);font-family:Arial,sans-serif;">Voltar ao Admin</a>' % url_for('voltar_admin')
-        body = body.replace('</body>', btn + '</body>', 1)
-        resp.set_data(body)
-    except Exception:
-        pass
-    return resp
 
 # ========= LOGIN/LOGOUT =========
 @app.route('/login', methods=['GET', 'POST'])
