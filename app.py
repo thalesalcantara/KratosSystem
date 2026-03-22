@@ -570,7 +570,14 @@ def autologin():
 
 @app.route('/voltar-admin')
 def voltar_admin():
-    return redirect(f"{PORTAL_ADMIN_URL}/admin?tab=sistemas")
+    token = sso_dump_shared({
+        'aud': 'painel-destino',
+        'orig': 'sistema-2',
+        'tipo': 'admin',
+        'next': '/admin?tab=sistemas',
+        'iat': int(datetime.utcnow().timestamp()),
+    })
+    return redirect(f"{PORTAL_ADMIN_URL}/sso/entrar?token={token}")
 
 @app.context_processor
 def inject_portal_admin_link():
