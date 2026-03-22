@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 import os
 import time
 import hashlib
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 # ========= FUSO-HORÁRIO =========
 BR_TZ = ZoneInfo("America/Sao_Paulo")
@@ -63,6 +64,17 @@ def local_bounds_to_utc_naive(di_str: str | None, df_str: str | None):
 # ========= APP / CONFIG =========
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "coopex-secreto")
+PORTAL_PRINCIPAL_URL = os.environ.get('PORTAL_PRINCIPAL_URL', 'https://financas-dxsu.onrender.com')
+
+def _sso_shared_serializer():
+    shared = os.environ.get('SSO_SHARED_SECRET') or 'COOPEX_SSO_SHARED_2026_FIXED'
+    return URLSafeTimedSerializer(shared, salt='coopex-sso-v1')
+
+def sso_dump_shared(payload: dict) -> str:
+    return _sso_shared_serializer().dumps(payload)
+
+def sso_load_shared(token: str, max_age_seconds: int = 60):
+    return _sso_shared_serializer().loads(token, max_age=max_age_seconds)
 
 # Corrige scheme/host atrás do proxy para cookies seguros e redirects corretos
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
@@ -515,14 +527,13 @@ def add_perf_headers(resp: Response):
     return resp
 
 
-
 @app.route('/autologin')
 def autologin():
     token = (request.args.get('token') or '').strip()
     if not token:
         return redirect(url_for('login'))
     try:
-        data = sso_load_shared(token, max_age_seconds=45)
+        data = sso_load_shared(token, max_age_seconds=60)
     except SignatureExpired:
         flash('Link expirou. Clique novamente no portal.', 'danger')
         return redirect(url_for('login'))
@@ -552,33 +563,29 @@ def voltar_admin():
         'orig': 'sistema2',
         'tipo': 'admin',
         'role': 'master',
+        'principal_user': 'COOPEX',
         'next': '/admin?tab=sistemas',
         'iat': int(datetime.utcnow().timestamp()),
     })
-    return redirect(f"{PORTAL_PRINCIPAL_URL.rstrip('/')}/sso/entrar?token={token}")
-
-@app.context_processor
-def inject_portal_admin_link():
-    return {'voltar_admin_url': url_for('voltar_admin')}
+    return redirect(f"{PORTAL_PRINCIPAL_URL.rstrip('/')}" + '/sso/entrar?token=' + token)
 
 @app.after_request
-def inject_voltar_admin_button(response):
+def _inject_voltar_admin_button(resp):
     try:
-        ctype = (response.content_type or '').lower()
-        if 'text/html' not in ctype:
-            return response
-        if request.path.startswith('/static') or request.path in ['/login', '/autologin', '/logout']:
-            return response
         if session.get('user_tipo') != 'admin':
-            return response
-        body = response.get_data(as_text=True)
-        if 'voltar-admin-flutuante' in body or '</body>' not in body:
-            return response
+            return resp
+        ctype = (resp.headers.get('Content-Type') or '').lower()
+        if 'text/html' not in ctype:
+            return resp
+        body = resp.get_data(as_text=True)
+        if 'id="voltar-admin-flutuante"' in body or '</body>' not in body:
+            return resp
         btn = '<a id="voltar-admin-flutuante" href="%s" style="position:fixed;right:18px;bottom:18px;z-index:9999;background:#2747d9;color:#fff;text-decoration:none;padding:10px 14px;border-radius:999px;font-weight:700;box-shadow:0 10px 24px rgba(0,0,0,.18);font-family:Arial,sans-serif;">Voltar ao Admin</a>' % url_for('voltar_admin')
-        response.set_data(body.replace('</body>', btn + '</body>'))
+        body = body.replace('</body>', btn + '</body>', 1)
+        resp.set_data(body)
     except Exception:
-        return response
-    return response
+        pass
+    return resp
 
 # ========= LOGIN/LOGOUT =========
 @app.route('/login', methods=['GET', 'POST'])
