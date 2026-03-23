@@ -2,29 +2,30 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Estabelecimentos - Coopex</title>
+  <title>Lançamentos - Coopex</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Fonts / Bootstrap / Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
   <style>
     :root{
-      /* Mesmo tom “Azul Royal” do Lançamentos */
       --bg:#f6f8ff;
       --panel:#ffffff;
       --line:#e4ebff;
       --ink:#0f172a;
       --muted:#5b6b8a;
 
+      /* AZUL ROYAL */
       --royal:#1f4fe0;
       --royal2:#3a66ff;
       --royal3:#163ab0;
 
-      --ok:#10b981;
       --danger:#ef4444;
+      --ok:#10b981;
 
+      --thead:#f2f6ff;
       --shadow: 0 14px 34px rgba(31,79,224,.12);
       --shadow2: 0 18px 46px rgba(15,23,42,.08);
       --radius: 18px;
@@ -35,181 +36,34 @@
 
     body{
       margin:0;
-      min-height:100vh;
+      min-height: 100vh;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--ink);
+      color: var(--ink);
       background:
-        radial-gradient(1200px 520px at 85% -20%, rgba(31,79,224,.14), transparent 60%),
-        radial-gradient(900px 420px at 10% 0%, rgba(16,185,129,.08), transparent 60%),
+        radial-gradient(1200px 420px at 80% -40%, rgba(31,79,224,.14), transparent 70%),
+        radial-gradient(900px 380px at 10% 0%, rgba(16,185,129,.08), transparent 60%),
         linear-gradient(180deg, var(--bg), var(--bg));
     }
 
-    /* ===== Layout ===== */
-    .layout{
-      display:flex;
-      min-height:100vh;
-    }
-
-    /* ===== Sidebar (desktop) ===== */
-    .sidebar{
-      width: 260px;
-      flex: 0 0 260px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid var(--line);
-      box-shadow: 10px 0 34px rgba(15,23,42,.06);
-      padding: 16px 12px;
-      z-index: 30;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
-
-    .brand{
-      border-radius: var(--radius);
-      background: linear-gradient(90deg, rgba(31,79,224,.10), rgba(58,102,255,.06));
-      border: 1px solid rgba(31,79,224,.18);
-      padding: 14px 12px;
-      box-shadow: 0 14px 30px rgba(31,79,224,.08);
-      display:flex;
-      align-items:center;
-      gap: 10px;
-    }
-    .brand img{
-      width: 54px; height: 54px;
-      object-fit: contain;
-      border-radius: 16px;
-      background:#fff;
-      border: 1px solid rgba(31,79,224,.18);
-      box-shadow: 0 10px 18px rgba(31,79,224,.10);
-      padding: 6px;
-    }
-    .brand .title{
-      min-width:0;
-      line-height:1.15;
-    }
-    .brand .title .t{
-      margin:0;
-      font-family: Orbitron, Inter, sans-serif;
-      font-weight: 900;
-      letter-spacing: .6px;
-      color: var(--royal3);
-      font-size: 14px;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .brand .title .s{
-      margin: 4px 0 0;
-      font-weight: 800;
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    .navbox{
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-      background:#fff;
-      box-shadow: var(--shadow2);
-      padding: 10px;
-    }
-
-    .nav-link{
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight: 900;
-      color: #1b2b5e;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      transition: background .15s, transform .05s, color .15s;
-      margin: 4px 0;
-    }
-    .nav-link i{
-      color: var(--royal3);
-      font-size: 1.15rem;
-    }
-    .nav-link:hover{
-      background:#f1f5ff;
-      color: var(--royal3);
-    }
-    .nav-link.active{
-      background: linear-gradient(90deg, rgba(31,79,224,.14), rgba(58,102,255,.08));
-      border: 1px solid rgba(31,79,224,.18);
-      color: var(--royal3);
-    }
-
-    .sidebar .footer{
-      margin-top:auto;
-      padding: 10px;
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-      background:#fff;
-      box-shadow: 0 10px 22px rgba(15,23,42,.06);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .who{
-      min-width:0;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-    }
-    .who .dot{
-      width: 10px; height: 10px;
-      border-radius: 999px;
-      background: var(--ok);
-      box-shadow: 0 0 0 4px rgba(16,185,129,.12);
-    }
-    .who .name{
-      font-weight: 900;
-      color: #0f172a;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 140px;
-      font-size: 12px;
-    }
-    .btn-logout{
-      height: 38px;
-      padding: 0 12px;
-      border-radius: 14px;
-      font-weight: 900;
-      border: 1px solid rgba(31,79,224,.18);
-      background: #fff;
-      color: var(--royal3);
-    }
-    .btn-logout:hover{ background:#f1f5ff; }
-
-    /* ===== Main ===== */
-    .main{
-      flex: 1 1 auto;
-      padding: 16px 18px 28px;
-      width: 100%;
-    }
-
+    /* ===== PREENCHE A PÁGINA TODA =====
+       - Em telas largas, usa quase toda a largura (sem “página sobrando”)
+       - Mantém margens leves
+    */
     .container-x{
-      width: min(1600px, calc(100vw - 320px)); /* ocupa bem no desktop com sidebar */
+      width: min(1600px, calc(100vw - 28px));
       margin: 0 auto;
+      padding: 18px 0 26px;
     }
 
-    /* ===== Topbar (main) ===== */
+    /* ===== Topbar ===== */
     .topbar{
       position: sticky;
       top: 12px;
-      z-index: 20;
+      z-index: 50;
       display:flex;
       align-items:center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       padding: 14px 14px;
       border-radius: var(--radius);
       background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 55%, var(--royal3) 100%);
@@ -217,13 +71,14 @@
       box-shadow: var(--shadow);
       border: 1px solid rgba(255,255,255,.22);
     }
-    .topbar .left{
+
+    .brand{
       display:flex;
       align-items:center;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
     }
-    .topbar .left .ico{
+    .brand-ico{
       width: 44px; height: 44px;
       border-radius: 14px;
       display:grid; place-items:center;
@@ -231,27 +86,26 @@
       border: 1px solid rgba(255,255,255,.18);
       flex: 0 0 auto;
     }
-    .topbar .left .txt{
-      min-width:0;
-      line-height:1.1;
+    .brand-title{
+      min-width: 0;
+      line-height: 1.1;
     }
-    .topbar .left .txt .t{
+    .brand-title .t{
       margin:0;
       font-family: Orbitron, Inter, sans-serif;
-      font-weight: 900;
-      letter-spacing: .6px;
+      font-weight: 800;
       font-size: 15px;
+      letter-spacing: .6px;
       white-space: nowrap;
-      overflow:hidden;
+      overflow: hidden;
       text-overflow: ellipsis;
     }
-    .topbar .left .txt .s{
-      margin:4px 0 0;
-      font-weight: 800;
+    .brand-title .s{
+      font-weight: 600;
       font-size: 12px;
       opacity: .92;
       white-space: nowrap;
-      overflow:hidden;
+      overflow: hidden;
       text-overflow: ellipsis;
     }
 
@@ -272,7 +126,6 @@
       display:inline-flex;
       align-items:center;
       gap: 8px;
-      text-decoration:none;
     }
     .btn-top:hover{ background: rgba(255,255,255,.16); color:#fff; }
 
@@ -286,108 +139,89 @@
       margin-top: 12px;
     }
 
-    /* ===== Header + Controles ===== */
-    .toolbar{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .view-switch{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn-toggle{
-      height: 42px;
-      border-radius: 14px;
-      font-weight: 900;
-      border: 1px solid rgba(31,79,224,.18);
-      background:#fff;
-      color: var(--royal3);
-      padding: 0 12px;
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      box-shadow: 0 10px 18px rgba(15,23,42,.06);
-    }
-    .btn-toggle:hover{ background:#f1f5ff; }
-    .btn-toggle.active{
-      border: none;
-      color:#fff;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
-      box-shadow: 0 12px 22px rgba(31,79,224,.14);
-    }
-
-    .search{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      background:#fff;
-      border: 1px solid #cfe0ff;
-      border-radius: 14px;
-      padding: 8px 10px;
-      box-shadow: inset 0 0 0 1px rgba(31,79,224,.04);
-    }
-    .search i{ color:#6b7aa6; }
-    .search input{
-      border:none; outline:none;
-      background: transparent;
-      width: 260px;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .btn-main{
-      height: 42px;
-      padding: 0 14px;
-      border-radius: 14px;
-      font-weight: 900;
-      border:none;
-      color:#fff;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
-      box-shadow: 0 12px 22px rgba(31,79,224,.14);
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      text-decoration:none;
-    }
-    .btn-main:hover{ filter: brightness(1.03); color:#fff; }
-
-    /* ===== KPIs ===== */
-    .kpis{
+    /* ===== Métricas ===== */
+    .stats{
       display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
+      grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 12px;
-      margin-top: 12px;
     }
-    .kpi{
+    .stat{
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 12px;
       background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
       box-shadow: 0 10px 22px rgba(15,23,42,.04);
     }
-    .kpi .label{
+    .stat .k{
       display:flex;
       align-items:center;
       gap: 8px;
       color:#1f2b4a;
       font-weight: 900;
       font-size: 12px;
-      text-transform: uppercase;
+      text-transform: uppercase; /* corrigido */
       letter-spacing: .06em;
     }
-    .kpi .label i{ color: var(--royal3); }
-    .kpi .value{
+    .stat .k i{ color: var(--royal); }
+    .stat .v{
       margin-top: 8px;
-      font: 900 22px/1 Orbitron, Inter, sans-serif;
+      font-size: 22px;
+      font-weight: 900;
       color: var(--royal3);
+      white-space: nowrap;
       font-variant-numeric: tabular-nums;
     }
+    .stat .s{
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* ===== Filtros ===== */
+    label{
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color:#0f172a;
+    }
+    .form-control, .form-select{
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid #cfe0ff;
+    }
+    .form-control:focus, .form-select:focus{
+      border-color: var(--royal);
+      box-shadow: 0 0 0 .2rem rgba(31,79,224,.14);
+    }
+
+    .btn-main{
+      height: 46px;
+      border-radius: 14px;
+      font-weight: 900;
+      border: none;
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
+      box-shadow: 0 12px 22px rgba(31,79,224,.14);
+    }
+    .btn-main:hover{ filter: brightness(1.03); }
+
+    .btn-ghost{
+      height: 46px;
+      border-radius: 14px;
+      font-weight: 900;
+      background:#fff;
+      border: 1px solid #cfe0ff;
+      color: var(--royal3);
+    }
+    .btn-ghost:hover{ background:#f1f5ff; }
+
+    .btn-success{
+      height: 46px;
+      border-radius: 14px;
+      font-weight: 900;
+    }
+
     .chips{
       display:flex;
       flex-wrap: wrap;
@@ -407,186 +241,268 @@
       font-size: 12px;
       box-shadow: 0 8px 16px rgba(31,79,224,.06);
     }
-    .chip .count{
-      padding: 2px 10px;
-      border-radius: 999px;
-      background: rgba(31,79,224,.12);
-      color: var(--royal3);
-      font-weight: 900;
+    .chip i{ color: var(--royal3); }
+
+    .hint{
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      margin-top: 8px;
     }
 
-    /* ===== Table ===== */
+    /* ===== TABELA SEM SCROLL LATERAL (e preenchendo o espaço) ===== */
     .table-wrap{
-      border-radius: 16px;
-      overflow: hidden;
-      background:#fff;
       border: 1px solid var(--line);
-      box-shadow: 0 8px 18px rgba(31,79,224,.08);
-      margin-top: 12px;
+      border-radius: 16px;
+      overflow: hidden;      /* SEM scroll horizontal */
+      background:#fff;
     }
+
     table{
       width: 100%;
-      margin:0;
-      text-align:center;
       border-collapse: collapse;
+      table-layout: fixed;   /* força caber */
     }
+
     thead th{
       position: sticky;
       top: 0;
-      z-index: 5;
-      background: #f2f6ff;
-      color: var(--royal3)!important;
+      z-index: 2;
+      background: var(--thead);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      font-size: 12px;
       font-family: Orbitron, Inter, sans-serif;
       letter-spacing: .7px;
-      border-bottom: 1px solid var(--line);
-      padding: 12px 8px;
+      color: var(--royal3);
+      text-align: center;
+      vertical-align: middle;
       white-space: nowrap;
     }
+
     tbody td{
       border-top: 1px solid var(--line);
-      padding: 12px 8px;
+      padding: 10px 8px;
+      font-size: 13px;
+      text-align:center;
       vertical-align: middle;
+      background:#fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
     tbody tr:nth-child(even) td{ background:#fbfdff; }
     tbody tr:hover td{ background:#f3f7ff; }
 
-    .estab-foto{
-      width: 86px; height: 86px;
-      object-fit: cover;
-      border-radius: 999px;
-      border: 3px solid rgba(31,79,224,.28);
-      box-shadow: 0 10px 18px rgba(31,79,224,.10);
-      background:#fff;
-      display:block;
-      margin: 0 auto;
+    td.col-data{
+      white-space: normal;
+      line-height: 1.1;
     }
-    .avatar-fallback{
-      width: 86px; height: 86px;
-      border-radius: 999px;
-      border: 3px solid rgba(31,79,224,.28);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin: 0 auto;
-      color: var(--royal3);
-      background: #eef3ff;
-      box-shadow: 0 10px 18px rgba(31,79,224,.10);
-      font-size: 2rem;
+    td.col-data small{
+      display:block;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      margin-top: 2px;
     }
 
-    .td-strong{
+    td.col-coop, td.col-estab{
+      text-align: left;
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.15;
+      font-weight: 750;
+    }
+    td.col-estab{ font-weight: 650; color:#1b2b5e; }
+
+    td.valor{
       font-weight: 900;
       color: var(--royal3);
-      font-family: Orbitron, Inter, sans-serif;
-      letter-spacing: .4px;
-      max-width: 260px;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      text-align:left;
+      font-variant-numeric: tabular-nums;
     }
-    .td-user{
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background:#fff;
       font-weight: 900;
+      font-size: 13px;
       color:#1b2b5e;
-      max-width: 200px;
       white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      text-align:left;
+      box-shadow: 0 10px 16px rgba(15,23,42,.04);
     }
+    .dot{
+      width:10px; height:10px;
+      border-radius:999px;
+      background: var(--royal3);
+      box-shadow: 0 0 0 3px rgba(31,79,224,.12);
+    }
+    .pill.ok .dot{ background: var(--ok); box-shadow: 0 0 0 3px rgba(16,185,129,.14); }
+    .pill.danger .dot{ background: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.12); }
 
     .actions{
       display:flex;
-      gap: 8px;
+      gap: 6px;
       justify-content:center;
-      flex-wrap: wrap;
+      align-items:center;
+      flex-wrap: nowrap;
     }
-    .btn-outline-primary{
-      border-radius: 12px;
-      font-weight: 900;
-      color: var(--royal3);
-      border-color: rgba(31,79,224,.35);
-    }
-    .btn-outline-primary:hover{
-      color:#fff;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
-      border-color: transparent;
-    }
-    .btn-outline-danger{
-      border-radius: 12px;
-      font-weight: 900;
-      color:#b4232a;
-      border-color: rgba(239,68,68,.35);
-    }
-    .btn-outline-danger:hover{
-      color:#fff;
-      background: linear-gradient(90deg, #ef4444, #dc2626);
-      border-color: transparent;
-    }
-
-    /* ===== Cards view ===== */
-    .cards{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .card-estab{
-      background:#fff;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      text-align:center;
-      box-shadow: 0 10px 22px rgba(15,23,42,.06);
-      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-    }
-    .card-estab:hover{
-      transform: translateY(-3px);
-      box-shadow: 0 14px 30px rgba(31,79,224,.12);
-      filter: brightness(1.01);
-    }
-    .card-estab .name{
-      margin-top: 10px;
-      font: 900 15px/1.2 Orbitron, Inter, sans-serif;
-      color: var(--royal3);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .card-estab .user{
-      margin-top: 4px;
-      color:#1b2b5e;
-      font-weight: 800;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Alerts */
-    .alertx{
-      margin-top: 12px;
+    .btn-ico{
+      width: 38px;
+      height: 38px;
       border-radius: 14px;
-      border: 0;
-      color:#fff;
+      display:grid;
+      place-items:center;
+      border: 1px solid #cfe0ff;
+      background:#fff;
+      color: var(--royal3);
       font-weight: 900;
+    }
+    .btn-ico:hover{ background:#f1f5ff; }
+    .btn-ico.primary{
+      border:none;
       background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
+      color:#fff;
       box-shadow: 0 12px 22px rgba(31,79,224,.14);
     }
-
-    /* ===== Responsivo ===== */
-    @media (max-width: 1100px){
-      .cards{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-      .container-x{ width: min(1600px, calc(100vw - 28px)); }
-      .sidebar{ width: 240px; flex-basis: 240px; }
+    .btn-ico.danger{
+      border:none;
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+      color:#fff;
+      box-shadow: 0 12px 22px rgba(239,68,68,.12);
     }
-    @media (max-width: 900px){
-      .sidebar{ display:none; }
-      .container-x{ width: calc(100vw - 22px); }
-      .main{ padding: 12px; }
+
+    tfoot td{
+      background:#f3f6ff;
+      border-top: 2px solid var(--line);
+      font-weight: 900;
+      color:#1b2b5e;
+      padding: 12px 10px;
+      white-space: nowrap;
+    }
+
+    /* Larguras: em telas grandes, mantém proporção e “estica” ocupando tudo */
+    th.w-data{ width: 11%; }
+    th.w-os{ width: 8%; }
+    th.w-coop{ width: 22%; }
+    th.w-estab{ width: 20%; }
+    th.w-compra{ width: 10%; }
+    th.w-parc{ width: 12%; }
+    th.w-sit{ width: 11%; }
+    th.w-acoes{ width: 6%; }
+
+    /* Modal */
+    .modal-content{
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: 0 20px 52px rgba(15,23,42,.16);
+      overflow:hidden;
+    }
+    .modal-header{
+      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
+      color:#fff;
+      border-bottom: 1px solid rgba(255,255,255,.22);
+    }
+    .modal-title{
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      letter-spacing: .6px;
+    }
+    .modal-body{
+      background:
+        radial-gradient(900px 320px at 85% -10%, rgba(31,79,224,.10), transparent 70%),
+        #fff;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+    }
+    .box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 12px 22px rgba(15,23,42,.06);
+    }
+    .box h6{
+      font-family: Orbitron, Inter, sans-serif;
+      color: var(--royal3);
+      letter-spacing: .6px;
+      margin: 0 0 10px 0;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .parcelas{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+    }
+    .parcela{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      background:#fff;
+      text-align:left;
+    }
+    .parcela .t{
+      font-weight: 900;
+      color:#1b2b5e;
+      display:flex; justify-content:space-between; align-items:center;
+      gap: 8px;
+    }
+    .parcela .v{
+      font: 900 18px/1 Orbitron, Inter, sans-serif;
+      color: var(--royal3);
+      margin-top: 8px;
+    }
+    .parcela .s{
+      margin-top: 6px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .parcela.paga{
+      background: #f2fff8;
+      border-color: rgba(16,185,129,.25);
+    }
+    .parcela.paga .v{ color: var(--ok); }
+
+    .timeline{
+      display:flex; flex-direction:column; gap:10px;
+      max-height: 320px;
+      overflow:auto;
+      padding-right: 6px;
+    }
+    .event{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      background:#fff;
+    }
+    .event .row1{
+      display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .event .amt{
+      font-family: Orbitron, Inter, sans-serif;
+      font-weight: 900;
+      color: var(--royal3);
+      white-space: nowrap;
+    }
+
+    /* Responsivo */
+    @media (max-width: 980px){
+      .stats{ grid-template-columns: 1fr; }
+      .grid2{ grid-template-columns: 1fr; }
+      .parcelas{ grid-template-columns: repeat(2, minmax(0,1fr)); }
       .topbar{ position: static; }
-      .kpis{ grid-template-columns: 1fr; }
-      .cards{ grid-template-columns: 1fr; }
-      .search input{ width: 200px; }
+      .container-x{ width: calc(100vw - 22px); }
     }
   </style>
 
@@ -707,15 +623,15 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
     <nav class="cx-nav">
       <div class="cx-nav-section">Visão geral</div>
-      <a class="cx-link" href="{{ url_for('painel_admin') }}"><span class="cx-link-left"><i class="bi bi-speedometer2 cx-link-icon"></i><span>Resumo</span></span></a>
+      <a class="cx-link" href="{{ url_for('dashboard') }}"><span class="cx-link-left"><i class="bi bi-speedometer2 cx-link-icon"></i><span>Resumo</span></span></a>
       <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-coin cx-link-icon"></i><span>Financeiro</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
       <div class="cx-sublinks open">
-        <a class="cx-sublink" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i><span>Lançamentos</span></a>
+        <a class="cx-sublink active" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i><span>Lançamentos</span></a>
       </div>
       <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-people cx-link-icon"></i><span>Cadastros</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
       <div class="cx-sublinks open">
         <a class="cx-sublink" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-person-badge"></i><span>Cooperados</span></a>
-        <a class="cx-sublink active" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
+        <a class="cx-sublink" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
       </div>
       <hr class="cx-nav-divider">
       <a class="cx-link" href="{{ url_for('logout') }}"><span class="cx-link-left"><i class="bi bi-box-arrow-left cx-link-icon"></i><span>Sair</span></span></a>
@@ -723,303 +639,661 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="cx-sidebar-footer"></div>
   </aside>
   <main class="cx-main"><div class="cx-content-shell">
-<div class="layout">
+<div class="container-x">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
+    <div class="topbar">
       <div class="brand">
-        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" />
-        <div class="title">
-          <p class="t">Coopex Parcerias</p>
-          <p class="s">Painel Administrativo</p>
+        <div class="brand-ico"><i class="bi bi-journal-text fs-4"></i></div>
+        <div class="brand-title">
+          <div class="t">Lançamentos e Descontos</div>
+          <div class="s">Parcelamento automático em 4x com desconto flexível</div>
         </div>
       </div>
-
-      <div class="navbox">
-        <nav class="nav flex-column">
-          <a class="nav-link" href="{{ url_for('painel_admin') }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
-          </a>
-          <a class="nav-link active" href="{{ url_for('listar_estabelecimentos') }}">
-            <i class="bi bi-building"></i> Estabelecimentos
-          </a>
-          <a class="nav-link" href="{{ url_for('listar_cooperados') }}">
-            <i class="bi bi-people-fill"></i> Cooperados
-          </a>
-          <a class="nav-link" href="{{ url_for('listar_lancamentos') }}">
-            <i class="bi bi-currency-dollar"></i> Lançamentos
-          </a>
-          <a class="nav-link" href="{{ url_for('logout') }}">
-            <i class="bi bi-box-arrow-left"></i> Sair
-          </a>
-        </nav>
-      </div>
-
-      <div class="footer">
-        <div class="who">
-          <span class="dot"></span>
-          <div class="name" title="{{ admin.nome }}"> {{ admin.nome }} </div>
-        </div>
-        <a class="btn btn-logout" href="{{ url_for('logout') }}" title="Sair">
-          <i class="bi bi-power"></i>
+      <div class="top-actions">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-top">
+          <i class="bi bi-arrow-left-circle"></i> Dashboard
         </a>
+        <button type="button" class="btn btn-top" id="btn-hoje">
+          <i class="bi bi-sun"></i> Hoje
+        </button>
       </div>
-    </aside>
+    </div>
 
-    <!-- Main -->
-    <main class="main">
-      <div class="container-x">
+    <!-- Métricas -->
+    <div class="cardx">
+      <div class="stats">
+        <div class="stat">
+          <div class="k"><i class="bi bi-list-ul"></i> Lançamentos</div>
+          <div class="v" id="m-qtd">—</div>
+          <div class="s">Linhas visíveis</div>
+        </div>
+        <div class="stat">
+          <div class="k"><i class="bi bi-cash-coin"></i> Total visível</div>
+          <div class="v" id="m-total">—</div>
+          <div class="s">Somatório dos valores</div>
+        </div>
+        <div class="stat">
+          <div class="k"><i class="bi bi-graph-up"></i> Ticket médio</div>
+          <div class="v" id="m-media">—</div>
+          <div class="s">Média por lançamento</div>
+        </div>
+        <div class="stat">
+          <div class="k"><i class="bi bi-credit-card-2-front"></i> Parcelas</div>
+          <div class="v" id="m-parc">—</div>
+          <div class="s">4x automático</div>
+        </div>
+      </div>
+    </div>
 
-        <!-- Topbar -->
-        <div class="topbar">
-          <div class="left">
-            <div class="ico"><i class="bi bi-building fs-4"></i></div>
-            <div class="txt">
-              <p class="t m-0">Estabelecimentos</p>
-              <p class="s m-0">Gerencie cadastros e logos</p>
-            </div>
+    <!-- Filtros -->
+    <div class="cardx">
+      <form id="form-filtros" method="get" action="{{ url_for('listar_lancamentos') }}">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label for="cooperado_id">Cooperado</label>
+            <select name="cooperado_id" id="cooperado_id" class="form-select">
+              <option value="">Todos</option>
+              {% for c in cooperados %}
+                <option value="{{ c.id }}" {% if filtros.cooperado_id == c.id|string %}selected{% endif %}>{{ c.nome }}</option>
+              {% endfor %}
+            </select>
           </div>
-          <div class="top-actions">
-            <a href="{{ url_for('painel_admin') }}" class="btn btn-top">
-              <i class="bi bi-arrow-left-circle"></i> Dashboard
-            </a>
-            <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-top">
-              <i class="bi bi-plus-circle"></i> Novo
-            </a>
+
+          <div class="col-md-3">
+            <label for="estabelecimento_id">Estabelecimento</label>
+            <select name="estabelecimento_id" id="estabelecimento_id" class="form-select">
+              <option value="">Todos</option>
+              {% for e in estabelecimentos %}
+                <option value="{{ e.id }}" {% if filtros.estabelecimento_id == e.id|string %}selected{% endif %}>{{ e.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label for="data_inicio">Data Início</label>
+            <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ filtros.data_inicio or '' }}">
+          </div>
+
+          <div class="col-md-2">
+            <label for="data_fim">Data Fim</label>
+            <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ filtros.data_fim or '' }}">
+          </div>
+
+          <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-main text-white">
+              <i class="bi bi-funnel"></i> Filtrar
+            </button>
+          </div>
+
+          <div class="col-md-2 d-grid">
+            <button type="button" class="btn btn-success" onclick="exportarExcel()">
+              <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+            </button>
+          </div>
+
+          <div class="col-md-2 d-grid">
+            <button type="button" class="btn btn-ghost" id="btn-limpar">
+              <i class="bi bi-x-circle"></i> Limpar
+            </button>
           </div>
         </div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alertx text-center">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+        <div class="chips" id="chips-filtros"></div>
+        <div class="hint">
+          Dica: clique no botão azul (cartão) para registrar descontos com data e editar quando quiser.
+        </div>
+      </form>
+    </div>
 
-        <!-- Conteúdo -->
-        <section class="cardx">
-          <div class="toolbar">
-            <div style="min-width:0">
-              <div style="font-family:Orbitron,Inter,sans-serif;font-weight:900;letter-spacing:.6px;color:var(--royal3)">
-                <i class="bi bi-buildings"></i> Estabelecimentos Cadastrados
-              </div>
-              <div style="color:var(--muted);font-weight:700;font-size:12px;margin-top:4px">
-                Use a busca para filtrar por nome ou usuário e alterne entre tabela e cartões.
-              </div>
-            </div>
+    <!-- Tabela -->
+    <div class="cardx">
+      <div class="table-wrap">
+        <table id="t-lanc">
+          <thead>
+            <tr>
+              <th class="w-data"><i class="bi bi-calendar-event"></i> Data</th>
+              <th class="w-os"><i class="bi bi-file-earmark-text"></i> Nº OS</th>
+              <th class="w-coop"><i class="bi bi-person"></i> Cooperado</th>
+              <th class="w-estab"><i class="bi bi-shop"></i> Estabelecimento</th>
+              <th class="w-compra"><i class="bi bi-currency-dollar"></i> Compra</th>
+              <th class="w-parc"><i class="bi bi-collection"></i> Parcela (4x)</th>
+              <th class="w-sit"><i class="bi bi-clipboard-check"></i> Situação</th>
+              <th class="w-acoes"><i class="bi bi-sliders2"></i> Ações</th>
+            </tr>
+          </thead>
 
-            <div class="view-switch">
-              <button class="btn btn-toggle active" id="btn-view-table"><i class="bi bi-table"></i> Tabela</button>
-              <button class="btn btn-toggle" id="btn-view-cards"><i class="bi bi-grid-3x3-gap"></i> Cartões</button>
-            </div>
+          <tbody>
+            {% if lancamentos %}
+              {% for l in lancamentos %}
+                <tr class="l-row"
+                    data-id="{{ l.id }}"
+                    data-data="{{ l.data.strftime('%Y-%m-%dT%H:%M:%S') }}"
+                    data-valor="{{ '%.2f'|format(l.valor) }}"
+                    data-os="{{ l.os_numero }}"
+                    data-coop="{{ l.cooperado.nome }}"
+                    data-estab="{{ l.estabelecimento.nome }}"
+                    data-desc="{{ (l.descricao or '')|e }}"
+                    data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'>
 
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-              <div class="search">
-                <i class="bi bi-search"></i>
-                <input type="text" id="busca" placeholder="Buscar por nome ou usuário..." />
-              </div>
-              <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-main">
-                <i class="bi bi-plus-circle"></i> Novo
-              </a>
-            </div>
-          </div>
-
-          <!-- KPIs -->
-          <div class="kpis">
-            <div class="kpi">
-              <div class="label"><i class="bi bi-buildings"></i> Total</div>
-              <div class="value" id="kpi-total">0</div>
-            </div>
-            <div class="kpi">
-              <div class="label"><i class="bi bi-image"></i> Com logo</div>
-              <div class="value" id="kpi-comlogo">0</div>
-            </div>
-            <div class="kpi">
-              <div class="label"><i class="bi bi-image-alt"></i> Sem logo</div>
-              <div class="value" id="kpi-semlogo">0</div>
-            </div>
-          </div>
-
-          <!-- Chips -->
-          <div class="chips">
-            <span class="chip">Visíveis <span class="count" id="count-visiveis">0</span></span>
-          </div>
-
-          <!-- VIEW: TABELA -->
-          <div class="table-wrap" id="view-table">
-            <table class="table align-middle m-0">
-              <thead>
-                <tr>
-                  <th style="width:120px">Logo</th>
-                  <th>Nome</th>
-                  <th>Usuário</th>
-                  <th style="width:220px">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-estabs">
-                {% for est in estabelecimentos %}
-                <tr class="tbl-row"
-                    data-name="{{ est.nome|lower }}"
-                    data-user="{{ est.username|lower }}"
-                    data-has-logo="{{ 1 if est.logo else 0 }}">
-                  <td>
-                    {% if est.logo %}
-                      <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}"
-                           alt="Logo do Estabelecimento"
-                           class="estab-foto"
-                           onerror="this.closest('td').innerHTML=fallbackAvatar();" />
-                    {% else %}
-                      <div class="avatar-fallback"><i class="bi bi-buildings"></i></div>
-                    {% endif %}
+                  <td class="col-data">
+                    <div>{{ l.data.strftime('%d/%m/%Y') }}</div>
+                    <small>{{ l.data.strftime('%H:%M') }}</small>
                   </td>
-                  <td class="td-strong" title="{{ est.nome }}">{{ est.nome }}</td>
-                  <td class="td-user" title="{{ est.username }}">{{ est.username }}</td>
+
+                  <td style="font-weight:900">{{ l.os_numero }}</td>
+
+                  <td class="col-coop">{{ l.cooperado.nome }}</td>
+
+                  <td class="col-estab">{{ l.estabelecimento.nome }}</td>
+
+                  <td class="valor" data-col="compra">
+                    {{ "{:,.2f}".format(l.valor).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                  </td>
+
+                  <td>
+                    <span class="pill"><span class="dot"></span><span class="vparc">—</span></span>
+                  </td>
+
+                  <td>
+                    <span class="pill danger"><span class="dot"></span><span class="sit">—</span></span>
+                  </td>
+
                   <td>
                     <div class="actions">
-                      <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil-square"></i> Editar
-                      </a>
-                      <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}"
-                         class="btn btn-sm btn-outline-danger"
-                         onclick="return confirm('Excluir este estabelecimento?')">
-                        <i class="bi bi-trash"></i> Excluir
-                      </a>
+                      <button type="button" class="btn-ico primary" title="Descontar / Parcelas" onclick="abrirParcelas({{ l.id }})">
+                        <i class="bi bi-credit-card-2-front"></i>
+                      </button>
+
+                      <form method="post"
+                            action="{{ url_for('excluir_lancamento', id=l.id) }}"
+                            onsubmit="return confirm('Excluir este lançamento? Essa ação não pode ser desfeita.');"
+                            style="margin:0">
+                        <input type="hidden" name="next" value="{{ request.full_path }}">
+                        <button type="submit" class="btn-ico danger" title="Excluir">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
                     </div>
                   </td>
                 </tr>
-                {% else %}
-                <tr>
-                  <td colspan="4" style="padding:14px;text-align:center;color:var(--muted);font-weight:800">
-                    Nenhum estabelecimento cadastrado.
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="8" style="padding:14px;text-align:center;color:var(--muted);font-weight:700">Nenhum lançamento encontrado.</td></tr>
+            {% endif %}
+          </tbody>
+
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-end">Totais (visíveis):</td>
+              <td id="tf-total" class="valor">—</td>
+              <td colspan="3" id="tf-qtd" class="text-start">— itens</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Parcelas / Descontos -->
+  <div class="modal fade" id="modalParcelas" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title" id="mp-title">Parcelas e Descontos</div>
+            <div style="opacity:.92;font-weight:800" id="mp-sub">—</div>
           </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
 
-          <!-- VIEW: CARTÕES -->
-          <div class="cards" id="view-cards" style="display:none">
-            {% for est in estabelecimentos %}
-            <div class="card-estab card-item"
-                 data-name="{{ est.nome|lower }}"
-                 data-user="{{ est.username|lower }}"
-                 data-has-logo="{{ 1 if est.logo else 0 }}">
-              {% if est.logo %}
-                <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}"
-                     alt="Logo do Estabelecimento"
-                     class="estab-foto"
-                     onerror="this.outerHTML=fallbackAvatar();" />
-              {% else %}
-                <div class="avatar-fallback"><i class="bi bi-buildings"></i></div>
-              {% endif %}
-
-              <div class="name" title="{{ est.nome }}">{{ est.nome }}</div>
-              <div class="user" title="{{ est.username }}">{{ est.username }}</div>
-
-              <div class="actions" style="margin-top:10px">
-                <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">
-                  <i class="bi bi-pencil-square"></i> Editar
-                </a>
-                <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}"
-                   class="btn btn-sm btn-outline-danger"
-                   onclick="return confirm('Excluir este estabelecimento?')">
-                  <i class="bi bi-trash"></i> Excluir
-                </a>
+        <div class="modal-body">
+          <div class="grid2">
+            <div class="box">
+              <h6><i class="bi bi-collection"></i> Parcelamento em 4x (com acúmulo automático)</h6>
+              <div class="parcelas" id="mp-parcelas"></div>
+              <div class="hint mt-3">
+                Regra: se você descontar <strong>menos</strong> que a parcela, o restante <strong>vai para a próxima</strong>.
               </div>
             </div>
-            {% else %}
-            <div class="card-estab" style="text-align:center;color:var(--muted);font-weight:900">
-              Nenhum estabelecimento cadastrado.
-            </div>
-            {% endfor %}
-          </div>
 
-        </section>
+            <div class="box">
+              <h6><i class="bi bi-calendar2-check"></i> Registrar desconto com data</h6>
+
+              <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                  <label>Data do desconto</label>
+                  <input type="date" class="form-control" id="mp-date">
+                </div>
+                <div class="col-md-6">
+                  <label>Valor descontado (R$)</label>
+                  <input type="text" class="form-control" id="mp-valor" placeholder="Ex.: 20,00">
+                </div>
+                <div class="col-12 d-grid mt-1">
+                  <button type="button" class="btn btn-main text-white" id="mp-add">
+                    <i class="bi bi-plus-circle"></i> Registrar desconto
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h6 class="m-0"><i class="bi bi-clock-history"></i> Histórico (editável)</h6>
+                </div>
+                <div class="hint mt-1">Você pode editar a data e o valor de qualquer desconto.</div>
+                <div class="timeline mt-2" id="mp-timeline"></div>
+              </div>
+
+              <div class="hint mt-3">
+                Observação: os descontos ficam salvos no navegador (localStorage) até você integrar com o banco.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Fechar</button>
+        </div>
       </div>
-    </main>
+    </div>
   </div>
 
   <script>
-    // Avatar fallback
-    function fallbackAvatar(){
-      return '<div class="avatar-fallback"><i class="bi bi-buildings"></i></div>';
+    // =========================
+    // Utilitários
+    // =========================
+    const brl = v => v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    const to2 = n => (Math.round((n + Number.EPSILON)*100)/100);
+
+    function onlyDigitsAndCommaDot(s){
+      return String(s||'').replace(/[^\d,.-]/g,'').trim();
     }
 
-    // KPIs
-    function atualizarKPIs(){
-      const rows = [...document.querySelectorAll('.tbl-row')];
-      const total = rows.length;
-      const comLogo = rows.filter(r => r.dataset.hasLogo === '1').length;
-      const semLogo = total - comLogo;
-
-      document.getElementById('kpi-total').textContent = total;
-      document.getElementById('kpi-comlogo').textContent = comLogo;
-      document.getElementById('kpi-semlogo').textContent = semLogo;
-
-      atualizarContagemVisiveis();
+    function parseBRL(input){
+      const s = onlyDigitsAndCommaDot(input);
+      if(!s) return NaN;
+      const norm = s.includes(',') ? s.replace(/\./g,'').replace(',', '.') : s;
+      const n = parseFloat(norm);
+      return isNaN(n) ? NaN : to2(n);
     }
 
-    function atualizarContagemVisiveis(){
-      const isCards = document.getElementById('view-cards').style.display !== 'none';
-      const sel = isCards ? '.card-item' : '.tbl-row';
-      const vis = [...document.querySelectorAll(sel)].filter(el => el.style.display !== 'none').length;
-      document.getElementById('count-visiveis').textContent = vis;
+    function formatBRInput(n){
+      if(isNaN(n)) return '';
+      return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Busca (tabela + cards)
-    function aplicarBusca(){
-      const q = (document.getElementById('busca').value || '')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-        .toLowerCase();
+    function localISODate(d=new Date()){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
 
-      const match = (name,user) => {
-        const n = (name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-        const u = (user||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-        return !q || n.includes(q) || u.includes(q);
+    // =========================
+    // Armazenamento local (provisório)
+    // =========================
+    function keyDescontos(id){ return `coopex_descontos_${id}`; }
+
+    function getHistorico(row){
+      const id = row.dataset.id;
+      const ls = localStorage.getItem(keyDescontos(id));
+      if (ls){
+        try { return JSON.parse(ls) || []; } catch(e){}
+      }
+      try{
+        const raw = row.dataset.historico || '[]';
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      }catch(e){
+        return [];
+      }
+    }
+
+    function setHistorico(id, hist){
+      localStorage.setItem(keyDescontos(id), JSON.stringify(hist || []));
+    }
+
+    // =========================
+    // Motor de parcelas (4x) com acúmulo
+    // =========================
+    function calcularParcelas(total, descontos){
+      total = to2(total);
+      const base = to2(total / 4);
+
+      const ds = (descontos || [])
+        .map((d, idx)=>({
+          id: d.id ?? `tmp_${idx}`,
+          data: String(d.data || '').slice(0,10),
+          valor: to2(parseFloat(d.valor) || 0),
+          idx
+        }))
+        .filter(d => d.valor > 0 && d.data);
+
+      ds.sort((a,b)=>{
+        if(a.data < b.data) return -1;
+        if(a.data > b.data) return 1;
+        return a.idx - b.idx;
+      });
+
+      let pagoTotal = 0;
+      ds.forEach(d => pagoTotal = to2(pagoTotal + d.valor));
+      if(pagoTotal > total) pagoTotal = total;
+
+      const parcelas = [];
+      let restante = total;
+      let carry = 0;
+      let pagoDistribuir = pagoTotal;
+
+      for(let i=1;i<=4;i++){
+        let sugerida = to2(base + carry);
+        if (sugerida < 0) sugerida = 0;
+        if (sugerida > restante) sugerida = restante;
+
+        const pagoNesta = to2(Math.min(pagoDistribuir, sugerida));
+        pagoDistribuir = to2(pagoDistribuir - pagoNesta);
+
+        const faltou = to2(sugerida - pagoNesta);
+        carry = to2(faltou);
+
+        restante = to2(restante - sugerida);
+
+        parcelas.push({
+          n: i, base, sugerida, pago: pagoNesta, faltou,
+          status: (faltou <= 0.0001) ? 'paga' : 'pendente'
+        });
+      }
+
+      const saldo = to2(total - pagoTotal);
+      return { total, base, pagoTotal, saldo, parcelas, descontosOrdenados: ds };
+    }
+
+    // =========================
+    // UI: métricas e chips
+    // =========================
+    function atualizarMetricasTabela(){
+      const rows = [...document.querySelectorAll('#t-lanc tbody tr.l-row')]
+        .filter(tr => tr.style.display !== 'none');
+
+      let soma = 0, qtd = 0;
+      rows.forEach(tr=>{
+        const v = parseFloat(tr.dataset.valor || '0') || 0;
+        soma = to2(soma + v);
+        qtd++;
+      });
+
+      const media = qtd ? to2(soma / qtd) : 0;
+
+      document.getElementById('m-qtd').textContent = qtd.toLocaleString('pt-BR');
+      document.getElementById('m-total').textContent = brl(soma);
+      document.getElementById('m-media').textContent = brl(media);
+      document.getElementById('m-parc').textContent = '4x automático';
+
+      document.getElementById('tf-total').textContent = brl(soma);
+      document.getElementById('tf-qtd').textContent = `${qtd.toLocaleString('pt-BR')} itens`;
+    }
+
+    function atualizarChips(){
+      const chips = document.getElementById('chips-filtros');
+      chips.innerHTML = '';
+
+      const coopSel  = document.getElementById('cooperado_id');
+      const estabSel = document.getElementById('estabelecimento_id');
+      const di = document.getElementById('data_inicio').value;
+      const df = document.getElementById('data_fim').value;
+
+      const add = (icon, txt) => {
+        const b = document.createElement('span');
+        b.className = 'chip';
+        b.innerHTML = `<i class="bi ${icon}"></i> ${txt}`;
+        chips.appendChild(b);
       };
 
-      document.querySelectorAll('.tbl-row').forEach(tr=>{
-        tr.style.display = match(tr.dataset.name, tr.dataset.user) ? '' : 'none';
-      });
-
-      document.querySelectorAll('.card-item').forEach(card=>{
-        card.style.display = match(card.dataset.name, card.dataset.user) ? '' : 'none';
-      });
-
-      atualizarContagemVisiveis();
+      if (coopSel.value)  add('bi-person', coopSel.options[coopSel.selectedIndex].text);
+      if (estabSel.value) add('bi-shop', estabSel.options[estabSel.selectedIndex].text);
+      if (di) add('bi-calendar-plus', `Início: ${new Date(di+'T00:00:00').toLocaleDateString('pt-BR')}`);
+      if (df) add('bi-calendar-minus', `Fim: ${new Date(df+'T00:00:00').toLocaleDateString('pt-BR')}`);
     }
 
-    // Alternar visualização
-    function setView(mode){
-      const vt = document.getElementById('view-table');
-      const vc = document.getElementById('view-cards');
-      const bt = document.getElementById('btn-view-table');
-      const bc = document.getElementById('btn-view-cards');
+    // =========================
+    // Preenche Parcela sugerida e Situação (usa "Total")
+    // =========================
+    function atualizarLinhaParcelas(tr){
+      const total = parseFloat(tr.dataset.valor || '0') || 0;
+      const hist = getHistorico(tr);
+      const calc = calcularParcelas(total, hist);
 
-      const showTable = (mode === 'table');
-      vt.style.display = showTable ? '' : 'none';
-      vc.style.display = showTable ? 'none' : '';
-      bt.classList.toggle('active', showTable);
-      bc.classList.toggle('active', !showTable);
+      const primeiraPendente = calc.parcelas.find(p => p.status !== 'paga') || calc.parcelas[3];
+      const sug = primeiraPendente ? primeiraPendente.sugerida : calc.parcelas[3].sugerida;
 
-      atualizarContagemVisiveis();
+      tr.querySelector('.vparc').textContent = brl(sug);
+
+      const sitEl = tr.querySelector('.sit');
+      const pill = sitEl?.closest('.pill');
+      const ok = calc.saldo <= 0.0001;
+
+      if (ok){
+        sitEl.textContent = 'Quitado';
+        pill.classList.remove('danger');
+        pill.classList.add('ok');
+      }else{
+        sitEl.textContent = `Total ${brl(calc.total)}`;
+        pill.classList.remove('ok');
+        pill.classList.add('danger');
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', ()=>{
-      atualizarKPIs();
-      aplicarBusca();
+    function atualizarTodasLinhas(){
+      document.querySelectorAll('#t-lanc tbody tr.l-row').forEach(tr => atualizarLinhaParcelas(tr));
+      atualizarMetricasTabela();
+      atualizarChips();
+    }
 
-      document.getElementById('busca').addEventListener('input', aplicarBusca);
-      document.getElementById('btn-view-table').addEventListener('click', ()=>setView('table'));
-      document.getElementById('btn-view-cards').addEventListener('click', ()=>setView('cards'));
+    // =========================
+    // Modal: Parcelas / Descontos
+    // =========================
+    let modal;
+    let currentId = null;
+
+    function getRowById(id){
+      return document.querySelector(`#t-lanc tbody tr.l-row[data-id="${id}"]`);
+    }
+
+    function renderParcelas(calc){
+      const wrap = document.getElementById('mp-parcelas');
+      wrap.innerHTML = '';
+      calc.parcelas.forEach(p=>{
+        const div = document.createElement('div');
+        div.className = 'parcela ' + (p.status === 'paga' ? 'paga' : '');
+        div.innerHTML = `
+          <div class="t">
+            <span>Parcela ${p.n}</span>
+            <span class="pill ${p.status==='paga'?'ok':'danger'}" style="padding:4px 8px;font-size:.82rem">
+              <span class="dot"></span>${p.status==='paga'?'Paga':'Pendente'}
+            </span>
+          </div>
+          <div class="v">${brl(p.sugerida)}</div>
+          <div class="s">Base: ${brl(p.base)} • Pago: ${brl(p.pago)} • Falta: ${brl(p.faltou)}</div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function renderTimeline(hist){
+      const tl = document.getElementById('mp-timeline');
+      tl.innerHTML = '';
+      if (!hist.length){
+        const empty = document.createElement('div');
+        empty.className = 'event';
+        empty.innerHTML = `<div class="hint">Nenhum desconto registrado ainda.</div>`;
+        tl.appendChild(empty);
+        return;
+      }
+
+      hist.forEach((d, idx)=>{
+        const ev = document.createElement('div');
+        ev.className = 'event';
+        ev.innerHTML = `
+          <div class="row1">
+            <span style="font-weight:900;color:#1b2b5e">
+              <i class="bi bi-calendar2-check" style="color:var(--royal3)"></i>
+              Desconto #${idx+1}
+            </span>
+            <span class="amt">${brl(parseFloat(d.valor)||0)}</span>
+          </div>
+
+          <div class="row g-2 mt-2 align-items-end">
+            <div class="col-md-6">
+              <label class="mb-1" style="font-size:.78rem">Data</label>
+              <input type="date" class="form-control form-control-sm" value="${(d.data||'').slice(0,10)}" data-edit-date="${idx}">
+            </div>
+            <div class="col-md-6">
+              <label class="mb-1" style="font-size:.78rem">Valor</label>
+              <input type="text" class="form-control form-control-sm" value="${formatBRInput(parseFloat(d.valor)||0)}" data-edit-valor="${idx}">
+            </div>
+
+            <div class="col-12 d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-sm btn-primary" style="border-radius:12px;font-weight:900" data-save="${idx}">
+                <i class="bi bi-check2-circle"></i> Salvar
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:12px;font-weight:900" data-del="${idx}">
+                <i class="bi bi-trash3"></i> Remover
+              </button>
+            </div>
+          </div>
+        `;
+        tl.appendChild(ev);
+      });
+
+      tl.querySelectorAll('button[data-save]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = parseInt(btn.getAttribute('data-save'), 10);
+          salvarEdicao(i);
+        });
+      });
+      tl.querySelectorAll('button[data-del]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = parseInt(btn.getAttribute('data-del'), 10);
+          removerDesconto(i);
+        });
+      });
+    }
+
+    function abrirParcelas(id){
+      currentId = String(id);
+      const tr = getRowById(currentId);
+      if(!tr) return;
+
+      const total = parseFloat(tr.dataset.valor || '0') || 0;
+      const hist = getHistorico(tr);
+
+      document.getElementById('mp-title').textContent = `Parcelas e Descontos • OS ${tr.dataset.os}`;
+      document.getElementById('mp-sub').textContent = `${tr.dataset.coop} • ${tr.dataset.estab} • Compra ${brl(total)}`;
+
+      document.getElementById('mp-date').value = localISODate(new Date());
+      document.getElementById('mp-valor').value = '';
+
+      const calc = calcularParcelas(total, hist);
+      renderParcelas(calc);
+      renderTimeline(hist);
+
+      modal.show();
+    }
+    window.abrirParcelas = abrirParcelas;
+
+    function refreshModal(){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+      const total = parseFloat(tr.dataset.valor || '0') || 0;
+      const hist = getHistorico(tr);
+      const calc = calcularParcelas(total, hist);
+      renderParcelas(calc);
+      renderTimeline(hist);
+      atualizarLinhaParcelas(tr);
+      atualizarMetricasTabela();
+    }
+
+    function adicionarDesconto(){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+
+      const date = (document.getElementById('mp-date').value || '').slice(0,10);
+      const val = parseBRL(document.getElementById('mp-valor').value);
+
+      if(!date){ alert('Informe a data do desconto.'); return; }
+      if(isNaN(val) || val <= 0){ alert('Informe um valor válido para o desconto.'); return; }
+
+      const hist = getHistorico(tr);
+      hist.push({ data: date, valor: to2(val) });
+      setHistorico(currentId, hist);
+
+      refreshModal();
+      document.getElementById('mp-valor').value = '';
+    }
+
+    function salvarEdicao(idx){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+
+      const hist = getHistorico(tr);
+
+      const dateInput = document.querySelector(`[data-edit-date="${idx}"]`);
+      const valInput  = document.querySelector(`[data-edit-valor="${idx}"]`);
+      if(!dateInput || !valInput) return;
+
+      const date = (dateInput.value || '').slice(0,10);
+      const val  = parseBRL(valInput.value);
+
+      if(!date){ alert('Informe a data do desconto.'); return; }
+      if(isNaN(val) || val <= 0){ alert('Informe um valor válido.'); return; }
+
+      hist[idx] = { ...hist[idx], data: date, valor: to2(val) };
+      setHistorico(currentId, hist);
+
+      refreshModal();
+    }
+
+    function removerDesconto(idx){
+      const tr = getRowById(currentId);
+      if(!tr) return;
+      const hist = getHistorico(tr);
+      hist.splice(idx, 1);
+      setHistorico(currentId, hist);
+      refreshModal();
+    }
+
+    // =========================
+    // Botões gerais
+    // =========================
+    function exportarExcel(){
+      const params = new URLSearchParams({
+        cooperado_id: document.getElementById('cooperado_id').value || '',
+        estabelecimento_id: document.getElementById('estabelecimento_id').value || '',
+        data_inicio: document.getElementById('data_inicio').value || '',
+        data_fim: document.getElementById('data_fim').value || ''
+      });
+      window.location.href = "{{ url_for('exportar_lancamentos') }}?" + params.toString();
+    }
+    window.exportarExcel = exportarExcel;
+
+    document.getElementById('btn-limpar')?.addEventListener('click', ()=>{
+      window.location.href = "{{ url_for('listar_lancamentos') }}";
     });
 
-    // Recalcula depois que as imagens carregarem/falharem
-    window.addEventListener('load', atualizarKPIs);
+    document.getElementById('btn-hoje')?.addEventListener('click', ()=>{
+      const d = localISODate(new Date());
+      document.getElementById('data_inicio').value = d;
+      document.getElementById('data_fim').value = d;
+      document.getElementById('form-filtros').submit();
+    });
+
+    // =========================
+    // Init
+    // =========================
+    document.addEventListener('DOMContentLoaded', ()=>{
+      modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
+      document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
+      atualizarTodasLinhas();
+    });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
