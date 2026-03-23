@@ -8,425 +8,391 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style id="coopex-unified-style">
+    <style>
+      /* ===== TEMA AZUL-ROYAL + BRANCO (apenas cores) ===== */
+      body {
+        background: #f7f9ff; /* claro */
+        font-family: "Roboto", Arial, sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        color: #0d1b3f; /* texto principal escuro */
+      }
+
+      /* Sidebar clara com azul-royal */
+      .sidebar {
+        width: 210px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: #ffffff;
+        color: #0d1b3f;
+        box-shadow: 3px 0 16px rgba(65,105,225,.12);
+        border-right: 1px solid #e5ebff;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 30px;
+      }
+      .sidebar .logo {
+        width: 210px !important; /* mantém seu 3x maior */
+        height: auto !important;
+        margin: 34px auto 4px auto;
+        display: block;
+        filter: drop-shadow(0 0 12px rgba(65,105,225,.35));
+        transition: width .2s;
+      }
+      .sidebar-funcao {
+        font-family: 'Orbitron', sans-serif;
+        color: #4169e1; /* royal */
+        font-size: 0.91rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 0 0 14px 0;
+        padding: 0 3px;
+        max-width: 96px;
+        line-height: 1.08;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        background: none;
+      }
+      .sidebar .nav-link {
+        color: #0d1b3f;
+        font-size: 1.08rem;
+        border-radius: 8px;
+        margin: 3px 0;
+        padding: 11px 20px;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.22s, color 0.22s;
+        width: 100%;
+        box-sizing: border-box;
+        background: #ffffff;
+      }
+      .sidebar .nav-link.active,
+      .sidebar .nav-link:hover {
+        background: #eef3ff; /* hover claro */
+        color: #4169e1 !important;
+      }
+      .sidebar .nav-link i {
+        font-size: 1.2rem;
+        margin-right: 10px;
+        color: #4169e1;
+      }
+
+      /* Main / Topbar azul-royal em gradiente */
+      .main-content {
+        margin-left:0 !important;
+        padding:0 !important;
+        margin-left: 230px;
+        padding: 38px 32px 20px 32px;
+      }
+      .topbar {
+        background: linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1.5px solid rgba(255,255,255,.25);
+        box-shadow: 0 8px 24px rgba(65,105,225,.25);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-radius: 14px;
+        padding: 0 8px;
+        color: #fff;
+      }
+      .topbar .btn-voltar {
+        font-weight: 700;
+        border-radius: 20px;
+        background: #ffffff;
+        color: #4169e1;
+        border: 1px solid #ffffff;
+        margin-right: 16px;
+        transition: background 0.2s, color 0.2s;
+      }
+      .topbar .btn-voltar:hover {
+        background: #2b50d9;
+        color: #ffffff;
+        border-color: #2b50d9;
+      }
+      .topbar span {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.07rem;
+        max-width: 220px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .topbar .btn-logout,
+      #btn-ativar-som-servico {
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+      }
+      .topbar .btn-logout:hover,
+      #btn-ativar-som-servico:hover {
+        background: #ffffff !important;
+        color: #4169e1 !important;
+      }
+
+      /* Título */
+      h2 {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        color: #4169e1;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      /* Cards claros */
+      .card-link {
+        text-decoration: none !important;
+      }
+      .card-link .card {
+        background: #ffffff;
+        border-radius: 17px;
+        box-shadow: 0 8px 28px rgba(65,105,225,.14), 0 2px 8px rgba(65,105,225,.10);
+        border: 1px solid #e5ebff;
+        color: #0d1b3f;
+        padding: 24px;
+        margin-bottom: 30px;
+        text-align: center;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 1.3rem;
+        user-select: none;
+        transition: background 0.3s, box-shadow 0.3s, transform 0.15s, color .2s;
+        cursor: pointer;
+      }
+      .card-link .card:hover {
+        background: #f5f8ff;
+        color: #2b50d9 !important;
+        box-shadow: 0 8px 28px rgba(65,105,225,.22), 0 2px 12px rgba(65,105,225,.18);
+        transform: translateY(-4px) scale(1.02);
+      }
+      .card-link .card i {
+        font-size: 2.3rem;
+        margin-bottom: 10px;
+        display: block;
+        color: #4169e1;
+        transition: color 0.2s;
+      }
+      .card-link .card:hover i {
+        color: #2b50d9;
+      }
+
+      /* Formulários claros */
+      form .form-control,
+      form .form-select {
+        background: #ffffff;
+        border: 1.5px solid #c9d4ff;
+        color: #0d1b3f;
+      }
+      form label {
+        font-weight: 700;
+        color: #2b3e73;
+      }
+      form .form-control:focus,
+      form .form-select:focus {
+        border-color: #4169e1;
+        box-shadow: 0 0 0 .2rem rgba(65,105,225,.18);
+      }
+      form .btn-primary {
+        background: linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
+        color: #ffffff;
+        font-weight: bold;
+        border: none;
+        border-radius: 17px;
+        padding: 8px 20px;
+        margin-top: 10px;
+        box-shadow: 0 10px 18px rgba(65,105,225,.18);
+      }
+      form .btn-primary:hover {
+        background: #2b50d9;
+        color: #ffffff;
+      }
+
+      /* Gráfico – cores azuis */
+      #graficoCooperados {
+        max-height: 340px;
+        background: #ffffff;
+        border: 1px solid #e5ebff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(65,105,225,.10);
+        padding: 8px;
+      }
+
+      /* Tabela (se usar .tabela-cooperados) */
+      .tabela-cooperados,
+      .tabela-cooperados th,
+      .tabela-cooperados td {
+        color: #0d1b3f !important;
+        background-color: #ffffff !important;
+        border-color: #e5ebff !important;
+      }
+
+      @media (max-width: 900px) {
+        .sidebar {
+          display: none;
+        }
+        .main-content {
+        margin-left:0 !important;
+        padding:0 !important;
+          margin-left: 0;
+          padding: 12px;
+        }
+        .sidebar-funcao {
+          font-size: 0.86rem;
+          max-width: 78px;
+          padding: 0 2px;
+        }
+        .sidebar .logo {
+          width: 84px !important;
+        }
+      }
+    </style>
+
+<style id="cx-unified-style">
 :root{
-  --cx-royal-1:#244be8;
-  --cx-royal-2:#1c33b8;
-  --cx-royal-3:#5d7cff;
-  --cx-white:#ffffff;
-  --cx-ink:#eef3ff;
-  --cx-text:#0f172a;
-  --cx-muted:#61708f;
-  --cx-line:rgba(255,255,255,.16);
-  --cx-glass:rgba(255,255,255,.10);
-  --cx-glass-2:rgba(255,255,255,.18);
-  --cx-main-bg:#eef3ff;
-  --cx-main-card:#ffffff;
-  --cx-main-line:#dce6ff;
-  --cx-shadow:0 24px 60px rgba(18,33,120,.18);
-  --cx-shadow-soft:0 14px 34px rgba(15,23,42,.08);
+  --royal-blue:#2747d9;
+  --royal-blue-2:#3358f0;
+  --royal-dark:#16258a;
+  --royal-soft:#eef3ff;
+  --bg:#f4f7fc;
+  --card:#ffffff;
+  --text:#182033;
+  --muted:#7b879f;
+  --border:#e6ebf5;
+  --success:#12b76a;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --shadow:0 10px 30px rgba(17,24,39,.08);
+  --sidebar-w:278px;
+  --radius:20px;
 }
-
 *{box-sizing:border-box}
-html,body{min-height:100%}
-
+html{scroll-behavior:smooth}
 body{
   margin:0 !important;
-  background:
-    radial-gradient(1200px 500px at 0% 0%, rgba(36,75,232,.18), transparent 55%),
-    radial-gradient(1000px 420px at 100% 0%, rgba(93,124,255,.16), transparent 58%),
-    linear-gradient(180deg, #f5f8ff 0%, #eef3ff 100%) !important;
-  color:var(--cx-text) !important;
+  font-family:'Inter',sans-serif;
+  background:radial-gradient(circle at top right, rgba(39,71,217,.10), transparent 28%), linear-gradient(180deg, #f7f9fe 0%, #f2f5fb 100%) !important;
+  color:var(--text);
   overflow-x:hidden;
 }
-
-.coopex-shell{
-  display:flex;
-  min-height:100vh;
-  width:100%;
+.cx-shell{display:flex;min-height:100vh}
+.cx-sidebar{
+  position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;padding:18px 14px;
+  background:linear-gradient(180deg, rgba(51,88,240,1) 0%, rgba(39,71,217,1) 38%, rgba(22,37,138,1) 100%);
+  color:#fff;box-shadow:0 0 26px rgba(0,0,0,.22);z-index:1020;overflow-y:auto;display:flex;flex-direction:column
 }
-
-.coopex-sidebar{
-  width:268px;
-  min-width:268px;
-  background:linear-gradient(180deg, #3051ea 0%, #2439bf 100%);
-  color:var(--cx-ink);
-  padding:20px 14px;
-  position:fixed;
-  left:0;
-  top:0;
-  bottom:0;
-  overflow-y:auto;
-  overflow-x:hidden;
-  box-shadow:18px 0 45px rgba(20,31,116,.24);
-  z-index:1000;
+.cx-sidebar::-webkit-scrollbar{width:8px}.cx-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:999px}
+.cx-brand{position:relative;padding:16px;margin-bottom:14px;border-radius:18px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px)}
+.cx-brand-title{margin:0;font-family:'Orbitron',sans-serif;font-size:1.08rem;letter-spacing:.9px;text-transform:uppercase;line-height:1.28;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-brand-sub{display:block;margin-top:6px;font-size:.74rem;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-nav{padding:0;margin:0}
+.cx-nav-section{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.60);margin:14px 8px 8px}
+.cx-nav-divider{border-color:rgba(255,255,255,.08);margin:12px 0 8px}
+.cx-link,.cx-group-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;border-radius:14px;padding:10px 12px;margin:4px 0;background:transparent;color:#fff;text-decoration:none;font-size:.92rem;cursor:pointer;transition:all .18s ease}
+.cx-link:hover,.cx-group-toggle:hover{background:rgba(255,255,255,.10);transform:translateY(-1px);color:#fff}
+.cx-link.active,.cx-sublink.active{background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.18);box-shadow:0 8px 18px rgba(0,0,0,.10);color:#fff!important}
+.cx-link-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.cx-link-left span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-link-icon{width:22px;display:flex;justify-content:center;align-items:center;font-size:1rem;flex-shrink:0}
+.cx-caret{font-size:.82rem;opacity:.72;transition:transform .18s ease}
+.cx-group-toggle.open .cx-caret{transform:rotate(180deg)}
+.cx-sublinks{display:none;padding-left:16px;margin-bottom:6px}.cx-sublinks.open{display:block}
+.cx-sublink{display:flex;align-items:center;gap:8px;padding:8px 10px;margin:4px 0;border-radius:12px;color:rgba(255,255,255,.84);text-decoration:none;font-size:.84rem;transition:all .18s ease}
+.cx-sublink:hover{color:#fff;background:rgba(255,255,255,.10);transform:translateX(2px)}
+.cx-sidebar-footer{margin-top:auto;padding-top:10px}
+.cx-main{flex:1;margin-left:var(--sidebar-w);padding:20px 20px 30px;width:calc(100% - var(--sidebar-w));min-width:0}
+.cx-content-shell,.cx-main > .tab-content,.cx-main .tab-pane > .cx-content-shell,.cx-main .tab-pane > .container-fluid{max-width:none!important;width:100%;margin:0 auto 26px}
+/* hide old menus / logos / back buttons */
+body > .sidebar, .page > .sidebar, .layout > .sidebar, .content > .sidebar, .main-content > .sidebar, .navx, .navbox, .sidebar-nav, .sidebar-card, .mini, .meta, .footer, .sidebar .logo, .head-card .brand img, .brand img{display:none!important}
+a[href*="dashboard"].btn-ghost:first-child, .btn-voltar, .btn-side, .btn-top[href*="dashboard"], .btn-outline-warning[href*="dashboard"], .btn-outline-warning .bi-arrow-left{ }
+.page, .layout, .wrapper, .app{display:block!important;grid-template-columns:none!important;min-height:unset!important}
+.main-content, .content, .main, .container-x{margin-left:0!important;padding-left:0!important;padding-right:0!important;width:100%!important;max-width:none!important}
+.container, .container-fluid{max-width:100%!important}
+/* cards/forms lighter */
+.card, .cardx, .form-card, .ajustar-card, .head-card, .topbar, .header, .topbar, .table-wrap, .photo-card, .panel, .content-card{
+  border-radius:var(--radius)!important;
 }
-
-.coopex-sidebar::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(220px 160px at 24px 18px, rgba(255,255,255,.16), transparent 65%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
-  pointer-events:none;
+.form-card, .ajustar-card, .photo-card, .cardx, .card, .table-wrap, .panel, .content-card, .head-card{
+  background:var(--card)!important;border:1px solid var(--border)!important;box-shadow:var(--shadow)!important;
 }
-
-.glass-card{
-  position:relative;
-  border:1px solid var(--cx-line);
-  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 14px 34px rgba(16,28,102,.18);
+.form-shell{max-width:none!important;width:100%!important;display:block!important}
+.form-card{max-width:1000px!important;margin:0 auto!important}
+.ajustar-card{max-width:880px!important;margin:0 auto!important}
+.topbar, .header, .panel-head{
+  border-radius:28px!important;
+  background:linear-gradient(135deg, rgba(39,71,217,1) 0%, rgba(51,88,240,1) 52%, rgba(22,37,138,1) 100%)!important;
+  color:#fff!important;box-shadow:0 18px 40px rgba(39,71,217,.22)!important;border:1px solid rgba(255,255,255,.22)!important;
 }
-
-.coopex-brand{
-  border-radius:20px;
-  padding:14px 14px 13px;
-  margin-bottom:22px;
-  overflow:hidden;
+.topbar .btn, .header .btn, .panel-head .btn, .top-actions .btn, .actions .btn{border-radius:14px!important}
+/* remove old logos visually */
+.logo-preview, .head-card .brand img, .form-card .logo-preview img{display:none!important}
+/* typography */
+.brand-title,.topbar h1,.header h1,.panel-head-title,h1.title,h2,h4.titulo{font-family:'Orbitron',sans-serif!important}
+/* tables */
+.table-wrap{overflow:auto hidden!important}
+@media (max-width:991px){
+  .cx-sidebar{transform:translateX(-100%);transition:transform .22s ease}
+  .cx-sidebar.mobile-open{transform:translateX(0)}
+  .cx-main{margin-left:0;width:100%;padding:14px}
+  .cx-mobile-toggle{position:fixed;left:14px;top:14px;z-index:1100;border:none;width:46px;height:46px;border-radius:14px;color:#fff;background:linear-gradient(180deg,#3051ea,#2439bf);box-shadow:0 14px 30px rgba(20,31,116,.22)}
 }
-
-.brand-title{
-  font-family:'Orbitron',sans-serif;
-  font-size:1.08rem;
-  letter-spacing:.9px;
-  font-weight:600;
-  line-height:1.08;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  color:#f5f8ff;
-}
-
-.brand-sub{
-  margin-top:6px;
-  font-size:.74rem;
-  font-weight:500;
-  color:rgba(235,242,255,.88);
-  line-height:1.15;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.menu-label{
-  color:rgba(235,242,255,.62);
-  font-weight:700;
-  letter-spacing:.12em;
-  font-size:.68rem;
-  margin:10px 10px 12px;
-  text-transform:uppercase;
-}
-
-.coopex-nav{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  position:relative;
-  z-index:1;
-}
-
-.menu-link,
-.menu-group-toggle{
-  width:100%;
-  border:none;
-  text-decoration:none;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:12px 14px;
-  color:#f7fbff;
-  font-weight:600;
-  font-size:.92rem;
-  line-height:1.2;
-  border-radius:16px;
-  background:transparent;
-  transition:all .18s ease;
-  cursor:pointer;
-}
-
-.menu-link span,
-.group-left span{
-  flex:1;
-  min-width:0;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.menu-link i,
-.group-left i,
-.menu-group-toggle>.arrow{
-  font-size:.92rem;
-  color:#f5f9ff;
-  flex:0 0 auto;
-}
-
-.menu-link:hover,
-.menu-group-toggle:hover{
-  background:rgba(255,255,255,.10);
-  color:#fff;
-}
-
-.menu-link.active{
-  background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.10));
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
-}
-
-.group-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-  flex:1;
-}
-
-.menu-group-toggle .arrow{
-  opacity:.9;
-  transition:transform .18s ease;
-}
-
-.menu-group-toggle.open .arrow{
-  transform:rotate(180deg);
-}
-
-.menu-group{
-  display:none;
-  flex-direction:column;
-  gap:6px;
-  padding:0 0 4px 0;
-}
-
-.menu-group.open{
-  display:flex;
-}
-
-.menu-group .menu-link{
-  margin-left:8px;
-  width:calc(100% - 8px);
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);
-  padding:11px 14px;
-  font-size:.84rem;
-  font-weight:600;
-}
-
-.menu-group .menu-link.active{
-  background:linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.12));
-}
-
-.coopex-main{
-  flex:1;
-  margin-left:268px;
-  padding:22px 22px 24px;
-  min-width:0;
-  width:calc(100% - 268px);
-}
-
-.coopex-main > *{
-  width:100%;
-  max-width:none;
-}
-
-.coopex-main .app-card,
-.coopex-main .form-card,
-.coopex-main .content-card,
-.coopex-main .card,
-.coopex-main .panel,
-.coopex-main .stats-card,
-.coopex-main .summary-card,
-.coopex-main .box,
-.coopex-main .cardx{
-  box-shadow:var(--cx-shadow-soft);
-}
-
-.coopex-main .form-card,
-.coopex-main .content-card,
-.coopex-main .card,
-.coopex-main .panel,
-.coopex-main .cardx{
-  border-color:var(--cx-main-line) !important;
-}
-
-#voltar-admin-flutuante,
-.btn-voltar,
-.btn-side,
-.top-actions .btn:first-child{
-  display:none !important;
-}
-
-.sidebar,
-.navx,
-.sidebar-card,
-.nav.flex-column,
-.sidebar-nav,
-.topbar .btn-back{
-  display:none !important;
-}
-
-.page,
-.app,
-.wrapper,
-.layout{
-  display:block !important;
-  grid-template-columns:none !important;
-}
-
-.container,
-.container-fluid{
-  max-width:100% !important;
-}
-
-body > .form-card,
-body > .form-shell,
-body > .container,
-body > .container-fluid{
-  width:100%;
-}
-
-.form-shell{
-  max-width:none !important;
-}
-
-.form-card{
-  max-width:none !important;
-  background:rgba(255,255,255,.88) !important;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  border:1px solid rgba(220,230,255,.95) !important;
-}
-
-.head-card{
-  background:rgba(255,255,255,.72) !important;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-}
-
-.head-card .brand img,
-.brand img{
-  display:none !important;
-}
-
-.main-content,
-.main,
-.content{
-  margin-left:0 !important;
-  padding:0 !important;
-  width:100% !important;
-  max-width:100% !important;
-}
-
-.container-x{
-  width:100% !important;
-  max-width:none !important;
-  margin:0 !important;
-  padding:18px 0 26px !important;
-}
-
-.topbar,
-.header{
-  width:100% !important;
-  margin:0 0 24px 0 !important;
-}
-
-@media (max-width: 991px){
-  .coopex-sidebar{
-    transform:translateX(-100%);
-    transition:transform .22s ease;
-  }
-
-  .coopex-sidebar.mobile-open{
-    transform:translateX(0);
-  }
-
-  .coopex-main{
-    margin-left:0;
-    width:100%;
-    padding:14px;
-  }
-
-  .coopex-mobile-toggle{
-    position:fixed;
-    left:14px;
-    top:14px;
-    z-index:1100;
-    border:none;
-    width:46px;
-    height:46px;
-    border-radius:14px;
-    color:#fff;
-    background:linear-gradient(180deg, #3051ea, #2439bf);
-    box-shadow:0 14px 30px rgba(20,31,116,.22);
-  }
-}
-
-@media (min-width: 992px){
-  .coopex-mobile-toggle{
-    display:none !important;
-  }
-}
+@media (min-width:992px){.cx-mobile-toggle{display:none!important}}
 </style>
-<script id="coopex-unified-script">
+<script id="cx-unified-script">
 document.addEventListener('DOMContentLoaded', function(){
-  document.querySelectorAll('.menu-group-toggle').forEach(function(btn){
+  document.querySelectorAll('.cx-group-toggle').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var key = btn.getAttribute('data-group');
-      var panel = document.querySelector('.menu-group[data-panel="'+key+'"]');
       btn.classList.toggle('open');
-      if(panel) panel.classList.toggle('open');
+      var panel=btn.nextElementSibling; if(panel&&panel.classList.contains('cx-sublinks')) panel.classList.toggle('open');
     });
   });
-  var mob = document.querySelector('.coopex-mobile-toggle');
-  var sidebar = document.querySelector('.coopex-sidebar');
-  if(mob && sidebar){
-    mob.addEventListener('click', function(){ sidebar.classList.toggle('mobile-open'); });
-  }
+  var mob=document.querySelector('.cx-mobile-toggle');
+  var sidebar=document.querySelector('.cx-sidebar');
+  if(mob&&sidebar){ mob.addEventListener('click', function(){ sidebar.classList.toggle('mobile-open'); }); }
 });
 </script>
 
 </head>
 <body>
-<button class="coopex-mobile-toggle" type="button"><i class="bi bi-list"></i></button>
-<div class="coopex-shell">
 
-<aside class="coopex-sidebar">
-  <div class="coopex-brand glass-card">
-    <div class="brand-title">PAINEL COOPEX</div>
-    <div class="brand-sub">Administração Central</div>
-  </div>
-
-  <div class="menu-label">VISÃO GERAL</div>
-  <nav class="coopex-nav">
-    <a class="menu-link active" href="{{ url_for('dashboard') }}"><i class="bi bi-graph-up"></i><span>Resumo</span></a>
-
-    <button type="button" class="menu-group-toggle" data-group="financeiro">
-      <span class="group-left"><i class="bi bi-coin"></i><span>Financeiro</span></span>
-      <i class="bi bi-chevron-down arrow"></i>
-    </button>
-    <div class="menu-group" data-panel="financeiro">
-      <a class="menu-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i><span>Lançamentos</span></a>
+<button class="cx-mobile-toggle" type="button"><i class="bi bi-list"></i></button>
+<div class="cx-shell">
+  <aside class="cx-sidebar">
+    <div class="cx-brand">
+      <p class="cx-brand-title">Painel Coopex</p>
+      <span class="cx-brand-sub">Administração central</span>
     </div>
-
-    <button type="button" class="menu-group-toggle" data-group="cadastros">
-      <span class="group-left"><i class="bi bi-people"></i><span>Cadastros</span></span>
-      <i class="bi bi-chevron-down arrow"></i>
-    </button>
-    <div class="menu-group" data-panel="cadastros">
-      <a class="menu-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-person-badge"></i><span>Cooperados</span></a>
-      <a class="menu-link" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
-    </div>
-
-    <a class="menu-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i><span>Sair</span></a>
-  </nav>
-</aside>
-
-<main class="coopex-main">
-
-  <div class="sidebar">
+    <nav class="cx-nav">
+      <div class="cx-nav-section">Visão geral</div>
+      <a class="cx-link active" href="{{ url_for('dashboard') }}"><span class="cx-link-left"><i class="bi bi-speedometer2 cx-link-icon"></i><span>Resumo</span></span></a>
+      <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-coin cx-link-icon"></i><span>Financeiro</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
+      <div class="cx-sublinks open">
+        <a class="cx-sublink" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i><span>Lançamentos</span></a>
+      </div>
+      <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-people cx-link-icon"></i><span>Cadastros</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
+      <div class="cx-sublinks open">
+        <a class="cx-sublink" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-person-badge"></i><span>Cooperados</span></a>
+        <a class="cx-sublink" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
+      </div>
+      <hr class="cx-nav-divider">
+      <a class="cx-link" href="{{ url_for('logout') }}"><span class="cx-link-left"><i class="bi bi-box-arrow-left cx-link-icon"></i><span>Sair</span></span></a>
+    </nav>
+    <div class="cx-sidebar-footer"></div>
+  </aside>
+  <main class="cx-main"><div class="cx-content-shell">
+<div class="sidebar">
     <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo" />
     <div class="sidebar-funcao">Gestor</div>
     <a class="nav-link active" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
@@ -689,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function(){
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</main>
+  </div></main>
 </div>
 </body>
 </html>
