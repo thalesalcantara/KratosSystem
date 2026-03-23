@@ -2,98 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>
-    {% if cooperado %}Ajustar Crédito - {{ cooperado.nome }}{% else %}Ajustar Crédito{% endif %}
-  </title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-  <style>
-    :root{
-      --royal:#4169E1;   /* Azul-royal */
-      --royal-700:#2f52c9;
-      --royal-300:#6a8df5;
-      --white:#ffffff;
-    }
-    body{
-      background: var(--white);
-      font-family:'Roboto',Arial,sans-serif;
-      min-height:100vh;
-      display:flex;align-items:center;justify-content:center;
-      padding:18px
-    }
-    .ajustar-card{
-      background: var(--white);
-      color: var(--royal);
-      padding:36px 28px 24px;
-      border-radius:16px;
-      box-shadow:0 8px 32px rgba(65,105,225,.15);
-      border:1px solid rgba(65,105,225,.2);
-      width:100%;max-width:520px
-    }
-    .titulo{
-      font-family:'Orbitron',sans-serif;
-      letter-spacing:1.3px;color:var(--royal);text-align:center;margin-bottom:14px
-    }
-    .foto-cooperado{
-      width:90px;height:90px;object-fit:cover;border-radius:50%;
-      border:3px solid var(--royal);margin:10px auto;background:#fff;display:block;
-      box-shadow:0 0 8px rgba(65,105,225,.35)
-    }
-    .nome{color:var(--royal);text-align:center;margin-bottom:8px;font-weight:600}
-    label{color:var(--royal);font-weight:700}
-    .form-control{
-      background:var(--white);
-      border:1px solid rgba(65,105,225,.35);
-      color:var(--royal);
-      font-weight:600;border-radius:10px
-    }
-    .form-control::placeholder{color:rgba(65,105,225,.55)}
-    .form-control:focus{
-      border-color:var(--royal);
-      box-shadow:0 0 0 2px rgba(65,105,225,.25);
-      background:var(--white);color:var(--royal)
-    }
-    .hint{color:var(--royal-300);font-size:.92rem;margin-top:6px}
-    .preview{
-      margin-top:10px;font-weight:800;font-size:1.05rem;
-      color:var(--royal)
-    }
-    .preview .novo{font-size:1.18rem}
-    .novo.up{color:var(--royal)}     /* azul para alta */
-    .novo.down{color:var(--royal)}   /* azul para baixa (mantendo paleta) */
-    .novo.neutral{color:var(--royal)}
-    .btn-primary{
-      background:linear-gradient(90deg,var(--royal) 60%,var(--royal-300) 100%);
-      color:#fff;font-weight:bold;border:none;border-radius:13px;width:100%;margin-top:12px
-    }
-    .btn-primary:hover{background:var(--royal-700);color:#fff}
-    .btn-outline-warning{ /* reutilizado como outline azul */
-      border-radius:13px;border-color:var(--royal);color:var(--royal)
-    }
-    .btn-outline-warning:hover{background:var(--royal);color:#fff}
-    /* deixar os botões “rápidos” no tema azul */
-    .btn-outline-light{
-      border-color:var(--royal); color:var(--royal); background:#fff;
-    }
-    .btn-outline-light:hover{background:var(--royal); color:#fff;}
-    /* secundário também no tema azul/branco */
-    .btn.btn-secondary{
-      background:#fff; color:var(--royal);
-      border:1px solid var(--royal);
-    }
-    .btn.btn-secondary:hover{background:var(--royal); color:#fff;}
-    .alert{
-      background:var(--royal);
-      color:#fff;font-weight:700;border-radius:9px;margin-bottom:12px;text-align:center
-    }
-    .linha-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .inline-buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-    .inline-buttons .btn{border-radius:10px;padding:.3rem .6rem}
-  </style>
-
-<style id="coopex-unified-style">
+  <style id="coopex-unified-style">
 :root{
   --cx-royal-1:#244be8;
   --cx-royal-2:#1c33b8;
@@ -111,7 +20,11 @@
   --cx-shadow:0 24px 60px rgba(18,33,120,.18);
   --cx-shadow-soft:0 14px 34px rgba(15,23,42,.08);
 }
-html,body{min-height:100%}
+
+html,body{
+  min-height:100%;
+}
+
 body{
   margin:0 !important;
   background:
@@ -120,11 +33,13 @@ body{
     linear-gradient(180deg, #f5f8ff 0%, #eef3ff 100%) !important;
   color:var(--cx-text) !important;
 }
+
 .coopex-shell{
   display:flex;
   min-height:100vh;
   width:100%;
 }
+
 .coopex-sidebar{
   width:268px;
   min-width:268px;
@@ -135,10 +50,11 @@ body{
   left:0;
   top:0;
   bottom:0;
-  overflow-y:auto;
+  overflow-y:hidden;
   box-shadow:18px 0 45px rgba(20,31,116,.24);
   z-index:1000;
 }
+
 .coopex-sidebar::before{
   content:"";
   position:absolute;
@@ -148,6 +64,7 @@ body{
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
   pointer-events:none;
 }
+
 .glass-card{
   position:relative;
   border:1px solid var(--cx-line);
@@ -156,37 +73,52 @@ body{
   -webkit-backdrop-filter:blur(10px);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 14px 34px rgba(16,28,102,.18);
 }
+
 .coopex-brand{
   border-radius:20px;
   padding:14px 14px 13px;
   margin-bottom:22px;
   overflow:hidden;
 }
+
 .brand-title{
-  font-family:Orbitron, Inter, sans-serif;
-  font-size:1.34rem;
-  letter-spacing:.18px;
-  font-weight:700;
+  font-family:'Orbitron', sans-serif;
+  font-size:1.08rem;
+  letter-spacing:.9px;
+  font-weight:600;
   line-height:1.08;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  color:#f8fbff;
+  color:#f5f8ff;
 }
+
 .brand-sub{
   margin-top:6px;
-  font-size:.95rem;
-  color:rgba(245,249,255,.88);
+  font-size:.74rem;
+  font-weight:500;
+  color:rgba(235,242,255,.88);
+  line-height:1.15;
 }
+
 .menu-label{
   color:rgba(235,242,255,.62);
-  font-weight:800;
-  letter-spacing:1.8px;
-  font-size:.92rem;
-  margin:8px 10px 14px;
+  font-weight:700;
+  letter-spacing:.12em;
+  font-size:.68rem;
+  margin:10px 10px 12px;
 }
-.coopex-nav{display:flex;flex-direction:column;gap:8px; position:relative; z-index:1;}
-.menu-link,.menu-group-toggle{
+
+.coopex-nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  position:relative;
+  z-index:1;
+}
+
+.menu-link,
+.menu-group-toggle{
   width:100%;
   border:none;
   text-decoration:none;
@@ -194,65 +126,92 @@ body{
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  padding:13px 14px;
+  padding:12px 14px;
   color:#f7fbff;
-  font-weight:700;
-  font-size:1.02rem;
+  font-weight:600;
+  font-size:.92rem;
+  line-height:1.2;
   border-radius:16px;
   background:transparent;
   transition:all .18s ease;
 }
-.menu-link span, .group-left span{flex:1}
-.menu-link i,.group-left i,.menu-group-toggle>.arrow{
-  font-size:1rem;
+
+.menu-link span,
+.group-left span{
+  flex:1;
+}
+
+.menu-link i,
+.group-left i,
+.menu-group-toggle > .arrow{
+  font-size:.92rem;
   color:#f5f9ff;
 }
-.menu-link:hover,.menu-group-toggle:hover{
+
+.menu-link:hover,
+.menu-group-toggle:hover{
   background:rgba(255,255,255,.10);
   color:#fff;
 }
+
 .menu-link.active{
   background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.10));
   border:1px solid rgba(255,255,255,.18);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
 }
+
 .group-left{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:10px;
 }
+
 .menu-group-toggle .arrow{
   opacity:.9;
   transition:transform .18s ease;
 }
-.menu-group-toggle.open .arrow{transform:rotate(180deg)}
+
+.menu-group-toggle.open .arrow{
+  transform:rotate(180deg);
+}
+
 .menu-group{
   display:none;
   flex-direction:column;
   gap:6px;
   padding:0 0 4px 0;
 }
-.menu-group.open{display:flex}
+
+.menu-group.open{
+  display:flex;
+}
+
 .menu-group .menu-link{
   margin-left:8px;
   width:calc(100% - 8px);
   background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08);
-  padding:12px 14px;
+  padding:11px 14px;
+  font-size:.84rem;
+  font-weight:600;
 }
+
 .menu-group .menu-link.active{
   background:linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.12));
 }
+
 .coopex-main{
   flex:1;
   margin-left:258px;
   padding:22px 22px 24px;
   min-width:0;
 }
+
 .coopex-main > *{
   width:100%;
   max-width:none;
 }
+
 .coopex-main .app-card,
 .coopex-main .form-card,
 .coopex-main .content-card,
@@ -263,12 +222,14 @@ body{
 .coopex-main .box{
   box-shadow:var(--cx-shadow-soft);
 }
+
 .coopex-main .form-card,
 .coopex-main .content-card,
 .coopex-main .card,
 .coopex-main .panel{
   border-color:var(--cx-main-line) !important;
 }
+
 #voltar-admin-flutuante,
 .btn-voltar,
 a[href*="dashboard"].btn-ghost:first-child,
@@ -279,26 +240,40 @@ a[href*="dashboard"].btn.btn-outline-warning,
 .top-actions .btn:first-child{
   display:none !important;
 }
-/* hide old sidebars/navs/quick side menus */
-.sidebar, .navx, .sidebar-card, .nav.flex-column, .sidebar-nav, .topbar .btn-back{
+
+.sidebar,
+.navx,
+.sidebar-card,
+.nav.flex-column,
+.sidebar-nav,
+.topbar .btn-back{
   display:none !important;
 }
-.page, .app, .wrapper, .layout{
+
+.page,
+.app,
+.wrapper,
+.layout{
   display:block !important;
   grid-template-columns:none !important;
 }
-.container, .container-fluid{
+
+.container,
+.container-fluid{
   max-width:100% !important;
 }
+
 body > .form-card,
 body > .form-shell,
 body > .container,
 body > .container-fluid{
   width:100%;
 }
+
 .form-shell{
   max-width:none !important;
 }
+
 .form-card{
   max-width:none !important;
   background:rgba(255,255,255,.88) !important;
@@ -306,38 +281,53 @@ body > .container-fluid{
   -webkit-backdrop-filter:blur(10px);
   border:1px solid rgba(220,230,255,.95) !important;
 }
+
 .head-card{
   background:rgba(255,255,255,.72) !important;
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
 }
+
 .head-card .brand img,
-.brand img{display:none !important;}
+.brand img{
+  display:none !important;
+}
+
 @media (max-width: 991px){
   .coopex-sidebar{
     transform:translateX(-100%);
     transition:transform .22s ease;
+    overflow-y:auto;
   }
-  .coopex-sidebar.mobile-open{transform:translateX(0)}
+
+  .coopex-sidebar.mobile-open{
+    transform:translateX(0);
+  }
+
   .coopex-main{
     margin-left:0;
     padding:14px;
   }
+
   .coopex-mobile-toggle{
     position:fixed;
     left:14px;
     top:14px;
     z-index:1100;
     border:none;
-    width:46px;height:46px;
+    width:46px;
+    height:46px;
     border-radius:14px;
     color:#fff;
     background:linear-gradient(180deg, #3051ea, #2439bf);
     box-shadow:0 14px 30px rgba(20,31,116,.22);
   }
 }
+
 @media (min-width: 992px){
-  .coopex-mobile-toggle{display:none !important;}
+  .coopex-mobile-toggle{
+    display:none !important;
+  }
 }
 </style>
 <script id="coopex-unified-script">
