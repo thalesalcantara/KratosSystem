@@ -635,14 +635,19 @@ body{
 }
 .coopex-brand{
   border-radius:20px;
-  padding:16px 16px 15px;
-  margin-bottom:24px;
+  padding:14px 14px 13px;
+  margin-bottom:22px;
+  overflow:hidden;
 }
 .brand-title{
   font-family:Orbitron, Inter, sans-serif;
-  font-size:1.8rem;
-  letter-spacing:.6px;
+  font-size:1.34rem;
+  letter-spacing:.18px;
   font-weight:700;
+  line-height:1.08;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
   color:#f8fbff;
 }
 .brand-sub{
@@ -717,12 +722,13 @@ body{
 }
 .coopex-main{
   flex:1;
-  margin-left:268px;
+  margin-left:258px;
   padding:22px 22px 24px;
   min-width:0;
 }
 .coopex-main > *{
-  max-width:1400px;
+  width:100%;
+  max-width:none;
 }
 .coopex-main .app-card,
 .coopex-main .form-card,
