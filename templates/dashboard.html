@@ -569,9 +569,305 @@
       .header{position: static;}
     }
   </style>
+
+<style id="coopex-unified-style">
+:root{
+  --cx-royal-1:#244be8;
+  --cx-royal-2:#1c33b8;
+  --cx-royal-3:#5d7cff;
+  --cx-white:#ffffff;
+  --cx-ink:#eef3ff;
+  --cx-text:#0f172a;
+  --cx-muted:#61708f;
+  --cx-line:rgba(255,255,255,.16);
+  --cx-glass:rgba(255,255,255,.10);
+  --cx-glass-2:rgba(255,255,255,.18);
+  --cx-main-bg:#eef3ff;
+  --cx-main-card:#ffffff;
+  --cx-main-line:#dce6ff;
+  --cx-shadow:0 24px 60px rgba(18,33,120,.18);
+  --cx-shadow-soft:0 14px 34px rgba(15,23,42,.08);
+}
+html,body{min-height:100%}
+body{
+  margin:0 !important;
+  background:
+    radial-gradient(1200px 500px at 0% 0%, rgba(36,75,232,.18), transparent 55%),
+    radial-gradient(1000px 420px at 100% 0%, rgba(93,124,255,.16), transparent 58%),
+    linear-gradient(180deg, #f5f8ff 0%, #eef3ff 100%) !important;
+  color:var(--cx-text) !important;
+}
+.coopex-shell{
+  display:flex;
+  min-height:100vh;
+  width:100%;
+}
+.coopex-sidebar{
+  width:268px;
+  min-width:268px;
+  background:linear-gradient(180deg, #3051ea 0%, #2439bf 100%);
+  color:var(--cx-ink);
+  padding:20px 14px;
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  overflow-y:auto;
+  box-shadow:18px 0 45px rgba(20,31,116,.24);
+  z-index:1000;
+}
+.coopex-sidebar::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(220px 160px at 24px 18px, rgba(255,255,255,.16), transparent 65%),
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
+  pointer-events:none;
+}
+.glass-card{
+  position:relative;
+  border:1px solid var(--cx-line);
+  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 14px 34px rgba(16,28,102,.18);
+}
+.coopex-brand{
+  border-radius:20px;
+  padding:16px 16px 15px;
+  margin-bottom:24px;
+}
+.brand-title{
+  font-family:Orbitron, Inter, sans-serif;
+  font-size:1.8rem;
+  letter-spacing:.6px;
+  font-weight:700;
+  color:#f8fbff;
+}
+.brand-sub{
+  margin-top:6px;
+  font-size:.95rem;
+  color:rgba(245,249,255,.88);
+}
+.menu-label{
+  color:rgba(235,242,255,.62);
+  font-weight:800;
+  letter-spacing:1.8px;
+  font-size:.92rem;
+  margin:8px 10px 14px;
+}
+.coopex-nav{display:flex;flex-direction:column;gap:8px; position:relative; z-index:1;}
+.menu-link,.menu-group-toggle{
+  width:100%;
+  border:none;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:13px 14px;
+  color:#f7fbff;
+  font-weight:700;
+  font-size:1.02rem;
+  border-radius:16px;
+  background:transparent;
+  transition:all .18s ease;
+}
+.menu-link span, .group-left span{flex:1}
+.menu-link i,.group-left i,.menu-group-toggle>.arrow{
+  font-size:1rem;
+  color:#f5f9ff;
+}
+.menu-link:hover,.menu-group-toggle:hover{
+  background:rgba(255,255,255,.10);
+  color:#fff;
+}
+.menu-link.active{
+  background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.10));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+}
+.group-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.menu-group-toggle .arrow{
+  opacity:.9;
+  transition:transform .18s ease;
+}
+.menu-group-toggle.open .arrow{transform:rotate(180deg)}
+.menu-group{
+  display:none;
+  flex-direction:column;
+  gap:6px;
+  padding:0 0 4px 0;
+}
+.menu-group.open{display:flex}
+.menu-group .menu-link{
+  margin-left:8px;
+  width:calc(100% - 8px);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  padding:12px 14px;
+}
+.menu-group .menu-link.active{
+  background:linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.12));
+}
+.coopex-main{
+  flex:1;
+  margin-left:268px;
+  padding:22px 22px 24px;
+  min-width:0;
+}
+.coopex-main > *{
+  max-width:1400px;
+}
+.coopex-main .app-card,
+.coopex-main .form-card,
+.coopex-main .content-card,
+.coopex-main .card,
+.coopex-main .panel,
+.coopex-main .stats-card,
+.coopex-main .summary-card,
+.coopex-main .box{
+  box-shadow:var(--cx-shadow-soft);
+}
+.coopex-main .form-card,
+.coopex-main .content-card,
+.coopex-main .card,
+.coopex-main .panel{
+  border-color:var(--cx-main-line) !important;
+}
+#voltar-admin-flutuante,
+.btn-voltar,
+a[href*="dashboard"].btn-ghost:first-child,
+a[href*="dashboard"].btn-top:first-child,
+a[href*="painel_admin"].btn-top:first-child,
+a[href*="dashboard"].btn.btn-outline-warning,
+.btn-side,
+.top-actions .btn:first-child{
+  display:none !important;
+}
+/* hide old sidebars/navs/quick side menus */
+.sidebar, .navx, .sidebar-card, .nav.flex-column, .sidebar-nav, .topbar .btn-back{
+  display:none !important;
+}
+.page, .app, .wrapper, .layout{
+  display:block !important;
+  grid-template-columns:none !important;
+}
+.container, .container-fluid{
+  max-width:100% !important;
+}
+body > .form-card,
+body > .form-shell,
+body > .container,
+body > .container-fluid{
+  width:100%;
+}
+.form-shell{
+  max-width:none !important;
+}
+.form-card{
+  max-width:none !important;
+  background:rgba(255,255,255,.88) !important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(220,230,255,.95) !important;
+}
+.head-card{
+  background:rgba(255,255,255,.72) !important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.head-card .brand img,
+.brand img{display:none !important;}
+@media (max-width: 991px){
+  .coopex-sidebar{
+    transform:translateX(-100%);
+    transition:transform .22s ease;
+  }
+  .coopex-sidebar.mobile-open{transform:translateX(0)}
+  .coopex-main{
+    margin-left:0;
+    padding:14px;
+  }
+  .coopex-mobile-toggle{
+    position:fixed;
+    left:14px;
+    top:14px;
+    z-index:1100;
+    border:none;
+    width:46px;height:46px;
+    border-radius:14px;
+    color:#fff;
+    background:linear-gradient(180deg, #3051ea, #2439bf);
+    box-shadow:0 14px 30px rgba(20,31,116,.22);
+  }
+}
+@media (min-width: 992px){
+  .coopex-mobile-toggle{display:none !important;}
+}
+</style>
+<script id="coopex-unified-script">
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.menu-group-toggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var key = btn.getAttribute('data-group');
+      var panel = document.querySelector('.menu-group[data-panel="'+key+'"]');
+      btn.classList.toggle('open');
+      if(panel) panel.classList.toggle('open');
+    });
+  });
+  var mob = document.querySelector('.coopex-mobile-toggle');
+  var sidebar = document.querySelector('.coopex-sidebar');
+  if(mob && sidebar){
+    mob.addEventListener('click', function(){ sidebar.classList.toggle('mobile-open'); });
+  }
+});
+</script>
+
 </head>
 
 <body>
+<button class="coopex-mobile-toggle" type="button"><i class="bi bi-list"></i></button>
+<div class="coopex-shell">
+
+<aside class="coopex-sidebar">
+  <div class="coopex-brand glass-card">
+    <div class="brand-title">PAINEL COOPEX</div>
+    <div class="brand-sub">Administração Central</div>
+  </div>
+
+  <div class="menu-label">VISÃO GERAL</div>
+  <nav class="coopex-nav">
+    <a class="menu-link active" href="{{ url_for('dashboard') }}"><i class="bi bi-graph-up"></i><span>Resumo</span></a>
+
+    <button type="button" class="menu-group-toggle" data-group="financeiro">
+      <span class="group-left"><i class="bi bi-coin"></i><span>Financeiro</span></span>
+      <i class="bi bi-chevron-down arrow"></i>
+    </button>
+    <div class="menu-group" data-panel="financeiro">
+      <a class="menu-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i><span>Lançamentos</span></a>
+    </div>
+
+    <button type="button" class="menu-group-toggle" data-group="cadastros">
+      <span class="group-left"><i class="bi bi-people"></i><span>Cadastros</span></span>
+      <i class="bi bi-chevron-down arrow"></i>
+    </button>
+    <div class="menu-group" data-panel="cadastros">
+      <a class="menu-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-person-badge"></i><span>Cooperados</span></a>
+      <a class="menu-link" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
+    </div>
+
+    <a class="menu-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i><span>Sair</span></a>
+  </nav>
+</aside>
+
+<main class="coopex-main">
+
   <div class="page">
 
     <!-- Sidebar -->
@@ -989,5 +1285,7 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</main>
+</div>
 </body>
 </html>
