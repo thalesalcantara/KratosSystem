@@ -1,597 +1,272 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>Estabelecimentos - Coopex</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Fonts / Bootstrap / Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <meta charset="UTF-8" />
+    <title>Dashboard Admin - Coopex</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      /* ===== TEMA AZUL-ROYAL + BRANCO (apenas cores) ===== */
+      body {
+        background: #f7f9ff; /* claro */
+        font-family: "Roboto", Arial, sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        color: #0d1b3f; /* texto principal escuro */
+      }
 
-  <style>
-    :root{
-      /* Mesmo tom “Azul Royal” do Lançamentos */
-      --bg:#f6f8ff;
-      --panel:#ffffff;
-      --line:#e4ebff;
-      --ink:#0f172a;
-      --muted:#5b6b8a;
+      /* Sidebar clara com azul-royal */
+      .sidebar {
+        width: 210px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: #ffffff;
+        color: #0d1b3f;
+        box-shadow: 3px 0 16px rgba(65,105,225,.12);
+        border-right: 1px solid #e5ebff;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 30px;
+      }
+      .sidebar .logo {
+        width: 210px !important; /* mantém seu 3x maior */
+        height: auto !important;
+        margin: 34px auto 4px auto;
+        display: block;
+        filter: drop-shadow(0 0 12px rgba(65,105,225,.35));
+        transition: width .2s;
+      }
+      .sidebar-funcao {
+        font-family: 'Orbitron', sans-serif;
+        color: #4169e1; /* royal */
+        font-size: 0.91rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 0 0 14px 0;
+        padding: 0 3px;
+        max-width: 96px;
+        line-height: 1.08;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        background: none;
+      }
+      .sidebar .nav-link {
+        color: #0d1b3f;
+        font-size: 1.08rem;
+        border-radius: 8px;
+        margin: 3px 0;
+        padding: 11px 20px;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.22s, color 0.22s;
+        width: 100%;
+        box-sizing: border-box;
+        background: #ffffff;
+      }
+      .sidebar .nav-link.active,
+      .sidebar .nav-link:hover {
+        background: #eef3ff; /* hover claro */
+        color: #4169e1 !important;
+      }
+      .sidebar .nav-link i {
+        font-size: 1.2rem;
+        margin-right: 10px;
+        color: #4169e1;
+      }
 
-      --royal:#1f4fe0;
-      --royal2:#3a66ff;
-      --royal3:#163ab0;
+      /* Main / Topbar azul-royal em gradiente */
+      .main-content {
+        margin-left:0 !important;
+        padding:0 !important;
+        margin-left: 230px;
+        padding: 38px 32px 20px 32px;
+      }
+      .topbar {
+        background: linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1.5px solid rgba(255,255,255,.25);
+        box-shadow: 0 8px 24px rgba(65,105,225,.25);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-radius: 14px;
+        padding: 0 8px;
+        color: #fff;
+      }
+      .topbar .btn-voltar {
+        font-weight: 700;
+        border-radius: 20px;
+        background: #ffffff;
+        color: #4169e1;
+        border: 1px solid #ffffff;
+        margin-right: 16px;
+        transition: background 0.2s, color 0.2s;
+      }
+      .topbar .btn-voltar:hover {
+        background: #2b50d9;
+        color: #ffffff;
+        border-color: #2b50d9;
+      }
+      .topbar span {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.07rem;
+        max-width: 220px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .topbar .btn-logout,
+      #btn-ativar-som-servico {
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+      }
+      .topbar .btn-logout:hover,
+      #btn-ativar-som-servico:hover {
+        background: #ffffff !important;
+        color: #4169e1 !important;
+      }
 
-      --ok:#10b981;
-      --danger:#ef4444;
+      /* Título */
+      h2 {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        color: #4169e1;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
 
-      --shadow: 0 14px 34px rgba(31,79,224,.12);
-      --shadow2: 0 18px 46px rgba(15,23,42,.08);
-      --radius: 18px;
-    }
+      /* Cards claros */
+      .card-link {
+        text-decoration: none !important;
+      }
+      .card-link .card {
+        background: #ffffff;
+        border-radius: 17px;
+        box-shadow: 0 8px 28px rgba(65,105,225,.14), 0 2px 8px rgba(65,105,225,.10);
+        border: 1px solid #e5ebff;
+        color: #0d1b3f;
+        padding: 24px;
+        margin-bottom: 30px;
+        text-align: center;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 1.3rem;
+        user-select: none;
+        transition: background 0.3s, box-shadow 0.3s, transform 0.15s, color .2s;
+        cursor: pointer;
+      }
+      .card-link .card:hover {
+        background: #f5f8ff;
+        color: #2b50d9 !important;
+        box-shadow: 0 8px 28px rgba(65,105,225,.22), 0 2px 12px rgba(65,105,225,.18);
+        transform: translateY(-4px) scale(1.02);
+      }
+      .card-link .card i {
+        font-size: 2.3rem;
+        margin-bottom: 10px;
+        display: block;
+        color: #4169e1;
+        transition: color 0.2s;
+      }
+      .card-link .card:hover i {
+        color: #2b50d9;
+      }
 
-    *{box-sizing:border-box}
-    html,body{overflow-x:hidden}
+      /* Formulários claros */
+      form .form-control,
+      form .form-select {
+        background: #ffffff;
+        border: 1.5px solid #c9d4ff;
+        color: #0d1b3f;
+      }
+      form label {
+        font-weight: 700;
+        color: #2b3e73;
+      }
+      form .form-control:focus,
+      form .form-select:focus {
+        border-color: #4169e1;
+        box-shadow: 0 0 0 .2rem rgba(65,105,225,.18);
+      }
+      form .btn-primary {
+        background: linear-gradient(90deg, #4169e1 0%, #5a7df0 100%);
+        color: #ffffff;
+        font-weight: bold;
+        border: none;
+        border-radius: 17px;
+        padding: 8px 20px;
+        margin-top: 10px;
+        box-shadow: 0 10px 18px rgba(65,105,225,.18);
+      }
+      form .btn-primary:hover {
+        background: #2b50d9;
+        color: #ffffff;
+      }
 
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(1200px 520px at 85% -20%, rgba(31,79,224,.14), transparent 60%),
-        radial-gradient(900px 420px at 10% 0%, rgba(16,185,129,.08), transparent 60%),
-        linear-gradient(180deg, var(--bg), var(--bg));
-    }
+      /* Gráfico – cores azuis */
+      #graficoCooperados {
+        max-height: 340px;
+        background: #ffffff;
+        border: 1px solid #e5ebff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(65,105,225,.10);
+        padding: 8px;
+      }
 
-    /* ===== Layout ===== */
-    .layout{
-      display:flex;
-      min-height:100vh;
-    }
+      /* Tabela (se usar .tabela-cooperados) */
+      .tabela-cooperados,
+      .tabela-cooperados th,
+      .tabela-cooperados td {
+        color: #0d1b3f !important;
+        background-color: #ffffff !important;
+        border-color: #e5ebff !important;
+      }
 
-    /* ===== Sidebar (desktop) ===== */
-    .sidebar{
-      width: 260px;
-      flex: 0 0 260px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid var(--line);
-      box-shadow: 10px 0 34px rgba(15,23,42,.06);
-      padding: 16px 12px;
-      z-index: 30;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
+      @media (max-width: 900px) {
+        .sidebar {
+          display: none;
+        }
+        .main-content {
+        margin-left:0 !important;
+        padding:0 !important;
+          margin-left: 0;
+          padding: 12px;
+        }
+        .sidebar-funcao {
+          font-size: 0.86rem;
+          max-width: 78px;
+          padding: 0 2px;
+        }
+        .sidebar .logo {
+          width: 84px !important;
+        }
+      }
+    </style>
 
-    .brand{
-      border-radius: var(--radius);
-      background: linear-gradient(90deg, rgba(31,79,224,.10), rgba(58,102,255,.06));
-      border: 1px solid rgba(31,79,224,.18);
-      padding: 14px 12px;
-      box-shadow: 0 14px 30px rgba(31,79,224,.08);
-      display:flex;
-      align-items:center;
-      gap: 10px;
-    }
-    .brand img{
-      width: 54px; height: 54px;
-      object-fit: contain;
-      border-radius: 16px;
-      background:#fff;
-      border: 1px solid rgba(31,79,224,.18);
-      box-shadow: 0 10px 18px rgba(31,79,224,.10);
-      padding: 6px;
-    }
-    .brand .title{
-      min-width:0;
-      line-height:1.15;
-    }
-    .brand .title .t{
-      margin:0;
-      font-family: Orbitron, Inter, sans-serif;
-      font-weight: 900;
-      letter-spacing: .6px;
-      color: var(--royal3);
-      font-size: 14px;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .brand .title .s{
-      margin: 4px 0 0;
-      font-weight: 800;
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    .navbox{
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-      background:#fff;
-      box-shadow: var(--shadow2);
-      padding: 10px;
-    }
-
-    .nav-link{
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight: 900;
-      color: #1b2b5e;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      transition: background .15s, transform .05s, color .15s;
-      margin: 4px 0;
-    }
-    .nav-link i{
-      color: var(--royal3);
-      font-size: 1.15rem;
-    }
-    .nav-link:hover{
-      background:#f1f5ff;
-      color: var(--royal3);
-    }
-    .nav-link.active{
-      background: linear-gradient(90deg, rgba(31,79,224,.14), rgba(58,102,255,.08));
-      border: 1px solid rgba(31,79,224,.18);
-      color: var(--royal3);
-    }
-
-    .sidebar .footer{
-      margin-top:auto;
-      padding: 10px;
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-      background:#fff;
-      box-shadow: 0 10px 22px rgba(15,23,42,.06);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .who{
-      min-width:0;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-    }
-    .who .dot{
-      width: 10px; height: 10px;
-      border-radius: 999px;
-      background: var(--ok);
-      box-shadow: 0 0 0 4px rgba(16,185,129,.12);
-    }
-    .who .name{
-      font-weight: 900;
-      color: #0f172a;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 140px;
-      font-size: 12px;
-    }
-    .btn-logout{
-      height: 38px;
-      padding: 0 12px;
-      border-radius: 14px;
-      font-weight: 900;
-      border: 1px solid rgba(31,79,224,.18);
-      background: #fff;
-      color: var(--royal3);
-    }
-    .btn-logout:hover{ background:#f1f5ff; }
-
-    /* ===== Main ===== */
-    .main{
-      flex: 1 1 auto;
-      padding: 16px 18px 28px;
-      width: 100%;
-    }
-
-    .container-x{
-      width: min(1600px, calc(100vw - 320px)); /* ocupa bem no desktop com sidebar */
-      margin: 0 auto;
-    }
-
-    /* ===== Topbar (main) ===== */
-    .topbar{
-      position: sticky;
-      top: 12px;
-      z-index: 20;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 14px 14px;
-      border-radius: var(--radius);
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal2) 55%, var(--royal3) 100%);
-      color:#fff;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,.22);
-    }
-    .topbar .left{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      min-width: 0;
-    }
-    .topbar .left .ico{
-      width: 44px; height: 44px;
-      border-radius: 14px;
-      display:grid; place-items:center;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.18);
-      flex: 0 0 auto;
-    }
-    .topbar .left .txt{
-      min-width:0;
-      line-height:1.1;
-    }
-    .topbar .left .txt .t{
-      margin:0;
-      font-family: Orbitron, Inter, sans-serif;
-      font-weight: 900;
-      letter-spacing: .6px;
-      font-size: 15px;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .topbar .left .txt .s{
-      margin:4px 0 0;
-      font-weight: 800;
-      font-size: 12px;
-      opacity: .92;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    .top-actions{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .btn-top{
-      height: 42px;
-      padding: 0 12px;
-      border-radius: 14px;
-      font-weight: 900;
-      border: 1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.10);
-      color:#fff;
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      text-decoration:none;
-    }
-    .btn-top:hover{ background: rgba(255,255,255,.16); color:#fff; }
-
-    /* ===== Cards ===== */
-    .cardx{
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow2);
-      padding: 14px;
-      margin-top: 12px;
-    }
-
-    /* ===== Header + Controles ===== */
-    .toolbar{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .view-switch{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn-toggle{
-      height: 42px;
-      border-radius: 14px;
-      font-weight: 900;
-      border: 1px solid rgba(31,79,224,.18);
-      background:#fff;
-      color: var(--royal3);
-      padding: 0 12px;
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      box-shadow: 0 10px 18px rgba(15,23,42,.06);
-    }
-    .btn-toggle:hover{ background:#f1f5ff; }
-    .btn-toggle.active{
-      border: none;
-      color:#fff;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
-      box-shadow: 0 12px 22px rgba(31,79,224,.14);
-    }
-
-    .search{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      background:#fff;
-      border: 1px solid #cfe0ff;
-      border-radius: 14px;
-      padding: 8px 10px;
-      box-shadow: inset 0 0 0 1px rgba(31,79,224,.04);
-    }
-    .search i{ color:#6b7aa6; }
-    .search input{
-      border:none; outline:none;
-      background: transparent;
-      width: 260px;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .btn-main{
-      height: 42px;
-      padding: 0 14px;
-      border-radius: 14px;
-      font-weight: 900;
-      border:none;
-      color:#fff;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
-      box-shadow: 0 12px 22px rgba(31,79,224,.14);
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      text-decoration:none;
-    }
-    .btn-main:hover{ filter: brightness(1.03); color:#fff; }
-
-    /* ===== KPIs ===== */
-    .kpis{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .kpi{
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px;
-      background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
-      box-shadow: 0 10px 22px rgba(15,23,42,.04);
-    }
-    .kpi .label{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      color:#1f2b4a;
-      font-weight: 900;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-    .kpi .label i{ color: var(--royal3); }
-    .kpi .value{
-      margin-top: 8px;
-      font: 900 22px/1 Orbitron, Inter, sans-serif;
-      color: var(--royal3);
-      font-variant-numeric: tabular-nums;
-    }
-    .chips{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #f3f6ff;
-      color:#1b2b5e;
-      font-weight: 900;
-      font-size: 12px;
-      box-shadow: 0 8px 16px rgba(31,79,224,.06);
-    }
-    .chip .count{
-      padding: 2px 10px;
-      border-radius: 999px;
-      background: rgba(31,79,224,.12);
-      color: var(--royal3);
-      font-weight: 900;
-    }
-
-    /* ===== Table ===== */
-    .table-wrap{
-      border-radius: 16px;
-      overflow: hidden;
-      background:#fff;
-      border: 1px solid var(--line);
-      box-shadow: 0 8px 18px rgba(31,79,224,.08);
-      margin-top: 12px;
-    }
-    table{
-      width: 100%;
-      margin:0;
-      text-align:center;
-      border-collapse: collapse;
-    }
-    thead th{
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      background: #f2f6ff;
-      color: var(--royal3)!important;
-      font-family: Orbitron, Inter, sans-serif;
-      letter-spacing: .7px;
-      border-bottom: 1px solid var(--line);
-      padding: 12px 8px;
-      white-space: nowrap;
-    }
-    tbody td{
-      border-top: 1px solid var(--line);
-      padding: 12px 8px;
-      vertical-align: middle;
-    }
-    tbody tr:nth-child(even) td{ background:#fbfdff; }
-    tbody tr:hover td{ background:#f3f7ff; }
-
-    .estab-foto{
-      width: 86px; height: 86px;
-      object-fit: cover;
-      border-radius: 999px;
-      border: 3px solid rgba(31,79,224,.28);
-      box-shadow: 0 10px 18px rgba(31,79,224,.10);
-      background:#fff;
-      display:block;
-      margin: 0 auto;
-    }
-    .avatar-fallback{
-      width: 86px; height: 86px;
-      border-radius: 999px;
-      border: 3px solid rgba(31,79,224,.28);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin: 0 auto;
-      color: var(--royal3);
-      background: #eef3ff;
-      box-shadow: 0 10px 18px rgba(31,79,224,.10);
-      font-size: 2rem;
-    }
-
-    .td-strong{
-      font-weight: 900;
-      color: var(--royal3);
-      font-family: Orbitron, Inter, sans-serif;
-      letter-spacing: .4px;
-      max-width: 260px;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      text-align:left;
-    }
-    .td-user{
-      font-weight: 900;
-      color:#1b2b5e;
-      max-width: 200px;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      text-align:left;
-    }
-
-    .actions{
-      display:flex;
-      gap: 8px;
-      justify-content:center;
-      flex-wrap: wrap;
-    }
-    .btn-outline-primary{
-      border-radius: 12px;
-      font-weight: 900;
-      color: var(--royal3);
-      border-color: rgba(31,79,224,.35);
-    }
-    .btn-outline-primary:hover{
-      color:#fff;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
-      border-color: transparent;
-    }
-    .btn-outline-danger{
-      border-radius: 12px;
-      font-weight: 900;
-      color:#b4232a;
-      border-color: rgba(239,68,68,.35);
-    }
-    .btn-outline-danger:hover{
-      color:#fff;
-      background: linear-gradient(90deg, #ef4444, #dc2626);
-      border-color: transparent;
-    }
-
-    /* ===== Cards view ===== */
-    .cards{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .card-estab{
-      background:#fff;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      text-align:center;
-      box-shadow: 0 10px 22px rgba(15,23,42,.06);
-      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-    }
-    .card-estab:hover{
-      transform: translateY(-3px);
-      box-shadow: 0 14px 30px rgba(31,79,224,.12);
-      filter: brightness(1.01);
-    }
-    .card-estab .name{
-      margin-top: 10px;
-      font: 900 15px/1.2 Orbitron, Inter, sans-serif;
-      color: var(--royal3);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .card-estab .user{
-      margin-top: 4px;
-      color:#1b2b5e;
-      font-weight: 800;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Alerts */
-    .alertx{
-      margin-top: 12px;
-      border-radius: 14px;
-      border: 0;
-      color:#fff;
-      font-weight: 900;
-      background: linear-gradient(90deg, var(--royal) 0%, var(--royal3) 100%);
-      box-shadow: 0 12px 22px rgba(31,79,224,.14);
-    }
-
-    /* ===== Responsivo ===== */
-    @media (max-width: 1100px){
-      .cards{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-      .container-x{ width: min(1600px, calc(100vw - 28px)); }
-      .sidebar{ width: 240px; flex-basis: 240px; }
-    }
-    @media (max-width: 900px){
-      .sidebar{ display:none; }
-      .container-x{ width: calc(100vw - 22px); }
-      .main{ padding: 12px; }
-      .topbar{ position: static; }
-      .kpis{ grid-template-columns: 1fr; }
-      .cards{ grid-template-columns: 1fr; }
-      .search input{ width: 200px; }
-    }
-  </style>
-
-  <style id="cx-unified-style">
+<style id="cx-unified-style">
 :root{
+  --royal-blue:#2747d9;
+  --royal-blue-2:#3358f0;
+  --royal-dark:#16258a;
+  --royal-soft:#eef3ff;
+  --bg:#f4f7fc;
   --card:#ffffff;
   --text:#182033;
   --muted:#7b879f;
@@ -639,35 +314,39 @@ body{
 .cx-sidebar-footer{margin-top:auto;padding-top:10px}
 .cx-main{flex:1;margin-left:var(--sidebar-w);padding:20px 20px 30px;width:calc(100% - var(--sidebar-w));min-width:0}
 .cx-content-shell,.cx-main > .tab-content,.cx-main .tab-pane > .cx-content-shell,.cx-main .tab-pane > .container-fluid{max-width:none!important;width:100%;margin:0 auto 26px}
+/* hide old menus / logos / back buttons */
 body > .sidebar, .page > .sidebar, .layout > .sidebar, .content > .sidebar, .main-content > .sidebar, .navx, .navbox, .sidebar-nav, .sidebar-card, .mini, .meta, .footer, .sidebar .logo, .head-card .brand img, .brand img{display:none!important}
+a[href*="dashboard"].btn-ghost:first-child, .btn-voltar, .btn-side, .btn-top[href*="dashboard"], .btn-outline-warning[href*="dashboard"], .btn-outline-warning .bi-arrow-left{ }
 .page, .layout, .wrapper, .app{display:block!important;grid-template-columns:none!important;min-height:unset!important}
 .main-content, .content, .main, .container-x{margin-left:0!important;padding-left:0!important;padding-right:0!important;width:100%!important;max-width:none!important}
 .container, .container-fluid{max-width:100%!important}
+/* cards/forms lighter */
 .card, .cardx, .form-card, .ajustar-card, .head-card, .topbar, .header, .topbar, .table-wrap, .photo-card, .panel, .content-card{
   border-radius:var(--radius)!important;
 }
 .form-card, .ajustar-card, .photo-card, .cardx, .card, .table-wrap, .panel, .content-card, .head-card{
   background:var(--card)!important;border:1px solid var(--border)!important;box-shadow:var(--shadow)!important;
 }
+.form-shell{max-width:none!important;width:100%!important;display:block!important}
+.form-card{max-width:1000px!important;margin:0 auto!important}
+.ajustar-card{max-width:880px!important;margin:0 auto!important}
 .topbar, .header, .panel-head{
   border-radius:28px!important;
   background:linear-gradient(135deg, rgba(39,71,217,1) 0%, rgba(51,88,240,1) 52%, rgba(22,37,138,1) 100%)!important;
   color:#fff!important;box-shadow:0 18px 40px rgba(39,71,217,.22)!important;border:1px solid rgba(255,255,255,.22)!important;
 }
 .topbar .btn, .header .btn, .panel-head .btn, .top-actions .btn, .actions .btn{border-radius:14px!important}
+/* remove old logos visually */
+.logo-preview, .head-card .brand img, .form-card .logo-preview img{display:none!important}
+/* typography */
 .brand-title,.topbar h1,.header h1,.panel-head-title,h1.title,h2,h4.titulo{font-family:'Orbitron',sans-serif!important}
+/* tables */
 .table-wrap{overflow:auto hidden!important}
-#view-table table{min-width:760px}
-.kpi{background:linear-gradient(180deg,#ffffff 0%,#f8faff 100%);border-color:#e6ebf5;box-shadow:0 8px 20px rgba(17,24,39,.05)}
-.chip{background:#f6f8ff;border-color:#dfe7fb}
-.card-estab{border-color:#e6ebf5;box-shadow:0 10px 24px rgba(17,24,39,.06)}
-.card-estab .actions{justify-content:center}
 @media (max-width:991px){
   .cx-sidebar{transform:translateX(-100%);transition:transform .22s ease}
   .cx-sidebar.mobile-open{transform:translateX(0)}
   .cx-main{margin-left:0;width:100%;padding:14px}
   .cx-mobile-toggle{position:fixed;left:14px;top:14px;z-index:1100;border:none;width:46px;height:46px;border-radius:14px;color:#fff;background:linear-gradient(180deg,#3051ea,#2439bf);box-shadow:0 14px 30px rgba(20,31,116,.22)}
-  .topbar{padding-left:58px!important}
 }
 @media (min-width:992px){.cx-mobile-toggle{display:none!important}}
 </style>
@@ -684,9 +363,10 @@ document.addEventListener('DOMContentLoaded', function(){
   if(mob&&sidebar){ mob.addEventListener('click', function(){ sidebar.classList.toggle('mobile-open'); }); }
 });
 </script>
-</head>
 
+</head>
 <body>
+
 <button class="cx-mobile-toggle" type="button"><i class="bi bi-list"></i></button>
 <div class="cx-shell">
   <aside class="cx-sidebar">
@@ -696,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
     <nav class="cx-nav">
       <div class="cx-nav-section">Visão geral</div>
-      <a class="cx-link" href="{{ url_for('dashboard') }}"><span class="cx-link-left"><i class="bi bi-speedometer2 cx-link-icon"></i><span>Resumo</span></span></a>
+      <a class="cx-link active" href="{{ url_for('dashboard') }}"><span class="cx-link-left"><i class="bi bi-speedometer2 cx-link-icon"></i><span>Resumo</span></span></a>
       <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-coin cx-link-icon"></i><span>Financeiro</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
       <div class="cx-sublinks open">
         <a class="cx-sublink" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i><span>Lançamentos</span></a>
@@ -704,267 +384,278 @@ document.addEventListener('DOMContentLoaded', function(){
       <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-people cx-link-icon"></i><span>Cadastros</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
       <div class="cx-sublinks open">
         <a class="cx-sublink" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-person-badge"></i><span>Cooperados</span></a>
-        <a class="cx-sublink active" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
+        <a class="cx-sublink" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
       </div>
       <hr class="cx-nav-divider">
       <a class="cx-link" href="{{ url_for('logout') }}"><span class="cx-link-left"><i class="bi bi-box-arrow-left cx-link-icon"></i><span>Sair</span></span></a>
     </nav>
     <div class="cx-sidebar-footer"></div>
   </aside>
-  <main class="cx-main">
-    <div class="cx-content-shell">
-      <div class="container-x">
+  <main class="cx-main"><div class="cx-content-shell">
+<div class="sidebar">
+    <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo" />
+    <div class="sidebar-funcao">Gestor</div>
+    <a class="nav-link active" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a class="nav-link" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-people"></i> Cooperados</a>
+    <a class="nav-link" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-building"></i> Estabelecimentos</a>
+    <a class="nav-link" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i> Lançamentos</a>
+    <a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i> Sair</a>
+  </div>
 
-        <!-- Topbar -->
-        <div class="topbar">
-          <div class="left">
-            <div class="ico"><i class="bi bi-building fs-4"></i></div>
-            <div class="txt">
-              <p class="t m-0">Estabelecimentos</p>
-              <p class="s m-0">Cadastros, logos e ações do módulo</p>
-            </div>
-          </div>
-          <div class="top-actions">
-            <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-top">
-              <i class="bi bi-plus-circle"></i> Novo
-            </a>
-          </div>
-        </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alertx text-center">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
-        <!-- Conteúdo -->
-        <section class="cardx">
-          <div class="toolbar">
-            <div style="min-width:0">
-              <div style="font-family:Orbitron,Inter,sans-serif;font-weight:900;letter-spacing:.6px;color:var(--royal3)">
-                <i class="bi bi-buildings"></i> Estabelecimentos Cadastrados
-              </div>
-              <div style="color:var(--muted);font-weight:700;font-size:12px;margin-top:4px">
-                Use a busca para filtrar por nome ou usuário e alterne entre tabela e cartões.
-              </div>
-            </div>
-
-            <div class="view-switch">
-              <button class="btn btn-toggle active" id="btn-view-table"><i class="bi bi-table"></i> Tabela</button>
-              <button class="btn btn-toggle" id="btn-view-cards"><i class="bi bi-grid-3x3-gap"></i> Cartões</button>
-            </div>
-
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-              <div class="search">
-                <i class="bi bi-search"></i>
-                <input type="text" id="busca" placeholder="Buscar por nome ou usuário..." />
-              </div>
-              <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-main">
-                <i class="bi bi-plus-circle"></i> Novo
-              </a>
-            </div>
-          </div>
-
-          <!-- KPIs -->
-          <div class="kpis">
-            <div class="kpi">
-              <div class="label"><i class="bi bi-buildings"></i> Total</div>
-              <div class="value" id="kpi-total">0</div>
-            </div>
-            <div class="kpi">
-              <div class="label"><i class="bi bi-image"></i> Com logo</div>
-              <div class="value" id="kpi-comlogo">0</div>
-            </div>
-            <div class="kpi">
-              <div class="label"><i class="bi bi-image-alt"></i> Sem logo</div>
-              <div class="value" id="kpi-semlogo">0</div>
-            </div>
-          </div>
-
-          <!-- Chips -->
-          <div class="chips">
-            <span class="chip">Visíveis <span class="count" id="count-visiveis">0</span></span>
-          </div>
-
-          <!-- VIEW: TABELA -->
-          <div class="table-wrap" id="view-table">
-            <table class="table align-middle m-0">
-              <thead>
-                <tr>
-                  <th style="width:120px">Logo</th>
-                  <th>Nome</th>
-                  <th>Usuário</th>
-                  <th style="width:220px">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-estabs">
-                {% for est in estabelecimentos %}
-                <tr class="tbl-row"
-                    data-name="{{ est.nome|lower }}"
-                    data-user="{{ est.username|lower }}"
-                    data-has-logo="{{ 1 if est.logo else 0 }}">
-                  <td>
-                    {% if est.logo %}
-                      <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}"
-                           alt="Logo do Estabelecimento"
-                           class="estab-foto"
-                           onerror="this.closest('td').innerHTML=fallbackAvatar();" />
-                    {% else %}
-                      <div class="avatar-fallback"><i class="bi bi-buildings"></i></div>
-                    {% endif %}
-                  </td>
-                  <td class="td-strong" title="{{ est.nome }}">{{ est.nome }}</td>
-                  <td class="td-user" title="{{ est.username }}">{{ est.username }}</td>
-                  <td>
-                    <div class="actions">
-                      <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil-square"></i> Editar
-                      </a>
-                      <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}"
-                         class="btn btn-sm btn-outline-danger"
-                         onclick="return confirm('Excluir este estabelecimento?')">
-                        <i class="bi bi-trash"></i> Excluir
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-                {% else %}
-                <tr>
-                  <td colspan="4" style="padding:14px;text-align:center;color:var(--muted);font-weight:800">
-                    Nenhum estabelecimento cadastrado.
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <!-- VIEW: CARTÕES -->
-          <div class="cards" id="view-cards" style="display:none">
-            {% for est in estabelecimentos %}
-            <div class="card-estab card-item"
-                 data-name="{{ est.nome|lower }}"
-                 data-user="{{ est.username|lower }}"
-                 data-has-logo="{{ 1 if est.logo else 0 }}">
-              {% if est.logo %}
-                <img src="{{ url_for('static', filename='logos/' ~ est.logo) }}"
-                     alt="Logo do Estabelecimento"
-                     class="estab-foto"
-                     onerror="this.outerHTML=fallbackAvatar();" />
-              {% else %}
-                <div class="avatar-fallback"><i class="bi bi-buildings"></i></div>
-              {% endif %}
-
-              <div class="name" title="{{ est.nome }}">{{ est.nome }}</div>
-              <div class="user" title="{{ est.username }}">{{ est.username }}</div>
-
-              <div class="actions" style="margin-top:10px">
-                <a href="{{ url_for('editar_estabelecimento', id=est.id) }}" class="btn btn-sm btn-outline-primary">
-                  <i class="bi bi-pencil-square"></i> Editar
-                </a>
-                <a href="{{ url_for('excluir_estabelecimento', id=est.id) }}"
-                   class="btn btn-sm btn-outline-danger"
-                   onclick="return confirm('Excluir este estabelecimento?')">
-                  <i class="bi bi-trash"></i> Excluir
-                </a>
-              </div>
-            </div>
-            {% else %}
-            <div class="card-estab" style="text-align:center;color:var(--muted);font-weight:900">
-              Nenhum estabelecimento cadastrado.
-            </div>
-            {% endfor %}
-          </div>
-
-        </section>
+  <div class="main-content">
+    <div class="topbar mb-4">
+      <button class="btn btn-voltar" onclick="window.location.href='{{ url_for('dashboard') }}';">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </button>
+      <span>Bem-vindo, {{ admin.nome }}</span>
+      <div class="d-flex align-items-center">
+        <!-- Botão opcional para “desbloquear” áudio por gesto do usuário -->
+        <button type="button" id="btn-ativar-som-servico" class="btn btn-outline-warning btn-sm me-2" title="Ativar/ testar som de novo lançamento">
+          <i class="bi bi-volume-up"></i> Som
+        </button>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm btn-logout ms-2">Sair <i class="bi bi-power"></i></a>
       </div>
     </div>
-  </main>
-</div>
 
+    <h2><i class="bi bi-speedometer2"></i> Painel de Controle</h2>
+
+    <form method="get" action="{{ url_for('dashboard') }}" class="mb-4 row g-3">
+      <div class="col-md-3">
+        <label for="cooperado_id" class="form-label">Cooperado</label>
+        <select class="form-select" id="cooperado_id" name="cooperado_id" aria-label="Selecione cooperado" onchange="mostrarFotoCooperadoDashboard()">
+          <option value="" data-foto="">Todos</option>
+          {% for c in cooperados %}
+            <option value="{{ c.id }}"
+              data-foto="{{ url_for('static', filename='uploads/' ~ c.foto) if c.foto else '' }}"
+              {% if filtros.cooperado_id and filtros.cooperado_id|int == c.id %} selected {% endif %}
+            >{{ c.nome }}</option>
+          {% endfor %}
+        </select>
+        <div id="foto-cooperado-dashboard" style="text-align:center; margin:8px 0 0 0;"></div>
+      </div>
+      <div class="col-md-3">
+        <label for="estabelecimento_id" class="form-label">Estabelecimento</label>
+        <select class="form-select" id="estabelecimento_id" name="estabelecimento_id" aria-label="Selecione estabelecimento">
+          <option value="">Todos</option>
+          {% for e in estabelecimentos %}
+            <option value="{{ e.id }}" {% if filtros.estabelecimento_id and filtros.estabelecimento_id|int == e.id %} selected {% endif %}>{{ e.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="data_inicio" class="form-label">Data Início</label>
+        <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ filtros.data_inicio or '' }}" />
+      </div>
+      <div class="col-md-3">
+        <label for="data_fim" class="form-label">Data Fim</label>
+        <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ filtros.data_fim or '' }}" />
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+      </div>
+    </form>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <a href="{{ url_for('listar_lancamentos') }}" class="card-link">
+          <div class="card shadow-sm">
+            <i class="bi bi-journal-check"></i>
+            Total de Pedidos
+            <div>{{ total_pedidos or 0 }}</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('listar_lancamentos') }}" class="card-link">
+          <div class="card shadow-sm">
+            <i class="bi bi-cash-stack"></i>
+            Valor Total Lançado
+            <div>R$ {{ ('{:,.2f}'.format(total_valor|default(0))) }}</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('listar_cooperados') }}" class="card-link">
+          <div class="card shadow-sm">
+            <i class="bi bi-people"></i>
+            Cooperados Cadastrados
+            <div>{{ total_cooperados or 0 }}</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('listar_estabelecimentos') }}" class="card-link">
+          <div class="card shadow-sm">
+            <i class="bi bi-building"></i>
+            Estabelecimentos
+            <div>{{ total_estabelecimentos or 0 }}</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Gráfico Cooperados horizontal mostrando VALOR REAL gasto por cooperado -->
+    <canvas id="graficoCooperados" height="320"></canvas>
+
+    <!-- Dados atuais (para o script comparar e decidir tocar o áudio) -->
+    <div id="metrics-data"
+         data-total-pedidos="{{ total_pedidos|default(0) }}"
+         data-ultimo-id="{{ ultimo_lancamento_id|default(0) }}"
+         style="display:none;"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Avatar fallback
-    function fallbackAvatar(){
-      return '<div class="avatar-fallback"><i class="bi bi-buildings"></i></div>';
+    function mostrarFotoCooperadoDashboard() {
+      var select = document.getElementById("cooperado_id");
+      var fotoDiv = document.getElementById("foto-cooperado-dashboard");
+      var option = select.options[select.selectedIndex];
+      var foto = option ? option.getAttribute("data-foto") : null;
+      if (foto && select.value) {
+        /* só cores alteradas: borda azul-royal e sombra azul suave */
+        fotoDiv.innerHTML = '<img src="' + foto + '" alt="Foto do Cooperado" style="max-width:90px;max-height:90px;border-radius:50%;border:3px solid #4169e1;box-shadow:0 0 8px rgba(65,105,225,.33);">';
+      } else {
+        fotoDiv.innerHTML = '';
+      }
     }
-
-    // KPIs
-    function atualizarKPIs(){
-      const rows = [...document.querySelectorAll('.tbl-row')];
-      const total = rows.length;
-      const comLogo = rows.filter(r => r.dataset.hasLogo === '1').length;
-      const semLogo = total - comLogo;
-
-      document.getElementById('kpi-total').textContent = total;
-      document.getElementById('kpi-comlogo').textContent = comLogo;
-      document.getElementById('kpi-semlogo').textContent = semLogo;
-
-      atualizarContagemVisiveis();
-    }
-
-    function atualizarContagemVisiveis(){
-      const isCards = document.getElementById('view-cards').style.display !== 'none';
-      const sel = isCards ? '.card-item' : '.tbl-row';
-      const vis = [...document.querySelectorAll(sel)].filter(el => el.style.display !== 'none').length;
-      document.getElementById('count-visiveis').textContent = vis;
-    }
-
-    // Busca (tabela + cards)
-    function aplicarBusca(){
-      const q = (document.getElementById('busca').value || '')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-        .toLowerCase();
-
-      const match = (name,user) => {
-        const n = (name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-        const u = (user||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-        return !q || n.includes(q) || u.includes(q);
-      };
-
-      document.querySelectorAll('.tbl-row').forEach(tr=>{
-        tr.style.display = match(tr.dataset.name, tr.dataset.user) ? '' : 'none';
-      });
-
-      document.querySelectorAll('.card-item').forEach(card=>{
-        card.style.display = match(card.dataset.name, card.dataset.user) ? '' : 'none';
-      });
-
-      atualizarContagemVisiveis();
-    }
-
-    // Alternar visualização
-    function setView(mode){
-      const vt = document.getElementById('view-table');
-      const vc = document.getElementById('view-cards');
-      const bt = document.getElementById('btn-view-table');
-      const bc = document.getElementById('btn-view-cards');
-
-      const showTable = (mode === 'table');
-      vt.style.display = showTable ? '' : 'none';
-      vc.style.display = showTable ? 'none' : '';
-      bt.classList.toggle('active', showTable);
-      bc.classList.toggle('active', !showTable);
-
-      atualizarContagemVisiveis();
-    }
-
-    document.addEventListener('DOMContentLoaded', ()=>{
-      atualizarKPIs();
-      aplicarBusca();
-
-      document.getElementById('busca').addEventListener('input', aplicarBusca);
-      document.getElementById('btn-view-table').addEventListener('click', ()=>setView('table'));
-      document.getElementById('btn-view-cards').addEventListener('click', ()=>setView('cards'));
+    document.addEventListener('DOMContentLoaded', function() {
+      mostrarFotoCooperadoDashboard();
     });
 
-    // Recalcula depois que as imagens carregarem/falharem
-    window.addEventListener('load', atualizarKPIs);
+    const ctx = document.getElementById("graficoCooperados").getContext("2d");
+
+    const data = {
+      labels: {{ cooperado_nomes|tojson }},
+      datasets: [
+        {
+          label: "Valor Real Gasto (R$)",
+          data: {{ cooperado_valores|tojson }},
+          backgroundColor: "rgba(65, 105, 225, 0.85)", /* azul-royal */
+          borderColor: "rgba(65, 105, 225, 1)",
+          borderWidth: 2,
+          barThickness: 16,
+          maxBarThickness: 18
+        }
+      ]
+    };
+
+    const options = {
+      indexAxis: 'y',
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: {
+            color: "#0d1b3f", /* texto escuro */
+            font: { size: 13 },
+            callback: function(value) { return "R$ " + value; }
+          },
+          grid: { color: "rgba(65,105,225,.25)" }
+        },
+        y: {
+          ticks: { color: "#0d1b3f", font: { size: 15 } },
+          grid: { color: "rgba(65,105,225,.18)" }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let value = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
+              return "R$ " + value.toLocaleString("pt-BR", {minimumFractionDigits:2});
+            }
+          }
+        }
+      },
+      animation: {
+        onComplete: function() {
+          const chart = this.chart;
+          const ctx = chart.ctx;
+          ctx.save();
+          chart.data.datasets.forEach(function(dataset, i) {
+            chart.getDatasetMeta(i).data.forEach(function(bar, index) {
+              const value = dataset.data[index];
+              ctx.font = "bold 13px Roboto";
+              ctx.fillStyle = "#0d1b3f"; /* número ao lado da barra em azul-escuro */
+              ctx.textAlign = "left";
+              ctx.textBaseline = "middle";
+              let x = bar.x + 8;
+              let y = bar.y;
+              ctx.fillText("R$ " + value.toLocaleString("pt-BR", {minimumFractionDigits:2}), x, y);
+            });
+          });
+          ctx.restore();
+        }
+      }
+    };
+
+    new Chart(ctx, {
+      type: "bar",
+      data: data,
+      options: options,
+    });
+  </script>
+
+  <!-- ÁUDIO: tocar quando aparecer novo lançamento (serviço) -->
+  <audio id="som-servico" preload="auto" style="display:none">
+    <!-- os mp3 estão em /statics (não é /static) -->
+    <source src="{{ url_for('statics_files', filename='servico.mp3') }}" type="audio/mpeg">
+  </audio>
+
+  <!-- Script: toca servico.mp3 quando detectar aumento de lançamentos -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const audio = document.getElementById('som-servico');
+      const metrics = document.getElementById('metrics-data');
+
+      // valores atuais vindos do servidor
+      const totalAtual = parseInt(metrics?.getAttribute('data-total-pedidos') || '0', 10);
+      const ultimoIdAtual = parseInt(metrics?.getAttribute('data-ultimo-id') || '0', 10);
+
+      // chaves no localStorage (por navegador)
+      const LS_TOTAL = 'coopex_total_pedidos';
+      const LS_ULTID = 'coopex_ultimo_lanc_id';
+
+      const totalPrev = parseInt(localStorage.getItem(LS_TOTAL) || '0', 10);
+      const ultPrev   = parseInt(localStorage.getItem(LS_ULTID) || '0', 10);
+
+      // decisão: tocar se aumentou o total ou se o último ID é maior
+      let deveTocar = false;
+      if (!isNaN(totalPrev) && totalAtual > totalPrev) {
+        deveTocar = true;
+      } else if (!isNaN(ultPrev) && ultimoIdAtual > ultPrev) {
+        deveTocar = true;
+      }
+
+      // salva os valores atuais para a próxima visita/reload
+      localStorage.setItem(LS_TOTAL, String(totalAtual));
+      localStorage.setItem(LS_ULTID, String(ultimoIdAtual));
+
+      function tocar(aud) {
+        if (!aud) return;
+        try {
+          aud.currentTime = 0;
+          const p = aud.play();
+          if (p && typeof p.then === 'function') p.catch(() => { /* pode ser bloqueado pelo navegador sem gesto */ });
+        } catch (e) { /* ignora */ }
+      }
+
+      if (deveTocar) {
+        tocar(audio);
+      }
+
+      // Botão opcional para “ativar/testar” som (ajuda a liberar autoplay)
+      const btn = document.getElementById('btn-ativar-som-servico');
+      if (btn) {
+        btn.addEventListener('click', function () {
+          tocar(audio);
+        });
+      }
+    });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </div></main>
+</div>
 </body>
 </html>
