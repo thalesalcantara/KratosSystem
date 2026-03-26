@@ -655,10 +655,7 @@
           <img class="avatar-img" src="{{ url_for('foto_cooperado', id=coop.id) }}" alt="foto do cooperado" onerror="this.style.visibility='hidden'">
         </div>
 
-        <div class="who">
-          <p class="brand">COOPEX</p>
-          <p class="name">Painel do cooperado</p>
-        </div>
+        <div class="who" style="display:none"></div>
 
         <div class="top-actions">
           <div class="metric-chip">
@@ -697,15 +694,6 @@
       </section>
 
       <section class="card tabs-card">
-        <div class="switcher" role="tablist" aria-label="Navegação">
-          <button class="sw active" type="button" data-target="home-section" role="tab" aria-selected="true">
-            <span class="i">🏠</span> Início
-          </button>
-          <button class="sw" type="button" data-target="catalogos-section" role="tab" aria-selected="false">
-            <span class="i">📚</span> Catálogos
-          </button>
-        </div>
-
         <div class="mini-tabs">
           <button class="mini-tab active" type="button" data-home-tab="resumo-box">
             <span class="ico">◫</span>
@@ -719,9 +707,9 @@
             <span class="ico">⚡</span>
             <span class="txt">Stories</span>
           </button>
-          <button class="mini-tab" type="button" data-home-tab="atalhos-box">
-            <span class="ico">☰</span>
-            <span class="txt">Atalhos</span>
+          <button class="mini-tab" type="button" data-home-tab="catalogos-box">
+            <span class="ico">📚</span>
+            <span class="txt">Catálogo</span>
           </button>
         </div>
       </section>
@@ -729,45 +717,32 @@
       <section id="home-section" class="page">
 
         <div id="resumo-box" class="home-box">
-          <div class="stats">
-            <div class="stat" style="background:var(--cx-ok-bg);border-color:#ccebdc;">
-              <p class="k">Crédito disponível</p>
-              <p class="v ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</p>
-              {% if coop.credito_atualizado_em %}
-                <p class="h">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</p>
-              {% else %}
-                <p class="h">Sem ajustes manuais.</p>
-              {% endif %}
-            </div>
-
-            <div class="stat" style="background:var(--cx-warn-bg);border-color:#ffe3ac;">
-              <p class="k">Total do mês</p>
-              <p class="v" id="monthTotal">R$ 0,00</p>
-              <p class="h"><span id="monthCount">0</span> lançamento(s) no mês atual</p>
-            </div>
-          </div>
-
-          <section class="card section" style="margin-top:12px;">
+          <section class="card section">
             <div class="head">
               <div>
                 <h3 class="title">Resumo</h3>
-                <p class="sub">Visual reorganizado no estilo da imagem, sem criar funções novas.</p>
+                <p class="sub">Visual reorganizado no estilo da imagem, sem repetir informações.</p>
               </div>
               <span class="badge">✓ Coopex</span>
             </div>
 
             <div class="stats" style="margin-bottom:0;">
-              <div class="stat">
+              <div class="stat" style="background:var(--cx-ok-bg);border-color:#ccebdc;">
                 <div class="chip">💳</div>
                 <p class="k">Crédito</p>
-                <p class="v ok">{{ '%.0f'|format(coop.credito or 0) }}</p>
-                <p class="h">Valor disponível no cadastro do cooperado.</p>
+                <p class="v ok">R$ {{ '%.2f'|format(coop.credito or 0) }}</p>
+                {% if coop.credito_atualizado_em %}
+                  <p class="h">Último ajuste: {{ coop.credito_atualizado_em.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% else %}
+                  <p class="h">Valor disponível no cadastro do cooperado.</p>
+                {% endif %}
               </div>
-              <div class="stat">
+
+              <div class="stat" style="background:var(--cx-warn-bg);border-color:#ffe3ac;">
                 <div class="chip">📆</div>
-                <p class="k">Filtro</p>
-                <p class="v">2 meses</p>
-                <p class="h">Mês atual e mês anterior nos lançamentos.</p>
+                <p class="k">Total de gastos</p>
+                <p class="v" id="monthTotal">R$ 0,00</p>
+                <p class="h"><span id="monthCount">0</span> lançamento(s) no período filtrado</p>
               </div>
             </div>
           </section>
@@ -780,12 +755,12 @@
                 <h3 class="title">Lançamentos</h3>
                 <p class="sub">Agrupado por estabelecimento, mantendo a lógica original.</p>
               </div>
-              <span class="badge">🧾 2 meses</span>
+              <span class="badge">🧾 Lançamentos</span>
             </div>
 
             <div id="groups" class="groups"></div>
             <div id="launchEmpty" class="empty" style="display:none;">
-              Nenhum lançamento encontrado para o mês atual e o mês anterior.
+              Nenhum lançamento encontrado para o período selecionado.
             </div>
 
             <div id="rawLaunches" style="display:none;">
@@ -839,102 +814,76 @@
           </div>
         </div>
 
-        <div id="atalhos-box" class="home-box hidden">
+        <div id="catalogos-box" class="home-box hidden">
           <section class="card section">
             <div class="head">
               <div>
-                <h3 class="title">Atalhos</h3>
-                <p class="sub">Acesso rápido ao que já existe no painel.</p>
+                <h3 class="title">Catálogos</h3>
+                <p class="sub">Pesquise itens pelo nome enquanto digita.</p>
               </div>
-              <span class="badge">☰ Menu</span>
+              <span class="badge">📚 Parceiros</span>
             </div>
-            <div class="stats" style="margin-bottom:0;">
-              <button class="stat" type="button" id="atalhoFiltro" style="text-align:left;cursor:pointer;">
-                <p class="k">Filtrar lançamentos</p>
-                <p class="v">Abrir</p>
-                <p class="h">Selecionar data de início e fim.</p>
-              </button>
-              <button class="stat" type="button" id="atalhoCatalogo" style="text-align:left;cursor:pointer;">
-                <p class="k">Ir para catálogos</p>
-                <p class="v">Catálogos</p>
-                <p class="h">Pesquisar itens dos parceiros.</p>
-              </button>
-            </div>
+
+            {% if catalogo_itens_coop and estab_por_id %}
+              <div class="searchbox">
+                <span class="sicon">🔎</span>
+                <input id="catalogSearch" type="search" inputmode="search" autocomplete="off" placeholder="Digite o nome do item, marca, categoria ou parceiro...">
+              </div>
+
+              <div class="searchmeta">
+                <div><span id="catalogCount">0</span> item(ns) exibido(s)</div>
+                <button type="button" class="clear" id="catalogClear">Limpar</button>
+              </div>
+
+              <div class="catalog-list" id="catalogGrid">
+                {% for est_id, est in estab_por_id.items() %}
+                  {% set itens_est = catalogo_itens_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
+                  {% if itens_est %}
+                    <article class="shop catalog-card-js" data-estab="{{ est.nome }}">
+                      <div class="shop-head">
+                        <div class="shop-logo">
+                          {% if est.id %}
+                            <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
+                          {% endif %}
+                          <span style="position:absolute;font-size:12px;">{{ est.nome[:2].upper() }}</span>
+                        </div>
+                        <div class="shop-info">
+                          <p class="shop-name" title="{{ est.nome }}">{{ est.nome }}</p>
+                          <div class="shop-count"><span class="catalog-pill-count">{{ itens_est|length }}</span> item(s)</div>
+                        </div>
+                      </div>
+
+                      <div class="items">
+                        {% for item in itens_est %}
+                          <div class="item catalog-item-js" data-item="{{ item.nome }}" data-estab="{{ est.nome }}" data-marca="{{ item.marca or '' }}" data-categoria="{{ item.categoria or '' }}" data-obs="{{ item.observacao or '' }}">
+                            <div class="iname" title="{{ item.nome }}">{{ item.nome }}</div>
+                            <div class="iprice">R$ {{ '%.2f'|format(item.valor or 0) }}</div>
+
+                            <div class="imeta">
+                              {% if item.marca %}Marca: {{ item.marca }}{% endif %}
+                              {% if item.categoria %}{{ ' • ' if item.marca }}Categoria: {{ item.categoria }}{% endif %}
+                              {% if not item.marca and not item.categoria %}&nbsp;{% endif %}
+                            </div>
+
+                            {% if item.observacao %}
+                              <div class="inote">{{ item.observacao }}</div>
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </article>
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+              <div class="empty" id="catalogEmptySearch" style="display:none;">Nenhum item encontrado com esse termo.</div>
+            {% else %}
+              <div class="empty">Nenhum catálogo disponível ainda para os estabelecimentos que lançam em seu nome.</div>
+            {% endif %}
           </section>
         </div>
+
       </section>
-
-      <section id="catalogos-section" class="page hidden">
-        <section class="card section">
-          <div class="head">
-            <div>
-              <h3 class="title">Catálogos</h3>
-              <p class="sub">Pesquise itens pelo nome enquanto digita.</p>
-            </div>
-            <span class="badge">📚 Parceiros</span>
-          </div>
-
-          {% if catalogo_itens_coop and estab_por_id %}
-            <div class="searchbox">
-              <span class="sicon">🔎</span>
-              <input id="catalogSearch" type="search" inputmode="search" autocomplete="off" placeholder="Digite o nome do item, marca, categoria ou parceiro...">
-            </div>
-
-            <div class="searchmeta">
-              <div><span id="catalogCount">0</span> item(ns) exibido(s)</div>
-              <button type="button" class="clear" id="catalogClear">Limpar</button>
-            </div>
-
-            <div class="catalog-list" id="catalogGrid">
-              {% for est_id, est in estab_por_id.items() %}
-                {% set itens_est = catalogo_itens_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
-                {% if itens_est %}
-                  <article class="shop catalog-card-js" data-estab="{{ est.nome }}">
-                    <div class="shop-head">
-                      <div class="shop-logo">
-                        {% if est.id %}
-                          <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
-                        {% endif %}
-                        <span style="position:absolute;font-size:12px;">{{ est.nome[:2].upper() }}</span>
-                      </div>
-                      <div class="shop-info">
-                        <p class="shop-name" title="{{ est.nome }}">{{ est.nome }}</p>
-                        <div class="shop-count"><span class="catalog-pill-count">{{ itens_est|length }}</span> item(s)</div>
-                      </div>
-                    </div>
-
-                    <div class="items">
-                      {% for item in itens_est %}
-                        <div class="item catalog-item-js" data-item="{{ item.nome }}" data-estab="{{ est.nome }}" data-marca="{{ item.marca or '' }}" data-categoria="{{ item.categoria or '' }}" data-obs="{{ item.observacao or '' }}">
-                          <div class="iname" title="{{ item.nome }}">{{ item.nome }}</div>
-                          <div class="iprice">R$ {{ '%.2f'|format(item.valor or 0) }}</div>
-
-                          <div class="imeta">
-                            {% if item.marca %}Marca: {{ item.marca }}{% endif %}
-                            {% if item.categoria %}{{ ' • ' if item.marca }}Categoria: {{ item.categoria }}{% endif %}
-                            {% if not item.marca and not item.categoria %}&nbsp;{% endif %}
-                          </div>
-
-                          {% if item.observacao %}
-                            <div class="inote">{{ item.observacao }}</div>
-                          {% endif %}
-                        </div>
-                      {% endfor %}
-                    </div>
-                  </article>
-                {% endif %}
-              {% endfor %}
-            </div>
-
-            <div class="empty" id="catalogEmptySearch" style="display:none;">Nenhum item encontrado com esse termo.</div>
-          {% else %}
-            <div class="empty">Nenhum catálogo disponível ainda para os estabelecimentos que lançam em seu nome.</div>
-          {% endif %}
-        </section>
-      </section>
-
-    </main>
-
     <div class="overlay" id="overlay"></div>
 
     <div class="sheet" id="sheet" aria-hidden="true">
@@ -1012,44 +961,7 @@
         {% endfor %}
       ];
     </script>
-
     <script>
-      const LAST_TAB_KEY = 'coopex_coop_tab_v5';
-      const sws = document.querySelectorAll('.sw[data-target]');
-      const pages = {
-        'home-section': document.getElementById('home-section'),
-        'catalogos-section': document.getElementById('catalogos-section')
-      };
-
-      function activate(target){
-        sws.forEach(b=>{
-          const on = b.getAttribute('data-target') === target;
-          b.classList.toggle('active', on);
-          b.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-        Object.keys(pages).forEach(id=>{
-          if(!pages[id]) return;
-          if(id === target){
-            pages[id].classList.remove('hidden');
-            pages[id].classList.add('fade');
-            setTimeout(()=>pages[id].classList.remove('fade'), 220);
-          }else{
-            pages[id].classList.add('hidden');
-          }
-        });
-        localStorage.setItem(LAST_TAB_KEY, target);
-        if(target === 'catalogos-section'){
-          const inp = document.getElementById('catalogSearch');
-          if(inp) setTimeout(()=>inp.focus(), 120);
-        }
-      }
-
-      sws.forEach(b=> b.addEventListener('click', ()=> activate(b.getAttribute('data-target'))));
-      document.addEventListener('DOMContentLoaded', ()=>{
-        const saved = localStorage.getItem(LAST_TAB_KEY);
-        if(saved && pages[saved]) activate(saved);
-        else activate('home-section');
-      });
 
       const homeTabs = document.querySelectorAll('.mini-tab[data-home-tab]');
       const homeBoxes = document.querySelectorAll('.home-box');
@@ -1068,8 +980,6 @@
       const closeFilters = document.getElementById('closeFilters');
       const cancelSheet = document.getElementById('cancelSheet');
       const cancelSheet2 = document.getElementById('cancelSheet2');
-      const atalhoFiltro = document.getElementById('atalhoFiltro');
-      const atalhoCatalogo = document.getElementById('atalhoCatalogo');
 
       function openSheet(){
         sheet.classList.add('open');
@@ -1082,12 +992,11 @@
         overlay.classList.remove('show');
       }
 
-      [openFiltersMid, openFiltersMid2, openFiltersIcon, atalhoFiltro].forEach(el=>{ if(el) el.addEventListener('click', openSheet); });
+      [openFiltersMid, openFiltersMid2, openFiltersIcon].forEach(el=>{ if(el) el.addEventListener('click', openSheet); });
       if(closeFilters) closeFilters.addEventListener('click', closeSheet);
       if(cancelSheet) cancelSheet.addEventListener('click', closeSheet);
       if(cancelSheet2) cancelSheet2.addEventListener('click', closeSheet);
       if(overlay) overlay.addEventListener('click', closeSheet);
-      if(atalhoCatalogo) atalhoCatalogo.addEventListener('click', ()=> activate('catalogos-section'));
       document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSheet(); });
 
       (function buildLaunchUI(){
@@ -1130,14 +1039,9 @@
           if(iso) date = new Date(iso);
           if(!date || isNaN(date.getTime())) date = new Date();
 
-          const diff = monthsDiff(date);
-          if(diff > 1) return;
-
           const tag = classify(date);
-          if(tag === 'current'){
-            monthTotal += val;
-            monthCount += 1;
-          }
+          monthTotal += val;
+          monthCount += 1;
 
           if(!groups.has(estab)) groups.set(estab, []);
           groups.get(estab).push({estab,val,iso,disp,os,descJson,tag,date});
@@ -1170,7 +1074,7 @@
           const badge = document.createElement('div'); badge.className = 'g-badge'; badge.textContent = '🏪';
           const nameBox = document.createElement('div'); nameBox.className = 'g-name';
           const b = document.createElement('b'); b.textContent = g.name;
-          const sm = document.createElement('small'); sm.textContent = g.list.length + ' lançamento(s) • 2 meses';
+          const sm = document.createElement('small'); sm.textContent = g.list.length + ' lançamento(s)';
           nameBox.appendChild(b); nameBox.appendChild(sm);
           left.appendChild(badge); left.appendChild(nameBox);
 
