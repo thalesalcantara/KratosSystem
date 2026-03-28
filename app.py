@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 import os
 import time
 import hashlib
+import secrets
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 # ========= FUSO-HORÁRIO =========
@@ -149,7 +150,24 @@ db = SQLAlchemy(app)
 # ====== garantir criação de tabelas em runtime (sem apagar nada) ======
 def ensure_schema():
     """Cria colunas no banco se ainda não existirem (sem Alembic)."""
-    with app.app_context():
+    
+
+class LocalizacaoCooperado(db.Model):
+    __tablename__ = 'localizacao_cooperado'
+
+    id = db.Column(db.Integer, primary_key=True)
+    cooperado_id = db.Column(db.Integer, db.ForeignKey('cooperado.id'), nullable=False, unique=True, index=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    accuracy = db.Column(db.Float, nullable=True)
+    speed = db.Column(db.Float, nullable=True)
+    online = db.Column(db.Boolean, default=False, index=True)
+    fonte = db.Column(db.String(30), default='android_native')
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    cooperado = db.relationship('Cooperado')
+
+with app.app_context():
         # ===== cooperado =====
         try:
             cols_coop = {
@@ -172,6 +190,8 @@ def ensure_schema():
             alter_coop.append("ADD COLUMN IF NOT EXISTS credito_atualizado_em TIMESTAMP NULL")
         if 'senha_hash' not in cols_coop:
             alter_coop.append("ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(128)")
+        if 'app_token' not in cols_coop:
+            alter_coop.append("ADD COLUMN IF NOT EXISTS app_token VARCHAR(120)")
 
         if alter_coop:
             try:
@@ -179,6 +199,14 @@ def ensure_schema():
                 db.session.commit()
             except Exception:
                 db.session.rollback()
+
+        try:
+            db.session.execute(text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ix_cooperado_app_token ON cooperado (app_token)"
+            ))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
         # ===== estabelecimento =====
         try:
@@ -245,6 +273,11 @@ class Cooperado(db.Model):
     foto_mimetype = db.Column(db.String(50), nullable=True)
     foto_filename = db.Column(db.String(120), nullable=True)
     senha_hash = db.Column(db.String(128), nullable=True)
+    app_token = db.Column(db.String(120), unique=True, nullable=True, index=True)
+
+    def ensure_app_token(self):
+        if not self.app_token:
+            self.app_token = secrets.token_urlsafe(32)
 
     def set_senha(self, senha: str):
         self.senha_hash = generate_password_hash(senha)
@@ -599,6 +632,9 @@ def login():
         # 3) Cooperado
         coop = Cooperado.query.filter_by(username=username).first()
         if coop and coop.checar_senha(senha):
+            coop.ensure_app_token()
+            db.session.commit()
+
             session['user_id'] = coop.id
             session['user_tipo'] = 'cooperado'
             return redirect(url_for('painel_cooperado'))
@@ -611,6 +647,14 @@ def login():
 
 @app.route('/logout')
 def logout():
+    if is_cooperado():
+        coop_id = session.get('user_id')
+        if coop_id:
+            loc = LocalizacaoCooperado.query.filter_by(cooperado_id=coop_id).first()
+            if loc:
+                loc.online = False
+                db.session.commit()
+
     session.clear()
     return redirect(url_for('login'))
 
@@ -2217,7 +2261,8 @@ def painel_cooperado():
             data_fim=df_s,
             catalogo_itens_coop=catalogo_itens_coop,
             stories_ativos_coop=stories_ativos_coop,
-            estab_por_id=estab_por_id
+            estab_por_id=estab_por_id,
+            app_token=coop.app_token
         )
     except TemplateNotFound:
         credito_ajuste = to_brt(coop.credito_atualizado_em).strftime(
@@ -2328,8 +2373,90 @@ def painel_cooperado():
         total_lanc=total_lanc,
         data_inicio=di_s,
         data_fim=df_s,
-        credito_ajuste=credito_ajuste
+        credito_ajuste=credito_ajuste,
+        app_token=coop.app_token
         )
+
+
+
+@app.post('/api/app/localizacao')
+def api_app_localizacao():
+    data = request.get_json(silent=True) or {}
+
+    auth = (request.headers.get('Authorization') or '').strip()
+    token = ''
+    if auth.lower().startswith('bearer '):
+        token = auth[7:].strip()
+
+    user_id = str(data.get('user_id') or '').strip()
+    lat = data.get('latitude')
+    lng = data.get('longitude')
+    accuracy = data.get('accuracy')
+    speed = data.get('speed')
+    source = (data.get('source') or 'android_native').strip()
+
+    if not token:
+        return jsonify({'ok': False, 'error': 'token ausente'}), 401
+
+    coop = Cooperado.query.filter_by(app_token=token).first()
+    if not coop:
+        return jsonify({'ok': False, 'error': 'token inválido'}), 401
+
+    if user_id and str(coop.id) != user_id:
+        return jsonify({'ok': False, 'error': 'user_id não confere'}), 403
+
+    if lat is None or lng is None:
+        return jsonify({'ok': False, 'error': 'latitude/longitude ausentes'}), 400
+
+    loc = LocalizacaoCooperado.query.filter_by(cooperado_id=coop.id).first()
+    if not loc:
+        loc = LocalizacaoCooperado(cooperado_id=coop.id)
+        db.session.add(loc)
+
+    loc.latitude = float(lat)
+    loc.longitude = float(lng)
+    loc.accuracy = float(accuracy or 0)
+    loc.speed = float(speed or 0)
+    loc.online = True
+    loc.fonte = source
+    loc.atualizado_em = datetime.utcnow()
+
+    db.session.commit()
+    return jsonify({'ok': True, 'cooperado_id': coop.id}), 200
+
+
+@app.get('/api/cooperado/localizacao_status')
+def api_cooperado_localizacao_status():
+    if not is_cooperado():
+        return jsonify({'ok': False, 'error': 'sem sessão'}), 403
+
+    coop_id = session.get('user_id')
+    coop = Cooperado.query.get_or_404(coop_id)
+    loc = LocalizacaoCooperado.query.filter_by(cooperado_id=coop.id).first()
+
+    if not loc or not loc.atualizado_em:
+        return jsonify({
+            'ok': True,
+            'tem_localizacao': False,
+            'online': False,
+            'mensagem': 'Aguardando localização...'
+        })
+
+    agora = datetime.utcnow()
+    delta = (agora - loc.atualizado_em).total_seconds()
+    online = delta <= 90
+
+    return jsonify({
+        'ok': True,
+        'tem_localizacao': True,
+        'online': online,
+        'latitude': loc.latitude,
+        'longitude': loc.longitude,
+        'accuracy': loc.accuracy,
+        'speed': loc.speed,
+        'atualizado_em': to_brt(loc.atualizado_em).strftime('%d/%m/%Y %H:%M:%S'),
+        'mensagem': 'Localização ativa' if online else 'Aguardando nova localização...'
+    })
 
 
 # ========= CRIA BANCO + ADMIN MASTER =========
