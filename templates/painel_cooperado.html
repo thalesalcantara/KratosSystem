@@ -646,7 +646,7 @@
   </style>
 </head>
 
-<body>
+<body data-user-id="{{ coop.id if coop is defined else "" }}">
   <div class="app">
 
     <header class="top">
@@ -672,6 +672,16 @@
     </header>
 
     <main class="content">
+
+      <section class="card section" id="gpsStatusCard" style="margin-bottom:12px">
+        <div class="head" style="margin-bottom:0">
+          <div>
+            <h3 class="title" style="font-size:1.05rem">Rastreamento</h3>
+            <p class="sub" id="gpsStatusText">Aguardando localização...</p>
+          </div>
+          <div class="badge" id="gpsStatusBadge">GPS</div>
+        </div>
+      </section>
 
       <section class="card filter-wrap">
         <div class="filter-grid">
@@ -1316,5 +1326,97 @@
       }
     </script>
   </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+  try {
+    if (window.AndroidBridge) {
+      window.AndroidBridge.saveLoginData(
+        "{{ coop.id if coop is defined else '' }}",
+        "{{ app_token if app_token is defined else '' }}"
+      );
+      window.AndroidBridge.markLoggedIn();
+    }
+  } catch (e) {
+    console.log('Falha ao sincronizar login com Android:', e);
+  }
+});
+    </script>
+
+    <script>
+(function setupGpsStatus(){
+  const textEl = document.getElementById('gpsStatusText');
+  const badgeEl = document.getElementById('gpsStatusBadge');
+
+  if (!textEl || !badgeEl) return;
+
+  function paintWaiting(msg){
+    textEl.textContent = msg || 'Aguardando localização...';
+    badgeEl.textContent = 'GPS';
+    badgeEl.style.background = '#fff8e8';
+    badgeEl.style.color = '#d38a00';
+  }
+
+  function paintOk(msg){
+    textEl.textContent = msg || 'Localização ativa';
+    badgeEl.textContent = 'ATIVO';
+    badgeEl.style.background = '#eef9f2';
+    badgeEl.style.color = '#0ea85f';
+  }
+
+  function paintOff(msg){
+    textEl.textContent = msg || 'Aguardando nova localização...';
+    badgeEl.textContent = 'OFF';
+    badgeEl.style.background = '#fff2f2';
+    badgeEl.style.color = '#e23b3b';
+  }
+
+  async function fetchStatus(){
+    try{
+      const r = await fetch("{{ url_for('api_cooperado_localizacao_status') }}", {
+        headers: {'Accept':'application/json'},
+        cache: 'no-store'
+      });
+      const data = await r.json();
+
+      if(!data || !data.ok){
+        paintWaiting('Aguardando localização...');
+        return;
+      }
+
+      if(!data.tem_localizacao){
+        paintWaiting(data.mensagem || 'Aguardando localização...');
+        return;
+      }
+
+      if(data.online){
+        paintOk((data.mensagem || 'Localização ativa') + ' • ' + (data.atualizado_em || ''));
+      }else{
+        paintOff((data.mensagem || 'Aguardando nova localização...') + ' • ' + (data.atualizado_em || ''));
+      }
+    }catch(e){
+      paintWaiting('Aguardando localização...');
+    }
+  }
+
+  fetchStatus();
+  setInterval(fetchStatus, 10000);
+})();
+    </script>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const sair = document.querySelector('a[href*="logout"]');
+  if (!sair) return;
+
+  sair.addEventListener('click', function () {
+    try {
+      if (window.AndroidBridge) {
+        window.AndroidBridge.logout();
+      }
+    } catch (e) {}
+  });
+});
+    </script>
 </body>
 </html>
