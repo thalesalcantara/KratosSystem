@@ -1943,6 +1943,35 @@ def api_integracao_parcerias_admin_resumo():
     })
 
 
+@app.post('/api/integracao/parcerias/admin/exportacao-financeira')
+def api_parcerias_exportacao_financeira():
+    """Snapshot financeiro autenticado; nunca envia senha nem altera origem."""
+    try:
+        claims = sso_load_shared((request.get_json(silent=True) or {}).get("token",""), max_age_seconds=60)
+    except (BadSignature, SignatureExpired, TypeError, ValueError):
+        return jsonify({"erro":"Autorizacao invalida"}),401
+    if claims.get("aud")!="parcerias-migracao-financeira" or claims.get("origem")!="financas":
+        return jsonify({"erro":"Destino invalido"}),403
+    cooperados=Cooperado.query.order_by(Cooperado.id).all()
+    estabelecimentos=Estabelecimento.query.order_by(Estabelecimento.id).all()
+    lancamentos=Lancamento.query.order_by(Lancamento.id).all()
+    descontos=DescontoLancamento.query.order_by(DescontoLancamento.id).all()
+    return jsonify({
+       "cooperados":[{"id":x.id,"nome":x.nome,"username":x.username,
+                       "credito":str(x.credito or 0)} for x in cooperados],
+       "estabelecimentos":[{"id":x.id,"nome":x.nome,"username":x.username} for x in estabelecimentos],
+       "lancamentos":[{"id":x.id,"data":x.data.isoformat() if x.data else None,
+          "os_numero":x.os_numero,"cooperado_id":x.cooperado_id,
+          "estabelecimento_id":x.estabelecimento_id,"valor":str(x.valor),
+          "descricao":x.descricao,"parcelas_total":x.parcelas_total,
+          "saldo_aberto":str(x.saldo_aberto) if x.saldo_aberto is not None else None,
+          "concluido":bool(x.concluido)} for x in lancamentos],
+       "descontos":[{"id":x.id,"lancamento_id":x.lancamento_id,
+          "valor":str(x.valor),"criado_em":x.criado_em.isoformat() if x.criado_em else None,
+          "observacao":x.observacao} for x in descontos]
+    })
+
+
 @app.post('/api/integracao/parcerias/admin/creditos')
 def api_integracao_parcerias_admin_creditos():
     """Listagem somente leitura dos creditos para conferencia de migracao."""
