@@ -1368,12 +1368,15 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     // Init
     // =========================
     document.addEventListener('DOMContentLoaded', ()=>{
-      modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
-      document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
+      // Listagem e agrupamento não dependem do carregamento do Bootstrap.
       cpAgruparCooperados();
       atualizarTodasLinhas();
-      document.getElementById('cp-lanc-busca').addEventListener('input', cpAplicarSituacao);
+      document.getElementById('cp-lanc-busca')?.addEventListener('input', cpAplicarSituacao);
       cpAplicarSituacao();
+      if(window.bootstrap && document.getElementById('modalParcelas')){
+        modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
+      }
+      document.getElementById('mp-add')?.addEventListener('click', adicionarDesconto);
     });
   </script>
 
