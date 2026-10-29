@@ -1901,8 +1901,20 @@ def api_integracao_parcerias_cooperado():
     if not username:
         return jsonify({'erro':'Cooperado nao informado'}), 400
     coop = Cooperado.query.filter(func.lower(Cooperado.username)==username.lower()).first()
+    # Sistemas podem usar logins diferentes: so permite nome completo exato
+    # e inequivoco, nunca correspondencia aproximada de dados financeiros.
     if not coop:
-        return jsonify({'erro':'Cadastro de Parcerias nao encontrado para este usuario'}), 404
+        import unicodedata
+        def normalizar_nome(v):
+            v = unicodedata.normalize('NFKD', str(v or ''))
+            return ' '.join(''.join(c for c in v if not unicodedata.combining(c)).upper().split())
+        nome = normalizar_nome(data.get('nome'))
+        if nome:
+            encontrados=[c for c in Cooperado.query.all() if normalizar_nome(c.nome)==nome]
+            if len(encontrados)==1:
+                coop=encontrados[0]
+    if not coop:
+        return jsonify({'erro':'Cadastro de Parcerias nao encontrado com identificacao unica'}), 404
     mes = request.args.get('mes') or datetime.now(BR_TZ).strftime('%Y-%m')
     try:
         inicio = datetime.strptime(mes, '%Y-%m')
