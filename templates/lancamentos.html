@@ -1168,7 +1168,9 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         const expanded=group.classList.contains('cp-expanded');
         items.forEach(tr=>{tr.style.display=(expanded&&eligible.includes(tr))?'':'none'});
         // Pagos: somar valores quitados; abertos: saldo; todos: total original das compras.
-        const soma=eligible.reduce((acc,tr)=>acc+(cpAbaAtiva==='pagos' ? (parseFloat(tr.dataset.pago||tr.dataset.valor||0)||0) : cpAbaAtiva==='todos' ? (parseFloat(tr.dataset.valor||0)||0) : (parseFloat(tr.dataset.saldo||0)||0)),0);
+        // A coluna Compra sempre mostra o valor original somado das compras visíveis.
+        // O saldo em aberto aparece separadamente na coluna Parcela (4x).
+        const soma=eligible.reduce((acc,tr)=>acc+(parseFloat(tr.dataset.valor||0)||0),0);
         const saldoGrupo=eligible.reduce((acc,tr)=>acc+(parseFloat(tr.dataset.saldo||0)||0),0);
         group.dataset.saldo=String(saldoGrupo);
         const quarter=Math.round((saldoGrupo/4)*100)/100;
