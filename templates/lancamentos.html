@@ -626,7 +626,9 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
 .cp-status-tab span{font-size:12px;margin-left:5px;opacity:.85}
 #t-lanc .pill.parcial{background:#fff2cf!important;color:#9a6400!important;border-color:#f5d57c!important}
 #t-lanc .pill.parcial .dot{background:#edaa13!important}
-</style><style id="cp-grupos-style">#t-lanc tbody tr.cp-grupo td{padding:0!important;background:#eef4ff!important;border-bottom:1px solid #dbe6f8!important}.cp-expander{width:100%;border:0;background:none;color:#0c316a;display:flex;align-items:center;gap:16px;text-align:left;padding:14px 18px;font:700 14px Inter,system-ui;cursor:pointer}.cp-expander>.bi{color:#1658d2;font-size:15px;transition:transform .18s}.cp-expanded .cp-expander>.bi{transform:rotate(180deg)}.cp-group-name{flex:1}.cp-group-count{color:#5a7196;font-size:12px;font-weight:600}.cp-group-total{min-width:110px;text-align:right;color:#0950bf;font-size:15px}.cp-group-status{min-width:76px;text-align:center;border-radius:99px;padding:5px 10px;font-size:12px}.cp-paid{background:#e3f8e9;color:#0d7943}.cp-partial{background:#fff1c8;color:#9e6600}.cp-pending{background:#ffe7e7;color:#a52222}@media(max-width:700px){.cp-expander{gap:7px;padding:11px 8px;font-size:12px}.cp-group-total{min-width:70px;font-size:12px}.cp-group-count{font-size:10px}.cp-group-status{min-width:55px;padding:3px 4px}}</style></head>
+</style><style id="cp-grupos-style">#t-lanc tbody tr.cp-grupo td{padding:0!important;background:#eef4ff!important;border-bottom:1px solid #dbe6f8!important}.cp-expander{width:100%;border:0;background:none;color:#0c316a;display:flex;align-items:center;gap:16px;text-align:left;padding:14px 18px;font:700 14px Inter,system-ui;cursor:pointer}.cp-expander>.bi{color:#1658d2;font-size:15px;transition:transform .18s}.cp-expanded .cp-expander>.bi{transform:rotate(180deg)}.cp-group-name{flex:1}.cp-group-count{color:#5a7196;font-size:12px;font-weight:600}.cp-group-total{min-width:110px;text-align:right;color:#0950bf;font-size:15px}.cp-group-status{min-width:76px;text-align:center;border-radius:99px;padding:5px 10px;font-size:12px}.cp-paid{background:#e3f8e9;color:#0d7943}.cp-partial{background:#fff1c8;color:#9e6600}.cp-pending{background:#ffe7e7;color:#a52222}@media(max-width:700px){.cp-expander{gap:7px;padding:11px 8px;font-size:12px}.cp-group-total{min-width:70px;font-size:12px}.cp-group-count{font-size:10px}.cp-group-status{min-width:55px;padding:3px 4px}}</style><style id="coopex-group-discount">
+.cp-group-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.cp-group-toolbar>.cp-expander{flex:1;min-width:300px}.cp-group-quarter{font-size:12px;color:#0c428a;font-weight:750}.cp-group-payment{margin-left:auto;display:flex;gap:8px;align-items:end;flex-wrap:wrap}.cp-group-payment label{font-size:11px;color:#345281;font-weight:700}.cp-group-payment input{display:block;max-width:125px;width:125px;background:white;border:1px solid #ccd9ed;border-radius:7px;padding:8px;color:#14386e}.cp-group-payment button{background:#0758e6;border:0;border-radius:7px;color:white;padding:9px 12px;font-weight:750}
+</style></head>
 
 <body>
 {% include '_coopex_nav_horizontal.html' %}
@@ -766,6 +768,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
                     data-valor="{{ '%.2f'|format(l.valor) }}"
                     data-os="{{ l.os_numero }}"
                     data-coop="{{ l.cooperado.nome }}"
+                    data-coop-id="{{ l.cooperado_id }}"
                     data-estab="{{ l.estabelecimento.nome }}"
                     data-desc="{{ (l.descricao or '')|e }}"
                     data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'
@@ -1125,8 +1128,20 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         const group=document.createElement('tr');
         group.className='cp-grupo';
         group.dataset.group=String(idx);
-        group.innerHTML='<td colspan="8"><button type="button" class="cp-expander" aria-expanded="false"><i class="bi bi-chevron-down"></i><span class="cp-group-name"></span><span class="cp-group-count"></span><strong class="cp-group-total"></strong><span class="cp-group-status"></span></button></td>';
+        group.innerHTML='<td colspan="8"><div class="cp-group-toolbar"><button type="button" class="cp-expander" aria-expanded="false"><i class="bi bi-chevron-down"></i><span class="cp-group-name"></span><span class="cp-group-count"></span><strong class="cp-group-total"></strong><span class="cp-group-status"></span></button><span class="cp-group-quarter"></span><form class="cp-group-payment" method="post" action="{{ url_for('descontar_total_cooperado_admin') }}"><input type="hidden" name="cooperado_id"><input type="hidden" name="estabelecimento_id"><input type="hidden" name="data_inicio"><input type="hidden" name="data_fim"><label>Descontar no total (R$) <input aria-label="Valor do desconto total" name="valor_desconto" type="number" min="0.01" step="0.01" required placeholder="0,00"></label><button type="submit">Aplicar desconto</button></form></div></td>';
         group.querySelector('.cp-group-name').textContent=name;
+        const payForm=group.querySelector('.cp-group-payment');
+        payForm.querySelector('[name="cooperado_id"]').value=items[0].dataset.coopId;
+        ['estabelecimento_id','data_inicio','data_fim'].forEach(id=>{
+          payForm.querySelector('[name="'+id+'"]').value=document.getElementById(id)?.value||'';
+        });
+        payForm.addEventListener('submit',ev=>{
+          const v=Number(payForm.querySelector('[name="valor_desconto"]').value);
+          const saldo=Number(group.dataset.saldo||0);
+          if(!Number.isFinite(v)||v<0.01||v>saldo+0.0001){ev.preventDefault();alert('Informe um desconto entre R$ 0,01 e o saldo aberto do cooperado.');return}
+          if(!confirm('Confirmar desconto consolidado de '+brl(v)+' nas compras abertas de '+name+'?'))ev.preventDefault();
+        });
+
         group.querySelector('button').addEventListener('click',()=>{
           group.classList.toggle('cp-expanded');
           group.querySelector('button').setAttribute('aria-expanded',String(group.classList.contains('cp-expanded')));
@@ -1154,6 +1169,11 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         items.forEach(tr=>{tr.style.display=(expanded&&eligible.includes(tr))?'':'none'});
         // Pagos: somar valores quitados; abertos: saldo; todos: total original das compras.
         const soma=eligible.reduce((acc,tr)=>acc+(cpAbaAtiva==='pagos' ? (parseFloat(tr.dataset.pago||tr.dataset.valor||0)||0) : cpAbaAtiva==='todos' ? (parseFloat(tr.dataset.valor||0)||0) : (parseFloat(tr.dataset.saldo||0)||0)),0);
+        const saldoGrupo=eligible.reduce((acc,tr)=>acc+(parseFloat(tr.dataset.saldo||0)||0),0);
+        group.dataset.saldo=String(saldoGrupo);
+        const quarter=Math.round((saldoGrupo/4)*100)/100;
+        group.querySelector('.cp-group-quarter').textContent=saldoGrupo>0?'Saldo '+brl(saldoGrupo)+' · 4x de '+brl(quarter)+' (aprox.)':'';
+        group.querySelector('.cp-group-payment').style.display=(cpAbaAtiva==='pagos'||saldoGrupo<0.009)?'none':'flex';
         const quitados=eligible.filter(tr=>tr.dataset.situacao==='pago').length;
         const parciais=eligible.filter(tr=>tr.dataset.situacao==='parcial').length;
         group.querySelector('.cp-group-count').textContent=eligible.length+' compra(s)';
