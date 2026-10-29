@@ -840,10 +840,13 @@ def apurar_pagamento_lancamento(compra, descontos=None):
         return total, 0, "pago"
     registros = compra.descontos if descontos is None else descontos
     registros = list(registros or [])
-    if registros:
+    # saldo_aberto é atualizado em cada baixa (individual ou consolidada).
+    # Quando existe, representa o valor efetivamente pendente da compra.
+    # O histórico continua sendo utilizado nos registros sem saldo persistido.
+    if compra.saldo_aberto is not None:
+        pago = total - min(total, max(0, cent(compra.saldo_aberto)))
+    elif registros:
         pago = sum(cent(d.valor if hasattr(d, "valor") else d["valor"]) for d in registros)
-    elif compra.saldo_aberto is not None:
-        pago = total - cent(compra.saldo_aberto)
     else:
         pago = 0
     pago = min(total, max(0, pago))
