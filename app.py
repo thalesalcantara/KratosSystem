@@ -857,6 +857,7 @@ def listar_cooperados():
 
     saldo_utilizado = {}
     credito_excedido = {}
+    credito_disponivel = {}
     limite_referencia = _Dec('800.00')
     for cooperado in cooperados:
         aberto = _centavos(pendentes_por_coop.get(cooperado.id, _Dec('0')))
@@ -866,9 +867,11 @@ def listar_cooperados():
         excedente = max(_Dec('0'), _centavos(aberto - limite_referencia))
         saldo_utilizado[cooperado.id] = float(aberto)
         credito_excedido[cooperado.id] = float(excedente)
+        credito_disponivel[cooperado.id] = float(max(_Dec("0"), _centavos(limite_referencia - aberto)))
     limite_referencia = float(limite_referencia)
     return render_template('cooperados.html', admin=admin, cooperados=cooperados,
                            saldo_utilizado=saldo_utilizado, credito_excedido=credito_excedido,
+                           credito_disponivel=credito_disponivel,
                            limite_referencia=limite_referencia)
 
 
