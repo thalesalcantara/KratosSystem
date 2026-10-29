@@ -1537,6 +1537,88 @@ def excluir_lancamento(id):
     return redirect(next_url)
 
 
+@app.post('/lancamentos/descontar-cooperado')
+def descontar_total_cooperado_admin():
+    """Um pagamento distribui o abatimento entre compras abertas do mesmo cooperado."""
+    if not is_admin():
+        return redirect(url_for('login'))
+    from decimal import Decimal, ROUND_HALF_UP
+    try:
+        cooperado_id = int(request.form.get('cooperado_id', '0'))
+    except (ValueError, TypeError):
+        cooperado_id = 0
+    coop = Cooperado.query.get_or_404(cooperado_id)
+    valor = parse_valor_brl(request.form.get('valor_desconto'))
+    centavos = (int((Decimal(str(valor)) * 100).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+                if valor is not None else 0)
+    if centavos <= 0:
+        flash('Informe um desconto maior ou igual a R$ 0,01.', 'danger')
+        return redirect(url_for('listar_lancamentos'))
+    # A seleção respeita o período exibido: compras antigas ficam fora da cobrança.
+    ini = request.form.get('data_inicio') or ''
+    fim = request.form.get('data_fim') or ''
+    try:
+        if ini:
+            datetime.strptime(ini, '%Y-%m-%d')
+        if fim:
+            datetime.strptime(fim, '%Y-%m-%d')
+    except ValueError:
+        flash('Período inválido.', 'danger')
+        return redirect(url_for('listar_lancamentos'))
+    di, df = local_bounds_to_utc_naive(ini, fim)
+    query = Lancamento.query.filter(Lancamento.cooperado_id == coop.id)
+    if di:
+        query = query.filter(Lancamento.data >= di)
+    if df:
+        query = query.filter(Lancamento.data < df)
+    est_id = request.form.get('estabelecimento_id') or ''
+    if est_id:
+        try:
+            query = query.filter(Lancamento.estabelecimento_id == int(est_id))
+        except ValueError:
+            flash('Estabelecimento inválido.', 'danger')
+            return redirect(url_for('listar_lancamentos'))
+    compras = query.order_by(Lancamento.data.asc(), Lancamento.id.asc()).with_for_update().all()
+    # O saldo persistido é a fonte de verdade, considerando descontos já lançados.
+    validas = []
+    for compra in compras:
+        # Histórico anterior a agosto de 2026 já quitado: sem débito retroativo.
+        if compra.data and to_brt(compra.data).date().isoformat() < '2026-08-01':
+            continue
+        if compra.concluido:
+            continue
+        saldo = compra.saldo_aberto if compra.saldo_aberto is not None else compra.valor
+        restante = int((Decimal(str(saldo or 0)) * 100).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+        if restante > 0:
+            validas.append((compra, restante))
+    total_aberto = sum(v for _, v in validas)
+    if centavos > total_aberto:
+        flash('Desconto maior que o saldo aberto consolidado do cooperado.', 'danger')
+        return redirect(url_for('listar_lancamentos'))
+    restante = centavos
+    observacao = 'Desconto consolidado de compras do cooperado'
+    try:
+        for compra, saldo in validas:
+            if restante <= 0:
+                break
+            abatido = min(restante, saldo)
+            db.session.add(DescontoLancamento(
+                lancamento_id=compra.id, valor=abatido / 100,
+                observacao=observacao))
+            compra.saldo_aberto = (saldo - abatido) / 100
+            compra.concluido = (saldo == abatido)
+            restante -= abatido
+        coop.credito = float(Decimal(str(coop.credito or 0)) + Decimal(centavos) / 100)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    flash('Desconto consolidado registrado e distribuído pelas compras sem duplicar o crédito.', 'success')
+    from urllib.parse import urlencode
+    args = {k: request.form.get(k) for k in ('cooperado_id', 'estabelecimento_id', 'data_inicio', 'data_fim') if request.form.get(k)}
+    return redirect(url_for('listar_lancamentos') + ('?' + urlencode(args) if args else ''))
+
+
 @app.post('/lancamentos/<int:id>/descontar')
 def descontar_lancamento_admin(id):
     if not is_admin():
