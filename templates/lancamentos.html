@@ -884,12 +884,12 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
                 <div class="d-flex align-items-center justify-content-between">
                   <h6 class="m-0"><i class="bi bi-clock-history"></i> Histórico (editável)</h6>
                 </div>
-                <div class="hint mt-1">Você pode editar a data e o valor de qualquer desconto.</div>
+                <div class="hint mt-1">Histórico de baixas confirmadas no banco. Não é possível alterar pagamentos somente pelo navegador.</div>
                 <div class="timeline mt-2" id="mp-timeline"></div>
               </div>
 
               <div class="hint mt-3">
-                Observação: os descontos ficam salvos no navegador (localStorage) até você integrar com o banco.
+                Os descontos individuais são registrados no banco e atualizam o crédito utilizado após a baixa.
               </div>
             </div>
           </div>
@@ -939,20 +939,11 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     function keyDescontos(id){ return `coopex_descontos_${id}`; }
 
     function getHistorico(row){
-      // Compatibilidade com os descontos antigos, ainda mantidos pelo navegador.
-      // Priorizamos o maior histórico disponível para evitar ocultar pagamentos.
-      let servidor=[],local=[];
-      try{const x=JSON.parse(row.dataset.historico||'[]');servidor=Array.isArray(x)?x:[]}catch(e){}
-      try{const x=JSON.parse(localStorage.getItem(keyDescontos(row.dataset.id))||'[]');local=Array.isArray(x)?x:[]}catch(e){}
-      const soma = itens => itens.reduce((a,d)=>a+Math.max(0,Number(d.valor)||0),0);
-      return soma(local)>soma(servidor)+0.0001?local:servidor;
-    }
-
-    function setHistorico(id, hist){
-      const dados=JSON.stringify(hist||[]);
-      const row=getRowById(id);
-      if(row){row.dataset.historico=dados;row.dataset.historicoEditado='1';}
-      try{localStorage.setItem(keyDescontos(id),dados)}catch(e){}
+      // Somente o histórico confirmado pelo servidor conta como pagamento.
+      try {
+        const dados=JSON.parse(row.dataset.historico||'[]');
+        return Array.isArray(dados)?dados:[];
+      } catch(e) { return []; }
     }
 
     // =========================
@@ -1345,50 +1336,35 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     function adicionarDesconto(){
       const tr = getRowById(currentId);
       if(!tr) return;
-
-      const date = (document.getElementById('mp-date').value || '').slice(0,10);
-      const val = parseBRL(document.getElementById('mp-valor').value);
-
-      if(!date){ alert('Informe a data do desconto.'); return; }
-      if(isNaN(val) || val <= 0){ alert('Informe um valor válido para o desconto.'); return; }
-
-      const hist = getHistorico(tr);
-      hist.push({ data: date, valor: to2(val) });
-      setHistorico(currentId, hist);
-
-      refreshModal();
-      document.getElementById('mp-valor').value = '';
+      const val=parseBRL(document.getElementById('mp-valor').value);
+      const saldo=Number(tr.dataset.saldo||'0');
+      if(!Number.isFinite(val)||val<0.01||val>saldo+0.0001){
+        alert('Informe um valor entre R$ 0,01 e o saldo pendente de '+brl(saldo)+'.');
+        return;
+      }
+      if(!confirm('Confirmar baixa individual de '+brl(val)+'? Esta operação será registrada no banco.'))return;
+      const form=document.createElement('form');
+      form.method='POST';
+      form.action="{{ url_for('descontar_lancamento_admin', id=0) }}".replace('/0/','/'+currentId+'/');
+      const values={
+        valor_desconto:val.toFixed(2),
+        observacao:'Baixa individual registrada em Lançamentos',
+        next:window.location.pathname+window.location.search
+      };
+      Object.entries(values).forEach(([name,value])=>{
+        const input=document.createElement('input');
+        input.type='hidden';input.name=name;input.value=value;form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
     }
 
     function salvarEdicao(idx){
-      const tr = getRowById(currentId);
-      if(!tr) return;
-
-      const hist = getHistorico(tr);
-
-      const dateInput = document.querySelector(`[data-edit-date="${idx}"]`);
-      const valInput  = document.querySelector(`[data-edit-valor="${idx}"]`);
-      if(!dateInput || !valInput) return;
-
-      const date = (dateInput.value || '').slice(0,10);
-      const val  = parseBRL(valInput.value);
-
-      if(!date){ alert('Informe a data do desconto.'); return; }
-      if(isNaN(val) || val <= 0){ alert('Informe um valor válido.'); return; }
-
-      hist[idx] = { ...hist[idx], data: date, valor: to2(val) };
-      setHistorico(currentId, hist);
-
-      refreshModal();
+      alert('Pagamentos confirmados não podem ser editados apenas no navegador. Faça a conciliação pelo histórico do banco.');
     }
 
     function removerDesconto(idx){
-      const tr = getRowById(currentId);
-      if(!tr) return;
-      const hist = getHistorico(tr);
-      hist.splice(idx, 1);
-      setHistorico(currentId, hist);
-      refreshModal();
+      alert('Pagamentos confirmados não podem ser excluídos apenas no navegador. Faça a conciliação pelo histórico do banco.');
     }
 
     // =========================
