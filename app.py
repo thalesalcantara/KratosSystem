@@ -826,38 +826,33 @@ def listar_cooperados():
 
     cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
 
-    # Saldo pendente: apenas compras ainda abertas, não faturamento histórico.
-    # A COOPEX informou que as compras até julho/2026 estão integralmente quitadas.
-    # Aplicar este corte somente à apuração visual; não alterar registros nem descontos.
-    from datetime import datetime as _dt
+    # Usar exatamente a regra do painel Lançamentos para o saldo em aberto:
+    # descontos registrados, flag de conclusão, saldo_aberto legado e quitação
+    # histórica até julho/2026. Nada é regravado nesta apuração.
     from decimal import Decimal as _Dec, ROUND_HALF_UP as _RHU
-    corte_historico = _dt(2026, 8, 1)
-    compras_abertas = db.session.query(
-        Lancamento.id.label('id'),
-        Lancamento.cooperado_id.label('cooperado_id'),
-        Lancamento.valor.label('valor')
-    ).filter(Lancamento.data >= corte_historico).subquery()
-    descontos_por_compra = db.session.query(
-        DescontoLancamento.lancamento_id.label('lancamento_id'),
-        func.coalesce(func.sum(DescontoLancamento.valor), 0).label('total')
-    ).group_by(DescontoLancamento.lancamento_id).subquery()
-    movimentos = db.session.query(
-        compras_abertas.c.cooperado_id,
-        compras_abertas.c.valor,
-        func.coalesce(descontos_por_compra.c.total, 0)
-    ).outerjoin(descontos_por_compra,
-                descontos_por_compra.c.lancamento_id == compras_abertas.c.id).all()
     def _centavos(valor):
-        return valor.quantize(_Dec('0.01'), rounding=_RHU)
+        return _Dec(str(valor or 0)).quantize(_Dec('0.01'), rounding=_RHU)
 
+    lancamentos_credito = Lancamento.query.options(
+        db.joinedload(Lancamento.descontos)
+    ).all()
     pendentes_por_coop = {}
-    for cid, valor, desconto in movimentos:
-        # Arredondar em centavos por compra antes de somar: R$ 0,01 em
-        # aberto não pode desaparecer por imprecisão de FLOAT ou arredondamento.
-        compra = _centavos(_Dec(str(valor or 0)))
-        pago = _centavos(_Dec(str(desconto or 0)))
-        pendente = max(_Dec('0.00'), _centavos(compra - pago))
-        pendentes_por_coop[cid] = pendentes_por_coop.get(cid, _Dec('0.00')) + pendente
+    for compra in lancamentos_credito:
+        valor = _centavos(compra.valor)
+        if valor <= 0:
+            continue
+        if to_brt(compra.data).date().isoformat() <= '2026-07-31' or compra.concluido:
+            continue
+        historico = list(compra.descontos or [])
+        if historico:
+            pago = sum((_centavos(d.valor) for d in historico), _Dec('0.00'))
+            restante = max(_Dec('0.00'), _centavos(valor - pago))
+        elif compra.saldo_aberto is not None:
+            restante = max(_Dec('0.00'), min(valor, _centavos(compra.saldo_aberto)))
+        else:
+            restante = valor
+        cid = compra.cooperado_id
+        pendentes_por_coop[cid] = pendentes_por_coop.get(cid, _Dec('0.00')) + restante
 
     saldo_utilizado = {}
     credito_excedido = {}
