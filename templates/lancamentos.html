@@ -775,6 +775,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
                     data-quitacao-historica="{{ '1' if l.quitado_historico else '0' }}"
                     data-situacao-inicial="{{ l.situacao_apurada }}"
                     data-pago-inicial="{{ l.pago_centavos_apuracao }}"
+                    data-saldo-inicial="{{ l.saldo_centavos_apuracao }}"
                     data-concluido="{{ '1' if l.concluido else '0' }}"
                     data-saldo-legado="{{ l.saldo_aberto if l.saldo_aberto is not none else '' }}">
 
@@ -1089,13 +1090,9 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       const pill = sitEl?.closest('.pill');
       // O servidor apura o histórico de quitações e descontos efetivos.
       if (tr.dataset.situacaoInicial && !tr.dataset.historicoEditado) {
-        const inicial = tr.dataset.situacaoInicial;
-        if (inicial === 'pago') {
-          calc.saldo = 0; calc.pagoTotal = total;
-        } else if (inicial === 'parcial') {
-          calc.pagoTotal = Number(tr.dataset.pagoInicial || 0) / 100;
-          calc.saldo = Math.max(0, total - calc.pagoTotal);
-        }
+        // Mesma apuração do backend usada para Crédito Utilizado.
+        calc.saldo = Number(tr.dataset.saldoInicial || 0) / 100;
+        calc.pagoTotal = Number(tr.dataset.pagoInicial || 0) / 100;
       }
       // Só publicar os valores depois da situação final apurada pelo servidor.
       // Esses atributos alimentam as somas e os grupos de Lançamentos.
