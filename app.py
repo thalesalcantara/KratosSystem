@@ -756,6 +756,10 @@ def dashboard():
     return render_template(
         'dashboard_resumo_coopex.html',
         recentes=recentes, resumo_estabelecimentos=resumo_estabelecimentos,
+        ranking_cooperados=sorted(
+            ((row.nome, float(row.total or 0)) for row in sum_per_coop),
+            key=lambda item: item[1], reverse=True
+        )[:5],
         top_nome=top_nome, top_percentual=(top_total / total_valor * 100 if total_valor else 0),
         media_pedido=media_pedido,
         admin=admin,
