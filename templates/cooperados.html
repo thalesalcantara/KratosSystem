@@ -915,6 +915,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 <td class="valor" data-utilizado="{{'%.2f'|format(saldo_utilizado.get(c.id,0))}}">
                   R$ {{"{:,.2f}".format(saldo_utilizado.get(c.id,0)).replace(",", "X").replace(".", ",").replace("X", ".")}}
+                  {% if 0 < saldo_utilizado.get(c.id,0) < 0.50 %}
+                    <span title="Ainda existe saldo em aberto, mesmo sendo apenas centavos" style="color:#a26500;font-weight:700;white-space:nowrap"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> Em aberto</span>
+                  {% endif %}
                 </td>
                 <td class="valor" data-disponivel="{{'%.2f'|format(credito_disponivel.get(c.id,0))}}">R$ {{"{:,.2f}".format(credito_disponivel.get(c.id,0)).replace(",", "X").replace(".", ",").replace("X", ".")}}</td>
                 <td data-excedido="{{'%.2f'|format(credito_excedido.get(c.id,0))}}">
