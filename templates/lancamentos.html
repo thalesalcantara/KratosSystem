@@ -772,7 +772,9 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
                     data-estab="{{ l.estabelecimento.nome }}"
                     data-desc="{{ (l.descricao or '')|e }}"
                     data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'
-                    data-quitacao-historica="{{ '1' if (l.data and l.data.strftime('%Y-%m-%d') < '2026-08-01') or (l.cooperado and (l.cooperado.nome|trim|upper) == 'COOPERADO REMOVIDO') else '0' }}"
+                    data-quitacao-historica="{{ '1' if l.quitado_historico else '0' }}"
+                    data-situacao-inicial="{{ l.situacao_apurada }}"
+                    data-pago-inicial="{{ l.pago_centavos_apuracao }}"
                     data-concluido="{{ '1' if l.concluido else '0' }}"
                     data-saldo-legado="{{ l.saldo_aberto if l.saldo_aberto is not none else '' }}">
 
@@ -948,7 +950,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     function setHistorico(id, hist){
       const dados=JSON.stringify(hist||[]);
       const row=getRowById(id);
-      if(row)row.dataset.historico=dados;
+      if(row){row.dataset.historico=dados;row.dataset.historicoEditado='1';}
       try{localStorage.setItem(keyDescontos(id),dados)}catch(e){}
     }
 
@@ -1087,6 +1089,16 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
 
       const sitEl = tr.querySelector('.sit');
       const pill = sitEl?.closest('.pill');
+      // O servidor apura o histórico de quitações e descontos efetivos.
+      if (tr.dataset.situacaoInicial && !tr.dataset.historicoEditado) {
+        const inicial = tr.dataset.situacaoInicial;
+        if (inicial === 'pago') {
+          calc.saldo = 0; calc.pagoTotal = total;
+        } else if (inicial === 'parcial') {
+          calc.pagoTotal = Number(tr.dataset.pagoInicial || 0) / 100;
+          calc.saldo = Math.max(0, total - calc.pagoTotal);
+        }
+      }
       const ok = calc.saldo <= 0.0001;
 
       pill.classList.remove('danger', 'ok', 'parcial');
