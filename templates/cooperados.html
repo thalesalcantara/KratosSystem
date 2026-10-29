@@ -908,8 +908,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 <td class="col-user" data-username="{{ c.username }}">{{ c.username }}</td>
 
-                <td class="valor" data-credito="{{ '%.2f'|format(c.credito) }}">
-                  {{ "{:,.2f}".format(c.credito).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                <td class="valor" data-credito="{{ '%.2f'|format(credito_disponivel.get(c.id,0)) }}" title="Crédito disponível descontadas as compras ainda em aberto">
+                  R$ {{ "{:,.2f}".format(credito_disponivel.get(c.id,0)).replace(",", "X").replace(".", ",").replace("X", ".") }}
                 </td>
 
                 <td class="valor" data-utilizado="{{'%.2f'|format(saldo_utilizado.get(c.id,0))}}">
