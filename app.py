@@ -833,8 +833,9 @@ def listar_cooperados():
     def _centavos(valor):
         return _Dec(str(valor or 0)).quantize(_Dec('0.01'), rounding=_RHU)
 
+    from sqlalchemy.orm import selectinload
     lancamentos_credito = Lancamento.query.options(
-        db.joinedload(Lancamento.descontos)
+        selectinload(Lancamento.descontos)
     ).all()
     pendentes_por_coop = {}
     for compra in lancamentos_credito:
