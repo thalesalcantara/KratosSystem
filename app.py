@@ -1887,6 +1887,50 @@ def estab_excluir_lancamento(id):
 
 
 # ========= PAINEL COOPERADO =========
+@app.post('/api/integracao/parcerias/cooperado')
+def api_integracao_parcerias_cooperado():
+    """Consulta somente leitura para cooperado autenticado no portal Financas."""
+    from sqlalchemy.orm import selectinload
+    try:
+        data = sso_load_shared((request.get_json(silent=True) or {}).get('token',''), max_age_seconds=50)
+    except (BadSignature, SignatureExpired, TypeError, ValueError):
+        return jsonify({'erro':'Autorizacao invalida ou expirada'}), 401
+    if data.get('aud') != 'parcerias-cooperado' or data.get('origem') != 'financas':
+        return jsonify({'erro':'Destino invalido'}), 403
+    username = str(data.get('username') or '').strip()
+    if not username:
+        return jsonify({'erro':'Cooperado nao informado'}), 400
+    coop = Cooperado.query.filter(func.lower(Cooperado.username)==username.lower()).first()
+    if not coop:
+        return jsonify({'erro':'Cadastro de Parcerias nao encontrado para este usuario'}), 404
+    mes = request.args.get('mes') or datetime.now(BR_TZ).strftime('%Y-%m')
+    try:
+        inicio = datetime.strptime(mes, '%Y-%m')
+        if inicio.strftime('%Y-%m') != mes:
+            raise ValueError('mes')
+        fim = datetime(inicio.year+1,1,1) if inicio.month==12 else datetime(inicio.year,inicio.month+1,1)
+    except ValueError:
+        return jsonify({'erro':'Mes invalido'}), 400
+    di, _ = local_bounds_to_utc_naive(inicio.strftime('%Y-%m-%d'), None)
+    df, _ = local_bounds_to_utc_naive(fim.strftime('%Y-%m-%d'), None)
+    compras = (Lancamento.query.options(selectinload(Lancamento.descontos))
+               .filter(Lancamento.cooperado_id==coop.id, Lancamento.data>=di,Lancamento.data<df)
+               .order_by(Lancamento.data.desc(),Lancamento.id.desc()).all())
+    itens=[]
+    soma=pago_total=aberto_total=0
+    for compra in compras:
+        pago, saldo, situacao=apurar_pagamento_lancamento(compra)
+        total=int(round(float(compra.valor or 0)*100))
+        soma+=total;pago_total+=pago;aberto_total+=saldo
+        itens.append({'id':compra.id,'os':compra.os_numero,'estabelecimento':compra.estabelecimento.nome,
+                      'data':to_brt(compra.data).strftime('%d/%m/%Y %H:%M'),
+                      'valor':total/100,'pago':pago/100,'saldo':saldo/100,'situacao':situacao})
+    return jsonify({'cooperado':coop.nome,'mes':mes,'total':soma/100,
+                    'pago':pago_total/100,'pendente':aberto_total/100,
+                    'credito_disponivel':max(0,800-aberto_total/100),
+                    'quantidade':len(itens),'itens':itens})
+
+
 @app.route('/painel_cooperado')
 def painel_cooperado():
     if not is_cooperado():
