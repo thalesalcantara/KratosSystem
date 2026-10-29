@@ -1011,7 +1011,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
 
       let soma = 0, qtd = 0;
       rows.forEach(tr=>{
-        const v = parseFloat(tr.dataset.saldo || '0') || 0;
+        const v = cpAbaAtiva==='pagos' ? (parseFloat(tr.dataset.pago || tr.dataset.valor || '0') || 0) : cpAbaAtiva==='todos' ? (parseFloat(tr.dataset.valor || '0') || 0) : (parseFloat(tr.dataset.saldo || '0') || 0);
         soma = to2(soma + v);
         qtd++;
       });
@@ -1080,6 +1080,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
 
       tr.querySelector('.vparc').textContent = brl(sug);
       tr.dataset.saldo = String(Math.max(0,calc.saldo));
+      tr.dataset.pago = String(Math.min(total, Math.max(0,calc.pagoTotal)));
 
       const sitEl = tr.querySelector('.sit');
       const pill = sitEl?.closest('.pill');
@@ -1151,8 +1152,8 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         group.style.display=eligible.length?'':'none';
         const expanded=group.classList.contains('cp-expanded');
         items.forEach(tr=>{tr.style.display=(expanded&&eligible.includes(tr))?'':'none'});
-        // Total do cooperado = saldo restante; valores quitados nunca somam.
-        const soma=eligible.reduce((acc,tr)=>acc+(parseFloat(tr.dataset.saldo||0)||0),0);
+        // Pagos: somar valores quitados; abertos: saldo; todos: total original das compras.
+        const soma=eligible.reduce((acc,tr)=>acc+(cpAbaAtiva==='pagos' ? (parseFloat(tr.dataset.pago||tr.dataset.valor||0)||0) : cpAbaAtiva==='todos' ? (parseFloat(tr.dataset.valor||0)||0) : (parseFloat(tr.dataset.saldo||0)||0)),0);
         const quitados=eligible.filter(tr=>tr.dataset.situacao==='pago').length;
         const parciais=eligible.filter(tr=>tr.dataset.situacao==='parcial').length;
         group.querySelector('.cp-group-count').textContent=eligible.length+' compra(s)';
