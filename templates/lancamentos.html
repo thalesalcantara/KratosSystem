@@ -930,14 +930,10 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     function keyDescontos(id){ return `coopex_descontos_${id}`; }
 
     function getHistorico(row){
-      const id = row.dataset.id;
-      const ls = localStorage.getItem(keyDescontos(id));
-      if (ls){
-        try { return JSON.parse(ls) || []; } catch(e){}
-      }
+      // PostgreSQL é a fonte de verdade: valores antigos em localStorage não
+      // podem sobrescrever pagamentos registrados no servidor.
       try{
-        const raw = row.dataset.historico || '[]';
-        const arr = JSON.parse(raw);
+        const arr = JSON.parse(row.dataset.historico || '[]');
         return Array.isArray(arr) ? arr : [];
       }catch(e){
         return [];
@@ -1145,7 +1141,8 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         group.querySelector('.cp-group-status').textContent=quitados===eligible.length?'Pago':parciais>0||quitados>0?'Parcial':'Pendente';
         group.querySelector('.cp-group-status').className='cp-group-status '+(quitados===eligible.length?'cp-paid':parciais>0||quitados>0?'cp-partial':'cp-pending');
       });
-      document.getElementById('cp-lanc-count').textContent=String(groups.filter(g=>g.style.display!=='none').length);
+      const visiveis = groups.filter(g=>g.style.display!=='none').length;
+      document.getElementById('cp-lanc-count').textContent=String(visiveis);
       document.getElementById('cp-count-abertos').textContent=abertos;
       document.getElementById('cp-count-pagos').textContent=pagos;
       document.getElementById('cp-count-todos').textContent=rows.length;
