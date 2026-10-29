@@ -826,28 +826,47 @@ def listar_cooperados():
 
     cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
 
-    # Crédito utilizado = compras menos descontos já registrados.
-    # Subconsultas separadas impedem multiplicação dos valores em joins.
-    compras = db.session.query(
+    # Saldo pendente: apenas compras ainda abertas, não faturamento histórico.
+    # A COOPEX informou que as compras até julho/2026 estão integralmente quitadas.
+    # Aplicar este corte somente à apuração visual; não alterar registros nem descontos.
+    from datetime import datetime as _dt
+    from decimal import Decimal as _Dec, ROUND_HALF_UP as _RHU
+    corte_historico = _dt(2026, 8, 1)
+    compras_abertas = db.session.query(
+        Lancamento.id.label('id'),
         Lancamento.cooperado_id.label('cooperado_id'),
-        func.sum(Lancamento.valor).label('total')
-    ).group_by(Lancamento.cooperado_id).subquery()
-    descontos = db.session.query(
-        Lancamento.cooperado_id.label('cooperado_id'),
-        func.sum(DescontoLancamento.valor).label('total')
-    ).join(DescontoLancamento, DescontoLancamento.lancamento_id == Lancamento.id).group_by(Lancamento.cooperado_id).subquery()
-    saldos = db.session.query(
-        Cooperado.id,
-        func.coalesce(compras.c.total, 0),
-        func.coalesce(descontos.c.total, 0)
-    ).outerjoin(compras, compras.c.cooperado_id == Cooperado.id).outerjoin(
-        descontos, descontos.c.cooperado_id == Cooperado.id
-    ).filter(Cooperado.id.in_([cooperado.id for cooperado in cooperados])).all() if cooperados else []
-    saldo_utilizado = {cid: max(0, round(float(total_compras or 0)-float(total_descontos or 0), 2))
-                       for cid, total_compras, total_descontos in saldos}
-    limite_referencia = 800.00
-    credito_excedido = {cid: max(0, round(valor-limite_referencia, 2))
-                        for cid, valor in saldo_utilizado.items()}
+        Lancamento.valor.label('valor')
+    ).filter(Lancamento.data >= corte_historico).subquery()
+    descontos_por_compra = db.session.query(
+        DescontoLancamento.lancamento_id.label('lancamento_id'),
+        func.coalesce(func.sum(DescontoLancamento.valor), 0).label('total')
+    ).group_by(DescontoLancamento.lancamento_id).subquery()
+    movimentos = db.session.query(
+        compras_abertas.c.cooperado_id,
+        compras_abertas.c.valor,
+        func.coalesce(descontos_por_compra.c.total, 0)
+    ).outerjoin(descontos_por_compra,
+                descontos_por_compra.c.lancamento_id == compras_abertas.c.id).all()
+    pendentes_por_coop = {}
+    for cid, valor, desconto in movimentos:
+        pendente = max(_Dec('0'), _Dec(str(valor or 0)) - _Dec(str(desconto or 0)))
+        pendentes_por_coop[cid] = pendentes_por_coop.get(cid, _Dec('0')) + pendente
+
+    def _centavos(valor):
+        return valor.quantize(_Dec('0.01'), rounding=_RHU)
+
+    saldo_utilizado = {}
+    credito_excedido = {}
+    limite_referencia = _Dec('800.00')
+    for cooperado in cooperados:
+        aberto = _centavos(pendentes_por_coop.get(cooperado.id, _Dec('0')))
+        disponivel = max(_Dec('0'), _Dec(str(cooperado.credito or 0)))
+        # Somente o que ultrapassar a referência de R$ 800,00, levando em
+        # conta tanto a dívida aberta quanto o crédito ainda disponível.
+        excedente = max(_Dec('0'), _centavos(aberto + disponivel - limite_referencia))
+        saldo_utilizado[cooperado.id] = float(aberto)
+        credito_excedido[cooperado.id] = float(excedente)
+    limite_referencia = float(limite_referencia)
     return render_template('cooperados.html', admin=admin, cooperados=cooperados,
                            saldo_utilizado=saldo_utilizado, credito_excedido=credito_excedido,
                            limite_referencia=limite_referencia)
