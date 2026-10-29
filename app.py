@@ -826,7 +826,31 @@ def listar_cooperados():
 
     cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
 
-    return render_template('cooperados.html', admin=admin, cooperados=cooperados)
+    # Crédito utilizado = compras menos descontos já registrados.
+    # Subconsultas separadas impedem multiplicação dos valores em joins.
+    compras = db.session.query(
+        Lancamento.cooperado_id.label('cooperado_id'),
+        func.sum(Lancamento.valor).label('total')
+    ).group_by(Lancamento.cooperado_id).subquery()
+    descontos = db.session.query(
+        Lancamento.cooperado_id.label('cooperado_id'),
+        func.sum(DescontoLancamento.valor).label('total')
+    ).join(DescontoLancamento, DescontoLancamento.lancamento_id == Lancamento.id).group_by(Lancamento.cooperado_id).subquery()
+    saldos = db.session.query(
+        Cooperado.id,
+        func.coalesce(compras.c.total, 0),
+        func.coalesce(descontos.c.total, 0)
+    ).outerjoin(compras, compras.c.cooperado_id == Cooperado.id).outerjoin(
+        descontos, descontos.c.cooperado_id == Cooperado.id
+    ).filter(Cooperado.id.in_([cooperado.id for cooperado in cooperados])).all() if cooperados else []
+    saldo_utilizado = {cid: max(0, round(float(total_compras or 0)-float(total_descontos or 0), 2))
+                       for cid, total_compras, total_descontos in saldos}
+    limite_referencia = 800.00
+    credito_excedido = {cid: max(0, round(valor-limite_referencia, 2))
+                        for cid, valor in saldo_utilizado.items()}
+    return render_template('cooperados.html', admin=admin, cooperados=cooperados,
+                           saldo_utilizado=saldo_utilizado, credito_excedido=credito_excedido,
+                           limite_referencia=limite_referencia)
 
 
 @app.route('/cooperados/novo', methods=['GET', 'POST'])
