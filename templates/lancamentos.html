@@ -611,7 +611,15 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 <link rel="stylesheet" href="{{ url_for('static',filename='css/coopex_admin_horizontal.css') }}?v=1">
-</head>
+<style id="coopex-lancamentos-visual">
+body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-main .container-x{width:100%!important;max-width:none!important;padding:20px 0 30px!important}
+.cp-lanc-hero{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 20px;padding:0 0 6px}.cp-lanc-hero-left{display:flex;align-items:center;gap:18px}.cp-lanc-hero-left>i{font-size:29px;color:#075ef1;background:#e6efff;border-radius:18px;padding:14px}.cp-lanc-hero h1{font:800 24px Inter,Arial,sans-serif;color:#0a316c;margin:0 0 5px}.cp-lanc-hero p{font-size:14px;color:#54729a;margin:0}.cp-lanc-actions{display:flex;gap:12px;flex-wrap:wrap}.cp-lanc-actions .btn{min-height:47px;min-width:130px;font-weight:750;border-radius:9px!important}.cp-lanc-actions .btn-success{background:#0bab64;border-color:#0bab64}
+.cx-main .cardx{border:1px solid #e0e9f8!important;border-radius:15px!important;box-shadow:0 5px 18px #173e740b!important;margin-bottom:21px!important;padding:18px!important;background:white!important}
+.cx-main .stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important}.cx-main .stat{min-width:0!important;display:flex;flex-direction:column;align-items:flex-start;background:#eef5ff!important;border:3px solid #fff!important;box-shadow:0 0 0 1px #dfe9f9!important;border-radius:15px!important;padding:18px!important}.cx-main .stat:nth-child(2){background:#eafbf3!important}.cx-main .stat:nth-child(3){background:#f3efff!important}.cx-main .stat:nth-child(4){background:#fff4e6!important}.cx-main .stat .k{color:#3b588b!important;font-size:12px!important}.cx-main .stat .v{font-size:24px!important;font-weight:850!important;color:#0748bb!important}.cx-main .stat .s{color:#54719c!important;font-size:12px!important}
+.cp-lanc-filters .row{display:grid!important;grid-template-columns:1.1fr 1.1fr .75fr .75fr .9fr!important;gap:14px!important}.cp-lanc-filters .row>div{width:100%!important;max-width:none!important;flex:none!important}.cp-lanc-filters label{font-size:13px!important;font-weight:800!important;color:#1a396c!important}.cp-lanc-filters .form-select,.cp-lanc-filters .form-control{min-height:46px;border-radius:9px;border-color:#cfdcf0}.cp-lanc-filters button[type=submit]{min-height:46px!important;border-radius:9px!important;background:#0751db!important;border:none!important}
+.cp-lanc-table .table-wrap{overflow:auto!important}.cp-lanc-table table{width:100%!important;min-width:950px!important;border-collapse:separate;border-spacing:0}.cp-lanc-table thead th{background:#edf4ff!important;color:#1b3768!important;font-size:12px!important;padding:14px 12px!important}.cp-lanc-table tbody td{padding:11px 12px!important;border-bottom:1px solid #e5ecf7!important}.cp-lanc-table .valor{font-weight:850;color:#0754db!important}.cp-lanc-table .btn-ico{border-radius:8px!important}.cp-lanc-table .pill.ok{background:#e3f8ed!important;color:#087a48!important}.cp-lanc-table .pill.parcial{background:#fff1cb!important;color:#9e6600!important;border-color:#ffdf81!important}.cp-lanc-table .pill.parcial .dot{background:#f2a500!important}.cp-lanc-table .pill.danger{background:#ffe5e9!important;color:#c72143!important}.cp-lanc-search{margin-left:auto;max-width:390px;width:38%;position:relative}.cp-lanc-search input{width:100%;padding:11px 12px 11px 36px;border:1px solid #cddcf2;border-radius:9px;font-size:13px}.cp-lanc-search i{position:absolute;left:13px;top:12px;color:#205fca}.cp-lanc-table-heading{display:flex;align-items:center;gap:12px;margin-bottom:16px}.cp-lanc-table-heading strong{font-size:16px;color:#122d60}.cp-lanc-table-heading .count{background:#e7efff;padding:5px 12px;border-radius:20px;color:#134bba;font-weight:800}
+@media(max-width:1200px){.cp-lanc-filters .row{grid-template-columns:repeat(3,minmax(0,1fr))!important}.cx-main .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}}@media(max-width:700px){.cp-lanc-hero{flex-wrap:wrap}.cp-lanc-filters .row{grid-template-columns:1fr!important}.cp-lanc-search{width:100%;max-width:none}.cp-lanc-table-heading{flex-wrap:wrap}.cx-main{padding:8px 12px!important}}
+</style></head>
 
 <body>
 {% include '_coopex_nav_horizontal.html' %}
@@ -641,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="cx-sidebar-footer"></div>
   </aside>
   <main class="cx-main"><div class="cx-content-shell">
-<div class="container-x">
+<div class="container-x"><div class="cp-lanc-hero"><div class="cp-lanc-hero-left"><i class="bi bi-shop-window"></i><div><h1>Lançamentos</h1><p>Visualize e gerencie todos os lançamentos de forma rápida e organizada.</p></div></div><div class="cp-lanc-actions"><button type="button" class="btn btn-success" onclick="exportarExcel()"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button><button type="button" class="btn btn-ghost" id="btn-hoje"><i class="bi bi-sun"></i> Hoje</button><button type="button" class="btn btn-ghost" id="btn-limpar"><i class="bi bi-x-circle"></i> Limpar</button></div></div>
 
     
 
@@ -672,7 +680,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
 
     <!-- Filtros -->
-    <div class="cardx">
+    <div class="cardx cp-lanc-filters">
       <form id="form-filtros" method="get" action="{{ url_for('listar_lancamentos') }}">
         <div class="row g-3 align-items-end">
           <div class="col-md-3">
@@ -711,18 +719,10 @@ document.addEventListener('DOMContentLoaded', function(){
             </button>
           </div>
 
-          <div class="col-md-2 d-grid">
-            <button type="button" class="btn btn-success" onclick="exportarExcel()">
-              <i class="bi bi-file-earmark-excel"></i> Exportar Excel
-            </button>
-          </div>
+          
 
-          <div class="col-md-2 d-grid"><button type="button" class="btn btn-ghost" id="btn-hoje"><i class="bi bi-sun"></i> Hoje</button></div>
-          <div class="col-md-2 d-grid">
-            <button type="button" class="btn btn-ghost" id="btn-limpar">
-              <i class="bi bi-x-circle"></i> Limpar
-            </button>
-          </div>
+          
+          
         </div>
 
         <div class="chips" id="chips-filtros"></div>
@@ -733,7 +733,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
 
     <!-- Tabela -->
-    <div class="cardx">
+    <div class="cardx cp-lanc-table"><div class="cp-lanc-table-heading"><i class="bi bi-list-ul"></i><strong>Lançamentos encontrados</strong><span class="count" id="cp-lanc-count">0</span><div class="cp-lanc-search"><i class="bi bi-search"></i><input id="cp-lanc-busca" placeholder="Buscar por cooperado, estabelecimento, Nº OS..." aria-label="Busca rápida"></div></div>
       <div class="table-wrap">
         <table id="t-lanc">
           <thead>
@@ -1058,13 +1058,16 @@ document.addEventListener('DOMContentLoaded', function(){
       const pill = sitEl?.closest('.pill');
       const ok = calc.saldo <= 0.0001;
 
+      pill.classList.remove('danger', 'ok', 'parcial');
       if (ok){
-        sitEl.textContent = 'Quitado';
-        pill.classList.remove('danger');
+        sitEl.textContent = 'Pago';
         pill.classList.add('ok');
-      }else{
-        sitEl.textContent = `Total ${brl(calc.total)}`;
-        pill.classList.remove('ok');
+      } else if (calc.pagoTotal > 0.0001) {
+        sitEl.textContent = 'Parcial';
+        pill.classList.add('parcial');
+        pill.title = 'Pago: ' + brl(calc.pagoTotal) + ' · Saldo: ' + brl(calc.saldo);
+      } else {
+        sitEl.textContent = 'Pendente';
         pill.classList.add('danger');
       }
     }
@@ -1280,6 +1283,21 @@ document.addEventListener('DOMContentLoaded', function(){
       modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
       document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
       atualizarTodasLinhas();
+      const busca = document.getElementById('cp-lanc-busca');
+      const aplicarBusca = () => {
+        const termo = (busca.value || '').trim().toLocaleLowerCase('pt-BR');
+        let visiveis = 0;
+        document.querySelectorAll('#t-lanc tbody tr.l-row').forEach(tr => {
+          const campos = [tr.dataset.coop, tr.dataset.estab, tr.dataset.os].join(' ').toLocaleLowerCase('pt-BR');
+          const exibir = !termo || campos.includes(termo);
+          tr.style.display = exibir ? '' : 'none';
+          if(exibir)visiveis++;
+        });
+        document.getElementById('cp-lanc-count').textContent = String(visiveis);
+        atualizarMetricasTabela();
+      };
+      busca.addEventListener('input', aplicarBusca);
+      aplicarBusca();
     });
   </script>
 
