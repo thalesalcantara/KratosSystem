@@ -818,6 +818,39 @@ def api_lancamento_info():
 
 
 # ========= COOPERADOS CRUD =========
+def apurar_pagamento_lancamento(compra, descontos=None):
+    """Retorna (pago_centavos, saldo_centavos, situacao) sem alterar o banco.
+
+    O histórico de descontos tem prioridade sobre saldo_aberto legado.
+    Operações anteriores a agosto/2026 estão quitadas pela regra histórica.
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+
+    def cent(v):
+        return int((Decimal(str(v or 0)) * 100).quantize(
+            Decimal("1"), rounding=ROUND_HALF_UP
+        ))
+
+    total = max(0, cent(compra.valor))
+    if total == 0:
+        return 0, 0, "pago"
+    if compra.concluido or (
+        compra.data and to_brt(compra.data).date().isoformat() <= "2026-07-31"
+    ):
+        return total, 0, "pago"
+    registros = compra.descontos if descontos is None else descontos
+    registros = list(registros or [])
+    if registros:
+        pago = sum(cent(d.valor if hasattr(d, "valor") else d["valor"]) for d in registros)
+    elif compra.saldo_aberto is not None:
+        pago = total - cent(compra.saldo_aberto)
+    else:
+        pago = 0
+    pago = min(total, max(0, pago))
+    saldo = total - pago
+    return pago, saldo, ("pago" if saldo == 0 else "parcial" if pago else "pendente")
+
+
 @app.route('/listar_cooperados')
 def listar_cooperados():
     if not is_admin():
@@ -826,34 +859,23 @@ def listar_cooperados():
 
     cooperados = cooperados_visiveis_query().order_by(Cooperado.nome).all()
 
-    # Usar exatamente a regra do painel Lançamentos para o saldo em aberto:
-    # descontos registrados, flag de conclusão, saldo_aberto legado e quitação
-    # histórica até julho/2026. Nada é regravado nesta apuração.
-    from decimal import Decimal as _Dec, ROUND_HALF_UP as _RHU
-    def _centavos(valor):
-        return _Dec(str(valor or 0)).quantize(_Dec('0.01'), rounding=_RHU)
-
+    # Apuração única por lançamento, reutilizada também na tela Lançamentos.
+    # Não altera registros existentes: apenas considera descontos e quitações.
     from sqlalchemy.orm import selectinload
     lancamentos_credito = Lancamento.query.options(
         selectinload(Lancamento.descontos)
     ).all()
     pendentes_por_coop = {}
     for compra in lancamentos_credito:
-        valor = _centavos(compra.valor)
-        if valor <= 0:
-            continue
-        if to_brt(compra.data).date().isoformat() <= '2026-07-31' or compra.concluido:
-            continue
-        historico = list(compra.descontos or [])
-        if historico:
-            pago = sum((_centavos(d.valor) for d in historico), _Dec('0.00'))
-            restante = max(_Dec('0.00'), _centavos(valor - pago))
-        elif compra.saldo_aberto is not None:
-            restante = max(_Dec('0.00'), min(valor, _centavos(compra.saldo_aberto)))
-        else:
-            restante = valor
-        cid = compra.cooperado_id
-        pendentes_por_coop[cid] = pendentes_por_coop.get(cid, _Dec('0.00')) + restante
+        _pago, _saldo, _situacao = apurar_pagamento_lancamento(compra)
+        if _saldo:
+            pendentes_por_coop[compra.cooperado_id] = (
+                pendentes_por_coop.get(compra.cooperado_id, 0) + _saldo
+            )
+
+    from decimal import Decimal as _Dec
+    def _centavos(valor):
+        return _Dec(str(valor or 0)).quantize(_Dec('0.01'))
 
     saldo_utilizado = {}
     credito_excedido = {}
@@ -1432,16 +1454,12 @@ def listar_lancamentos():
         # pendentes quando o navegador filtra ou agrupa por cooperado.
         # Regularização histórica definida pela administração: até 31/07/2026.
         l.quitado_historico = (to_brt(l.data).date().isoformat() <= "2026-07-31")
-        valor_centavos = round(float(l.valor or 0) * 100)
-        pago_centavos = sum(round(float(d["valor"] or 0) * 100) for d in historico)
-        if l.quitado_historico or l.concluido:
-            pago_centavos = valor_centavos
-        elif not historico and l.saldo_aberto is not None:
-            pago_centavos = max(0, valor_centavos - round(float(l.saldo_aberto) * 100))
-        pago_centavos = min(max(0, pago_centavos), max(0, valor_centavos))
+        pago_centavos, saldo_centavos, situacao = apurar_pagamento_lancamento(
+            l, historico
+        )
         l.pago_centavos_apuracao = pago_centavos
-        l.situacao_apurada = ("pago" if pago_centavos >= valor_centavos
-                             else "parcial" if pago_centavos >= 1 else "pendente")
+        l.saldo_centavos_apuracao = saldo_centavos
+        l.situacao_apurada = situacao
 
     return render_template(
         'lancamentos.html',
