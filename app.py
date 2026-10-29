@@ -847,13 +847,17 @@ def listar_cooperados():
         func.coalesce(descontos_por_compra.c.total, 0)
     ).outerjoin(descontos_por_compra,
                 descontos_por_compra.c.lancamento_id == compras_abertas.c.id).all()
-    pendentes_por_coop = {}
-    for cid, valor, desconto in movimentos:
-        pendente = max(_Dec('0'), _Dec(str(valor or 0)) - _Dec(str(desconto or 0)))
-        pendentes_por_coop[cid] = pendentes_por_coop.get(cid, _Dec('0')) + pendente
-
     def _centavos(valor):
         return valor.quantize(_Dec('0.01'), rounding=_RHU)
+
+    pendentes_por_coop = {}
+    for cid, valor, desconto in movimentos:
+        # Arredondar em centavos por compra antes de somar: R$ 0,01 em
+        # aberto não pode desaparecer por imprecisão de FLOAT ou arredondamento.
+        compra = _centavos(_Dec(str(valor or 0)))
+        pago = _centavos(_Dec(str(desconto or 0)))
+        pendente = max(_Dec('0.00'), _centavos(compra - pago))
+        pendentes_por_coop[cid] = pendentes_por_coop.get(cid, _Dec('0.00')) + pendente
 
     saldo_utilizado = {}
     credito_excedido = {}
