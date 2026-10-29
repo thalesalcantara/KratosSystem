@@ -768,7 +768,9 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
                     data-coop="{{ l.cooperado.nome }}"
                     data-estab="{{ l.estabelecimento.nome }}"
                     data-desc="{{ (l.descricao or '')|e }}"
-                    data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'>
+                    data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'
+                    data-concluido="{{ '1' if l.concluido else '0' }}"
+                    data-saldo-legado="{{ l.saldo_aberto if l.saldo_aberto is not none else '' }}">
 
                   <td class="col-data">
                     <div>{{ l.data.strftime('%d/%m/%Y') }}</div>
@@ -1056,6 +1058,17 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       const total = parseFloat(tr.dataset.valor || '0') || 0;
       const hist = getHistorico(tr);
       const calc = calcularParcelas(total, hist);
+      // Legado: antes do histórico de descontos, o sistema também salvava
+      // a quitação e o saldo em colunas próprias da compra.
+      const saldoLegadoTexto = tr.dataset.saldoLegado;
+      const saldoLegado = saldoLegadoTexto === '' ? NaN : Number(saldoLegadoTexto);
+      if (hist.length === 0 && tr.dataset.concluido === '1') {
+        calc.saldo = 0;
+        calc.pagoTotal = total;
+      } else if (hist.length === 0 && Number.isFinite(saldoLegado) && saldoLegado >= 0 && saldoLegado <= total) {
+        calc.saldo = saldoLegado;
+        calc.pagoTotal = Math.max(0, total - saldoLegado);
+      }
 
       const primeiraPendente = calc.parcelas.find(p => p.status !== 'paga') || calc.parcelas[3];
       const sug = primeiraPendente ? primeiraPendente.sugerida : calc.parcelas[3].sugerida;
