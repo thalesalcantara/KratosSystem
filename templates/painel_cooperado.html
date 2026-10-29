@@ -713,14 +713,6 @@
             <span class="ico">🧾</span>
             <span class="txt">Lançamentos</span>
           </button>
-          <button class="mini-tab" type="button" data-home-tab="stories-box">
-            <span class="ico">⚡</span>
-            <span class="txt">Stories</span>
-          </button>
-          <button class="mini-tab" type="button" data-home-tab="catalogos-box">
-            <span class="ico">📚</span>
-            <span class="txt">Catálogo</span>
-          </button>
         </div>
       </section>
 
@@ -788,111 +780,6 @@
           </section>
         </div>
 
-        <div id="stories-box" class="home-box hidden">
-          <div class="card section" style="margin-bottom:0;">
-            <div class="head" style="margin-bottom:10px;">
-              <div>
-                <h3 class="title">Stories</h3>
-                <p class="sub">Promoções e recados rápidos dos parceiros.</p>
-              </div>
-              <span class="badge">⚡ Ao vivo</span>
-            </div>
-
-            {% if stories_ativos_coop and estab_por_id %}
-              <div class="stories-shell" aria-label="Stories de estabelecimentos">
-                {% for est_id, est in estab_por_id.items() %}
-                  {% set est_stories = stories_ativos_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
-                  {% if est_stories %}
-                    <button type="button" class="story" data-est-id="{{ est_id }}" data-est-nome="{{ est.nome }}">
-                      <div class="ring">
-                        <div class="inner">
-                          {% if est.id %}
-                            <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
-                          {% endif %}
-                          <span style="position:absolute;">{{ est.nome[:2].upper() }}</span>
-                        </div>
-                      </div>
-                      <div class="sname" title="{{ est.nome }}">{{ est.nome }}</div>
-                      <div class="smeta">{{ est_stories|length }} story{{ 'ies' if est_stories|length>1 else '' }}</div>
-                    </button>
-                  {% endif %}
-                {% endfor %}
-              </div>
-            {% else %}
-              <div class="empty">Ainda não há stories ativos dos estabelecimentos que lançam em seu nome.</div>
-            {% endif %}
-          </div>
-        </div>
-
-        <div id="catalogos-box" class="home-box hidden">
-          <section class="card section">
-            <div class="head">
-              <div>
-                <h3 class="title">Catálogos</h3>
-                <p class="sub">Pesquise itens pelo nome enquanto digita.</p>
-              </div>
-              <span class="badge">📚 Parceiros</span>
-            </div>
-
-            {% if catalogo_itens_coop and estab_por_id %}
-              <div class="searchbox">
-                <span class="sicon">🔎</span>
-                <input id="catalogSearch" type="search" inputmode="search" autocomplete="off" placeholder="Digite o nome do item, marca, categoria ou parceiro...">
-              </div>
-
-              <div class="searchmeta">
-                <div><span id="catalogCount">0</span> item(ns) exibido(s)</div>
-                <button type="button" class="clear" id="catalogClear">Limpar</button>
-              </div>
-
-              <div class="catalog-list" id="catalogGrid">
-                {% for est_id, est in estab_por_id.items() %}
-                  {% set itens_est = catalogo_itens_coop | selectattr('estabelecimento_id','equalto', est_id) | list %}
-                  {% if itens_est %}
-                    <article class="shop catalog-card-js" data-estab="{{ est.nome }}">
-                      <div class="shop-head">
-                        <div class="shop-logo">
-                          {% if est.id %}
-                            <img src="{{ url_for('logo_estabelecimento', id=est.id) }}" alt="{{ est.nome }}" onerror="this.style.display='none'">
-                          {% endif %}
-                          <span style="position:absolute;font-size:12px;">{{ est.nome[:2].upper() }}</span>
-                        </div>
-                        <div class="shop-info">
-                          <p class="shop-name" title="{{ est.nome }}">{{ est.nome }}</p>
-                          <div class="shop-count"><span class="catalog-pill-count">{{ itens_est|length }}</span> item(s)</div>
-                        </div>
-                      </div>
-
-                      <div class="items">
-                        {% for item in itens_est %}
-                          <div class="item catalog-item-js" data-item="{{ item.nome }}" data-estab="{{ est.nome }}" data-marca="{{ item.marca or '' }}" data-categoria="{{ item.categoria or '' }}" data-obs="{{ item.observacao or '' }}">
-                            <div class="iname" title="{{ item.nome }}">{{ item.nome }}</div>
-                            <div class="iprice">R$ {{ '%.2f'|format(item.valor or 0) }}</div>
-
-                            <div class="imeta">
-                              {% if item.marca %}Marca: {{ item.marca }}{% endif %}
-                              {% if item.categoria %}{{ ' • ' if item.marca }}Categoria: {{ item.categoria }}{% endif %}
-                              {% if not item.marca and not item.categoria %}&nbsp;{% endif %}
-                            </div>
-
-                            {% if item.observacao %}
-                              <div class="inote">{{ item.observacao }}</div>
-                            {% endif %}
-                          </div>
-                        {% endfor %}
-                      </div>
-                    </article>
-                  {% endif %}
-                {% endfor %}
-              </div>
-
-              <div class="empty" id="catalogEmptySearch" style="display:none;">Nenhum item encontrado com esse termo.</div>
-            {% else %}
-              <div class="empty">Nenhum catálogo disponível ainda para os estabelecimentos que lançam em seu nome.</div>
-            {% endif %}
-          </section>
-        </div>
-
       </section>
     <div class="overlay" id="overlay"></div>
 
@@ -928,48 +815,8 @@
       </div>
     </div>
 
-    <div class="story-modal" id="storyModal">
-      <div class="story-frame">
-        <div class="story-progress" id="storyProgress"></div>
-        <div class="story-head">
-          <div class="sdot" id="storyInitial">E</div>
-          <div class="stitle">
-            <h5 id="storyTitle">Estabelecimento</h5>
-            <span id="storySub">Story</span>
-          </div>
-          <button class="sclose" id="closeStory" aria-label="Fechar story">×</button>
-        </div>
-        <div class="story-body">
-          <img id="storyImg" src="" alt="story" style="display:none;">
-          <video id="storyVideo" playsinline muted style="display:none;"></video>
-          <div class="touch">
-            <div class="zone" data-dir="prev"></div>
-            <div class="zone" data-dir="next"></div>
-          </div>
-        </div>
-        <div class="story-caption">
-          <div class="cap" id="storyCaption"></div>
-          <div class="like">
-            <button id="storyLikeBtn" type="button" class="likebtn">👍 <span>TOP</span></button>
-            <div id="storyLikeStats" class="likestats"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <script>
-      window.COOP_STORIES = [
-        {% for s in stories_ativos_coop %}
-          {
-            id: {{ s.id }},
-            estId: {{ s.estabelecimento_id }},
-            tipo: "{{ s.tipo }}",
-            titulo: {{ (s.titulo or '')|tojson }},
-            legenda: {{ (s.legenda or '')|tojson }},
-            src: "{{ url_for('story_midia', story_id=s.id) }}"
-          }{% if not loop.last %},{% endif %}
-        {% endfor %}
-      ];
+      window.COOP_STORIES = [];
     </script>
     <script>
 
