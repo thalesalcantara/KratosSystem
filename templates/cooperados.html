@@ -874,6 +874,7 @@ document.addEventListener('DOMContentLoaded', function(){
                   Crédito (R$) <i class="bi bi-arrow-down-up sort"></i>
                 </th>
                 <th style="min-width:132px">Utilizado em aberto</th>
+                <th style="min-width:125px">Saldo disponível</th>
                 <th style="min-width:150px">Crédito excedido <i class="bi bi-exclamation-triangle" title="Saldo em aberto acima de R$ 800,00"></i></th>
                 <th class="sortable" data-key="ajuste" data-type="date" style="width:18%">
                   Último ajuste <i class="bi bi-arrow-down-up sort"></i>
@@ -915,6 +916,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 <td class="valor" data-utilizado="{{'%.2f'|format(saldo_utilizado.get(c.id,0))}}">
                   R$ {{"{:,.2f}".format(saldo_utilizado.get(c.id,0)).replace(",", "X").replace(".", ",").replace("X", ".")}}
                 </td>
+                <td class="valor" data-disponivel="{{'%.2f'|format(credito_disponivel.get(c.id,0))}}">R$ {{"{:,.2f}".format(credito_disponivel.get(c.id,0)).replace(",", "X").replace(".", ",").replace("X", ".")}}</td>
                 <td data-excedido="{{'%.2f'|format(credito_excedido.get(c.id,0))}}">
                   {% if credito_excedido.get(c.id,0) > 0 %}
                     <span class="coopex-excedido" title="Saldo de compras ainda não descontadas acima do limite de referência de R$ 800,00">
