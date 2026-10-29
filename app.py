@@ -1887,6 +1887,28 @@ def estab_excluir_lancamento(id):
 
 
 # ========= PAINEL COOPERADO =========
+@app.post('/api/integracao/parcerias/migracao-estabelecimento')
+def api_parcerias_migracao_estabelecimento():
+    """Resposta restrita a conexao servidor-servidor autenticada por SSO curto."""
+    try:
+        data=sso_load_shared((request.get_json(silent=True) or {}).get('token',''),max_age_seconds=30)
+    except (BadSignature, SignatureExpired, TypeError, ValueError):
+        return jsonify({'erro':'Autorizacao invalida'}),401
+    if data.get('aud')!='parcerias-migracao-estabelecimento' or data.get('origem')!='financas':
+        return jsonify({'erro':'Destino invalido'}),403
+    try:
+        legacy_id=int(data.get('legacy_id'))
+    except (TypeError,ValueError):
+        return jsonify({'erro':'Identificador invalido'}),400
+    if legacy_id not in (1,2,3):
+        return jsonify({'erro':'Estabelecimento nao autorizado para esta etapa'}),403
+    e=Estabelecimento.query.get(legacy_id)
+    if not e or not e.senha_hash or not e.username:
+        return jsonify({'erro':'Cadastro incompleto'}),404
+    # Hash trafega exclusivamente na conexao HTTPS entre servidores, nunca no navegador.
+    return jsonify({'id':e.id,'nome':e.nome,'usuario':e.username,'senha_hash':e.senha_hash})
+
+
 @app.post('/api/integracao/parcerias/admin/creditos')
 def api_integracao_parcerias_admin_creditos():
     """Listagem somente leitura dos creditos para conferencia de migracao."""
