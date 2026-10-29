@@ -684,9 +684,11 @@ document.addEventListener('DOMContentLoaded', function(){
   if(mob&&sidebar){ mob.addEventListener('click', function(){ sidebar.classList.toggle('mobile-open'); }); }
 });
 </script>
+<link rel="stylesheet" href="{{ url_for('static',filename='css/coopex_admin_horizontal.css') }}?v=1">
 </head>
 
 <body>
+{% include '_coopex_nav_horizontal.html' %}
 <button class="cx-mobile-toggle" type="button"><i class="bi bi-list"></i></button>
 <div class="cx-shell">
   <aside class="cx-sidebar">
