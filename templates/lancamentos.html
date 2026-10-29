@@ -626,7 +626,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
 .cp-status-tab span{font-size:12px;margin-left:5px;opacity:.85}
 #t-lanc .pill.parcial{background:#fff2cf!important;color:#9a6400!important;border-color:#f5d57c!important}
 #t-lanc .pill.parcial .dot{background:#edaa13!important}
-</style></head>
+</style><style id="cp-grupos-style">#t-lanc tbody tr.cp-grupo td{padding:0!important;background:#eef4ff!important;border-bottom:1px solid #dbe6f8!important}.cp-expander{width:100%;border:0;background:none;color:#0c316a;display:flex;align-items:center;gap:16px;text-align:left;padding:14px 18px;font:700 14px Inter,system-ui;cursor:pointer}.cp-expander>.bi{color:#1658d2;font-size:15px;transition:transform .18s}.cp-expanded .cp-expander>.bi{transform:rotate(180deg)}.cp-group-name{flex:1}.cp-group-count{color:#5a7196;font-size:12px;font-weight:600}.cp-group-total{min-width:110px;text-align:right;color:#0950bf;font-size:15px}.cp-group-status{min-width:76px;text-align:center;border-radius:99px;padding:5px 10px;font-size:12px}.cp-paid{background:#e3f8e9;color:#0d7943}.cp-partial{background:#fff1c8;color:#9e6600}.cp-pending{background:#ffe7e7;color:#a52222}@media(max-width:700px){.cp-expander{gap:7px;padding:11px 8px;font-size:12px}.cp-group-total{min-width:70px;font-size:12px}.cp-group-count{font-size:10px}.cp-group-status{min-width:55px;padding:3px 4px}}</style></head>
 
 <body>
 {% include '_coopex_nav_horizontal.html' %}
@@ -1092,19 +1092,69 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       .some(k => Boolean(cpParams.get(k)));
     let cpAbaAtiva = cpTemFiltros ? 'todos' : 'abertos';
 
-    function cpAplicarSituacao(){
-      const rows = Array.from(document.querySelectorAll('#t-lanc tbody tr.l-row'));
-      let abertos=0, pagos=0;
+    // Agrupa compras por cooperado, sem mudar seus IDs, descontos ou ações.
+    function cpAgruparCooperados(){
+      const tbody=document.querySelector('#t-lanc tbody');
+      if(!tbody)return;
+      tbody.querySelectorAll('tr.cp-grupo').forEach(x=>x.remove());
+      const rows=Array.from(tbody.querySelectorAll('tr.l-row'));
+      const groups=new Map();
       rows.forEach(tr=>{
-        if(tr.dataset.situacao==='pago') pagos++; else abertos++;
-        tr.style.display=(cpAbaAtiva==='todos' ||
-          (cpAbaAtiva==='pagos' && tr.dataset.situacao==='pago') ||
-          (cpAbaAtiva==='abertos' && tr.dataset.situacao!=='pago')) ? '' : 'none';
+        const key=tr.dataset.coop||'Cooperado';
+        if(!groups.has(key))groups.set(key,[]);
+        groups.get(key).push(tr);
+      });
+      let idx=0;
+      groups.forEach((items,name)=>{
+        const group=document.createElement('tr');
+        group.className='cp-grupo';
+        group.dataset.group=String(idx);
+        group.innerHTML='<td colspan="8"><button type="button" class="cp-expander" aria-expanded="false"><i class="bi bi-chevron-down"></i><span class="cp-group-name"></span><span class="cp-group-count"></span><strong class="cp-group-total"></strong><span class="cp-group-status"></span></button></td>';
+        group.querySelector('.cp-group-name').textContent=name;
+        group.querySelector('button').addEventListener('click',()=>{
+          group.classList.toggle('cp-expanded');
+          group.querySelector('button').setAttribute('aria-expanded',String(group.classList.contains('cp-expanded')));
+          cpAplicarSituacao();
+        });
+        tbody.appendChild(group);
+        items.forEach(tr=>{tr.dataset.group=String(idx);tbody.appendChild(tr)});
+        idx++;
+      });
+    }
+    cpAgruparCooperados();
+
+    function cpAplicarSituacao(){
+      const groups=Array.from(document.querySelectorAll('#t-lanc tbody tr.cp-grupo'));
+      let abertos=0,pagos=0;
+      const rows=Array.from(document.querySelectorAll('#t-lanc tbody tr.l-row'));
+      rows.forEach(tr=>{if(tr.dataset.situacao==='pago')pagos++;else abertos++});
+      groups.forEach(group=>{
+        const items=rows.filter(tr=>tr.dataset.group===group.dataset.group);
+        const eligible=items.filter(tr=>cpAbaAtiva==='todos'||
+          (cpAbaAtiva==='pagos'&&tr.dataset.situacao==='pago')||
+          (cpAbaAtiva==='abertos'&&tr.dataset.situacao!=='pago'));
+        group.style.display=eligible.length?'':'none';
+        const expanded=group.classList.contains('cp-expanded');
+        items.forEach(tr=>{tr.style.display=(expanded&&eligible.includes(tr))?'':'none'});
+        const soma=eligible.reduce((acc,tr)=>acc+(parseFloat(tr.dataset.valor||0)||0),0);
+        const quitados=eligible.filter(tr=>tr.dataset.situacao==='pago').length;
+        const parciais=eligible.filter(tr=>tr.dataset.situacao==='parcial').length;
+        group.querySelector('.cp-group-count').textContent=eligible.length+' compra(s)';
+        group.querySelector('.cp-group-total').textContent=brl(soma);
+        group.querySelector('.cp-group-status').textContent=quitados===eligible.length?'Pago':parciais>0||quitados>0?'Parcial':'Pendente';
+        group.querySelector('.cp-group-status').className='cp-group-status '+(quitados===eligible.length?'cp-paid':parciais>0||quitados>0?'cp-partial':'cp-pending');
       });
       document.getElementById('cp-count-abertos').textContent=abertos;
       document.getElementById('cp-count-pagos').textContent=pagos;
       document.getElementById('cp-count-todos').textContent=rows.length;
       document.querySelectorAll('.cp-status-tab').forEach(btn=>{
+        const ativo=btn.dataset.tab===cpAbaAtiva;
+        btn.classList.toggle('active',ativo);
+        btn.setAttribute('aria-pressed',String(ativo));
+      });
+      atualizarMetricasTabela();
+    }
+    document.querySelectorAll('.cp-status-tab').forEach(btn=>{
         const ativo=btn.dataset.tab===cpAbaAtiva;
         btn.classList.toggle('active',ativo);
         btn.setAttribute('aria-pressed',String(ativo));
