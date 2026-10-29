@@ -1429,8 +1429,23 @@ def listar_lancamentos():
             "valor": float(desconto.valor or 0)
         })
     for l in lancamentos:
-        l.historico_descontos_json = _json.dumps(descontos_por_lancamento.get(l.id, []))
+        historico = descontos_por_lancamento.get(l.id, [])
+        l.historico_descontos_json = _json.dumps(historico)
         l.data_brasilia = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
+        # Estados derivados no servidor: evita tratar lançamentos antigos como
+        # pendentes quando o navegador filtra ou agrupa por cooperado.
+        # Regularização histórica definida pela administração: até 31/07/2026.
+        l.quitado_historico = (to_brt(l.data).date().isoformat() <= "2026-07-31")
+        valor_centavos = round(float(l.valor or 0) * 100)
+        pago_centavos = sum(round(float(d["valor"] or 0) * 100) for d in historico)
+        if l.quitado_historico or l.concluido:
+            pago_centavos = valor_centavos
+        elif not historico and l.saldo_aberto is not None:
+            pago_centavos = max(0, valor_centavos - round(float(l.saldo_aberto) * 100))
+        pago_centavos = min(max(0, pago_centavos), max(0, valor_centavos))
+        l.pago_centavos_apuracao = pago_centavos
+        l.situacao_apurada = ("pago" if pago_centavos >= valor_centavos
+                             else "parcial" if pago_centavos >= 1 else "pendente")
 
     return render_template(
         'lancamentos.html',
