@@ -684,58 +684,49 @@
       box-shadow:0 0 0 3px rgba(45,79,227,.15), 0 6px 14px rgba(45,79,227,.18);
       border-radius:50%;
     }
+
+    /* Navegação horizontal alinhada ao padrão do administrador */
+    .sidebar{display:none!important}
+    .main-content{margin-left:0!important;padding:18px 24px 28px!important;max-width:1920px;margin-right:auto;margin-left:auto!important}
+    .est-nav-horizontal{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:24px;min-height:76px;padding:10px 24px;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(23,52,116,.07);color:var(--ink)}
+    .est-brand{display:flex;align-items:center;gap:11px;min-width:210px;flex-shrink:0}
+    .est-brand img{width:48px;height:48px;object-fit:contain}
+    .est-brand span{display:flex;flex-direction:column;line-height:1.25}
+    .est-brand strong{font-size:16px;letter-spacing:.5px;color:var(--accent);font-weight:900}
+    .est-brand small{font-size:9px;font-weight:800;letter-spacing:.8px;color:var(--muted)}
+    .est-nav-links{display:flex;align-items:center;gap:7px;flex:1;min-width:0}
+    .est-nav-links .sidebar-tab{appearance:none;border:1px solid transparent;background:transparent;color:var(--ink);font-size:13px;font-weight:800;white-space:nowrap;padding:12px 17px;border-radius:10px;display:inline-flex;align-items:center;gap:9px;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s}
+    .est-nav-links .sidebar-tab:hover{background:var(--accent-soft);color:var(--accent)}
+    .est-nav-links .sidebar-tab.active{background:var(--accent);color:#fff;box-shadow:0 7px 16px rgba(45,79,227,.20)}
+    .est-nav-actions{display:flex;align-items:center;gap:11px;margin-left:auto;flex-shrink:0}
+    .est-theme-button{padding:8px 10px!important;border-radius:9px!important;font-size:12px!important}
+    .est-color-picker{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);white-space:nowrap}
+    .est-color-picker input{width:28px;height:27px;border-radius:6px;cursor:pointer}
+    .est-nav-exit{display:flex;gap:6px;align-items:center;border:1px solid var(--line);padding:9px 12px;border-radius:9px;text-decoration:none;color:var(--ink);font-weight:800;font-size:12px}
+    .est-nav-exit:hover{background:var(--accent-soft);color:var(--accent)}
+    .main-content>.topbar{position:relative;top:auto;z-index:10;min-height:62px;border-radius:12px;margin-bottom:16px!important}
+    @media(max-width:1100px){.est-nav-horizontal{flex-wrap:wrap;gap:10px;padding:10px 16px}.est-brand{min-width:auto}.est-nav-links{order:3;width:100%;flex-basis:100%;overflow-x:auto;padding-bottom:4px}.est-nav-actions{margin-left:auto}}
+    @media(max-width:640px){.main-content{padding:12px!important}.est-brand small{font-size:8px}.est-color-picker{display:none}.est-nav-links .sidebar-tab{padding:9px 12px;font-size:12px}.est-nav-actions{gap:5px}.est-theme-button span{display:none}.main-content>.topbar{flex-wrap:wrap;gap:8px;padding:12px}.main-content>.topbar .clock{font-size:12px}}
   </style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-      <div class="logo-wrap">
-        <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex" class="logo">
-        <div class="badge-role">
-          Parceiro<br>Coopex
-        </div>
-      </div>
-
-      <!-- Navegação lateral (abas) -->
-      <nav class="side-nav" aria-label="Menu principal">
-        <button class="side-link sidebar-tab active" type="button" data-tab-target="tab-creditos">
-          <div class="icon-wrap"><i class="bi bi-currency-dollar"></i></div>
-          <span class="label">Créditos</span>
-        </button>
-
-        <button class="side-link sidebar-tab" type="button" data-tab-target="tab-catalogo">
-          <div class="icon-wrap"><i class="bi bi-bag-check"></i></div>
-          <span class="label">Catálogo</span>
-        </button>
-
-        <button class="side-link sidebar-tab" type="button" data-tab-target="tab-stories">
-          <div class="icon-wrap"><i class="bi bi-camera-reels"></i></div>
-          <span class="label">Stories / Promoções</span>
-        </button>
-      </nav>
-
-      <!-- Rodapé da sidebar -->
-      <div class="sidebar-footer">
-        <button class="theme-toggle" type="button" id="themeToggle">
-          <i class="bi bi-moon-stars" id="themeIcon"></i>
-          <span id="themeLabel">Escuro</span>
-        </button>
-
-        <label class="theme-color-picker">
-          Cor
-          <input type="color" id="accentPicker" value="#2d4fe3" title="Escolher cor do tema">
-        </label>
-
-        <div class="logout-link">
-          <a href="{{ url_for('logout') }}">
-            <i class="bi bi-box-arrow-left"></i>
-            <span>Sair</span>
-          </a>
-        </div>
-      </div>
+  <!-- Navegação superior do estabelecimento: mesmas abas, novo posicionamento -->
+  <header class="est-nav-horizontal">
+    <div class="est-brand">
+      <img src="{{ url_for('static', filename='logo_coopex.png') }}" alt="Logo Coopex">
+      <span><strong>COOPEX</strong><small>PAINEL DO ESTABELECIMENTO</small></span>
     </div>
-  </aside>
+    <nav class="est-nav-links" aria-label="Menu principal do estabelecimento">
+      <button class="sidebar-tab active" type="button" data-tab-target="tab-creditos"><i class="bi bi-wallet2"></i> Créditos</button>
+      <button class="sidebar-tab" type="button" data-tab-target="tab-catalogo"><i class="bi bi-bag-check"></i> Catálogo</button>
+      <button class="sidebar-tab" type="button" data-tab-target="tab-stories"><i class="bi bi-camera-reels"></i> Stories / Promoções</button>
+    </nav>
+    <div class="est-nav-actions">
+      <button class="theme-toggle est-theme-button" type="button" id="themeToggle" title="Alternar tema"><i class="bi bi-moon-stars" id="themeIcon"></i><span id="themeLabel">Escuro</span></button>
+      <label class="theme-color-picker est-color-picker" title="Cor de destaque">Cor <input type="color" id="accentPicker" value="#2d4fe3" title="Escolher cor do tema"></label>
+      <a class="est-nav-exit" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a>
+    </div>
+  </header>
 
   <!-- Main -->
   <div class="main-content">
