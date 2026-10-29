@@ -873,23 +873,26 @@ def listar_cooperados():
                 pendentes_por_coop.get(compra.cooperado_id, 0) + _saldo
             )
 
-    from decimal import Decimal as _Dec
-    def _centavos(valor):
-        return _Dec(str(valor or 0)).quantize(_Dec('0.01'))
+    from decimal import Decimal as _Dec, ROUND_HALF_UP as _RHU
+    def _centavos_para_reais(valor_centavos):
+        # apurar_pagamento_lancamento devolve CENTAVOS inteiros.
+        return (_Dec(int(valor_centavos or 0)) / _Dec('100')).quantize(
+            _Dec('0.01'), rounding=_RHU
+        )
 
     saldo_utilizado = {}
     credito_excedido = {}
     credito_disponivel = {}
     limite_referencia = _Dec('800.00')
     for cooperado in cooperados:
-        aberto = _centavos(pendentes_por_coop.get(cooperado.id, _Dec('0')))
+        aberto = _centavos_para_reais(pendentes_por_coop.get(cooperado.id, 0))
         # O excedente atual depende somente da dívida ainda em aberto.
         # Pagamentos reduzem primeiro o excedente, e só então liberam saldo.
         # Não alterar cooperado.credito (registro operacional) nesta consulta.
-        excedente = max(_Dec('0'), _centavos(aberto - limite_referencia))
+        excedente = max(_Dec('0'), aberto - limite_referencia)
         saldo_utilizado[cooperado.id] = float(aberto)
         credito_excedido[cooperado.id] = float(excedente)
-        credito_disponivel[cooperado.id] = float(max(_Dec("0"), _centavos(limite_referencia - aberto)))
+        credito_disponivel[cooperado.id] = float(max(_Dec("0"), limite_referencia - aberto))
     limite_referencia = float(limite_referencia)
     return render_template('cooperados.html', admin=admin, cooperados=cooperados,
                            saldo_utilizado=saldo_utilizado, credito_excedido=credito_excedido,
