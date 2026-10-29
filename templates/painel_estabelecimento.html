@@ -747,7 +747,6 @@
       <span class="est-welcome">Bem-vindo, <strong>{{ est.nome }}</strong></span>
       <span class="est-clock clock" id="clock-br">Natal - --/--/---- --:--:--</span>
       <button class="theme-toggle est-theme-button" type="button" id="themeToggle" title="Alternar tema"><i class="bi bi-moon-stars" id="themeIcon"></i><span id="themeLabel">Escuro</span></button>
-      <label class="theme-color-picker est-color-picker" title="Cor de destaque">Cor <input type="color" id="accentPicker" value="#2d4fe3" title="Escolher cor do tema"></label>
       <a class="est-nav-exit" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a>
     </div>
   </header>
@@ -1367,29 +1366,6 @@
     }
   }
 
-  /* ===== Cor de destaque (accent) ===== */
-  function applyAccent(color){
-    if (!color) return;
-    document.documentElement.style.setProperty('--accent', color);
-  }
-
-  function initAccent(){
-    const picker = document.getElementById('accentPicker');
-    const stored = localStorage.getItem('coopex-accent');
-    if (stored){
-      applyAccent(stored);
-      if (picker) picker.value = stored;
-    }
-
-    if (picker){
-      picker.addEventListener('input', () => {
-        const val = picker.value;
-        applyAccent(val);
-        localStorage.setItem('coopex-accent', val);
-      });
-    }
-  }
-
   /* ===== Data padrão do lançamento (hoje em Brasília) ===== */
   function initDataLancamentoHoje(){
     const input = document.getElementById('data_lancamento');
@@ -1425,7 +1401,6 @@
     atualizarBloqueios();
     initTabs();
     initTheme();
-    initAccent();
     initDataLancamentoHoje();
     initSomVenda();
 
