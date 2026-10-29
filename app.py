@@ -2672,6 +2672,84 @@ def criar_banco_e_admin():
             print('Admin criado: coopex / coopex05289')
 
 
+# ========= CORRECAO PONTUAL AUDITAVEL: BAIXA INDEVIDA =========
+def _reverter_baixa_indevida_emmanuel_20261029():
+    """Reverte UMA unica baixa indevida, uma unica vez, sem alterar outras OS."""
+    from decimal import Decimal
+    try:
+        with app.app_context():
+            # Idempotencia sob workers concorrentes: travar a mesma transacao.
+            db.session.execute(text("SELECT pg_advisory_xact_lock(22630813677)"))
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS auditoria_estorno_kratos (
+                    referencia VARCHAR(100) PRIMARY KEY,
+                    cooperado_id INTEGER NOT NULL,
+                    lancamento_id INTEGER NOT NULL,
+                    desconto_id INTEGER NOT NULL,
+                    valor NUMERIC(12,2) NOT NULL,
+                    motivo TEXT NOT NULL,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+            ref = 'emmanuel-os226308-desconto2-20261029'
+            anterior = db.session.execute(text(
+                "SELECT referencia FROM auditoria_estorno_kratos WHERE referencia=:ref"
+            ), {"ref": ref}).first()
+            if anterior:
+                db.session.commit()
+                return
+            reg = db.session.execute(text("""
+                SELECT l.id, l.cooperado_id, l.os_numero, l.valor, l.saldo_aberto,
+                       l.concluido, c.nome, d.id AS desconto_id, d.valor AS desconto_valor,
+                       c.credito
+                FROM lancamento l
+                JOIN cooperado c ON c.id=l.cooperado_id
+                JOIN desconto_lancamento d ON d.lancamento_id=l.id
+                WHERE l.id=581 AND d.id=2
+                FOR UPDATE OF l,c,d
+            """)).mappings().first()
+            valido = (reg and reg['cooperado_id']==11 and
+                      reg['nome']=='EMMANUEL THALES DE OLIVEIRA ALCANTARA' and
+                      reg['os_numero']=='226308' and
+                      Decimal(str(reg['valor']))==Decimal('136.77') and
+                      Decimal(str(reg['desconto_valor']))==Decimal('136.77') and
+                      Decimal(str(reg['saldo_aberto']))==Decimal('0') and
+                      reg['concluido'] is True)
+            if not valido:
+                db.session.rollback()
+                app.logger.warning("Estorno OS 226308 nao executado: registro divergente.")
+                return
+            quantidade = db.session.execute(text(
+                "SELECT COUNT(*) FROM desconto_lancamento WHERE lancamento_id=581"
+            )).scalar()
+            if quantidade != 1:
+                db.session.rollback()
+                app.logger.warning("Estorno OS 226308 nao executado: outros descontos existem.")
+                return
+            db.session.execute(text("""
+                INSERT INTO auditoria_estorno_kratos
+                    (referencia,cooperado_id,lancamento_id,desconto_id,valor,motivo)
+                VALUES (:ref,11,581,2,136.77,'Baixa individual indevida, estornada a pedido do administrador')
+            """), {"ref":ref})
+            db.session.execute(text("DELETE FROM desconto_lancamento WHERE id=2 AND lancamento_id=581"))
+            db.session.execute(text("""
+                UPDATE lancamento SET saldo_aberto=136.77, concluido=FALSE
+                WHERE id=581 AND cooperado_id=11
+            """))
+            # A baixa indevida havia devolvido credito operacional.
+            db.session.execute(text("""
+                UPDATE cooperado SET credito=credito-136.77 WHERE id=11
+            """))
+            db.session.commit()
+            app.logger.warning("Estorno auditado realizado: Emmanuel, OS 226308, R$ 136,77.")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Falha ao executar estorno pontual da OS 226308")
+
+
+_reverter_baixa_indevida_emmanuel_20261029()
+
+
 # ========= MAIN =========
 if __name__ == '__main__':
     criar_banco_e_admin()
