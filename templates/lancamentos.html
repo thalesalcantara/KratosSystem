@@ -1011,11 +1011,13 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     // =========================
     function atualizarMetricasTabela(){
       const rows = [...document.querySelectorAll('#t-lanc tbody tr.l-row')]
-        .filter(tr => tr.style.display !== 'none');
+        .filter(tr => cpAbaAtiva==='todos' ||
+          (cpAbaAtiva==='pagos' && tr.dataset.situacao==='pago') ||
+          (cpAbaAtiva==='abertos' && tr.dataset.situacao!=='pago'));
 
       let soma = 0, qtd = 0;
       rows.forEach(tr=>{
-        const v = parseFloat(tr.dataset.valor || '0') || 0;
+        const v = parseFloat(tr.dataset.saldo || '0') || 0;
         soma = to2(soma + v);
         qtd++;
       });
@@ -1065,6 +1067,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       const sug = primeiraPendente ? primeiraPendente.sugerida : calc.parcelas[3].sugerida;
 
       tr.querySelector('.vparc').textContent = brl(sug);
+      tr.dataset.saldo = String(Math.max(0,calc.saldo));
 
       const sitEl = tr.querySelector('.sit');
       const pill = sitEl?.closest('.pill');
@@ -1136,7 +1139,8 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         group.style.display=eligible.length?'':'none';
         const expanded=group.classList.contains('cp-expanded');
         items.forEach(tr=>{tr.style.display=(expanded&&eligible.includes(tr))?'':'none'});
-        const soma=eligible.reduce((acc,tr)=>acc+(parseFloat(tr.dataset.valor||0)||0),0);
+        // Total do cooperado = saldo restante; valores quitados nunca somam.
+        const soma=eligible.reduce((acc,tr)=>acc+(parseFloat(tr.dataset.saldo||0)||0),0);
         const quitados=eligible.filter(tr=>tr.dataset.situacao==='pago').length;
         const parciais=eligible.filter(tr=>tr.dataset.situacao==='parcial').length;
         group.querySelector('.cp-group-count').textContent=eligible.length+' compra(s)';
