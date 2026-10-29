@@ -930,18 +930,20 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     function keyDescontos(id){ return `coopex_descontos_${id}`; }
 
     function getHistorico(row){
-      // PostgreSQL é a fonte de verdade: valores antigos em localStorage não
-      // podem sobrescrever pagamentos registrados no servidor.
-      try{
-        const arr = JSON.parse(row.dataset.historico || '[]');
-        return Array.isArray(arr) ? arr : [];
-      }catch(e){
-        return [];
-      }
+      // Compatibilidade com os descontos antigos, ainda mantidos pelo navegador.
+      // Priorizamos o maior histórico disponível para evitar ocultar pagamentos.
+      let servidor=[],local=[];
+      try{const x=JSON.parse(row.dataset.historico||'[]');servidor=Array.isArray(x)?x:[]}catch(e){}
+      try{const x=JSON.parse(localStorage.getItem(keyDescontos(row.dataset.id))||'[]');local=Array.isArray(x)?x:[]}catch(e){}
+      const soma = itens => itens.reduce((a,d)=>a+Math.max(0,Number(d.valor)||0),0);
+      return soma(local)>soma(servidor)+0.0001?local:servidor;
     }
 
     function setHistorico(id, hist){
-      localStorage.setItem(keyDescontos(id), JSON.stringify(hist || []));
+      const dados=JSON.stringify(hist||[]);
+      const row=getRowById(id);
+      if(row)row.dataset.historico=dados;
+      try{localStorage.setItem(keyDescontos(id),dados)}catch(e){}
     }
 
     // =========================
@@ -1116,8 +1118,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         idx++;
       });
     }
-    cpAgruparCooperados();
-
+    // Agrupar somente após o DOM estar pronto para evitar linhas desaparecidas.
     function cpAplicarSituacao(){
       const groups=Array.from(document.querySelectorAll('#t-lanc tbody tr.cp-grupo'));
       let abertos=0,pagos=0;
@@ -1369,6 +1370,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     document.addEventListener('DOMContentLoaded', ()=>{
       modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
       document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
+      cpAgruparCooperados();
       atualizarTodasLinhas();
       document.getElementById('cp-lanc-busca').addEventListener('input', cpAplicarSituacao);
       cpAplicarSituacao();
