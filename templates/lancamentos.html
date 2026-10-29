@@ -769,7 +769,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
                     data-estab="{{ l.estabelecimento.nome }}"
                     data-desc="{{ (l.descricao or '')|e }}"
                     data-historico='{{ (l.historico_descontos_json or "[]")|safe }}'
-                    data-quitacao-historica="{{ '1' if l.data and l.data.strftime('%Y-%m-%d') < '2026-08-01' else '0' }}"
+                    data-quitacao-historica="{{ '1' if (l.data and l.data.strftime('%Y-%m-%d') < '2026-08-01') or (l.cooperado and (l.cooperado.nome|trim|upper) == 'COOPERADO REMOVIDO') else '0' }}"
                     data-concluido="{{ '1' if l.concluido else '0' }}"
                     data-saldo-legado="{{ l.saldo_aberto if l.saldo_aberto is not none else '' }}">
 
