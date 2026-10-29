@@ -1168,9 +1168,9 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
           if(!confirm('Confirmar desconto consolidado de '+brl(v)+' nas compras abertas de '+name+'?'))ev.preventDefault();
         });
 
-        group.querySelector('button').addEventListener('click',()=>{
+        group.querySelector('.cp-expander').addEventListener('click',()=>{
           group.classList.toggle('cp-expanded');
-          group.querySelector('button').setAttribute('aria-expanded',String(group.classList.contains('cp-expanded')));
+          group.querySelector('.cp-expander').setAttribute('aria-expanded',String(group.classList.contains('cp-expanded')));
           cpAplicarSituacao();
         });
         tbody.appendChild(group);
@@ -1215,7 +1215,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         const vencidas=eligible.filter(tr=>{
           if(tr.dataset.situacao==='pago')return false;
           const raw=String(tr.dataset.data||'').slice(0,10);
-          if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(raw))return false;
+          if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return false;
           const [ano,mes,dia]=raw.split('-').map(Number);
           const elegivel=new Date(ano,mes-1,dia);elegivel.setDate(elegivel.getDate()+30);
           return elegivel<=hoje;
@@ -1228,7 +1228,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         group.querySelector('.cp-group-payment').style.display=(cpAbaAtiva==='pagos'||saldoGrupo<0.009)?'none':'flex';
         const quitados=eligible.filter(tr=>tr.dataset.situacao==='pago').length;
         const parciais=eligible.filter(tr=>tr.dataset.situacao==='parcial').length;
-        group.querySelector('.cp-group-count').textContent=eligible.length+' compra(s)';
+        group.querySelector('.cp-summary-os').title=(oss.join(' · ')||'Sem OS')+' · '+eligible.length+' compra(s)';
         group.querySelector('.cp-group-name').title=eligible.length+' compra(s) — clique para exibir datas e OS individualmente';
         group.querySelector('.cp-group-total').textContent=brl(soma);
         group.querySelector('.cp-group-status').textContent=quitados===eligible.length?'Pago':parciais>0||quitados>0?'Parcial':'Pendente';
