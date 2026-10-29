@@ -1925,20 +1925,47 @@ def api_integracao_parcerias_cooperado():
         return jsonify({'erro':'Mes invalido'}), 400
     di, _ = local_bounds_to_utc_naive(inicio.strftime('%Y-%m-%d'), None)
     df, _ = local_bounds_to_utc_naive(fim.strftime('%Y-%m-%d'), None)
+    # Exibir compras do mes selecionado MAIS todas as anteriores com divida
+    # em aberto. Valores resumidos representam todos os itens exibidos.
     compras = (Lancamento.query.options(selectinload(Lancamento.descontos))
-               .filter(Lancamento.cooperado_id==coop.id, Lancamento.data>=di,Lancamento.data<df)
+               .filter(Lancamento.cooperado_id==coop.id, Lancamento.data<df)
                .order_by(Lancamento.data.desc(),Lancamento.id.desc()).all())
+    from decimal import Decimal, ROUND_HALF_UP
+    def cent(v):
+        return int((Decimal(str(v or 0))*100).quantize(Decimal('1'),rounding=ROUND_HALF_UP))
+    hoje=datetime.now(BR_TZ).date()
     itens=[]
     soma=pago_total=aberto_total=0
+    cobrar_semana_centavos=0
     for compra in compras:
-        pago, saldo, situacao=apurar_pagamento_lancamento(compra)
-        total=int(round(float(compra.valor or 0)*100))
-        soma+=total;pago_total+=pago;aberto_total+=saldo
+        pago,saldo,situacao=apurar_pagamento_lancamento(compra)
+        # Retem quitados somente do mes selecionado; pendentes de meses
+        # anteriores continuam visiveis e entram no saldo geral.
+        no_mes=bool(compra.data and di<=compra.data<df)
+        if saldo==0 and not no_mes:
+            continue
+        total=max(0,cent(compra.valor))
+        soma+=total
+        pago_total+=pago
+        aberto_total+=saldo
+        data_compra=to_brt(compra.data).date()
+        inicio_cobranca=data_compra+timedelta(days=30)
+        parcela_centavos=0
+        vencido_centavos=0
+        if saldo>0 and hoje>=inicio_cobranca:
+            semanas=min(4,1+(hoje-inicio_cobranca).days//7)
+            base=total//4
+            parcelas=[base,base,base,total-base*3]
+            parcela_centavos=parcelas[min(semanas-1,3)]
+            vencido_centavos=max(0,min(saldo,sum(parcelas[:semanas])-pago))
+            cobrar_semana_centavos+=vencido_centavos
         itens.append({'id':compra.id,'os':compra.os_numero,'estabelecimento':compra.estabelecimento.nome,
                       'data':to_brt(compra.data).strftime('%d/%m/%Y %H:%M'),
-                      'valor':total/100,'pago':pago/100,'saldo':saldo/100,'situacao':situacao})
-    return jsonify({'cooperado':coop.nome,'mes':mes,'total':soma/100,
-                    'pago':pago_total/100,'pendente':aberto_total/100,
+                      'valor':total/100,'pago':pago/100,'saldo':saldo/100,'situacao':situacao,
+                      'parcela_semanal':parcela_centavos/100,'cobranca_acumulada':vencido_centavos/100,
+                      'inicio_cobranca':inicio_cobranca.strftime('%d/%m/%Y')})
+    return jsonify({'mes':mes,'total':soma/100,'pago':pago_total/100,
+                    'pendente':aberto_total/100,'cobranca_semanal':cobrar_semana_centavos/100,
                     'credito_disponivel':max(0,round(float(coop.credito or 0),2)),
                     'quantidade':len(itens),'itens':itens})
 
