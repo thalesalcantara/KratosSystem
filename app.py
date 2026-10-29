@@ -1927,7 +1927,7 @@ def api_integracao_parcerias_cooperado():
                       'valor':total/100,'pago':pago/100,'saldo':saldo/100,'situacao':situacao})
     return jsonify({'cooperado':coop.nome,'mes':mes,'total':soma/100,
                     'pago':pago_total/100,'pendente':aberto_total/100,
-                    'credito_disponivel':max(0,800-aberto_total/100),
+                    'credito_disponivel':max(0,round(float(coop.credito or 0),2)),
                     'quantidade':len(itens),'itens':itens})
 
 
