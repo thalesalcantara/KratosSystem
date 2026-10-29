@@ -198,34 +198,13 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/coopex_admin_horizontal.css') }}?v=2">
-</head>
+<style id="coopex-nav-force">.cx-shell{display:block!important;width:100%!important;min-height:calc(100vh - 74px)!important}.cx-main{margin:0!important;width:100%!important;max-width:none!important;padding:22px 28px!important}.cx-content-shell{width:100%!important;max-width:none!important}.cp-topbar{display:flex!important}.cx-mobile-toggle,.cx-sidebar{display:none!important}@media(max-width:900px){.cx-main{padding:12px!important}}</style></head>
 <body>
 {% include '_coopex_nav_horizontal.html' %}
 
-<button class="cx-mobile-toggle" type="button"><i class="bi bi-list"></i></button>
+
 <div class="cx-shell">
-  <aside class="cx-sidebar">
-    <div class="cx-brand">
-      <p class="cx-brand-title">Painel Coopex</p>
-      <span class="cx-brand-sub">Administração central</span>
-    </div>
-    <nav class="cx-nav">
-      <div class="cx-nav-section">Visão geral</div>
-      <a class="cx-link" href="{{ url_for('dashboard') }}"><span class="cx-link-left"><i class="bi bi-speedometer2 cx-link-icon"></i><span>Resumo</span></span></a>
-      <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-coin cx-link-icon"></i><span>Financeiro</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
-      <div class="cx-sublinks open">
-        <a class="cx-sublink" href="{{ url_for('listar_lancamentos') }}"><i class="bi bi-journal-text"></i><span>Lançamentos</span></a>
-      </div>
-      <button type="button" class="cx-group-toggle open"><span class="cx-link-left"><i class="bi bi-people cx-link-icon"></i><span>Cadastros</span></span><i class="bi bi-chevron-down cx-caret"></i></button>
-      <div class="cx-sublinks open">
-        <a class="cx-sublink active" href="{{ url_for('listar_cooperados') }}"><i class="bi bi-person-badge"></i><span>Cooperados</span></a>
-        <a class="cx-sublink" href="{{ url_for('listar_estabelecimentos') }}"><i class="bi bi-shop-window"></i><span>Estabelecimentos</span></a>
-      </div>
-      <hr class="cx-nav-divider">
-      <a class="cx-link" href="{{ url_for('logout') }}"><span class="cx-link-left"><i class="bi bi-box-arrow-left cx-link-icon"></i><span>Sair</span></span></a>
-    </nav>
-    <div class="cx-sidebar-footer"></div>
-  </aside>
+  
   <main class="cx-main"><div class="cx-content-shell">
 <div class="ajustar-card">
 
