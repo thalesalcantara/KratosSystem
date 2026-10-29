@@ -1084,8 +1084,6 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       const sug = primeiraPendente ? primeiraPendente.sugerida : calc.parcelas[3].sugerida;
 
       tr.querySelector('.vparc').textContent = brl(sug);
-      tr.dataset.saldo = String(Math.max(0,calc.saldo));
-      tr.dataset.pago = String(Math.min(total, Math.max(0,calc.pagoTotal)));
 
       const sitEl = tr.querySelector('.sit');
       const pill = sitEl?.closest('.pill');
@@ -1099,6 +1097,10 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
           calc.saldo = Math.max(0, total - calc.pagoTotal);
         }
       }
+      // Só publicar os valores depois da situação final apurada pelo servidor.
+      // Esses atributos alimentam as somas e os grupos de Lançamentos.
+      tr.dataset.saldo = String(Math.max(0, to2(calc.saldo)));
+      tr.dataset.pago = String(Math.min(total, Math.max(0, to2(calc.pagoTotal))));
       const ok = calc.saldo <= 0.0001;
 
       pill.classList.remove('danger', 'ok', 'parcial');
