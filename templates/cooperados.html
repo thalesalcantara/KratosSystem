@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 <link rel="stylesheet" href="{{ url_for('static',filename='css/coopex_admin_horizontal.css') }}?v=1">
-</head>
+<style>.coopex-excedido{display:inline-flex;align-items:center;gap:7px;border:1px solid #f6d17b;border-radius:8px;background:#fff5d9;color:#955600;padding:7px 9px;font-weight:800;white-space:nowrap}.coopex-sem-excesso{color:#93a4be;font-weight:700}</style></head>
 
 <body>
 {% include '_coopex_nav_horizontal.html' %}
@@ -851,6 +851,8 @@ document.addEventListener('DOMContentLoaded', function(){
                 <th class="sortable" data-key="credito" data-type="number" style="width:16%">
                   Crédito (R$) <i class="bi bi-arrow-down-up sort"></i>
                 </th>
+                <th style="min-width:132px">Utilizado em aberto</th>
+                <th style="min-width:150px">Crédito excedido <i class="bi bi-exclamation-triangle" title="Saldo em aberto acima de R$ 800,00"></i></th>
                 <th class="sortable" data-key="ajuste" data-type="date" style="width:18%">
                   Último ajuste <i class="bi bi-arrow-down-up sort"></i>
                 </th>
@@ -888,6 +890,19 @@ document.addEventListener('DOMContentLoaded', function(){
                   {{ "{:,.2f}".format(c.credito).replace(",", "X").replace(".", ",").replace("X", ".") }}
                 </td>
 
+                <td class="valor" data-utilizado="{{'%.2f'|format(saldo_utilizado.get(c.id,0))}}">
+                  R$ {{"{:,.2f}".format(saldo_utilizado.get(c.id,0)).replace(",", "X").replace(".", ",").replace("X", ".")}}
+                </td>
+                <td data-excedido="{{'%.2f'|format(credito_excedido.get(c.id,0))}}">
+                  {% if credito_excedido.get(c.id,0) > 0 %}
+                    <span class="coopex-excedido" title="Saldo de compras ainda não descontadas acima do limite de referência de R$ 800,00">
+                      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                      R$ {{"{:,.2f}".format(credito_excedido[c.id]).replace(",", "X").replace(".", ",").replace("X", ".")}}
+                    </span>
+                  {% else %}
+                    <span class="coopex-sem-excesso">—</span>
+                  {% endif %}
+                </td>
                 <td class="col-user ajuste"
                     data-ajuste="{{ ts.isoformat() if ts else '' }}"
                     data-order="{{ (ts.timestamp() * 1000)|int if ts else 0 }}">
