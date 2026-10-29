@@ -1157,13 +1157,6 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       atualizarMetricasTabela();
     }
     document.querySelectorAll('.cp-status-tab').forEach(btn=>{
-        const ativo=btn.dataset.tab===cpAbaAtiva;
-        btn.classList.toggle('active',ativo);
-        btn.setAttribute('aria-pressed',String(ativo));
-      });
-      atualizarMetricasTabela();
-    }
-    document.querySelectorAll('.cp-status-tab').forEach(btn=>{
       btn.addEventListener('click',()=>{
         cpAbaAtiva=btn.dataset.tab;
         cpAplicarSituacao();
@@ -1382,10 +1375,6 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       atualizarTodasLinhas();
       document.getElementById('cp-lanc-busca').addEventListener('input', cpAplicarSituacao);
       cpAplicarSituacao();
-      }));
-      busca.addEventListener('input', aplicarBusca);
-      window.coopenAtualizarFiltroLancamentos = aplicarBusca;
-      aplicarBusca();
     });
   </script>
 
