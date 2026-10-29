@@ -1915,16 +1915,18 @@ def api_integracao_parcerias_cooperado():
                 coop=encontrados[0]
     if not coop:
         return jsonify({'erro':'Cadastro de Parcerias nao encontrado com identificacao unica'}), 404
-    mes = request.args.get('mes') or datetime.now(BR_TZ).strftime('%Y-%m')
+    from datetime import date as _date
     try:
-        inicio = datetime.strptime(mes, '%Y-%m')
-        if inicio.strftime('%Y-%m') != mes:
-            raise ValueError('mes')
-        fim = datetime(inicio.year+1,1,1) if inicio.month==12 else datetime(inicio.year,inicio.month+1,1)
+        di_s = request.args.get('data_inicio') or datetime.now(BR_TZ).strftime('%Y-%m-01')
+        df_s = request.args.get('data_fim') or datetime.now(BR_TZ).strftime('%Y-%m-%d')
+        di_data = _date.fromisoformat(di_s)
+        df_data = _date.fromisoformat(df_s)
+        if di_data > df_data:
+            raise ValueError('periodo')
     except ValueError:
-        return jsonify({'erro':'Mes invalido'}), 400
-    di, _ = local_bounds_to_utc_naive(inicio.strftime('%Y-%m-%d'), None)
-    df, _ = local_bounds_to_utc_naive(fim.strftime('%Y-%m-%d'), None)
+        return jsonify({'erro':'Periodo invalido'}), 400
+    di, _ = local_bounds_to_utc_naive(di_s, None)
+    _, df = local_bounds_to_utc_naive(None, df_s)
     # Exibir compras do mes selecionado MAIS todas as anteriores com divida
     # em aberto. Valores resumidos representam todos os itens exibidos.
     compras = (Lancamento.query.options(selectinload(Lancamento.descontos))
@@ -1964,7 +1966,7 @@ def api_integracao_parcerias_cooperado():
                       'valor':total/100,'pago':pago/100,'saldo':saldo/100,'situacao':situacao,
                       'parcela_semanal':parcela_centavos/100,'cobranca_acumulada':vencido_centavos/100,
                       'inicio_cobranca':inicio_cobranca.strftime('%d/%m/%Y')})
-    return jsonify({'mes':mes,'total':soma/100,'pago':pago_total/100,
+    return jsonify({'data_inicio':di_s,'data_fim':df_s,'total':soma/100,'pago':pago_total/100,
                     'pendente':aberto_total/100,'cobranca_semanal':cobrar_semana_centavos/100,
                     'credito_disponivel':max(0,round(float(coop.credito or 0),2)),
                     'quantidade':len(itens),'itens':itens})
