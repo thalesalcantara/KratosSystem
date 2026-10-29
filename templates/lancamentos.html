@@ -643,23 +643,7 @@ document.addEventListener('DOMContentLoaded', function(){
   <main class="cx-main"><div class="cx-content-shell">
 <div class="container-x">
 
-    <div class="topbar">
-      <div class="brand">
-        <div class="brand-ico"><i class="bi bi-journal-text fs-4"></i></div>
-        <div class="brand-title">
-          <div class="t">Lançamentos e Descontos</div>
-          <div class="s">Parcelamento automático em 4x com desconto flexível</div>
-        </div>
-      </div>
-      <div class="top-actions">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-top">
-          <i class="bi bi-arrow-left-circle"></i> Dashboard
-        </a>
-        <button type="button" class="btn btn-top" id="btn-hoje">
-          <i class="bi bi-sun"></i> Hoje
-        </button>
-      </div>
-    </div>
+    
 
     <!-- Métricas -->
     <div class="cardx">
@@ -733,6 +717,7 @@ document.addEventListener('DOMContentLoaded', function(){
             </button>
           </div>
 
+          <div class="col-md-2 d-grid"><button type="button" class="btn btn-ghost" id="btn-hoje"><i class="bi bi-sun"></i> Hoje</button></div>
           <div class="col-md-2 d-grid">
             <button type="button" class="btn btn-ghost" id="btn-limpar">
               <i class="bi bi-x-circle"></i> Limpar
