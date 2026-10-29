@@ -1909,6 +1909,40 @@ def api_parcerias_migracao_estabelecimento():
     return jsonify({'id':e.id,'nome':e.nome,'usuario':e.username,'senha_hash':e.senha_hash})
 
 
+@app.post('/api/integracao/parcerias/admin/resumo')
+def api_integracao_parcerias_admin_resumo():
+    """Resumo real de lancamentos da origem, apenas consulta autenticada."""
+    try:
+        data=sso_load_shared((request.get_json(silent=True) or {}).get('token',''),max_age_seconds=50)
+    except (BadSignature,SignatureExpired,TypeError,ValueError):
+        return jsonify({'erro':'Autorizacao invalida'}),401
+    if data.get('aud')!='parcerias-admin-resumo' or data.get('origem')!='financas':
+        return jsonify({'erro':'Destino invalido'}),403
+    entradas=db.session.query(
+        Estabelecimento.id,Estabelecimento.nome,
+        func.count(Lancamento.id),func.coalesce(func.sum(Lancamento.valor),0)
+    ).outerjoin(Lancamento,Estabelecimento.id==Lancamento.estabelecimento_id).group_by(
+        Estabelecimento.id,Estabelecimento.nome).order_by(Estabelecimento.nome).all()
+    soma_aberta=db.session.query(func.coalesce(func.sum(
+        func.coalesce(Lancamento.saldo_aberto,Lancamento.valor)),0)).scalar()
+    recentes=db.session.query(Lancamento).order_by(Lancamento.data.desc()).limit(10).all()
+    return jsonify({
+        'total_lancamentos':db.session.query(func.count(Lancamento.id)).scalar() or 0,
+        'total_valor':round(float(db.session.query(func.coalesce(func.sum(Lancamento.valor),0)).scalar() or 0),2),
+        'total_aberto':round(float(soma_aberta or 0),2),
+        'cooperados':db.session.query(func.count(Cooperado.id)).scalar() or 0,
+        'estabelecimentos':db.session.query(func.count(Estabelecimento.id)).scalar() or 0,
+        'por_estabelecimento':[{'nome':n,'quantidade':q,'valor':round(float(v or 0),2)}
+                               for _id,n,q,v in entradas],
+        'recentes':[{'data':x.data.isoformat() if x.data else '',
+                    'cooperado':x.cooperado.nome if x.cooperado else '',
+                    'estabelecimento':x.estabelecimento.nome if x.estabelecimento else '',
+                    'valor':round(float(x.valor or 0),2),
+                    'saldo_aberto':round(float(x.saldo_aberto if x.saldo_aberto is not None else x.valor or 0),2)}
+                    for x in recentes]
+    })
+
+
 @app.post('/api/integracao/parcerias/admin/creditos')
 def api_integracao_parcerias_admin_creditos():
     """Listagem somente leitura dos creditos para conferencia de migracao."""
