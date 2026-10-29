@@ -860,10 +860,10 @@ def listar_cooperados():
     limite_referencia = _Dec('800.00')
     for cooperado in cooperados:
         aberto = _centavos(pendentes_por_coop.get(cooperado.id, _Dec('0')))
-        disponivel = max(_Dec('0'), _Dec(str(cooperado.credito or 0)))
-        # Somente o que ultrapassar a referência de R$ 800,00, levando em
-        # conta tanto a dívida aberta quanto o crédito ainda disponível.
-        excedente = max(_Dec('0'), _centavos(aberto + disponivel - limite_referencia))
+        # O excedente atual depende somente da dívida ainda em aberto.
+        # Pagamentos reduzem primeiro o excedente, e só então liberam saldo.
+        # Não alterar cooperado.credito (registro operacional) nesta consulta.
+        excedente = max(_Dec('0'), _centavos(aberto - limite_referencia))
         saldo_utilizado[cooperado.id] = float(aberto)
         credito_excedido[cooperado.id] = float(excedente)
     limite_referencia = float(limite_referencia)
