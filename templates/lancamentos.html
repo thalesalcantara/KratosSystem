@@ -504,7 +504,7 @@
       .topbar{ position: static; }
       .container-x{ width: calc(100vw - 22px); }
     }
-  </style>
+  .cp-status-tabs{display:inline-flex;gap:5px;padding:4px;background:#eef4ff;border-radius:10px;margin-left:12px}.cp-status-tab{border:0;border-radius:8px;background:transparent;color:#284b83;font:700 12px Inter,Arial,sans-serif;padding:9px 12px;cursor:pointer;white-space:nowrap}.cp-status-tab.active{background:#1458dd;color:#fff;box-shadow:0 2px 6px #163e8730}.cp-status-tab:hover:not(.active){background:#dceaff}@media(max-width:900px){.cp-status-tabs{margin-left:0;flex-wrap:wrap}.cp-lanc-table-heading{flex-wrap:wrap}}</style>
 
 <style id="cx-unified-style">
 :root{
@@ -733,7 +733,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
     </div>
 
     <!-- Tabela -->
-    <div class="cardx cp-lanc-table"><div class="cp-lanc-table-heading"><i class="bi bi-list-ul"></i><strong>Lançamentos encontrados</strong><span class="count" id="cp-lanc-count">0</span><div class="cp-lanc-search"><i class="bi bi-search"></i><input id="cp-lanc-busca" placeholder="Buscar por cooperado, estabelecimento, Nº OS..." aria-label="Busca rápida"></div></div>
+    <div class="cardx cp-lanc-table"><div class="cp-lanc-table-heading"><i class="bi bi-list-ul"></i><strong>Lançamentos</strong><div class="cp-status-tabs" role="group" aria-label="Filtrar situação dos lançamentos"><button type="button" class="cp-status-tab active" data-status="abertos">Pendentes e parciais</button><button type="button" class="cp-status-tab" data-status="pagos">Pagos</button><button type="button" class="cp-status-tab" data-status="todos">Todos</button></div><span class="count" id="cp-lanc-count">0</span><div class="cp-lanc-search"><i class="bi bi-search"></i><input id="cp-lanc-busca" placeholder="Buscar por cooperado, estabelecimento, Nº OS..." aria-label="Busca rápida"></div></div>
       <div class="table-wrap">
         <table id="t-lanc">
           <thead>
@@ -1059,6 +1059,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       const ok = calc.saldo <= 0.0001;
 
       pill.classList.remove('danger', 'ok', 'parcial');
+      tr.dataset.situacao = ok ? 'pago' : (calc.pagoTotal > 0.0001 ? 'parcial' : 'pendente');
       if (ok){
         sitEl.textContent = 'Pago';
         pill.classList.add('ok');
@@ -1284,19 +1285,32 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
       atualizarTodasLinhas();
       const busca = document.getElementById('cp-lanc-busca');
+      const tabs = [...document.querySelectorAll('.cp-status-tab')];
+      let situacaoAtiva = 'abertos';
       const aplicarBusca = () => {
         const termo = (busca.value || '').trim().toLocaleLowerCase('pt-BR');
         let visiveis = 0;
         document.querySelectorAll('#t-lanc tbody tr.l-row').forEach(tr => {
+          // Recalcula a situação a partir dos descontos, inclusive após ajustes.
+          atualizarLinhaParcelas(tr);
           const campos = [tr.dataset.coop, tr.dataset.estab, tr.dataset.os].join(' ').toLocaleLowerCase('pt-BR');
-          const exibir = !termo || campos.includes(termo);
+          const atendeBusca = !termo || campos.includes(termo);
+          const atendeStatus = situacaoAtiva === 'todos' ||
+            (situacaoAtiva === 'pagos' ? tr.dataset.situacao === 'pago' : tr.dataset.situacao !== 'pago');
+          const exibir = atendeBusca && atendeStatus;
           tr.style.display = exibir ? '' : 'none';
-          if(exibir)visiveis++;
+          if (exibir) visiveis++;
         });
         document.getElementById('cp-lanc-count').textContent = String(visiveis);
         atualizarMetricasTabela();
       };
+      tabs.forEach(btn => btn.addEventListener('click', () => {
+        situacaoAtiva = btn.dataset.status;
+        tabs.forEach(t => t.classList.toggle('active', t === btn));
+        aplicarBusca();
+      }));
       busca.addEventListener('input', aplicarBusca);
+      window.coopenAtualizarFiltroLancamentos = aplicarBusca;
       aplicarBusca();
     });
   </script>
