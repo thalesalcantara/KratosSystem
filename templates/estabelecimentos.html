@@ -718,20 +718,7 @@ document.addEventListener('DOMContentLoaded', function(){
       <div class="container-x">
 
         <!-- Topbar -->
-        <div class="topbar">
-          <div class="left">
-            <div class="ico"><i class="bi bi-building fs-4"></i></div>
-            <div class="txt">
-              <p class="t m-0">Estabelecimentos</p>
-              <p class="s m-0">Cadastros, logos e ações do módulo</p>
-            </div>
-          </div>
-          <div class="top-actions">
-            <a href="{{ url_for('novo_estabelecimento') }}" class="btn btn-top">
-              <i class="bi bi-plus-circle"></i> Novo
-            </a>
-          </div>
-        </div>
+        
 
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
