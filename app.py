@@ -1666,55 +1666,46 @@ def descontar_lancamento_admin(id):
     if not is_admin():
         return redirect(url_for('login'))
 
-    l = Lancamento.query.get_or_404(id)
-    coop = Cooperado.query.get(l.cooperado_id)
+    from decimal import Decimal, ROUND_HALF_UP
+    destino = request.form.get('next') or url_for('listar_lancamentos')
+    def centavos(v):
+        return int((Decimal(str(v or 0)) * 100).quantize(
+            Decimal('1'), rounding=ROUND_HALF_UP
+        ))
 
+    valor = parse_valor_brl(request.form.get('valor_desconto'))
+    valor_centavos = centavos(valor)
+    if valor_centavos <= 0:
+        flash('Informe um valor de desconto válido.', 'danger')
+        return redirect(destino)
+
+    # Serializa a baixa individual com a baixa geral para evitar cobrança em duplicidade.
+    l = Lancamento.query.filter_by(id=id).with_for_update().first_or_404()
+    coop = Cooperado.query.get(l.cooperado_id)
     if not coop:
         flash('Cooperado não encontrado.', 'danger')
-        return redirect(url_for('listar_lancamentos'))
+        return redirect(destino)
+    _, saldo_centavos, _ = apurar_pagamento_lancamento(l)
+    if saldo_centavos <= 0:
+        flash('Este lançamento já está pago; nenhuma nova baixa foi registrada.', 'warning')
+        return redirect(destino)
+    if valor_centavos > saldo_centavos:
+        flash('O desconto excede o saldo pendente atual. Nenhuma baixa foi registrada.', 'danger')
+        return redirect(destino)
 
-    if l.concluido:
-        flash('Este lançamento já está concluído.', 'warning')
-        return redirect(url_for('listar_lancamentos'))
-
-    valor_f = parse_valor_brl(request.form.get('valor_desconto'))
-    obs = (request.form.get('observacao') or '').strip() or None
-
-    if valor_f is None or valor_f <= 0:
-        flash('Informe um valor de desconto válido.', 'danger')
-        return redirect(url_for('listar_lancamentos'))
-
-    saldo = float(l.saldo_aberto) if (l.saldo_aberto is not None) else float(l.valor or 0)
-
-    if valor_f > saldo:
-        flash(f'O desconto não pode ser maior que o saldo em aberto (R$ {saldo:.2f}).', 'danger')
-        return redirect(url_for('listar_lancamentos'))
-
-    # devolve crédito para o cooperado (pagamento do débito)
-    coop.credito += float(valor_f)
-
-    # registra histórico do desconto
-    d = DescontoLancamento(
+    db.session.add(DescontoLancamento(
         lancamento_id=l.id,
-        valor=float(valor_f),
-        observacao=obs
-    )
-    db.session.add(d)
-
-    # baixa o saldo
-    novo_saldo = saldo - float(valor_f)
-    if novo_saldo <= 0.00001:
-        l.saldo_aberto = 0.0
-        l.concluido = True
-    else:
-        l.saldo_aberto = float(novo_saldo)
-
+        valor=valor_centavos / 100,
+        observacao=(request.form.get('observacao') or '').strip() or None
+    ))
+    restante = saldo_centavos - valor_centavos
+    l.saldo_aberto = restante / 100
+    l.concluido = restante == 0
+    coop.credito = float(Decimal(str(coop.credito or 0)) +
+                         Decimal(valor_centavos) / Decimal('100'))
     db.session.commit()
-    flash('Desconto registrado e crédito devolvido automaticamente.', 'success')
-
-    next_url = request.form.get('next') or url_for('listar_lancamentos')
-    return redirect(next_url)
-
+    flash('Baixa individual registrada no banco e saldo atualizado.', 'success')
+    return redirect(destino)
 
 # ========= PAINEL ESTABELECIMENTO =========
 @app.route('/painel_estabelecimento', methods=['GET', 'POST'])
