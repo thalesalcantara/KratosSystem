@@ -1887,6 +1887,23 @@ def estab_excluir_lancamento(id):
 
 
 # ========= PAINEL COOPERADO =========
+@app.post('/api/integracao/parcerias/admin/creditos')
+def api_integracao_parcerias_admin_creditos():
+    """Listagem somente leitura dos creditos para conferencia de migracao."""
+    try:
+        payload = sso_load_shared((request.get_json(silent=True) or {}).get('token', ''), max_age_seconds=50)
+    except (BadSignature, SignatureExpired, TypeError, ValueError):
+        return jsonify({'erro': 'Autorizacao invalida'}), 401
+    if payload.get('aud') != 'parcerias-admin-creditos' or payload.get('origem') != 'financas':
+        return jsonify({'erro': 'Destino invalido'}), 403
+    registros = Cooperado.query.order_by(Cooperado.id).all()
+    return jsonify({'registros': [
+        {'id': c.id, 'nome': c.nome, 'username': c.username,
+         'credito_disponivel': round(float(c.credito or 0), 2)}
+        for c in registros
+    ]})
+
+
 @app.post('/api/integracao/parcerias/cooperado')
 def api_integracao_parcerias_cooperado():
     """Consulta somente leitura para cooperado autenticado no portal Financas."""
