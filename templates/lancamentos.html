@@ -1210,21 +1210,40 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         group.querySelector('.cp-summary-estabs').textContent=estabs.length===1?estabs[0]:estabs.length+' estabelecimentos';
         group.querySelector('.cp-summary-estabs').title=estabs.join(' · ');
         group.querySelector('.cp-group-open').textContent='Pendente: '+brl(saldoGrupo);
-        // Projeção, não uma baixa: compras entram no cálculo 30 dias após a data.
+        // Cobrança prevista por compra: 30 dias de carência e quatro vencimentos
+        // semanais. Parcelas não pagas acumulam; pagamentos baixados abatem
+        // primeiro o total já vencido. Novas compras têm seu próprio prazo.
+        // Nenhuma previsão altera pagamentos ou saldos no banco.
         const hoje=new Date();hoje.setHours(0,0,0,0);
-        const vencidas=eligible.filter(tr=>{
-          if(tr.dataset.situacao==='pago')return false;
+        const emCentavos=v=>Math.max(0,Math.round((Number(v)||0)*100));
+        let previstoCentavos=0, semanalCentavos=0, aguardando=0, vencidas=0;
+        eligible.forEach(tr=>{
+          const saldo=emCentavos(tr.dataset.saldo);
+          if(saldo===0)return;
           const raw=String(tr.dataset.data||'').slice(0,10);
-          if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return false;
+          if(!/^\d{4}-\d{2}-\d{2}$/.test(raw)){aguardando++;return;}
           const [ano,mes,dia]=raw.split('-').map(Number);
-          const elegivel=new Date(ano,mes-1,dia);elegivel.setDate(elegivel.getDate()+30);
-          return elegivel<=hoje;
+          const inicio=new Date(ano,mes-1,dia);
+          inicio.setDate(inicio.getDate()+30);
+          if(inicio>hoje){aguardando++;return;}
+          const total=emCentavos(tr.dataset.valor);
+          const pago=Math.max(0,total-saldo);
+          const semanas=Math.min(4,1+Math.floor((hoje-inicio)/86400000/7));
+          // Divisão exata em centavos, com arredondamento residual na quarta.
+          const parcelas=[Math.floor(total/4),Math.floor(total/4),Math.floor(total/4)];
+          parcelas.push(total-parcelas[0]-parcelas[1]-parcelas[2]);
+          const acumulado=parcelas.slice(0,semanas).reduce((a,b)=>a+b,0);
+          previstoCentavos+=Math.max(0,acumulado-pago);
+          semanalCentavos+=parcelas[Math.min(semanas-1,3)];
+          vencidas++;
         });
-        const baseVencida=vencidas.reduce((sum,tr)=>sum+(Number(tr.dataset.saldo)||0),0);
-        const semanal=Math.round(baseVencida*25)/100;
-        const proxima=eligible.filter(tr=>!vencidas.includes(tr)&&tr.dataset.situacao!=='pago');
-        group.querySelector('.cp-group-quarter').textContent=baseVencida>0?'Previsão semanal: '+brl(semanal)+' (4x)':'Aguardando 30 dias';
-        group.querySelector('.cp-group-quarter').title='Previsão calculada sobre compras com pelo menos 30 dias e saldo pendente. Não efetua pagamento. '+proxima.length+' compra(s) ainda aguardam 30 dias.';
+        const previsto=Math.min(emCentavos(saldoGrupo),previstoCentavos)/100;
+        group.querySelector('.cp-group-quarter').textContent=
+          vencidas ? 'A pagar nesta semana: '+brl(previsto) : 'Aguardando 30 dias';
+        group.querySelector('.cp-group-quarter').title=
+          'Valor acumulado das parcelas já vencidas, menos baixas efetivas. '+
+          'Cada compra começa 30 dias após sua data e vence semanalmente por 4 semanas. '+
+          aguardando+' compra(s) ainda no prazo de 30 dias.';
         group.querySelector('.cp-group-payment').style.display=(cpAbaAtiva==='pagos'||saldoGrupo<0.009)?'none':'flex';
         const quitados=eligible.filter(tr=>tr.dataset.situacao==='pago').length;
         const parciais=eligible.filter(tr=>tr.dataset.situacao==='parcial').length;
