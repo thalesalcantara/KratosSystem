@@ -707,6 +707,30 @@
     .main-content>.topbar{position:relative;top:auto;z-index:10;min-height:62px;border-radius:12px;margin-bottom:16px!important}
     @media(max-width:1100px){.est-nav-horizontal{flex-wrap:wrap;gap:10px;padding:10px 16px}.est-brand{min-width:auto}.est-nav-links{order:3;width:100%;flex-basis:100%;overflow-x:auto;padding-bottom:4px}.est-nav-actions{margin-left:auto}}
     @media(max-width:640px){.main-content{padding:12px!important}.est-brand small{font-size:8px}.est-color-picker{display:none}.est-nav-links .sidebar-tab{padding:9px 12px;font-size:12px}.est-nav-actions{gap:5px}.est-theme-button span{display:none}.main-content>.topbar{flex-wrap:wrap;gap:8px;padding:12px}.main-content>.topbar .clock{font-size:12px}}
+
+    /* Layout definitivo: uma única faixa superior, visual administrativo */
+    body{background:#f3f6fc!important}
+    .est-nav-horizontal{position:sticky!important;top:0!important;z-index:1100!important;min-height:82px!important;padding:12px 30px!important;gap:30px!important;background:linear-gradient(110deg,#152a65 0%,#2549b9 65%,#315be0 100%)!important;color:#fff!important;border:0!important;box-shadow:0 8px 24px rgba(17,42,111,.22)!important}
+    .est-brand{min-width:220px!important;gap:14px!important}
+    .est-brand img{width:63px!important;height:56px!important;filter:drop-shadow(0 3px 6px rgba(0,0,0,.18))}
+    .est-brand strong{color:#fff!important;font-size:18px!important}
+    .est-brand small{color:#cbd9ff!important;letter-spacing:.65px!important;font-size:9px!important}
+    .est-nav-links{gap:8px!important}
+    .est-nav-links .sidebar-tab{color:#e6edff!important;border:1px solid transparent!important;padding:12px 16px!important;border-radius:11px!important;font-size:13px!important}
+    .est-nav-links .sidebar-tab:hover{background:rgba(255,255,255,.14)!important;color:white!important}
+    .est-nav-links .sidebar-tab.active{background:#fff!important;color:#2145b9!important;border-color:#fff!important;box-shadow:0 5px 16px rgba(4,19,65,.19)!important}
+    .est-nav-actions{gap:12px!important}
+    .est-welcome{font-size:12px;color:#dbe5ff;white-space:nowrap}
+    .est-welcome strong{color:white;font-weight:800}
+    .est-clock{font-size:12px!important;color:#fff!important;font-weight:700!important;white-space:nowrap}
+    .est-theme-button{background:rgba(255,255,255,.10)!important;border:1px solid rgba(255,255,255,.35)!important;box-shadow:none!important;color:#fff!important}
+    .est-color-picker{color:#fff!important}
+    .est-nav-exit{color:#fff!important;border-color:rgba(255,255,255,.35)!important;background:rgba(255,255,255,.1)!important}
+    .est-nav-exit:hover{background:#fff!important;color:#2448be!important}
+    .main-content{padding-top:20px!important}
+    @media(max-width:1450px){.est-nav-horizontal{gap:15px!important;padding:10px 18px!important}.est-brand{min-width:165px!important}.est-welcome{display:none}.est-nav-links .sidebar-tab{padding:10px 11px!important}}
+    @media(max-width:1080px){.est-nav-horizontal{flex-wrap:wrap!important}.est-nav-links{order:3;flex-basis:100%;overflow-x:auto}.est-nav-actions{margin-left:auto}.est-clock{font-size:11px!important}}
+    @media(max-width:620px){.est-nav-horizontal{padding:10px 12px!important;gap:10px!important}.est-brand img{width:44px!important;height:44px!important}.est-brand{min-width:0!important}.est-brand strong{font-size:14px!important}.est-clock{display:none}.est-color-picker{display:none}}
   </style>
 </head>
 <body>
@@ -722,6 +746,8 @@
       <button class="sidebar-tab" type="button" data-tab-target="tab-stories"><i class="bi bi-camera-reels"></i> Stories / Promoções</button>
     </nav>
     <div class="est-nav-actions">
+      <span class="est-welcome">Bem-vindo, <strong>{{ est.nome }}</strong></span>
+      <span class="est-clock clock" id="clock-br">Natal - --/--/---- --:--:--</span>
       <button class="theme-toggle est-theme-button" type="button" id="themeToggle" title="Alternar tema"><i class="bi bi-moon-stars" id="themeIcon"></i><span id="themeLabel">Escuro</span></button>
       <label class="theme-color-picker est-color-picker" title="Cor de destaque">Cor <input type="color" id="accentPicker" value="#2d4fe3" title="Escolher cor do tema"></label>
       <a class="est-nav-exit" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a>
@@ -731,16 +757,7 @@
   <!-- Main -->
   <div class="main-content">
 
-    <!-- Topbar com relógio -->
-    <div class="topbar mb-4">
-      <div class="who">Bem-vindo, {{ est.nome }}</div>
-      <div class="d-flex align-items-center gap-3">
-        <div class="clock" id="clock-br">Natal - --/--/---- --:--:--</div>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-warning btn-sm fw-bold" style="border-color:#ffd66e;color:#fff">
-          Sair <i class="bi bi-power"></i>
-        </a>
-      </div>
-    </div>
+
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
