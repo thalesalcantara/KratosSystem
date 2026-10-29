@@ -1385,8 +1385,25 @@ def listar_lancamentos():
 
     lancamentos = query.order_by(Lancamento.data.desc()).all()
 
-    # Exibição em Brasília
+    # A situação é derivada dos descontos efetivamente registrados no PostgreSQL.
+    # Sem esse campo, a interface classificava compras quitadas como pendentes.
+    import json as _json
+    # Carrega os descontos em lote, evitando uma consulta por lançamento.
+    if lancamentos:
+        descontos_rows = DescontoLancamento.query.filter(
+            DescontoLancamento.lancamento_id.in_([l.id for l in lancamentos])
+        ).order_by(DescontoLancamento.criado_em, DescontoLancamento.id).all()
+    else:
+        descontos_rows = []
+    descontos_por_lancamento = {}
+    for desconto in descontos_rows:
+        descontos_por_lancamento.setdefault(desconto.lancamento_id, []).append({
+            "id": desconto.id,
+            "data": to_brt(desconto.criado_em).date().isoformat() if desconto.criado_em else "",
+            "valor": float(desconto.valor or 0)
+        })
     for l in lancamentos:
+        l.historico_descontos_json = _json.dumps(descontos_por_lancamento.get(l.id, []))
         l.data_brasilia = to_brt(l.data).strftime('%d/%m/%Y %H:%M')
 
     return render_template(
