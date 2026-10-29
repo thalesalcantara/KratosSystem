@@ -735,8 +735,29 @@ def dashboard():
     except Exception:
         ultimo_lancamento_id = 0
 
+    # Visão geral com registros reais do período e dos estabelecimentos.
+    recentes = base_q.order_by(Lancamento.data.desc()).limit(5).all()
+    top_registro = max(sum_per_coop, key=lambda row: float(row.total or 0)) if sum_per_coop else None
+    top_nome = top_registro.nome if top_registro else '—'
+    top_total = float(top_registro.total or 0) if top_registro else 0.0
+    media_pedido = total_valor / total_pedidos if total_pedidos else 0.0
+    est_resumo = db.session.query(
+        Estabelecimento.nome,
+        func.count(Lancamento.id),
+        func.coalesce(func.sum(Lancamento.valor), 0.0)
+    ).outerjoin(Lancamento, Estabelecimento.id == Lancamento.estabelecimento_id)
+    if di_utc:
+        est_resumo = est_resumo.filter((Lancamento.data >= di_utc) | Lancamento.id.is_(None))
+    if df_utc_excl:
+        est_resumo = est_resumo.filter((Lancamento.data < df_utc_excl) | Lancamento.id.is_(None))
+    if est_id_i:
+        est_resumo = est_resumo.filter(Estabelecimento.id == est_id_i)
+    resumo_estabelecimentos = est_resumo.group_by(Estabelecimento.id, Estabelecimento.nome).order_by(Estabelecimento.nome).all()
     return render_template(
-        'dashboard.html',
+        'dashboard_resumo_coopex.html',
+        recentes=recentes, resumo_estabelecimentos=resumo_estabelecimentos,
+        top_nome=top_nome, top_percentual=(top_total / total_valor * 100 if total_valor else 0),
+        media_pedido=media_pedido,
         admin=admin,
         cooperados=cooperados,
         estabelecimentos=estabelecimentos,
