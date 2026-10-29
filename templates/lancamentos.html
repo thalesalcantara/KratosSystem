@@ -739,13 +739,9 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       </form>
     </div>
 
-    <div class="cp-status-tabs" role="group" aria-label="Situação dos lançamentos">
-      <button type="button" class="cp-status-tab" data-tab="abertos">Em aberto <span id="cp-count-abertos"></span></button>
-      <button type="button" class="cp-status-tab" data-tab="pagos">Pagos <span id="cp-count-pagos"></span></button>
-      <button type="button" class="cp-status-tab" data-tab="todos">Todos <span id="cp-count-todos"></span></button>
-    </div>
+
     <!-- Tabela -->
-    <div class="cardx cp-lanc-table"><div class="cp-lanc-table-heading"><i class="bi bi-list-ul"></i><strong>Lançamentos</strong><div class="cp-status-tabs" role="group" aria-label="Filtrar situação dos lançamentos"><button type="button" class="cp-status-tab active" data-status="abertos">Pendentes e parciais</button><button type="button" class="cp-status-tab" data-status="pagos">Pagos</button><button type="button" class="cp-status-tab" data-status="todos">Todos</button></div><span class="count" id="cp-lanc-count">0</span><div class="cp-lanc-search"><i class="bi bi-search"></i><input id="cp-lanc-busca" placeholder="Buscar por cooperado, estabelecimento, Nº OS..." aria-label="Busca rápida"></div></div>
+    <div class="cardx cp-lanc-table"><div class="cp-lanc-table-heading"><i class="bi bi-list-ul"></i><strong>Lançamentos</strong><div class="cp-status-tabs" role="group" aria-label="Filtrar situação dos lançamentos"><button type="button" class="cp-status-tab active" data-tab="abertos">Pendentes e parciais <span id="cp-count-abertos"></span></button><button type="button" class="cp-status-tab" data-tab="pagos">Pagos <span id="cp-count-pagos"></span></button><button type="button" class="cp-status-tab" data-tab="todos">Todos <span id="cp-count-todos"></span></button></div><span class="count" id="cp-lanc-count">0</span><div class="cp-lanc-search"><i class="bi bi-search"></i><input id="cp-lanc-busca" placeholder="Buscar por cooperado, estabelecimento, Nº OS..." aria-label="Busca rápida"></div></div>
       <div class="table-wrap">
         <table id="t-lanc">
           <thead>
@@ -1133,9 +1129,10 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       rows.forEach(tr=>{if(tr.dataset.situacao==='pago')pagos++;else abertos++});
       groups.forEach(group=>{
         const items=rows.filter(tr=>tr.dataset.group===group.dataset.group);
-        const eligible=items.filter(tr=>cpAbaAtiva==='todos'||
+        const termo=(document.getElementById('cp-lanc-busca')?.value||'').trim().toLocaleLowerCase('pt-BR');
+        const eligible=items.filter(tr=>(!termo || [tr.dataset.coop,tr.dataset.estab,tr.dataset.os].join(' ').toLocaleLowerCase('pt-BR').includes(termo)) && (cpAbaAtiva==='todos'||
           (cpAbaAtiva==='pagos'&&tr.dataset.situacao==='pago')||
-          (cpAbaAtiva==='abertos'&&tr.dataset.situacao!=='pago'));
+          (cpAbaAtiva==='abertos'&&tr.dataset.situacao!=='pago')));
         group.style.display=eligible.length?'':'none';
         const expanded=group.classList.contains('cp-expanded');
         items.forEach(tr=>{tr.style.display=(expanded&&eligible.includes(tr))?'':'none'});
@@ -1148,6 +1145,7 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
         group.querySelector('.cp-group-status').textContent=quitados===eligible.length?'Pago':parciais>0||quitados>0?'Parcial':'Pendente';
         group.querySelector('.cp-group-status').className='cp-group-status '+(quitados===eligible.length?'cp-paid':parciais>0||quitados>0?'cp-partial':'cp-pending');
       });
+      document.getElementById('cp-lanc-count').textContent=String(groups.filter(g=>g.style.display!=='none').length);
       document.getElementById('cp-count-abertos').textContent=abertos;
       document.getElementById('cp-count-pagos').textContent=pagos;
       document.getElementById('cp-count-todos').textContent=rows.length;
@@ -1382,30 +1380,8 @@ body{background:#f3f7ff!important}.cx-main{padding:0 28px 30px!important}.cx-mai
       modal = new bootstrap.Modal(document.getElementById('modalParcelas'));
       document.getElementById('mp-add').addEventListener('click', adicionarDesconto);
       atualizarTodasLinhas();
-      const busca = document.getElementById('cp-lanc-busca');
-      const tabs = [...document.querySelectorAll('.cp-status-tab')];
-      let situacaoAtiva = 'abertos';
-      const aplicarBusca = () => {
-        const termo = (busca.value || '').trim().toLocaleLowerCase('pt-BR');
-        let visiveis = 0;
-        document.querySelectorAll('#t-lanc tbody tr.l-row').forEach(tr => {
-          // Recalcula a situação a partir dos descontos, inclusive após ajustes.
-          atualizarLinhaParcelas(tr);
-          const campos = [tr.dataset.coop, tr.dataset.estab, tr.dataset.os].join(' ').toLocaleLowerCase('pt-BR');
-          const atendeBusca = !termo || campos.includes(termo);
-          const atendeStatus = situacaoAtiva === 'todos' ||
-            (situacaoAtiva === 'pagos' ? tr.dataset.situacao === 'pago' : tr.dataset.situacao !== 'pago');
-          const exibir = atendeBusca && atendeStatus;
-          tr.style.display = exibir ? '' : 'none';
-          if (exibir) visiveis++;
-        });
-        document.getElementById('cp-lanc-count').textContent = String(visiveis);
-        atualizarMetricasTabela();
-      };
-      tabs.forEach(btn => btn.addEventListener('click', () => {
-        situacaoAtiva = btn.dataset.status;
-        tabs.forEach(t => t.classList.toggle('active', t === btn));
-        aplicarBusca();
+      document.getElementById('cp-lanc-busca').addEventListener('input', cpAplicarSituacao);
+      cpAplicarSituacao();
       }));
       busca.addEventListener('input', aplicarBusca);
       window.coopenAtualizarFiltroLancamentos = aplicarBusca;
