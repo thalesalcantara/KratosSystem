@@ -1900,7 +1900,7 @@ def api_parcerias_migracao_estabelecimento():
         legacy_id=int(data.get('legacy_id'))
     except (TypeError,ValueError):
         return jsonify({'erro':'Identificador invalido'}),400
-    if legacy_id not in (1,2,3):
+    if legacy_id not in (1,2,3,4):
         return jsonify({'erro':'Estabelecimento nao autorizado para esta etapa'}),403
     e=Estabelecimento.query.get(legacy_id)
     if not e or not e.senha_hash or not e.username:
